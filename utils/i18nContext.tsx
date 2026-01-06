@@ -72,7 +72,12 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     close: "Close",
     loginAsAdminMsg: "Login as admin to read your messages",
     loginAsAdminBtn: "Login as admin",
-    ussdLoginMsg: "Login as admin to use USSD services available with your Orange subscription."
+    ussdLoginMsg: "Login as admin to use USSD services available with your Orange subscription.",
+    scanQrText: "Scan the QR code to connect to Orange ZLT automatically.",
+    no: "NO",
+    host: "Host",
+    internetAccess: "Internet Access",
+    offlineDevices: "Offline Devices"
   },
   cn: {
     menu: "菜单",
@@ -135,7 +140,12 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     close: "关闭",
     loginAsAdminMsg: "登录管理员账户以阅读短信",
     loginAsAdminBtn: "登录管理员",
-    ussdLoginMsg: "登录管理员以使用您的 Orange 订阅中可用的 USSD 服务。"
+    ussdLoginMsg: "登录管理员以使用您的 Orange 订阅中可用的 USSD 服务。",
+    scanQrText: "扫描二维码自动连接到 Orange ZLT。",
+    no: "序号",
+    host: "主机",
+    internetAccess: "互联网访问",
+    offlineDevices: "离线设备"
   },
   fr: {
     menu: "Menu",
@@ -198,7 +208,12 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     close: "Fermer",
     loginAsAdminMsg: "Connectez-vous en tant qu'admin pour lire vos messages",
     loginAsAdminBtn: "Connexion admin",
-    ussdLoginMsg: "Connectez-vous en tant qu'administrateur pour utiliser les services USSD disponibles avec votre abonnement Orange."
+    ussdLoginMsg: "Connectez-vous en tant qu'administrateur pour utiliser les services USSD disponibles avec votre abonnement Orange.",
+    scanQrText: "Scannez le code QR pour vous connecter automatiquement à Orange ZLT.",
+    no: "N°",
+    host: "Hôte",
+    internetAccess: "Accès Internet",
+    offlineDevices: "Appareils hors ligne"
   },
   ar: {
     menu: "قائمة",
@@ -261,7 +276,12 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     close: "إغلاق",
     loginAsAdminMsg: "سجل الدخول كمسؤول لقراءة رسائلك",
     loginAsAdminBtn: "تسجيل دخول المسؤول",
-    ussdLoginMsg: "قم بتسجيل الدخول كمسؤول لاستخدام خدمات USSD المتاحة مع اشتراك Orange الخاص بك."
+    ussdLoginMsg: "قم بتسجيل الدخول كمسؤول لاستخدام خدمات USSD المتاحة مع اشتراك Orange الخاص بك.",
+    scanQrText: "امسح رمز الاستجابة السريعة للاتصال بـ Orange ZLT تلقائيًا.",
+    no: "رقم",
+    host: "المضيف",
+    internetAccess: "خدمة الإنترنت",
+    offlineDevices: "الأجهزة غير المتصلة"
   },
   el: {
     menu: "Menú",
@@ -324,7 +344,12 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     close: "Cerrar",
     loginAsAdminMsg: "Inicie sesión como admin para leer mensajes",
     loginAsAdminBtn: "Iniciar sesión admin",
-    ussdLoginMsg: "Inicie sesión como admin para usar los servicios USSD disponibles con su suscripción de Orange."
+    ussdLoginMsg: "Inicie sesión como admin para usar los servicios USSD disponibles con su suscripción de Orange.",
+    scanQrText: "Escanee el código QR para conectarse a Orange ZLT automáticamente.",
+    no: "NO",
+    host: "Host",
+    internetAccess: "Acceso a Internet",
+    offlineDevices: "Dispositivos sin conexión"
   }
 };
 

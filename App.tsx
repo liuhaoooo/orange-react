@@ -15,6 +15,7 @@ import { getSessionId, logout } from './utils/api';
 function AppContent() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isDevicesModalOpen, setIsDevicesModalOpen] = useState(false);
+  const [devicesFilter, setDevicesFilter] = useState<string | undefined>(undefined);
   const [currentPage, setCurrentPage] = useState(1);
   const [cardsPerPage, setCardsPerPage] = useState(4);
   
@@ -26,8 +27,15 @@ function AppContent() {
   const openLoginModal = () => setIsLoginModalOpen(true);
   const closeLoginModal = () => setIsLoginModalOpen(false);
 
-  const openDevicesModal = () => setIsDevicesModalOpen(true);
-  const closeDevicesModal = () => setIsDevicesModalOpen(false);
+  const openDevicesModal = (ssid?: string) => {
+    setDevicesFilter(ssid);
+    setIsDevicesModalOpen(true);
+  };
+  
+  const closeDevicesModal = () => {
+    setIsDevicesModalOpen(false);
+    setDevicesFilter(undefined);
+  };
 
   const handleLogout = async () => {
     if (isLoggedIn) {
@@ -89,14 +97,17 @@ function AppContent() {
     <ConnectionCard 
       key="conn" 
       onOpenSettings={openLoginModal} 
-      onManageDevices={openDevicesModal}
+      onManageDevices={() => openDevicesModal()}
     />,
     <UsageCard key="usage" />,
     <MessagesCard 
       key="msg" 
       onOpenLogin={openLoginModal}
     />,
-    <WifiCard key="wifi" />,
+    <WifiCard 
+      key="wifi" 
+      onManageDevices={openDevicesModal}
+    />,
     <ServicesCard 
       key="services" 
       onOpenLogin={openLoginModal}
@@ -166,7 +177,7 @@ function AppContent() {
       )}
 
       <LoginModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />
-      <ConnectedDevicesModal isOpen={isDevicesModalOpen} onClose={closeDevicesModal} />
+      <ConnectedDevicesModal isOpen={isDevicesModalOpen} onClose={closeDevicesModal} filterSsid={devicesFilter} />
     </div>
   );
 }

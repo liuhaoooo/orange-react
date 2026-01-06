@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Loader2 } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { login } from '../utils/api';
@@ -56,8 +57,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+  return createPortal(
+    <div className="fixed inset-0 bg-black/70 z-[9999] flex items-center justify-center p-4">
       <div className="bg-white w-full max-w-lg shadow-2xl relative animate-fade-in text-black">
         {/* Header */}
         <div className="flex justify-between items-center p-6 pb-2">
@@ -108,6 +109,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
