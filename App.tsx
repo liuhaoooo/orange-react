@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Header } from './components/Header';
 import { ConnectionCard } from './components/ConnectionCard';
 import { UsageCard } from './components/UsageCard';
@@ -19,6 +19,9 @@ function AppContent() {
   const [cardsPerPage, setCardsPerPage] = useState(4);
   
   const { isLoggedIn, checkSession, setIsLoggedIn } = useGlobalState();
+  
+  // Track previous login state to detect transitions
+  const prevIsLoggedIn = useRef(isLoggedIn);
 
   const openLoginModal = () => setIsLoginModalOpen(true);
   const closeLoginModal = () => setIsLoginModalOpen(false);
@@ -38,12 +41,12 @@ function AppContent() {
   const cardWidth = 300;
   const gap = 24; 
 
-  // Monitor login status to trigger modal
+  // Monitor login status to trigger modal on logout/expiration
   useEffect(() => {
-    if (!isLoggedIn) {
-      // Logic handled locally in cards now for better UX, or we can keep this for forced re-login
-      // setIsLoginModalOpen(true); 
+    if (prevIsLoggedIn.current === true && isLoggedIn === false) {
+      setIsLoginModalOpen(true);
     }
+    prevIsLoggedIn.current = isLoggedIn;
   }, [isLoggedIn]);
 
   // Heartbeat Effect: Check login status every 10 seconds via Global State
