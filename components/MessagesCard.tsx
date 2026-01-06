@@ -1,13 +1,20 @@
+
 import React, { useState } from 'react';
 import { Card, CardHeader } from './UIComponents';
-import { Inbox, ChevronLeft, ChevronRight, Send, FileText } from 'lucide-react';
+import { Inbox, ChevronLeft, ChevronRight, Send, FileText, MessageSquare } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
+import { useGlobalState } from '../utils/GlobalStateContext';
 
 type TabType = 'inbox' | 'sent' | 'draft';
 
-export const MessagesCard: React.FC = () => {
+interface MessagesCardProps {
+  onOpenLogin: () => void;
+}
+
+export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
   const [activeTab, setActiveTab] = useState<TabType>('inbox');
   const { t } = useLanguage();
+  const { isLoggedIn } = useGlobalState();
 
   const renderTabButton = (tab: TabType, label: string) => {
     const isActive = activeTab === tab;
@@ -41,6 +48,54 @@ export const MessagesCard: React.FC = () => {
     }
   };
 
+  // State: Not Logged In
+  if (!isLoggedIn) {
+    return (
+      <Card>
+        <CardHeader title={t('messages')} showSettings={true} onSettingsClick={onOpenLogin} />
+        <div className="flex-1 flex flex-col items-center justify-center p-6 space-y-8">
+           {/* Graphics: Two Bubbles */}
+           <div className="relative w-full h-32 flex justify-center items-center">
+             {/* Black bubble on left */}
+             <div className="absolute left-6 top-0 transform translate-y-4">
+               <MessageSquare 
+                  className="w-24 h-24 text-black fill-black transform -scale-x-100" 
+                  strokeWidth={1}
+                />
+                {/* Lines inside to look like the design */}
+                <div className="absolute top-[30%] left-[20%] w-[60%] h-[10%] bg-white/30 rounded-full"></div>
+                <div className="absolute top-[55%] left-[20%] w-[40%] h-[10%] bg-white/30 rounded-full"></div>
+             </div>
+             
+             {/* Orange bubble on right */}
+             <div className="absolute right-6 bottom-0 transform -translate-y-2">
+                <MessageSquare 
+                  className="w-24 h-24 text-orange fill-orange" 
+                  strokeWidth={1}
+                />
+                {/* Lines inside */}
+                <div className="absolute top-[30%] left-[20%] w-[60%] h-[10%] bg-white/30 rounded-full"></div>
+                <div className="absolute top-[55%] left-[20%] w-[40%] h-[10%] bg-white/30 rounded-full"></div>
+             </div>
+           </div>
+
+           <div className="text-center w-full px-4 mt-8">
+             <p className="text-black mb-6 text-sm sm:text-base leading-tight">
+               {t('loginAsAdminMsg')}
+             </p>
+             <button
+               onClick={onOpenLogin}
+               className="border border-black px-6 py-2 font-bold text-sm text-black hover:bg-gray-100 transition-colors"
+             >
+               {t('loginAsAdminBtn')}
+             </button>
+           </div>
+        </div>
+      </Card>
+    );
+  }
+
+  // State: Logged In
   return (
     <Card className="flex flex-col">
       <CardHeader title={t('messages')} />

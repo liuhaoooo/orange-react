@@ -1,7 +1,9 @@
+
 import React, { useState } from 'react';
 import { Card, CardHeader, SquareSwitch } from './UIComponents';
 import { Clock, ArrowUpDown, Router, Battery, Users } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
+import { useGlobalState } from '../utils/GlobalStateContext';
 
 interface ConnectionCardProps {
   onOpenSettings: () => void;
@@ -12,6 +14,31 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
   const [isConnected, setIsConnected] = useState(true);
   const [isRoaming, setIsRoaming] = useState(false);
   const { t } = useLanguage();
+  const { isLoggedIn } = useGlobalState();
+
+  const handleConnectionToggle = () => {
+    if (!isLoggedIn) {
+      onOpenSettings();
+      return;
+    }
+    setIsConnected(!isConnected);
+  };
+
+  const handleRoamingToggle = () => {
+    if (!isLoggedIn) {
+      onOpenSettings();
+      return;
+    }
+    setIsRoaming(!isRoaming);
+  };
+
+  const handleManageDevices = () => {
+    if (!isLoggedIn) {
+      onOpenSettings();
+      return;
+    }
+    onManageDevices();
+  };
 
   return (
     <Card>
@@ -26,7 +53,7 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
           </div>
           <SquareSwitch 
             isOn={isConnected} 
-            onChange={() => setIsConnected(!isConnected)} 
+            onChange={handleConnectionToggle} 
           />
         </div>
         <div className="flex justify-between items-center">
@@ -36,7 +63,7 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
           </div>
           <SquareSwitch 
             isOn={isRoaming} 
-            onChange={() => setIsRoaming(!isRoaming)} 
+            onChange={handleRoamingToggle} 
           />
         </div>
       </div>
@@ -104,7 +131,7 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
       {/* Footer Button */}
       <div className="p-4 mt-auto">
         <button 
-          onClick={onManageDevices}
+          onClick={handleManageDevices}
           className="w-full border border-black py-2 text-sm font-bold hover:bg-gray-100 transition-colors text-black"
         >
           {t('manageDevices')}

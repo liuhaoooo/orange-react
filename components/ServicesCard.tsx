@@ -1,13 +1,20 @@
+
 import React, { useState } from 'react';
 import { Card, CardHeader } from './UIComponents';
 import { ChevronLeft, ArrowLeft } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
+import { useGlobalState } from '../utils/GlobalStateContext';
 
-export const ServicesCard: React.FC = () => {
+interface ServicesCardProps {
+  onOpenLogin?: () => void;
+}
+
+export const ServicesCard: React.FC<ServicesCardProps> = ({ onOpenLogin }) => {
   const [mode, setMode] = useState<'menu' | 'keyboard'>('menu');
   const [displayValue, setDisplayValue] = useState('');
   const [inputValue, setInputValue] = useState('');
   const { t } = useLanguage();
+  const { isLoggedIn } = useGlobalState();
 
   const handleKeyPress = (key: string) => {
     setInputValue(prev => prev + key);
@@ -34,6 +41,39 @@ export const ServicesCard: React.FC = () => {
       setDisplayValue('');
   };
 
+  // State: Not Logged In
+  if (!isLoggedIn) {
+    return (
+      <Card className="w-[300px] max-w-[300px] overflow-hidden">
+        <CardHeader title={t('services')} showSettings={true} onSettingsClick={onOpenLogin} />
+        <div className="flex-1 bg-[#f2f2f2] flex flex-col items-center p-6 text-center">
+             <p className="text-black mb-8 text-sm sm:text-base leading-tight px-2">
+               {t('ussdLoginMsg')}
+             </p>
+             
+             <button 
+                onClick={onOpenLogin}
+                className="border border-black px-6 py-2 font-bold text-sm text-black mb-auto hover:bg-gray-100 transition-colors"
+             >
+               {t('loginAsAdminBtn')}
+             </button>
+
+             {/* Illustration Placeholder */}
+             {/* Replace the URL below with your local image asset when ready */}
+             <div 
+                className="w-full h-40 bg-contain bg-no-repeat bg-center mt-4"
+                style={{ 
+                    backgroundImage: "url('https://cdn-icons-png.flaticon.com/512/3063/3063822.png')", // Temporary placeholder 
+                    opacity: 0.8
+                }}
+             >
+             </div>
+        </div>
+      </Card>
+    );
+  }
+
+  // State: Logged In (Menu Mode)
   if (mode === 'menu') {
     return (
       <Card className="w-[300px] max-w-[300px] overflow-hidden">
@@ -60,6 +100,7 @@ export const ServicesCard: React.FC = () => {
     );
   }
 
+  // State: Logged In (Keyboard Mode)
   return (
     <Card className="w-[300px] max-w-[300px] overflow-hidden">
         {/* Custom Header for Keyboard Mode */}

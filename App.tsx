@@ -32,7 +32,8 @@ function AppContent() {
   // Monitor login status to trigger modal
   useEffect(() => {
     if (!isLoggedIn) {
-      setIsLoginModalOpen(true);
+      // Logic handled locally in cards now for better UX, or we can keep this for forced re-login
+      // setIsLoginModalOpen(true); 
     }
   }, [isLoggedIn]);
 
@@ -79,9 +80,15 @@ function AppContent() {
       onManageDevices={openDevicesModal}
     />,
     <UsageCard key="usage" />,
-    <MessagesCard key="msg" />,
+    <MessagesCard 
+      key="msg" 
+      onOpenLogin={openLoginModal}
+    />,
     <WifiCard key="wifi" />,
-    <ServicesCard key="services" />
+    <ServicesCard 
+      key="services" 
+      onOpenLogin={openLoginModal}
+    />
   ];
 
   const totalPages = Math.ceil(allCards.length / cardsPerPage);

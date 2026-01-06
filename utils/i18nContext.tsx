@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 type LanguageCode = 'en' | 'cn' | 'fr' | 'ar' | 'el';
@@ -68,7 +69,10 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     type: "Type",
     duration: "Duration",
     noDevices: "No devices connected.",
-    close: "Close"
+    close: "Close",
+    loginAsAdminMsg: "Login as admin to read your messages",
+    loginAsAdminBtn: "Login as admin",
+    ussdLoginMsg: "Login as admin to use USSD services available with your Orange subscription."
   },
   cn: {
     menu: "菜单",
@@ -128,7 +132,10 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     type: "类型",
     duration: "时长",
     noDevices: "暂无设备连接。",
-    close: "关闭"
+    close: "关闭",
+    loginAsAdminMsg: "登录管理员账户以阅读短信",
+    loginAsAdminBtn: "登录管理员",
+    ussdLoginMsg: "登录管理员以使用您的 Orange 订阅中可用的 USSD 服务。"
   },
   fr: {
     menu: "Menu",
@@ -188,7 +195,10 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     type: "Type",
     duration: "Durée",
     noDevices: "Aucun appareil connecté.",
-    close: "Fermer"
+    close: "Fermer",
+    loginAsAdminMsg: "Connectez-vous en tant qu'admin pour lire vos messages",
+    loginAsAdminBtn: "Connexion admin",
+    ussdLoginMsg: "Connectez-vous en tant qu'administrateur pour utiliser les services USSD disponibles avec votre abonnement Orange."
   },
   ar: {
     menu: "قائمة",
@@ -248,7 +258,10 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     type: "النوع",
     duration: "المدة",
     noDevices: "لا توجد أجهزة متصلة.",
-    close: "إغلاق"
+    close: "إغلاق",
+    loginAsAdminMsg: "سجل الدخول كمسؤول لقراءة رسائلك",
+    loginAsAdminBtn: "تسجيل دخول المسؤول",
+    ussdLoginMsg: "قم بتسجيل الدخول كمسؤول لاستخدام خدمات USSD المتاحة مع اشتراك Orange الخاص بك."
   },
   el: {
     menu: "Menú",
@@ -308,7 +321,10 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     type: "Tipo",
     duration: "Duración",
     noDevices: "No hay dispositivos conectados.",
-    close: "Cerrar"
+    close: "Cerrar",
+    loginAsAdminMsg: "Inicie sesión como admin para leer mensajes",
+    loginAsAdminBtn: "Iniciar sesión admin",
+    ussdLoginMsg: "Inicie sesión como admin para usar los servicios USSD disponibles con su suscripción de Orange."
   }
 };
 
