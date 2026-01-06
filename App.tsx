@@ -10,7 +10,7 @@ import { LoginModal } from './components/LoginModal';
 import { ConnectedDevicesModal } from './components/ConnectedDevicesModal';
 import { LanguageProvider } from './utils/i18nContext';
 import { GlobalStateProvider, useGlobalState } from './utils/GlobalStateContext';
-import { getSessionId } from './utils/api';
+import { getSessionId, logout } from './utils/api';
 
 function AppContent() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -18,13 +18,22 @@ function AppContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [cardsPerPage, setCardsPerPage] = useState(4);
   
-  const { isLoggedIn, checkSession } = useGlobalState();
+  const { isLoggedIn, checkSession, setIsLoggedIn } = useGlobalState();
 
   const openLoginModal = () => setIsLoginModalOpen(true);
   const closeLoginModal = () => setIsLoginModalOpen(false);
 
   const openDevicesModal = () => setIsDevicesModalOpen(true);
   const closeDevicesModal = () => setIsDevicesModalOpen(false);
+
+  const handleLogout = async () => {
+    if (isLoggedIn) {
+      const success = await logout();
+      if (success) {
+        setIsLoggedIn(false);
+      }
+    }
+  };
 
   const cardWidth = 300;
   const gap = 24; 
@@ -99,7 +108,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen flex flex-col font-sans bg-[#e5e5e5]">
-      <Header onLogout={openLoginModal} />
+      <Header onLogout={handleLogout} />
       
       {/* 
           Updated padding to be responsive: 

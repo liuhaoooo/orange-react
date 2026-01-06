@@ -217,6 +217,24 @@ export const apiRequest = async <T = any>(
 };
 
 /**
+ * Logout Function
+ * CMD: 101
+ */
+export const logout = async (): Promise<boolean> => {
+  try {
+    const response = await apiRequest(101, 'POST');
+    if (response.success) {
+      clearSessionId();
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error('Logout error:', error);
+    return false;
+  }
+};
+
+/**
  * Check authentication status (Heartbeat)
  * CMD: 104
  * Returns true if authenticated, false if NO_AUTH
