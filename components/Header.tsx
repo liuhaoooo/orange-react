@@ -1,9 +1,12 @@
+
 import React, { useState } from 'react';
-import { Menu, Home, ChevronDown, HelpCircle, Settings, LogOut } from 'lucide-react';
+import { Menu, Home, ChevronDown, HelpCircle, Settings, LogOut, LogIn } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
+import { useGlobalState } from '../utils/GlobalStateContext';
 
 interface HeaderProps {
   onLogout: () => void;
+  onLogin: () => void;
 }
 
 interface Language {
@@ -28,10 +31,11 @@ const languageAllList: Language[] = [
   // { value: 'sk', name: 'Slovenský', bit: 12 },
 ];
 
-export const Header: React.FC<HeaderProps> = ({ onLogout }) => {
+export const Header: React.FC<HeaderProps> = ({ onLogout, onLogin }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const { language, setLanguage, t } = useLanguage();
+  const { isLoggedIn } = useGlobalState();
 
   const currentLang = languageAllList.find(l => l.value === language) || languageAllList.find(l => l.value === 'en');
 
@@ -83,14 +87,18 @@ export const Header: React.FC<HeaderProps> = ({ onLogout }) => {
                 </button>
                 <div className="border-t border-gray-100 my-1"></div>
                 <button 
-                  className="flex items-center w-full px-4 py-2.5 text-sm hover:bg-gray-100 hover:text-orange transition-colors text-red-600 font-bold"
+                  className={`flex items-center w-full px-4 py-2.5 text-sm hover:bg-gray-100 hover:text-orange transition-colors font-bold ${isLoggedIn ? 'text-red-600' : 'text-black'}`}
                   onClick={() => {
                     setIsMenuOpen(false);
-                    onLogout();
+                    if (isLoggedIn) {
+                      onLogout();
+                    } else {
+                      onLogin();
+                    }
                   }}
                 >
-                  <LogOut size={16} className="me-3" />
-                  {t('logout')}
+                  {isLoggedIn ? <LogOut size={16} className="me-3" /> : <LogIn size={16} className="me-3" />}
+                  {isLoggedIn ? t('logout') : t('login')}
                 </button>
               </div>
             </>

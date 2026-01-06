@@ -111,7 +111,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen flex flex-col font-sans bg-[#e5e5e5]">
-      <Header onLogout={handleLogout} />
+      <Header onLogout={handleLogout} onLogin={openLoginModal} />
       
       {/* 
           Updated padding to be responsive: 
