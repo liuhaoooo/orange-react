@@ -9,13 +9,16 @@ import { ServicesCard } from './components/ServicesCard';
 import { LoginModal } from './components/LoginModal';
 import { ConnectedDevicesModal } from './components/ConnectedDevicesModal';
 import { LanguageProvider } from './utils/i18nContext';
-import { getSessionId, clearSessionId, checkAuthStatus } from './utils/api';
+import { GlobalStateProvider, useGlobalState } from './utils/GlobalStateContext';
+import { getSessionId } from './utils/api';
 
 function AppContent() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isDevicesModalOpen, setIsDevicesModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [cardsPerPage, setCardsPerPage] = useState(4);
+  
+  const { isLoggedIn, checkSession } = useGlobalState();
 
   const openLoginModal = () => setIsLoginModalOpen(true);
   const closeLoginModal = () => setIsLoginModalOpen(false);
@@ -26,30 +29,24 @@ function AppContent() {
   const cardWidth = 300;
   const gap = 24; 
 
-  // Heartbeat Effect: Check login status every 10 seconds
+  // Monitor login status to trigger modal
   useEffect(() => {
-    // Only start if we have a session ID
-    if (!getSessionId()) return;
+    if (!isLoggedIn) {
+      setIsLoginModalOpen(true);
+    }
+  }, [isLoggedIn]);
+
+  // Heartbeat Effect: Check login status every 10 seconds via Global State
+  useEffect(() => {
+    // Initial verification
+    checkSession();
 
     const intervalId = setInterval(async () => {
-      // Check if session ID exists locally first
-      if (!getSessionId()) {
-        clearInterval(intervalId);
-        setIsLoginModalOpen(true);
-        return;
-      }
-
-      const isAuthenticated = await checkAuthStatus();
-      
-      if (!isAuthenticated) {
-        clearInterval(intervalId); // Stop the loop
-        clearSessionId();          // Clear the session
-        setIsLoginModalOpen(true); // Open login modal
-      }
+      await checkSession();
     }, 10000);
 
     return () => clearInterval(intervalId);
-  }, []);
+  }, [checkSession]);
 
   // Responsive layout logic for pagination
   useEffect(() => {
@@ -158,7 +155,9 @@ function AppContent() {
 export default function App() {
   return (
     <LanguageProvider>
-      <AppContent />
+      <GlobalStateProvider>
+        <AppContent />
+      </GlobalStateProvider>
     </LanguageProvider>
   );
 }

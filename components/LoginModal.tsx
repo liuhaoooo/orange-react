@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Loader2 } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { login } from '../utils/api';
+import { useGlobalState } from '../utils/GlobalStateContext';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const { t } = useLanguage();
+  const { setIsLoggedIn } = useGlobalState();
   
   // Reset when opening
   useEffect(() => {
@@ -39,9 +41,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       const result = await login(username, password);
       
       if (result.success) {
+        setIsLoggedIn(true);
         onClose();
-        // Ideally, trigger a global refresh or state update here
-        window.location.reload(); // Simple reload to refresh app state with new session
       } else {
         // Display the specific error message returned by the API
         setErrorMsg(result.message || 'Login failed. Please check your credentials.');
