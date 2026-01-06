@@ -5,9 +5,12 @@ import { User, QrCode } from 'lucide-react';
 import { WifiNetwork } from '../types';
 import { useLanguage } from '../utils/i18nContext';
 import { QrModal } from './QrModal';
+import { useGlobalState } from '../utils/GlobalStateContext';
 
 interface WifiCardProps {
   onManageDevices: (ssid: string) => void;
+  onOpenLogin: () => void;
+  onEditSsid: (network: WifiNetwork) => void;
 }
 
 const initialNetworks: WifiNetwork[] = [
@@ -17,25 +20,50 @@ const initialNetworks: WifiNetwork[] = [
   { id: '4', name: 'Flybox-KAV1-GUEST-5G', frequency: '5GHz', clients: 0, hasQr: true, enabled: false, isGuest: true },
 ];
 
-export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices }) => {
+export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin, onEditSsid }) => {
   const [networks, setNetworks] = useState<WifiNetwork[]>(initialNetworks);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState('');
   const { t } = useLanguage();
+  const { isLoggedIn } = useGlobalState();
+
+  const handleInteraction = (action: () => void) => {
+    if (!isLoggedIn) {
+      onOpenLogin();
+    } else {
+      action();
+    }
+  };
 
   const toggleNetwork = (id: string) => {
-    setNetworks(prev => prev.map(net => 
-      net.id === id ? { ...net, enabled: !net.enabled } : net
-    ));
+    handleInteraction(() => {
+      setNetworks(prev => prev.map(net => 
+        net.id === id ? { ...net, enabled: !net.enabled } : net
+      ));
+    });
   };
 
   const openQrModal = (name: string) => {
+    handleInteraction(() => {
       setSelectedNetwork(name);
       setIsQrModalOpen(true);
+    });
   };
 
   const closeQrModal = () => {
       setIsQrModalOpen(false);
+  };
+  
+  const handleManageDevicesClick = (ssid: string) => {
+    handleInteraction(() => {
+        onManageDevices(ssid);
+    });
+  };
+
+  const handleSsidClick = (network: WifiNetwork) => {
+    handleInteraction(() => {
+        onEditSsid(network);
+    });
   };
 
   return (
@@ -49,8 +77,8 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices }) => {
               {/* Icon - Clickable to show devices for this SSID */}
               <div 
                 className="relative me-3 cursor-pointer group"
-                onClick={() => onManageDevices(net.name)}
-                title="Manage connected devices"
+                onClick={() => handleManageDevicesClick(net.name)}
+                title={t('manageDevices')}
               >
                 <User className="w-6 h-6 text-black fill-current group-hover:text-orange transition-colors" />
                 <div className="absolute -top-1 -right-1 bg-blue-500 text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full border border-white font-bold rtl:right-auto rtl:-left-1">
@@ -58,9 +86,11 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices }) => {
                 </div>
               </div>
 
-              {/* Info */}
-              <div className="flex-1 min-w-0 pe-2">
-                <div className="font-bold text-sm truncate text-black text-start">{net.name}</div>
+              {/* Info - Clickable to Edit SSID */}
+              <div className="flex-1 min-w-0 pe-2 group cursor-pointer" onClick={() => handleSsidClick(net)}>
+                <div className="font-bold text-sm truncate text-black text-start group-hover:text-orange transition-colors" title={t('editSsid')}>
+                    {net.name}
+                </div>
                 <div className="text-xs text-black text-start">{net.frequency}</div>
               </div>
 

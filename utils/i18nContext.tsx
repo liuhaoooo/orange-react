@@ -77,7 +77,17 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     no: "NO",
     host: "Host",
     internetAccess: "Internet Access",
-    offlineDevices: "Offline Devices"
+    offlineDevices: "Offline Devices",
+    editSsid: "Edit SSID",
+    optimization5g: "5GHz Optimization:",
+    ssidBroadcast: "SSID Broadcast:",
+    ssid: "SSID:",
+    authType: "Authentication Type:",
+    wifiPassword: "Wi-Fi Password:",
+    weak: "Weak",
+    medium: "Medium",
+    strong: "Strong",
+    confirm: "Confirm"
   },
   cn: {
     menu: "菜单",
@@ -145,7 +155,17 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     no: "序号",
     host: "主机",
     internetAccess: "互联网访问",
-    offlineDevices: "离线设备"
+    offlineDevices: "离线设备",
+    editSsid: "编辑 SSID",
+    optimization5g: "5GHz 优化:",
+    ssidBroadcast: "SSID 广播:",
+    ssid: "SSID:",
+    authType: "认证类型:",
+    wifiPassword: "Wi-Fi 密码:",
+    weak: "弱",
+    medium: "中",
+    strong: "强",
+    confirm: "确认"
   },
   fr: {
     menu: "Menu",
@@ -213,7 +233,17 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     no: "N°",
     host: "Hôte",
     internetAccess: "Accès Internet",
-    offlineDevices: "Appareils hors ligne"
+    offlineDevices: "Appareils hors ligne",
+    editSsid: "Modifier le SSID",
+    optimization5g: "Optimisation 5GHz:",
+    ssidBroadcast: "Diffusion SSID:",
+    ssid: "SSID:",
+    authType: "Type d'authentification:",
+    wifiPassword: "Mot de passe Wi-Fi:",
+    weak: "Faible",
+    medium: "Moyen",
+    strong: "Fort",
+    confirm: "Confirmer"
   },
   ar: {
     menu: "قائمة",
@@ -281,7 +311,17 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     no: "رقم",
     host: "المضيف",
     internetAccess: "خدمة الإنترنت",
-    offlineDevices: "الأجهزة غير المتصلة"
+    offlineDevices: "الأجهزة غير المتصلة",
+    editSsid: "تعديل SSID",
+    optimization5g: "تحسين 5GHz:",
+    ssidBroadcast: "بث SSID:",
+    ssid: "SSID:",
+    authType: "نوع المصادقة:",
+    wifiPassword: "كلمة مرور Wi-Fi:",
+    weak: "ضعيف",
+    medium: "متوسط",
+    strong: "قوي",
+    confirm: "تأكيد"
   },
   el: {
     menu: "Menú",
@@ -349,7 +389,17 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     no: "NO",
     host: "Host",
     internetAccess: "Acceso a Internet",
-    offlineDevices: "Dispositivos sin conexión"
+    offlineDevices: "Dispositivos sin conexión",
+    editSsid: "Editar SSID",
+    optimization5g: "Optimización 5GHz:",
+    ssidBroadcast: "Difusión SSID:",
+    ssid: "SSID:",
+    authType: "Tipo de autenticación:",
+    wifiPassword: "Contraseña Wi-Fi:",
+    weak: "Débil",
+    medium: "Medio",
+    strong: "Fuerte",
+    confirm: "Confirmar"
   }
 };
 

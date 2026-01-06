@@ -8,14 +8,20 @@ import { WifiCard } from './components/WifiCard';
 import { ServicesCard } from './components/ServicesCard';
 import { LoginModal } from './components/LoginModal';
 import { ConnectedDevicesModal } from './components/ConnectedDevicesModal';
+import { EditSsidModal } from './components/EditSsidModal';
 import { LanguageProvider } from './utils/i18nContext';
 import { GlobalStateProvider, useGlobalState } from './utils/GlobalStateContext';
 import { getSessionId, logout } from './utils/api';
+import { WifiNetwork } from './types';
 
 function AppContent() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isDevicesModalOpen, setIsDevicesModalOpen] = useState(false);
+  const [isEditSsidModalOpen, setIsEditSsidModalOpen] = useState(false);
+  
   const [devicesFilter, setDevicesFilter] = useState<string | undefined>(undefined);
+  const [editingNetwork, setEditingNetwork] = useState<WifiNetwork | undefined>(undefined);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [cardsPerPage, setCardsPerPage] = useState(4);
   
@@ -35,6 +41,16 @@ function AppContent() {
   const closeDevicesModal = () => {
     setIsDevicesModalOpen(false);
     setDevicesFilter(undefined);
+  };
+
+  const openEditSsidModal = (network: WifiNetwork) => {
+    setEditingNetwork(network);
+    setIsEditSsidModalOpen(true);
+  };
+
+  const closeEditSsidModal = () => {
+    setIsEditSsidModalOpen(false);
+    setEditingNetwork(undefined);
   };
 
   const handleLogout = async () => {
@@ -107,6 +123,8 @@ function AppContent() {
     <WifiCard 
       key="wifi" 
       onManageDevices={openDevicesModal}
+      onOpenLogin={openLoginModal}
+      onEditSsid={openEditSsidModal}
     />,
     <ServicesCard 
       key="services" 
@@ -178,6 +196,7 @@ function AppContent() {
 
       <LoginModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />
       <ConnectedDevicesModal isOpen={isDevicesModalOpen} onClose={closeDevicesModal} filterSsid={devicesFilter} />
+      <EditSsidModal isOpen={isEditSsidModalOpen} onClose={closeEditSsidModal} network={editingNetwork} />
     </div>
   );
 }
