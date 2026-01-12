@@ -4,6 +4,7 @@ import { Card, CardHeader, SquareSwitch } from './UIComponents';
 import { Timer, ArrowUpDown, Battery, TabletSmartphone } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
+import { Link } from 'react-router-dom';
 
 interface ConnectionCardProps {
   onOpenSettings: () => void;
@@ -46,14 +47,6 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
       return;
     }
     setIsRoaming(!isRoaming);
-  };
-
-  const handleManageDevices = () => {
-    if (!isLoggedIn) {
-      onOpenSettings();
-      return;
-    }
-    onManageDevices();
   };
 
   return (
@@ -115,12 +108,12 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
 
         {/* Action Button */}
         <div className="mt-6">
-            <button 
-                onClick={handleManageDevices}
-                className="bg-orange hover:bg-orange-dark text-black font-bold py-2 px-6 text-sm transition-colors rounded-none"
+            <Link 
+                to="/connection"
+                className="inline-block bg-orange hover:bg-orange-dark text-black font-bold py-2 px-6 text-sm transition-colors rounded-none"
             >
                 {t('viewConnection')}
-            </button>
+            </Link>
         </div>
 
       </div>

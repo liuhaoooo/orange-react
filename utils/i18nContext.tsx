@@ -99,7 +99,11 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     reset: "Reset",
     uploads: "Uploads",
     downloads: "Downloads",
-    viewUsage: "View Usage"
+    viewUsage: "View Usage",
+    newMessage: "New message",
+    selectAll: "Select All",
+    search: "Search",
+    selectMsgToRead: "Select SMS message to read"
   },
   cn: {
     menu: "菜单",
@@ -189,7 +193,11 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     reset: "重置",
     uploads: "上传",
     downloads: "下载",
-    viewUsage: "查看用量"
+    viewUsage: "查看用量",
+    newMessage: "新建消息",
+    selectAll: "全选",
+    search: "搜索",
+    selectMsgToRead: "选择要阅读的消息"
   },
   fr: {
     menu: "Menu",
@@ -279,7 +287,11 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     reset: "Réinitialiser",
     uploads: "Téléchargements (Montant)",
     downloads: "Téléchargements (Descendant)",
-    viewUsage: "Voir l'utilisation"
+    viewUsage: "Voir l'utilisation",
+    newMessage: "Nouveau message",
+    selectAll: "Tout sélectionner",
+    search: "Rechercher",
+    selectMsgToRead: "Sélectionnez un SMS à lire"
   },
   ar: {
     menu: "قائمة",
@@ -369,7 +381,11 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     reset: "إعادة ضبط",
     uploads: "التحميلات",
     downloads: "التنزيلات",
-    viewUsage: "عرض الاستخدام"
+    viewUsage: "عرض الاستخدام",
+    newMessage: "رسالة جديدة",
+    selectAll: "تحديد الكل",
+    search: "بحث",
+    selectMsgToRead: "اختر رسالة لقراءتها"
   },
   el: {
     menu: "Menú",
@@ -432,7 +448,7 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     deviceName: "Nombre del dispositivo",
     ipAddress: "Dirección IP",
     macAddress: "Dirección MAC",
-    type: "Tipo",
+    type: "Type",
     duration: "Duración",
     noDevices: "No hay dispositivos conectados.",
     close: "Cerrar",
@@ -459,7 +475,11 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     reset: "Reiniciar",
     uploads: "Subidas",
     downloads: "Descargas",
-    viewUsage: "Ver uso"
+    viewUsage: "Ver uso",
+    newMessage: "Nuevo mensaje",
+    selectAll: "Seleccionar todo",
+    search: "Buscar",
+    selectMsgToRead: "Seleccionar SMS para leer"
   }
 };
 
