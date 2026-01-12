@@ -68,10 +68,10 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
 
   return (
     <>
-      <Card>
+      <Card className="h-full">
         <CardHeader title={t('wifiNetworks')} />
         
-        <div className="flex flex-col">
+        <div className="flex flex-col flex-1">
           {networks.map((net) => (
             <div key={net.id} className="flex items-center p-3 border-b border-gray-200 min-h-[80px]">
               {/* Icon - Clickable to show devices for this SSID */}

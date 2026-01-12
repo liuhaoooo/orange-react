@@ -1,12 +1,12 @@
-import React from 'react';
-import { Settings, Check, X } from 'lucide-react';
 
-export const CardHeader: React.FC<{ title: string; showSettings?: boolean; extraIcons?: React.ReactNode; onSettingsClick?: () => void }> = ({ title, showSettings = true, extraIcons, onSettingsClick }) => (
+import React from 'react';
+import { Check, X } from 'lucide-react';
+
+export const CardHeader: React.FC<{ title: string; extraIcons?: React.ReactNode }> = ({ title, extraIcons }) => (
   <div className="bg-black text-white px-4 py-3 flex justify-between items-center shrink-0">
     <h2 className="font-bold text-lg">{title}</h2>
     <div className="flex items-center space-x-3">
       {extraIcons}
-      {showSettings && <Settings className="w-5 h-5 cursor-pointer hover:text-orange" onClick={onSettingsClick} />}
     </div>
   </div>
 );
@@ -33,7 +33,7 @@ export const SquareSwitch: React.FC<SquareSwitchProps> = ({ isOn, onChange }) =>
 };
 
 export const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = "" }) => (
-  <div className={`bg-white shadow-sm flex flex-col w-[300px] min-w-[300px] max-w-[300px] h-[580px] shrink-0 overflow-hidden ${className}`}>
+  <div className={`bg-white shadow-sm flex flex-col overflow-hidden ${className}`}>
     {children}
   </div>
 );

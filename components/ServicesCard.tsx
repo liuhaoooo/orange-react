@@ -7,9 +7,10 @@ import { useGlobalState } from '../utils/GlobalStateContext';
 
 interface ServicesCardProps {
   onOpenLogin?: () => void;
+  className?: string;
 }
 
-export const ServicesCard: React.FC<ServicesCardProps> = ({ onOpenLogin }) => {
+export const ServicesCard: React.FC<ServicesCardProps> = ({ onOpenLogin, className = "" }) => {
   const [mode, setMode] = useState<'menu' | 'keyboard'>('menu');
   const [displayValue, setDisplayValue] = useState('');
   const [inputValue, setInputValue] = useState('');
@@ -44,8 +45,8 @@ export const ServicesCard: React.FC<ServicesCardProps> = ({ onOpenLogin }) => {
   // State: Not Logged In
   if (!isLoggedIn) {
     return (
-      <Card className="w-[300px] max-w-[300px] overflow-hidden">
-        <CardHeader title={t('services')} showSettings={true} onSettingsClick={onOpenLogin} />
+      <Card className={`overflow-hidden ${className}`}>
+        <CardHeader title={t('services')} />
         <div className="flex-1 bg-[#f2f2f2] flex flex-col items-center p-6 text-center">
              <p className="text-black mb-8 text-sm sm:text-base leading-tight px-2">
                {t('ussdLoginMsg')}
@@ -59,11 +60,10 @@ export const ServicesCard: React.FC<ServicesCardProps> = ({ onOpenLogin }) => {
              </button>
 
              {/* Illustration Placeholder */}
-             {/* Replace the URL below with your local image asset when ready */}
              <div 
                 className="w-full h-40 bg-contain bg-no-repeat bg-center mt-4"
                 style={{ 
-                    backgroundImage: "url('https://cdn-icons-png.flaticon.com/512/3063/3063822.png')", // Temporary placeholder 
+                    backgroundImage: "url('https://cdn-icons-png.flaticon.com/512/3063/3063822.png')", 
                     opacity: 0.8
                 }}
              >
@@ -76,8 +76,8 @@ export const ServicesCard: React.FC<ServicesCardProps> = ({ onOpenLogin }) => {
   // State: Logged In (Menu Mode)
   if (mode === 'menu') {
     return (
-      <Card className="w-[300px] max-w-[300px] overflow-hidden">
-        <CardHeader title={t('services')} showSettings={false} />
+      <Card className={`overflow-hidden ${className}`}>
+        <CardHeader title={t('services')} />
         <div className="flex-1 bg-[#f2f2f2] relative flex flex-col w-full">
            {/* Service List */}
            <div className="w-full">
@@ -102,7 +102,7 @@ export const ServicesCard: React.FC<ServicesCardProps> = ({ onOpenLogin }) => {
 
   // State: Logged In (Keyboard Mode)
   return (
-    <Card className="w-[300px] max-w-[300px] overflow-hidden">
+    <Card className={`overflow-hidden ${className}`}>
         {/* Custom Header for Keyboard Mode */}
         <div className="bg-black text-white px-4 py-3 flex items-center shrink-0">
              <button onClick={goBack} className="me-2 hover:text-orange flex items-center transform rtl:rotate-180">

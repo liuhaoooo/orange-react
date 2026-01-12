@@ -51,29 +51,27 @@ export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
   // State: Not Logged In
   if (!isLoggedIn) {
     return (
-      <Card>
-        <CardHeader title={t('messages')} showSettings={true} onSettingsClick={onOpenLogin} />
+      <Card className="h-full">
+        <CardHeader title={t('messages')} />
         <div className="flex-1 flex flex-col items-center justify-center p-6 space-y-8">
            {/* Graphics: Two Bubbles */}
            <div className="relative w-full h-32 flex justify-center items-center">
              {/* Black bubble on left */}
-             <div className="absolute left-6 top-0 transform translate-y-4">
+             <div className="absolute left-1/4 sm:left-1/3 top-0 transform translate-y-4">
                <MessageSquare 
                   className="w-24 h-24 text-black fill-black transform -scale-x-100" 
                   strokeWidth={1}
                 />
-                {/* Lines inside to look like the design */}
                 <div className="absolute top-[30%] left-[20%] w-[60%] h-[10%] bg-white/30 rounded-full"></div>
                 <div className="absolute top-[55%] left-[20%] w-[40%] h-[10%] bg-white/30 rounded-full"></div>
              </div>
              
              {/* Orange bubble on right */}
-             <div className="absolute right-6 bottom-0 transform -translate-y-2">
+             <div className="absolute right-1/4 sm:right-1/3 bottom-0 transform -translate-y-2">
                 <MessageSquare 
                   className="w-24 h-24 text-orange fill-orange" 
                   strokeWidth={1}
                 />
-                {/* Lines inside */}
                 <div className="absolute top-[30%] left-[20%] w-[60%] h-[10%] bg-white/30 rounded-full"></div>
                 <div className="absolute top-[55%] left-[20%] w-[40%] h-[10%] bg-white/30 rounded-full"></div>
              </div>
@@ -97,7 +95,7 @@ export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
 
   // State: Logged In
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col h-full">
       <CardHeader title={t('messages')} />
       
       {/* Tabs */}
@@ -125,7 +123,7 @@ export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
         <button className="p-1 text-gray-400 hover:text-black transform rtl:rotate-180"><ChevronRight size={16} /></button>
       </div>
 
-      <div className="p-4">
+      <div className="p-4 mt-auto">
         <button className="w-full border border-black py-2 text-sm font-bold hover:bg-gray-100 transition-colors text-black">
           {t('redirectMessages')}
         </button>

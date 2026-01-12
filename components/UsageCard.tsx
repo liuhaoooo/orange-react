@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardHeader } from './UIComponents';
 import { RotateCcw, ArrowUp, ArrowDown } from 'lucide-react';
@@ -49,13 +50,13 @@ export const UsageCard: React.FC = () => {
   const { t } = useLanguage();
 
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader 
         title={t('usage')} 
-        extraIcons={<RotateCcw className="w-5 h-5 cursor-pointer hover:text-orange transform -scale-x-100" />} // Approximate refresh icon
+        extraIcons={<RotateCcw className="w-5 h-5 cursor-pointer hover:text-orange transform -scale-x-100" />} 
       />
       
-      <div className="p-4 pb-0">
+      <div className="p-4 pb-0 flex-1">
         <h3 className="font-bold text-sm mb-4 text-black">{t('myUsage')}</h3>
         <div className="flex justify-around mb-6">
           <CircularProgress value="1.20" unit="GB" label={t('national')} colors={COLORS_NATIONAL} />
@@ -93,14 +94,12 @@ export const UsageCard: React.FC = () => {
       </div>
 
       {/* Client Area Banner */}
-      <div className="mt-auto bg-[#36a9e1] p-4 flex relative overflow-hidden h-[160px]">
-        {/* Background Image Layer */}
-        {/* TIP: Replace the url() below with your specific image URL */}
+      <div className="mt-auto bg-[#36a9e1] p-4 flex relative overflow-hidden h-[160px] shrink-0">
         <div 
             className="absolute inset-0 z-0 bg-cover bg-center rtl:transform rtl:-scale-x-100"
             style={{
                 backgroundImage: "url('https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2029&auto=format&fit=crop')",
-                opacity: 0.4, // Adjust opacity to blend with the blue background
+                opacity: 0.4, 
                 mixBlendMode: 'overlay' 
             }}
         />
