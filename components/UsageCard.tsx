@@ -7,15 +7,15 @@ import { Link } from 'react-router-dom';
 const DonutChart = ({ value, label, unit, percentage }: { value: number, label: string, unit: string, percentage: number }) => {
   return (
     <div className="flex flex-col items-center">
-      <span className="text-base font-bold mb-3 text-black">{label}</span>
-      <div className="relative w-40 h-40 rounded-full flex items-center justify-center bg-gray-100"
+      <span className="text-sm font-bold mb-3 text-black">{label}</span>
+      <div className="relative w-32 h-32 rounded-full flex items-center justify-center bg-gray-100"
            style={{
              background: `conic-gradient(#ff7900 ${percentage}%, #f2f2f2 ${percentage}% 100%)`
            }}
       >
-        <div className="absolute w-28 h-28 bg-white rounded-full flex flex-col items-center justify-center">
-             <span className="text-2xl font-bold text-black leading-none mb-1">{value.toFixed(1)}</span>
-             <span className="text-base font-bold text-gray-500 leading-none">{unit}</span>
+        <div className="absolute w-24 h-24 bg-white rounded-full flex flex-col items-center justify-center">
+             <span className="text-xl font-bold text-black leading-none mb-1">{value.toFixed(1)}</span>
+             <span className="text-sm font-bold text-gray-500 leading-none">{unit}</span>
         </div>
       </div>
     </div>
@@ -31,7 +31,7 @@ export const UsageCard: React.FC = () => {
       
       <div className="p-6 flex-1 flex flex-col">
         {/* Charts Area */}
-        <div className="flex justify-around items-center w-full mt-8">
+        <div className="flex justify-around items-center w-full mt-8 gap-4">
           <DonutChart 
             value={465.7} 
             percentage={45} 
