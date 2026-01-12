@@ -84,82 +84,67 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
          </button>
       </div>
 
-      {/* Login Gate */}
-      {!isLoggedIn ? (
-          <div className="w-full h-[400px] flex items-center justify-center bg-white border border-gray-200 shadow-sm">
-             <div className="text-center p-8">
-                 <p className="mb-4 font-bold text-lg">{t('loginAsAdminMsg')}</p>
-                 <button 
-                    onClick={onOpenSettings}
-                    className="bg-orange hover:bg-orange-dark text-black font-bold py-2 px-6 transition-colors"
-                 >
-                    {t('loginAsAdminBtn')}
-                 </button>
-             </div>
+      {/* Authenticated Content */}
+      <div className="bg-white p-6 shadow-sm border border-gray-200">
+          {/* List Container */}
+          <div className="border border-gray-300 max-h-[600px] overflow-y-auto mb-6">
+              {networks.map((net, index) => (
+                  <div 
+                      key={net.id} 
+                      className={`flex items-center p-4 min-h-[90px] ${index !== networks.length - 1 ? 'border-b border-gray-200' : ''}`}
+                  >
+                      {/* Icon */}
+                      <div className="me-4 relative shrink-0 cursor-pointer" onClick={() => handleInteraction(() => onOpenDevices(net.name))}>
+                           <div className="bg-gray-100 p-2 rounded-sm">
+                              <User className="w-6 h-6 text-black fill-current" />
+                           </div>
+                           <div className="absolute -top-1.5 -right-1.5 bg-blue-600 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold border-2 border-white">
+                              {net.clients}
+                           </div>
+                      </div>
+
+                      {/* Details */}
+                      <div className="flex-1 min-w-0 pe-4">
+                          <div 
+                              className="font-bold text-black text-sm mb-1 cursor-pointer hover:text-orange transition-colors"
+                              onClick={() => handleInteraction(() => onEditSsid({ ...net, frequency: net.has5 ? '5GHz' : '2.4GHz' }))}
+                          >
+                              {net.name}
+                          </div>
+                          {net.description && (
+                              <div className="text-xs text-black mb-1 truncate">
+                                  {t(net.description)}
+                              </div>
+                          )}
+                          <div className="flex items-center">
+                              <FreqCheckbox label="2.4 GHz" checked={net.has24} />
+                              <FreqCheckbox label="5 GHz" checked={net.has5} />
+                          </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center space-x-4 rtl:space-x-reverse shrink-0">
+                           <QrCode 
+                              className="w-6 h-6 cursor-pointer text-black hover:text-orange transition-colors"
+                              onClick={() => openQr(net.name)}
+                           />
+                           <SquareSwitch isOn={net.enabled} onChange={() => toggleNetwork(net.id)} />
+                      </div>
+                  </div>
+              ))}
           </div>
-      ) : (
-        /* Authenticated Content */
-        <div className="bg-white p-6 shadow-sm border border-gray-200">
-            {/* List Container */}
-            <div className="border border-gray-300 max-h-[600px] overflow-y-auto mb-6">
-                {networks.map((net, index) => (
-                    <div 
-                        key={net.id} 
-                        className={`flex items-center p-4 min-h-[90px] ${index !== networks.length - 1 ? 'border-b border-gray-200' : ''}`}
-                    >
-                        {/* Icon */}
-                        <div className="me-4 relative shrink-0 cursor-pointer" onClick={() => onOpenDevices(net.name)}>
-                             <div className="bg-gray-100 p-2 rounded-sm">
-                                <User className="w-6 h-6 text-black fill-current" />
-                             </div>
-                             <div className="absolute -top-1.5 -right-1.5 bg-blue-600 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold border-2 border-white">
-                                {net.clients}
-                             </div>
-                        </div>
 
-                        {/* Details */}
-                        <div className="flex-1 min-w-0 pe-4">
-                            <div 
-                                className="font-bold text-black text-sm mb-1 cursor-pointer hover:text-orange transition-colors"
-                                onClick={() => onEditSsid({ ...net, frequency: net.has5 ? '5GHz' : '2.4GHz' })} // simplified mapping
-                            >
-                                {net.name}
-                            </div>
-                            {net.description && (
-                                <div className="text-xs text-black mb-1 truncate">
-                                    {t(net.description)}
-                                </div>
-                            )}
-                            <div className="flex items-center">
-                                <FreqCheckbox label="2.4 GHz" checked={net.has24} />
-                                <FreqCheckbox label="5 GHz" checked={net.has5} />
-                            </div>
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex items-center space-x-4 rtl:space-x-reverse shrink-0">
-                             <QrCode 
-                                className="w-6 h-6 cursor-pointer text-black hover:text-orange transition-colors"
-                                onClick={() => openQr(net.name)}
-                             />
-                             <SquareSwitch isOn={net.enabled} onChange={() => toggleNetwork(net.id)} />
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            {/* Extender Section */}
-            <div className="border border-gray-300 p-4 flex justify-between items-center">
-                <div className="flex items-center">
-                     <div className="bg-gray-100 p-2 rounded-sm me-4">
-                        <Wifi className="w-6 h-6 text-black" />
-                     </div>
-                     <span className="font-bold text-black text-sm">{t('wifiExtender')}</span>
-                </div>
-                <SquareSwitch isOn={extenderEnabled} onChange={() => handleInteraction(() => setExtenderEnabled(!extenderEnabled))} />
-            </div>
-        </div>
-      )}
+          {/* Extender Section */}
+          <div className="border border-gray-300 p-4 flex justify-between items-center">
+              <div className="flex items-center">
+                   <div className="bg-gray-100 p-2 rounded-sm me-4">
+                      <Wifi className="w-6 h-6 text-black" />
+                   </div>
+                   <span className="font-bold text-black text-sm">{t('wifiExtender')}</span>
+              </div>
+              <SquareSwitch isOn={extenderEnabled} onChange={() => handleInteraction(() => setExtenderEnabled(!extenderEnabled))} />
+          </div>
+      </div>
 
       <QrModal 
         isOpen={isQrModalOpen} 
