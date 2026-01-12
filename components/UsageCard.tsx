@@ -1,27 +1,23 @@
 
 import React from 'react';
 import { Card, CardHeader } from './UIComponents';
-import { RotateCcw, ArrowUp, ArrowDown } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
+import { Link } from 'react-router-dom';
 
-// Simple CSS-based Donut Chart Component
-const DonutChart = ({ value, total, color, label, unit }: { value: number, total: number, color: string, label: string, unit: string }) => {
-  const percentage = Math.min(100, Math.max(0, (value / total) * 100));
-  
+const DonutChart = ({ value, label, unit, percentage }: { value: number, label: string, unit: string, percentage: number }) => {
   return (
     <div className="flex flex-col items-center">
-      <div className="relative w-24 h-24 rounded-full flex items-center justify-center bg-gray-200"
+      <span className="text-base font-bold mb-3 text-black">{label}</span>
+      <div className="relative w-40 h-40 rounded-full flex items-center justify-center bg-gray-100"
            style={{
-             background: `conic-gradient(${color} ${percentage}%, #e5e5e5 ${percentage}% 100%)`
+             background: `conic-gradient(#ff7900 ${percentage}%, #f2f2f2 ${percentage}% 100%)`
            }}
       >
-        {/* Inner white circle to create donut effect */}
-        <div className="absolute w-16 h-16 bg-white rounded-full flex flex-col items-center justify-center">
-             <span className="text-sm font-bold text-black leading-none">{value.toFixed(2)}</span>
-             <span className="text-xs font-bold text-gray-500 leading-none">{unit}</span>
+        <div className="absolute w-28 h-28 bg-white rounded-full flex flex-col items-center justify-center">
+             <span className="text-2xl font-bold text-black leading-none mb-1">{value.toFixed(1)}</span>
+             <span className="text-base font-bold text-gray-500 leading-none">{unit}</span>
         </div>
       </div>
-      <span className="text-xs font-bold mt-2 text-black">{label}</span>
     </div>
   );
 };
@@ -30,90 +26,31 @@ export const UsageCard: React.FC = () => {
   const { t } = useLanguage();
 
   return (
-    <Card className="h-full">
-      <CardHeader 
-        title={t('usage')} 
-        extraIcons={<RotateCcw className="w-5 h-5 cursor-pointer hover:text-orange transform -scale-x-100" />} 
-      />
+    <Card className="h-full flex flex-col">
+      <CardHeader title={t('usage')} />
       
-      <div className="p-4 pb-0 flex-1 flex flex-col">
-        <h3 className="font-bold text-sm mb-4 text-black">{t('myUsage')}</h3>
-        
+      <div className="p-6 flex-1 flex flex-col">
         {/* Charts Area */}
-        <div className="flex justify-around mb-6">
+        <div className="flex justify-around items-center w-full mt-8">
           <DonutChart 
-            value={1.20} 
-            total={100} 
-            color="#000000" 
+            value={465.7} 
+            percentage={45} 
             label={t('national')} 
             unit="GB" 
           />
           <DonutChart 
-            value={0.00} 
-            total={100} 
-            color="#ffcc00" 
+            value={931.3} 
+            percentage={15} 
             label={t('international')} 
-            unit="MB" 
+            unit="GB" 
           />
         </div>
 
-        {/* Stats Table */}
-        <div className="border-t border-gray-200 pt-3 mt-auto mb-4">
-          <h3 className="font-bold text-sm mb-2 text-black">{t('currentSession')}</h3>
-          
-          {/* Upload Row */}
-          <div className="flex text-xs mb-1 text-black">
-             <div className="flex items-center justify-center w-1/2 text-gray-600">
-                <ArrowUp className="w-3 h-3 me-1" /> 78.75 MB
-             </div>
-             <div className="flex items-center justify-center w-1/2 text-gray-600">
-                <ArrowUp className="w-3 h-3 me-1" /> 0.00 MB
-             </div>
-          </div>
-          
-          {/* Download Row */}
-          <div className="flex text-xs font-bold mb-1 text-black">
-             <div className="flex items-center justify-center w-1/2">
-                <ArrowDown className="w-3 h-3 me-1" /> 1.13 GB
-             </div>
-             <div className="flex items-center justify-center w-1/2">
-                <ArrowDown className="w-3 h-3 me-1" /> 0.00 MB
-             </div>
-          </div>
-          
-          {/* Labels Row */}
-          <div className="flex text-xs font-bold text-black mt-2">
-             <div className="w-1/2 text-center border-r border-gray-200">{t('national')}</div>
-             <div className="w-1/2 text-center">{t('international')}</div>
-          </div>
-        </div>
-
-        <div className="text-[10px] text-gray-400 mt-2 mb-2 text-center">
-            {t('infoSource')}
-        </div>
-      </div>
-
-      {/* Client Area Banner */}
-      <div className="mt-auto bg-[#36a9e1] p-4 flex relative overflow-hidden h-[140px] shrink-0">
-        <div 
-            className="absolute inset-0 z-0 bg-cover bg-center rtl:transform rtl:-scale-x-100"
-            style={{
-                backgroundImage: "url('https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2029&auto=format&fit=crop')",
-                opacity: 0.4, 
-                mixBlendMode: 'overlay' 
-            }}
-        />
-
-        <div className="w-3/4 z-10 relative flex flex-col items-start h-full justify-between">
-            <div>
-                <h3 className="font-bold text-lg mb-1 text-black opacity-90 leading-tight">{t('clientArea')}</h3>
-                <p className="text-xs leading-tight mb-2 text-black opacity-80">
-                    {t('clientAreaDesc')}
-                </p>
-            </div>
-            <button className="border border-black text-black text-xs font-bold px-4 py-1.5 hover:bg-white/20 transition-colors backdrop-blur-sm self-start">
-                {t('connect')}
-            </button>
+        {/* Button Area - Pushed to bottom */}
+        <div className="mt-auto pt-6">
+             <Link to="/usage" className="inline-block bg-orange hover:bg-orange-dark text-black font-bold py-3 px-8 text-sm transition-colors rounded-none">
+                {t('viewUsage')}
+             </Link>
         </div>
       </div>
     </Card>

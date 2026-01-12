@@ -98,7 +98,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     manageAccessDesc: "Manage Internet access for connected devices",
     reset: "Reset",
     uploads: "Uploads",
-    downloads: "Downloads"
+    downloads: "Downloads",
+    viewUsage: "View Usage"
   },
   cn: {
     menu: "菜单",
@@ -187,7 +188,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     manageAccessDesc: "管理连接设备的互联网访问权限",
     reset: "重置",
     uploads: "上传",
-    downloads: "下载"
+    downloads: "下载",
+    viewUsage: "查看用量"
   },
   fr: {
     menu: "Menu",
@@ -276,7 +278,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     manageAccessDesc: "Gérer l'accès Internet pour les appareils connectés",
     reset: "Réinitialiser",
     uploads: "Téléchargements (Montant)",
-    downloads: "Téléchargements (Descendant)"
+    downloads: "Téléchargements (Descendant)",
+    viewUsage: "Voir l'utilisation"
   },
   ar: {
     menu: "قائمة",
@@ -365,7 +368,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     manageAccessDesc: "إدارة الوصول إلى الإنترنت للأجهزة المتصلة",
     reset: "إعادة ضبط",
     uploads: "التحميلات",
-    downloads: "التنزيلات"
+    downloads: "التنزيلات",
+    viewUsage: "عرض الاستخدام"
   },
   el: {
     menu: "Menú",
@@ -454,7 +458,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     manageAccessDesc: "Administrar acceso a Internet para dispositivos",
     reset: "Reiniciar",
     uploads: "Subidas",
-    downloads: "Descargas"
+    downloads: "Descargas",
+    viewUsage: "Ver uso"
   }
 };
 
