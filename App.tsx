@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Header } from './components/Header';
 import { Dashboard } from './pages/Dashboard';
 import { ConnectionPage } from './pages/ConnectionPage';
@@ -78,6 +78,7 @@ function AppContent() {
         
         <main className="w-full max-w-[1200px] mx-auto p-4 md:p-6" dir="ltr">
           <Routes>
+            {/* Main Dashboard Route */}
             <Route 
               path="/" 
               element={
@@ -88,6 +89,8 @@ function AppContent() {
                 />
               } 
             />
+            
+            {/* Connection Detail Page */}
             <Route 
               path="/connection" 
               element={
@@ -97,11 +100,15 @@ function AppContent() {
                 />
               } 
             />
-            {/* Placeholders for other routes if needed */}
+            
+            {/* Tabs reusing Dashboard for now (as placeholders) */}
             <Route path="/usage" element={<Dashboard onOpenLogin={openLoginModal} onOpenDevices={openDevicesModal} onEditSsid={openEditSsidModal} />} />
             <Route path="/messages" element={<Dashboard onOpenLogin={openLoginModal} onOpenDevices={openDevicesModal} onEditSsid={openEditSsidModal} />} />
             <Route path="/wifi" element={<Dashboard onOpenLogin={openLoginModal} onOpenDevices={openDevicesModal} onEditSsid={openEditSsidModal} />} />
             <Route path="/services" element={<Dashboard onOpenLogin={openLoginModal} onOpenDevices={openDevicesModal} onEditSsid={openEditSsidModal} />} />
+            
+            {/* Catch-all redirect */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
 

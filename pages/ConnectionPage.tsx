@@ -72,7 +72,7 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
           />
           <StatBox 
             icon={null} 
-            topText="----"
+            topText="----" 
             label={t('network')} 
             value={t('noNetwork')} 
           />
@@ -94,13 +94,13 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
         {/* Connection & Roaming Toggles (Spans 3/5) */}
         <Card className="lg:col-span-3 border border-gray-200">
              {/* Connection Row */}
-            <div className="flex justify-between items-center p-6 border-b border-gray-200 min-h-[100px]">
+            <div className="flex justify-between items-center p-6 border-b border-gray-200 min-h-[120px]">
                 <div className="flex items-center">
-                   <div className="bg-gray-100 p-2 rounded-sm me-4">
-                      <LinkIcon size={24} className="text-black" />
+                   <div className="bg-gray-100 p-2.5 rounded-sm me-5">
+                      <LinkIcon size={32} className="text-black" />
                    </div>
                    <div className="flex flex-col items-start">
-                        <span className="font-bold text-black text-sm">{isConnected ? t('connected') : t('notConnected')}</span>
+                        <span className="font-bold text-black text-lg mb-1">{isConnected ? t('connected') : t('notConnected')}</span>
                         <span className={`text-sm ${!isConnected ? 'text-orange' : 'text-gray-500'}`}>
                             {isConnected ? `${t('dataIs')} ${t('on')}` : t('pinCodeRequired')}
                         </span>
@@ -110,13 +110,13 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
             </div>
 
             {/* Roaming Row */}
-            <div className="flex justify-between items-center p-6 min-h-[100px]">
+            <div className="flex justify-between items-center p-6 min-h-[120px]">
                 <div className="flex items-center">
-                   <div className="bg-gray-100 p-2 rounded-sm me-4">
-                      <Globe size={24} className="text-black" />
+                   <div className="bg-gray-100 p-2.5 rounded-sm me-5">
+                      <Globe size={32} className="text-black" />
                    </div>
                    <div className="flex flex-col items-start">
-                        <span className="font-bold text-black text-sm">{t('roaming')}</span>
+                        <span className="font-bold text-black text-lg mb-1">{t('roaming')}</span>
                         <span className="text-sm text-black">{isRoaming ? `${t('roamingIs')} ${t('on')}` : t('roamingOff')}</span>
                     </div>
                 </div>
@@ -125,19 +125,23 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
         </Card>
 
         {/* Devices Card (Spans 2/5) */}
-        <Card className="lg:col-span-2 border border-gray-200 p-6 flex flex-col items-start justify-between">
-             <div className="w-full">
-                 <h2 className="font-bold text-lg mb-1">{t('devices')}</h2>
-                 <p className="text-sm text-gray-600 mb-6">{t('manageAccessDesc')}</p>
-                 <div className="flex items-center space-x-2 mb-6">
-                    <Monitor size={50} strokeWidth={1.5} className="text-black" />
-                    <Smartphone size={40} strokeWidth={1.5} className="text-black" />
-                 </div>
+        <Card className="lg:col-span-2 border border-gray-200 p-6 flex flex-col justify-between h-full min-h-[240px]">
+             <div>
+               <h2 className="font-bold text-xl mb-4 text-black">{t('devices')}</h2>
+               <div className="flex items-start mb-6">
+                  <div className="flex items-end me-5 text-black shrink-0 relative">
+                      <Monitor size={56} strokeWidth={1.2} />
+                      <Smartphone size={36} strokeWidth={1.2} className="absolute -right-2 -bottom-0.5 fill-white bg-white border-2 border-white rounded-md" />
+                  </div>
+                  <p className="text-sm text-gray-700 leading-tight pt-1">
+                    {t('manageAccessDesc')}
+                  </p>
+               </div>
              </div>
              
              <button 
                 onClick={handleManageDevicesClick}
-                className="bg-orange hover:bg-orange-dark text-black font-bold py-3 px-6 text-sm transition-colors w-full"
+                className="bg-orange hover:bg-orange-dark text-black font-bold py-3 px-6 text-sm transition-colors w-full rounded-none"
             >
                 {t('manageDevices')}
             </button>

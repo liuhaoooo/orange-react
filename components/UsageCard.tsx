@@ -2,49 +2,29 @@
 import React from 'react';
 import { Card, CardHeader } from './UIComponents';
 import { RotateCcw, ArrowUp, ArrowDown } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { useLanguage } from '../utils/i18nContext';
 
-const dataNational = [
-  { name: 'Used', value: 1.2 },
-  { name: 'Remaining', value: 100 }, // Mock remaining
-];
-const dataInternational = [
-  { name: 'Used', value: 0 },
-  { name: 'Remaining', value: 100 },
-];
-
-const COLORS_NATIONAL = ['#000000', '#e5e5e5'];
-const COLORS_INTERNATIONAL = ['#ffcc00', '#e5e5e5'];
-
-const CircularProgress = ({ value, label, unit, colors }: { value: string, label: string, unit: string, colors: string[] }) => (
-  <div className="flex flex-col items-center">
-    <div className="relative w-24 h-24">
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
-          <Pie
-            data={[{ value: parseFloat(value) }, { value: 100 - parseFloat(value) }]}
-            innerRadius={32}
-            outerRadius={42}
-            startAngle={90}
-            endAngle={-270}
-            dataKey="value"
-            stroke="none"
-          >
-            {dataNational.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
-            ))}
-          </Pie>
-        </PieChart>
-      </ResponsiveContainer>
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-xs font-bold text-black">
-        <span>{value}</span>
-        <span>{unit}</span>
+// Simple CSS-based Donut Chart Component
+const DonutChart = ({ value, total, color, label, unit }: { value: number, total: number, color: string, label: string, unit: string }) => {
+  const percentage = Math.min(100, Math.max(0, (value / total) * 100));
+  
+  return (
+    <div className="flex flex-col items-center">
+      <div className="relative w-24 h-24 rounded-full flex items-center justify-center bg-gray-200"
+           style={{
+             background: `conic-gradient(${color} ${percentage}%, #e5e5e5 ${percentage}% 100%)`
+           }}
+      >
+        {/* Inner white circle to create donut effect */}
+        <div className="absolute w-16 h-16 bg-white rounded-full flex flex-col items-center justify-center">
+             <span className="text-sm font-bold text-black leading-none">{value.toFixed(2)}</span>
+             <span className="text-xs font-bold text-gray-500 leading-none">{unit}</span>
+        </div>
       </div>
+      <span className="text-xs font-bold mt-2 text-black">{label}</span>
     </div>
-    <span className="text-xs font-bold mt-1 text-black">{label}</span>
-  </div>
-);
+  );
+};
 
 export const UsageCard: React.FC = () => {
   const { t } = useLanguage();
@@ -56,24 +36,42 @@ export const UsageCard: React.FC = () => {
         extraIcons={<RotateCcw className="w-5 h-5 cursor-pointer hover:text-orange transform -scale-x-100" />} 
       />
       
-      <div className="p-4 pb-0 flex-1">
+      <div className="p-4 pb-0 flex-1 flex flex-col">
         <h3 className="font-bold text-sm mb-4 text-black">{t('myUsage')}</h3>
+        
+        {/* Charts Area */}
         <div className="flex justify-around mb-6">
-          <CircularProgress value="1.20" unit="GB" label={t('national')} colors={COLORS_NATIONAL} />
-          <CircularProgress value="0.00" unit="MB" label={t('international')} colors={COLORS_INTERNATIONAL} />
+          <DonutChart 
+            value={1.20} 
+            total={100} 
+            color="#000000" 
+            label={t('national')} 
+            unit="GB" 
+          />
+          <DonutChart 
+            value={0.00} 
+            total={100} 
+            color="#ffcc00" 
+            label={t('international')} 
+            unit="MB" 
+          />
         </div>
 
-        <div className="border-t border-gray-200 pt-3">
+        {/* Stats Table */}
+        <div className="border-t border-gray-200 pt-3 mt-auto mb-4">
           <h3 className="font-bold text-sm mb-2 text-black">{t('currentSession')}</h3>
           
+          {/* Upload Row */}
           <div className="flex text-xs mb-1 text-black">
-             <div className="flex items-center justify-center w-1/2">
+             <div className="flex items-center justify-center w-1/2 text-gray-600">
                 <ArrowUp className="w-3 h-3 me-1" /> 78.75 MB
              </div>
-             <div className="flex items-center justify-center w-1/2">
+             <div className="flex items-center justify-center w-1/2 text-gray-600">
                 <ArrowUp className="w-3 h-3 me-1" /> 0.00 MB
              </div>
           </div>
+          
+          {/* Download Row */}
           <div className="flex text-xs font-bold mb-1 text-black">
              <div className="flex items-center justify-center w-1/2">
                 <ArrowDown className="w-3 h-3 me-1" /> 1.13 GB
@@ -82,19 +80,21 @@ export const UsageCard: React.FC = () => {
                 <ArrowDown className="w-3 h-3 me-1" /> 0.00 MB
              </div>
           </div>
-          <div className="flex text-xs font-bold text-black">
-             <div className="w-1/2 text-center">{t('national')}</div>
+          
+          {/* Labels Row */}
+          <div className="flex text-xs font-bold text-black mt-2">
+             <div className="w-1/2 text-center border-r border-gray-200">{t('national')}</div>
              <div className="w-1/2 text-center">{t('international')}</div>
           </div>
         </div>
 
-        <div className="text-[10px] text-black mt-4 mb-2">
+        <div className="text-[10px] text-gray-400 mt-2 mb-2 text-center">
             {t('infoSource')}
         </div>
       </div>
 
       {/* Client Area Banner */}
-      <div className="mt-auto bg-[#36a9e1] p-4 flex relative overflow-hidden h-[160px] shrink-0">
+      <div className="mt-auto bg-[#36a9e1] p-4 flex relative overflow-hidden h-[140px] shrink-0">
         <div 
             className="absolute inset-0 z-0 bg-cover bg-center rtl:transform rtl:-scale-x-100"
             style={{
@@ -104,12 +104,14 @@ export const UsageCard: React.FC = () => {
             }}
         />
 
-        <div className="w-2/3 z-10 relative flex flex-col items-start h-full">
-            <h3 className="font-bold text-xl mb-1 text-black opacity-90 leading-tight">{t('clientArea')}</h3>
-            <p className="text-sm leading-tight mb-3 text-black opacity-80">
-                {t('clientAreaDesc')}
-            </p>
-            <button className="mt-auto border border-black text-black text-xs font-bold px-4 py-1.5 hover:bg-white/10 transition-colors backdrop-blur-sm">
+        <div className="w-3/4 z-10 relative flex flex-col items-start h-full justify-between">
+            <div>
+                <h3 className="font-bold text-lg mb-1 text-black opacity-90 leading-tight">{t('clientArea')}</h3>
+                <p className="text-xs leading-tight mb-2 text-black opacity-80">
+                    {t('clientAreaDesc')}
+                </p>
+            </div>
+            <button className="border border-black text-black text-xs font-bold px-4 py-1.5 hover:bg-white/20 transition-colors backdrop-blur-sm self-start">
                 {t('connect')}
             </button>
         </div>

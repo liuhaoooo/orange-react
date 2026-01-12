@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { User, ChevronDown, HelpCircle, Settings, LogOut, LogIn } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 
 interface HeaderProps {
   onLogout: () => void;
@@ -29,18 +29,15 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, onLogin }) => {
   const [isLangOpen, setIsLangOpen] = useState(false);
   const { language, setLanguage, t } = useLanguage();
   const { isLoggedIn } = useGlobalState();
-  const location = useLocation();
 
   const currentLang = languageAllList.find(l => l.value === language) || languageAllList.find(l => l.value === 'en');
 
-  const getLinkClass = (path: string) => {
-    const isActive = location.pathname === path;
-    return `h-full flex items-center px-4 transition-colors font-bold text-sm ${
+  const navLinkClass = ({ isActive }: { isActive: boolean }) => 
+    `h-full flex items-center px-4 transition-colors font-bold text-sm ${
       isActive 
         ? 'text-orange border-b-4 border-orange bg-white/5' 
         : 'text-gray-400 hover:text-white hover:bg-white/5'
     }`;
-  };
 
   return (
     <header className="bg-black text-white h-[60px] flex items-center px-0 relative z-30 shadow-md">
@@ -56,12 +53,12 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, onLogin }) => {
 
       {/* Navigation Links - Desktop */}
       <nav className="hidden md:flex items-center space-x-0 h-full">
-        <Link to="/" className={getLinkClass('/')}>{t('dashboard')}</Link>
-        <Link to="/connection" className={getLinkClass('/connection')}>{t('connection')}</Link>
-        <Link to="/usage" className={getLinkClass('/usage')}>{t('usage')}</Link>
-        <Link to="/messages" className={getLinkClass('/messages')}>{t('messages')}</Link>
-        <Link to="/wifi" className={getLinkClass('/wifi')}>{t('wifiNetworks')}</Link>
-        <Link to="/services" className={getLinkClass('/services')}>{t('services')}</Link>
+        <NavLink to="/" end className={navLinkClass}>{t('dashboard')}</NavLink>
+        <NavLink to="/connection" className={navLinkClass}>{t('connection')}</NavLink>
+        <NavLink to="/usage" className={navLinkClass}>{t('usage')}</NavLink>
+        <NavLink to="/messages" className={navLinkClass}>{t('messages')}</NavLink>
+        <NavLink to="/wifi" className={navLinkClass}>{t('wifiNetworks')}</NavLink>
+        <NavLink to="/services" className={navLinkClass}>{t('services')}</NavLink>
       </nav>
       
       {/* Right Side Actions */}
