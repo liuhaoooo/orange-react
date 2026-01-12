@@ -110,7 +110,9 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     buyAPass: "Buy a pass",
     creditTransfer: "Credit transfer",
     orangeFidelite: "Orange Fidelité",
-    googleSearch: "google search"
+    googleSearch: "google search",
+    viewServices: "View Services",
+    viewWifiNetworks: "View Wi-Fi Networks"
   },
   cn: {
     menu: "菜单",
@@ -211,7 +213,9 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     buyAPass: "购买通行证",
     creditTransfer: "信用转账",
     orangeFidelite: "Orange Fidelité",
-    googleSearch: "谷歌搜索"
+    googleSearch: "谷歌搜索",
+    viewServices: "查看服务",
+    viewWifiNetworks: "查看 Wi-Fi 网络"
   },
   fr: {
     menu: "Menu",
@@ -312,7 +316,9 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     buyAPass: "Acheter un pass",
     creditTransfer: "Transfert de crédit",
     orangeFidelite: "Orange Fidelité",
-    googleSearch: "google search"
+    googleSearch: "google search",
+    viewServices: "Voir les services",
+    viewWifiNetworks: "Voir les réseaux Wi-Fi"
   },
   ar: {
     menu: "قائمة",
@@ -413,7 +419,9 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     buyAPass: "شراء تصريح",
     creditTransfer: "تحويل رصيد",
     orangeFidelite: "Orange Fidelité",
-    googleSearch: "google search"
+    googleSearch: "google search",
+    viewServices: "عرض الخدمات",
+    viewWifiNetworks: "عرض شبكات Wi-Fi"
   },
   el: {
     menu: "Menú",
@@ -514,7 +522,9 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     buyAPass: "Comprar un pase",
     creditTransfer: "Transferencia de crédito",
     orangeFidelite: "Orange Fidelité",
-    googleSearch: "google search"
+    googleSearch: "google search",
+    viewServices: "Ver servicios",
+    viewWifiNetworks: "Ver redes Wi-Fi"
   }
 };
 
