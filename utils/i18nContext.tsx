@@ -103,7 +103,14 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     newMessage: "New message",
     selectAll: "Select All",
     search: "Search",
-    selectMsgToRead: "Select SMS message to read"
+    selectMsgToRead: "Select SMS message to read",
+    wifiExtender: "Wi-Fi extender",
+    guestWifiDesc: "Activate guest Wi-Fi network (default Wi-Fi key = guest_password_from_machine)",
+    rechargeByCard: "Recharge by card",
+    buyAPass: "Buy a pass",
+    creditTransfer: "Credit transfer",
+    orangeFidelite: "Orange Fidelité",
+    googleSearch: "google search"
   },
   cn: {
     menu: "菜单",
@@ -197,7 +204,14 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     newMessage: "新建消息",
     selectAll: "全选",
     search: "搜索",
-    selectMsgToRead: "选择要阅读的消息"
+    selectMsgToRead: "选择要阅读的消息",
+    wifiExtender: "Wi-Fi 扩展器",
+    guestWifiDesc: "激活访客 Wi-Fi 网络 (默认 Wi-Fi 密码 = guest_password_from_machine)",
+    rechargeByCard: "卡充值",
+    buyAPass: "购买通行证",
+    creditTransfer: "信用转账",
+    orangeFidelite: "Orange Fidelité",
+    googleSearch: "谷歌搜索"
   },
   fr: {
     menu: "Menu",
@@ -291,7 +305,14 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     newMessage: "Nouveau message",
     selectAll: "Tout sélectionner",
     search: "Rechercher",
-    selectMsgToRead: "Sélectionnez un SMS à lire"
+    selectMsgToRead: "Sélectionnez un SMS à lire",
+    wifiExtender: "Répéteur Wi-Fi",
+    guestWifiDesc: "Activer le réseau Wi-Fi invité (clé Wi-Fi par défaut = guest_password_from_machine)",
+    rechargeByCard: "Recharge par carte",
+    buyAPass: "Acheter un pass",
+    creditTransfer: "Transfert de crédit",
+    orangeFidelite: "Orange Fidelité",
+    googleSearch: "google search"
   },
   ar: {
     menu: "قائمة",
@@ -385,7 +406,14 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     newMessage: "رسالة جديدة",
     selectAll: "تحديد الكل",
     search: "بحث",
-    selectMsgToRead: "اختر رسالة لقراءتها"
+    selectMsgToRead: "اختر رسالة لقراءتها",
+    wifiExtender: "موسع Wi-Fi",
+    guestWifiDesc: "تفعيل شبكة Wi-Fi للضيوف (مفتاح Wi-Fi الافتراضي = guest_password_from_machine)",
+    rechargeByCard: "شحن بالبطاقة",
+    buyAPass: "شراء تصريح",
+    creditTransfer: "تحويل رصيد",
+    orangeFidelite: "Orange Fidelité",
+    googleSearch: "google search"
   },
   el: {
     menu: "Menú",
@@ -479,7 +507,14 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     newMessage: "Nuevo mensaje",
     selectAll: "Seleccionar todo",
     search: "Buscar",
-    selectMsgToRead: "Seleccionar SMS para leer"
+    selectMsgToRead: "Seleccionar SMS para leer",
+    wifiExtender: "Extensor Wi-Fi",
+    guestWifiDesc: "Activar red Wi-Fi de invitados (clave Wi-Fi predeterminada = guest_password_from_machine)",
+    rechargeByCard: "Recargar con tarjeta",
+    buyAPass: "Comprar un pase",
+    creditTransfer: "Transferencia de crédito",
+    orangeFidelite: "Orange Fidelité",
+    googleSearch: "google search"
   }
 };
 

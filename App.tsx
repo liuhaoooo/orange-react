@@ -6,6 +6,8 @@ import { Dashboard } from './pages/Dashboard';
 import { ConnectionPage } from './pages/ConnectionPage';
 import { UsagePage } from './pages/UsagePage';
 import { MessagesPage } from './pages/MessagesPage';
+import { WifiNetworksPage } from './pages/WifiNetworksPage';
+import { ServicesPage } from './pages/ServicesPage';
 import { LoginModal } from './components/LoginModal';
 import { ConnectedDevicesModal } from './components/ConnectedDevicesModal';
 import { EditSsidModal } from './components/EditSsidModal';
@@ -123,9 +125,27 @@ function AppContent() {
               } 
             />
 
-            {/* Tabs reusing Dashboard for now (as placeholders) */}
-            <Route path="/wifi" element={<Dashboard onOpenLogin={openLoginModal} onOpenDevices={openDevicesModal} onEditSsid={openEditSsidModal} />} />
-            <Route path="/services" element={<Dashboard onOpenLogin={openLoginModal} onOpenDevices={openDevicesModal} onEditSsid={openEditSsidModal} />} />
+            {/* Wifi Networks Page */}
+            <Route 
+              path="/wifi" 
+              element={
+                <WifiNetworksPage 
+                  onOpenSettings={openLoginModal} 
+                  onOpenDevices={openDevicesModal} 
+                  onEditSsid={openEditSsidModal} 
+                />
+              } 
+            />
+
+            {/* Services Page */}
+            <Route 
+              path="/services" 
+              element={
+                <ServicesPage 
+                  onOpenSettings={openLoginModal}
+                />
+              } 
+            />
             
             {/* Catch-all redirect */}
             <Route path="*" element={<Navigate to="/" replace />} />
