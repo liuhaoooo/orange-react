@@ -112,7 +112,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     orangeFidelite: "Orange Fidelité",
     googleSearch: "google search",
     viewServices: "View Services",
-    viewWifiNetworks: "View Wi-Fi Networks"
+    viewWifiNetworks: "View Wi-Fi Networks",
+    viewMessages: "View Messages"
   },
   cn: {
     menu: "菜单",
@@ -215,7 +216,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     orangeFidelite: "Orange Fidelité",
     googleSearch: "谷歌搜索",
     viewServices: "查看服务",
-    viewWifiNetworks: "查看 Wi-Fi 网络"
+    viewWifiNetworks: "查看 Wi-Fi 网络",
+    viewMessages: "查看消息"
   },
   fr: {
     menu: "Menu",
@@ -318,7 +320,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     orangeFidelite: "Orange Fidelité",
     googleSearch: "google search",
     viewServices: "Voir les services",
-    viewWifiNetworks: "Voir les réseaux Wi-Fi"
+    viewWifiNetworks: "Voir les réseaux Wi-Fi",
+    viewMessages: "Voir les messages"
   },
   ar: {
     menu: "قائمة",
@@ -421,7 +424,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     orangeFidelite: "Orange Fidelité",
     googleSearch: "google search",
     viewServices: "عرض الخدمات",
-    viewWifiNetworks: "عرض شبكات Wi-Fi"
+    viewWifiNetworks: "عرض شبكات Wi-Fi",
+    viewMessages: "عرض الرسائل"
   },
   el: {
     menu: "Menú",
@@ -524,7 +528,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     orangeFidelite: "Orange Fidelité",
     googleSearch: "google search",
     viewServices: "Ver servicios",
-    viewWifiNetworks: "Ver redes Wi-Fi"
+    viewWifiNetworks: "Ver redes Wi-Fi",
+    viewMessages: "Ver mensajes"
   }
 };
 
