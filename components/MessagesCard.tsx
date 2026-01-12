@@ -71,15 +71,15 @@ export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
       <CardHeader title={t('messages')} />
       
       {/* Sub Header: Inbox */}
-      <div className="px-6 py-4 border-b border-gray-200 flex items-center bg-white">
+      <div className="px-6 py-4 border-b border-gray-200 flex items-center bg-white shrink-0">
           <span className="font-bold text-lg text-black me-2">{t('inbox')}</span>
           <span className="bg-[#4169e1] text-white text-xs font-bold h-6 w-6 flex items-center justify-center rounded-full">2</span>
       </div>
 
       {/* List */}
-      <div className="flex-1 overflow-hidden flex flex-col bg-white">
+      <div className="flex-1 overflow-y-auto flex flex-col bg-white">
           {messages.map((msg) => (
-              <div key={msg.id} className="p-4 px-6 border-b border-gray-200 flex justify-between items-center">
+              <div key={msg.id} className="p-4 px-6 border-b border-gray-200 flex justify-between items-center shrink-0">
                   <div className="flex-1 min-w-0 pe-4">
                       <div className="font-bold text-black text-sm">{msg.sender}</div>
                       <div className="text-gray-500 text-xs mt-1">{msg.date}</div>
@@ -94,7 +94,7 @@ export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
       </div>
 
       {/* Footer */}
-      <div className="p-6 pt-4 bg-white mt-auto">
+      <div className="p-6 pt-4 bg-white mt-auto shrink-0">
         <Link 
             to="/messages"
             className="inline-block bg-orange hover:bg-orange-dark text-black font-bold py-2 px-4 text-sm transition-colors"
