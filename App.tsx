@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Header } from './components/Header';
 import { Dashboard } from './pages/Dashboard';
 import { ConnectionPage } from './pages/ConnectionPage';
+import { UsagePage } from './pages/UsagePage';
 import { LoginModal } from './components/LoginModal';
 import { ConnectedDevicesModal } from './components/ConnectedDevicesModal';
 import { EditSsidModal } from './components/EditSsidModal';
@@ -101,8 +102,17 @@ function AppContent() {
               } 
             />
             
+            {/* Usage Page */}
+            <Route 
+              path="/usage" 
+              element={
+                <UsagePage 
+                   onOpenSettings={openLoginModal}
+                />
+              } 
+            />
+            
             {/* Tabs reusing Dashboard for now (as placeholders) */}
-            <Route path="/usage" element={<Dashboard onOpenLogin={openLoginModal} onOpenDevices={openDevicesModal} onEditSsid={openEditSsidModal} />} />
             <Route path="/messages" element={<Dashboard onOpenLogin={openLoginModal} onOpenDevices={openDevicesModal} onEditSsid={openEditSsidModal} />} />
             <Route path="/wifi" element={<Dashboard onOpenLogin={openLoginModal} onOpenDevices={openDevicesModal} onEditSsid={openEditSsidModal} />} />
             <Route path="/services" element={<Dashboard onOpenLogin={openLoginModal} onOpenDevices={openDevicesModal} onEditSsid={openEditSsidModal} />} />

@@ -95,7 +95,10 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     strong: "Strong",
     confirm: "Confirm",
     devices: "Devices",
-    manageAccessDesc: "Manage Internet access for connected devices"
+    manageAccessDesc: "Manage Internet access for connected devices",
+    reset: "Reset",
+    uploads: "Uploads",
+    downloads: "Downloads"
   },
   cn: {
     menu: "菜单",
@@ -165,7 +168,7 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     loginAsAdminMsg: "登录管理员账户以阅读短信",
     loginAsAdminBtn: "登录管理员",
     ussdLoginMsg: "登录管理员以使用您的 Orange 订阅中可用的 USSD 服务。",
-    scanQrText: "扫描二维码自动连接到 Orange ZLT。",
+    scanQrText: "扫描二维码自动连接到 Orange ZLT 自动连接。",
     no: "序号",
     host: "主机",
     internetAccess: "互联网访问",
@@ -181,7 +184,10 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     strong: "强",
     confirm: "确认",
     devices: "设备",
-    manageAccessDesc: "管理连接设备的互联网访问权限"
+    manageAccessDesc: "管理连接设备的互联网访问权限",
+    reset: "重置",
+    uploads: "上传",
+    downloads: "下载"
   },
   fr: {
     menu: "Menu",
@@ -267,7 +273,10 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     strong: "Fort",
     confirm: "Confirmer",
     devices: "Appareils",
-    manageAccessDesc: "Gérer l'accès Internet pour les appareils connectés"
+    manageAccessDesc: "Gérer l'accès Internet pour les appareils connectés",
+    reset: "Réinitialiser",
+    uploads: "Téléchargements (Montant)",
+    downloads: "Téléchargements (Descendant)"
   },
   ar: {
     menu: "قائمة",
@@ -353,7 +362,10 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     strong: "قوي",
     confirm: "تأكيد",
     devices: "الأجهزة",
-    manageAccessDesc: "إدارة الوصول إلى الإنترنت للأجهزة المتصلة"
+    manageAccessDesc: "إدارة الوصول إلى الإنترنت للأجهزة المتصلة",
+    reset: "إعادة ضبط",
+    uploads: "التحميلات",
+    downloads: "التنزيلات"
   },
   el: {
     menu: "Menú",
@@ -439,7 +451,10 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     strong: "Fuerte",
     confirm: "Confirmar",
     devices: "Dispositivos",
-    manageAccessDesc: "Administrar acceso a Internet para dispositivos"
+    manageAccessDesc: "Administrar acceso a Internet para dispositivos",
+    reset: "Reiniciar",
+    uploads: "Subidas",
+    downloads: "Descargas"
   }
 };
 
