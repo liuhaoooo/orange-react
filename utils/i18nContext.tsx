@@ -13,6 +13,7 @@ interface LanguageContextType {
 const translations: Record<LanguageCode, Record<string, string>> = {
   en: {
     menu: "Menu",
+    dashboard: "Dashboard",
     myNumber: "My number",
     help: "Help",
     settings: "Settings",
@@ -92,10 +93,13 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     weak: "Weak",
     medium: "Medium",
     strong: "Strong",
-    confirm: "Confirm"
+    confirm: "Confirm",
+    devices: "Devices",
+    manageAccessDesc: "Manage Internet access for connected devices"
   },
   cn: {
     menu: "菜单",
+    dashboard: "仪表盘",
     myNumber: "我的号码",
     help: "帮助",
     settings: "设置",
@@ -175,10 +179,13 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     weak: "弱",
     medium: "中",
     strong: "强",
-    confirm: "确认"
+    confirm: "确认",
+    devices: "设备",
+    manageAccessDesc: "管理连接设备的互联网访问权限"
   },
   fr: {
     menu: "Menu",
+    dashboard: "Tableau de bord",
     myNumber: "Mon numéro",
     help: "Aide",
     settings: "Paramètres",
@@ -258,10 +265,13 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     weak: "Faible",
     medium: "Moyen",
     strong: "Fort",
-    confirm: "Confirmer"
+    confirm: "Confirmer",
+    devices: "Appareils",
+    manageAccessDesc: "Gérer l'accès Internet pour les appareils connectés"
   },
   ar: {
     menu: "قائمة",
+    dashboard: "لوحة القيادة",
     myNumber: "رقمي",
     help: "مساعدة",
     settings: "إعدادات",
@@ -341,10 +351,13 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     weak: "ضعيف",
     medium: "متوسط",
     strong: "قوي",
-    confirm: "تأكيد"
+    confirm: "تأكيد",
+    devices: "الأجهزة",
+    manageAccessDesc: "إدارة الوصول إلى الإنترنت للأجهزة المتصلة"
   },
   el: {
     menu: "Menú",
+    dashboard: "Tablero",
     myNumber: "Mi número",
     help: "Ayuda",
     settings: "Configuración",
@@ -424,7 +437,9 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     weak: "Débil",
     medium: "Medio",
     strong: "Fuerte",
-    confirm: "Confirmar"
+    confirm: "Confirmar",
+    devices: "Dispositivos",
+    manageAccessDesc: "Administrar acceso a Internet para dispositivos"
   }
 };
 

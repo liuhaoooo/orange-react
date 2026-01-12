@@ -1,11 +1,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Header } from './components/Header';
-import { ConnectionCard } from './components/ConnectionCard';
-import { UsageCard } from './components/UsageCard';
-import { MessagesCard } from './components/MessagesCard';
-import { WifiCard } from './components/WifiCard';
-import { ServicesCard } from './components/ServicesCard';
+import { Dashboard } from './pages/Dashboard';
+import { ConnectionPage } from './pages/ConnectionPage';
 import { LoginModal } from './components/LoginModal';
 import { ConnectedDevicesModal } from './components/ConnectedDevicesModal';
 import { EditSsidModal } from './components/EditSsidModal';
@@ -74,52 +72,44 @@ function AppContent() {
   }, [checkSession]);
 
   return (
-    <div className="min-h-screen flex flex-col font-sans bg-[#e5e5e5]">
-      <Header onLogout={handleLogout} onLogin={openLoginModal} />
-      
-      <main className="w-full max-w-[1200px] mx-auto p-4 md:p-6 space-y-6" dir="ltr">
+    <Router>
+      <div className="min-h-screen flex flex-col font-sans bg-[#e5e5e5]">
+        <Header onLogout={handleLogout} onLogin={openLoginModal} />
         
-        {/* Row 1: Connection and Messages */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="h-[450px]">
-             <ConnectionCard 
-               onOpenSettings={openLoginModal} 
-               onManageDevices={() => openDevicesModal()}
-             />
-          </div>
-          <div className="h-[450px]">
-             <MessagesCard 
-               onOpenLogin={openLoginModal}
-             />
-          </div>
-        </div>
-
-        {/* Row 2: Usage, Wi-Fi, Services */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="h-[450px]">
-            <UsageCard />
-          </div>
-          <div className="h-[450px]">
-            <WifiCard 
-              onManageDevices={openDevicesModal}
-              onOpenLogin={openLoginModal}
-              onEditSsid={openEditSsidModal}
+        <main className="w-full max-w-[1200px] mx-auto p-4 md:p-6" dir="ltr">
+          <Routes>
+            <Route 
+              path="/" 
+              element={
+                <Dashboard 
+                  onOpenLogin={openLoginModal} 
+                  onOpenDevices={openDevicesModal} 
+                  onEditSsid={openEditSsidModal} 
+                />
+              } 
             />
-          </div>
-          <div className="h-[450px]">
-            <ServicesCard 
-              onOpenLogin={openLoginModal}
-              className="h-full"
+            <Route 
+              path="/connection" 
+              element={
+                <ConnectionPage 
+                  onOpenSettings={openLoginModal}
+                  onManageDevices={() => openDevicesModal()}
+                />
+              } 
             />
-          </div>
-        </div>
+            {/* Placeholders for other routes if needed */}
+            <Route path="/usage" element={<Dashboard onOpenLogin={openLoginModal} onOpenDevices={openDevicesModal} onEditSsid={openEditSsidModal} />} />
+            <Route path="/messages" element={<Dashboard onOpenLogin={openLoginModal} onOpenDevices={openDevicesModal} onEditSsid={openEditSsidModal} />} />
+            <Route path="/wifi" element={<Dashboard onOpenLogin={openLoginModal} onOpenDevices={openDevicesModal} onEditSsid={openEditSsidModal} />} />
+            <Route path="/services" element={<Dashboard onOpenLogin={openLoginModal} onOpenDevices={openDevicesModal} onEditSsid={openEditSsidModal} />} />
+          </Routes>
+        </main>
 
-      </main>
-
-      <LoginModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />
-      <ConnectedDevicesModal isOpen={isDevicesModalOpen} onClose={closeDevicesModal} filterSsid={devicesFilter} />
-      <EditSsidModal isOpen={isEditSsidModalOpen} onClose={closeEditSsidModal} network={editingNetwork} />
-    </div>
+        <LoginModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />
+        <ConnectedDevicesModal isOpen={isDevicesModalOpen} onClose={closeDevicesModal} filterSsid={devicesFilter} />
+        <EditSsidModal isOpen={isEditSsidModalOpen} onClose={closeEditSsidModal} network={editingNetwork} />
+      </div>
+    </Router>
   );
 }
 

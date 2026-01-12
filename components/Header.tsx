@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
-import { Menu, User, ChevronDown, HelpCircle, Settings, LogOut, LogIn } from 'lucide-react';
+import { User, ChevronDown, HelpCircle, Settings, LogOut, LogIn } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
+import { Link, useLocation } from 'react-router-dom';
 
 interface HeaderProps {
   onLogout: () => void;
@@ -28,28 +29,39 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, onLogin }) => {
   const [isLangOpen, setIsLangOpen] = useState(false);
   const { language, setLanguage, t } = useLanguage();
   const { isLoggedIn } = useGlobalState();
+  const location = useLocation();
 
   const currentLang = languageAllList.find(l => l.value === language) || languageAllList.find(l => l.value === 'en');
+
+  const getLinkClass = (path: string) => {
+    const isActive = location.pathname === path;
+    return `h-full flex items-center px-4 transition-colors font-bold text-sm ${
+      isActive 
+        ? 'text-orange border-b-4 border-orange bg-white/5' 
+        : 'text-gray-400 hover:text-white hover:bg-white/5'
+    }`;
+  };
 
   return (
     <header className="bg-black text-white h-[60px] flex items-center px-0 relative z-30 shadow-md">
       {/* Logo Section */}
       <div className="flex items-center h-full me-4 md:me-8">
-        <div className="bg-orange h-full px-4 flex items-center justify-center font-bold text-xl me-4">
-          <span className="bg-white text-orange text-xs p-0.5 px-1 font-bold me-1">orange</span>
-        </div>
-        <h1 className="text-xl font-bold tracking-tight text-white">Airbox2</h1>
+        <Link to="/" className="flex items-center h-full">
+            <div className="bg-orange h-full px-4 flex items-center justify-center font-bold text-xl me-4">
+            <span className="bg-white text-orange text-xs p-0.5 px-1 font-bold me-1">orange</span>
+            </div>
+            <h1 className="text-xl font-bold tracking-tight text-white">Airbox2</h1>
+        </Link>
       </div>
 
       {/* Navigation Links - Desktop */}
-      <nav className="hidden md:flex items-center space-x-0 h-full text-sm font-bold text-gray-400">
-        <a href="#" className="h-full flex items-center px-4 text-orange border-b-4 border-orange bg-white/5">{t('menu')}</a> 
-        {/* Mapping 'Menu' to 'Dashboard' conceptually for now, or just using static labels */}
-        <a href="#" className="h-full flex items-center px-4 hover:text-white hover:bg-white/5 transition-colors">{t('connection')}</a>
-        <a href="#" className="h-full flex items-center px-4 hover:text-white hover:bg-white/5 transition-colors">{t('usage')}</a>
-        <a href="#" className="h-full flex items-center px-4 hover:text-white hover:bg-white/5 transition-colors">{t('messages')}</a>
-        <a href="#" className="h-full flex items-center px-4 hover:text-white hover:bg-white/5 transition-colors">{t('wifiNetworks')}</a>
-        <a href="#" className="h-full flex items-center px-4 hover:text-white hover:bg-white/5 transition-colors">{t('services')}</a>
+      <nav className="hidden md:flex items-center space-x-0 h-full">
+        <Link to="/" className={getLinkClass('/')}>{t('dashboard')}</Link>
+        <Link to="/connection" className={getLinkClass('/connection')}>{t('connection')}</Link>
+        <Link to="/usage" className={getLinkClass('/usage')}>{t('usage')}</Link>
+        <Link to="/messages" className={getLinkClass('/messages')}>{t('messages')}</Link>
+        <Link to="/wifi" className={getLinkClass('/wifi')}>{t('wifiNetworks')}</Link>
+        <Link to="/services" className={getLinkClass('/services')}>{t('services')}</Link>
       </nav>
       
       {/* Right Side Actions */}
