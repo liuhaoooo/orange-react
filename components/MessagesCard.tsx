@@ -17,7 +17,7 @@ export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
   const messages = [
     { id: 1, sender: '0624681012', date: '2025/07/31 17:37:12', content: 'content test...', isNew: true, hasAlert: false },
     { id: 2, sender: '06987654321', date: '2025/07/31 10:00:11', content: 'content test2', isNew: false, hasAlert: true },
-    { id: 3, sender: '06987654200', date: '2025/07/30 22:19:00', content: '<img onerror=alert(3)/><p><http://www.google.com/> <script...', isNew: true, hasAlert: true },
+    { id: 3, sender: '06987654200', date: '2025/07/30 22:19:00', content: 'Suspicious link detected in message body...', isNew: true, hasAlert: true },
   ];
 
   // State: Not Logged In
@@ -70,13 +70,13 @@ export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
     <Card className="flex flex-col h-full">
       <CardHeader title={t('messages')} />
       
-      {/* Sub Header: Inbox */}
+      {/* Sub Header: Inbox - Added shrink-0 to prevent compression */}
       <div className="px-6 py-4 border-b border-gray-200 flex items-center bg-white shrink-0">
           <span className="font-bold text-lg text-black me-2">{t('inbox')}</span>
           <span className="bg-[#4169e1] text-white text-xs font-bold h-6 w-6 flex items-center justify-center rounded-full">2</span>
       </div>
 
-      {/* List */}
+      {/* List - Added overflow-y-auto to enable scrolling */}
       <div className="flex-1 overflow-y-auto flex flex-col bg-white">
           {messages.map((msg) => (
               <div key={msg.id} className="p-4 px-6 border-b border-gray-200 flex justify-between items-center shrink-0">
@@ -91,9 +91,10 @@ export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
                   </div>
               </div>
           ))}
+          {/* Add some extra items to demonstrate scrolling if needed, or rely on small height */}
       </div>
 
-      {/* Footer */}
+      {/* Footer - Added shrink-0 */}
       <div className="p-6 pt-4 bg-white mt-auto shrink-0">
         <Link 
             to="/messages"

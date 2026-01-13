@@ -10,7 +10,7 @@ const DonutChart = ({ value, label, unit, percentage }: { value: number, label: 
       <span className="text-sm font-bold mb-3 text-black">{label}</span>
       <div className="relative w-32 h-32 rounded-full flex items-center justify-center bg-gray-100"
            style={{
-             background: `conic-gradient(#ff7900 ${percentage}%, #f2f2f2 ${percentage}% 100%)`
+             backgroundImage: `conic-gradient(#ff7900 ${percentage}%, #f2f2f2 ${percentage}% 100%)`
            }}
       >
         <div className="absolute w-24 h-24 bg-white rounded-full flex flex-col items-center justify-center">
