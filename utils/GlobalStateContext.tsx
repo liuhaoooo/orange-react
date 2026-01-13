@@ -43,12 +43,11 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
     return true;
   }, [isLoggedIn]);
 
-  // Polling for status info (CMD 586) when logged in
+  // Polling for status info (CMD 586) - always active
   useEffect(() => {
     let intervalId: ReturnType<typeof setInterval>;
 
     const fetchInfo = async () => {
-      if (!isLoggedIn) return;
       try {
         const data = await fetchStatusInfo();
         if (data && data.success) {
@@ -59,15 +58,13 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
       }
     };
 
-    if (isLoggedIn) {
-      fetchInfo(); // Fetch immediately
-      intervalId = setInterval(fetchInfo, 10000); // Fetch every 10 seconds as requested
-    }
+    fetchInfo(); // Fetch immediately on mount
+    intervalId = setInterval(fetchInfo, 10000); // Fetch every 10 seconds
 
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [isLoggedIn, updateGlobalData]);
+  }, [updateGlobalData]);
 
   return (
     <GlobalStateContext.Provider value={{ 
