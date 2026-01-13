@@ -28,10 +28,11 @@ const StatItem: React.FC<{
 );
 
 export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, onManageDevices }) => {
-  const [isConnected, setIsConnected] = useState(false); // Default to false to match screenshot "Not connected"
-  const [isRoaming, setIsRoaming] = useState(false);
+  const [isConnected, setIsConnected] = useState(false); // UI toggle, separated from API status for now
+  const [isRoaming, setIsRoaming] = useState(false); // UI toggle
   const { t } = useLanguage();
-  const { isLoggedIn } = useGlobalState();
+  const { isLoggedIn, globalData } = useGlobalState();
+  const statusInfo = globalData.statusInfo;
 
   const handleConnectionToggle = () => {
     if (!isLoggedIn) {
@@ -49,6 +50,42 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
     setIsRoaming(!isRoaming);
   };
 
+  // --- Format Data ---
+  
+  // Time Elapsed: Seconds to HH:MM:SS
+  const formatTime = (secondsStr: string) => {
+    if (!secondsStr) return "00:00:00";
+    const totalSeconds = parseInt(secondsStr, 10);
+    if (isNaN(totalSeconds)) return "00:00:00";
+
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    const pad = (num: number) => num.toString().padStart(2, '0');
+    return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  };
+
+  // Data Usage: Sum of 4 flows -> Fixed to 2 decimals + MB
+  const formatDataUsage = () => {
+    if (!statusInfo) return "0.00 MB";
+    const total = 
+      parseFloat(statusInfo.roam_dl_mon_flow || "0") + 
+      parseFloat(statusInfo.roam_ul_mon_flow || "0") + 
+      parseFloat(statusInfo.ul_mon_flow || "0") + 
+      parseFloat(statusInfo.dl_mon_flow || "0");
+    return `${total.toFixed(2)} MB`;
+  };
+
+  // Connected Devices Count
+  const getConnectedCount = () => {
+    if (!statusInfo || !statusInfo.dhcp_list_info) return "0";
+    if (Array.isArray(statusInfo.dhcp_list_info)) {
+        return statusInfo.dhcp_list_info.length.toString();
+    }
+    return "0";
+  };
+
   return (
     <Card className="h-full">
       <CardHeader title={t('connection')} />
@@ -58,28 +95,28 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
           <StatItem 
             icon={<Timer size={40} strokeWidth={1.5} />} 
             label={t('timeElapsed')} 
-            value="00:05:34" 
+            value={statusInfo ? formatTime(statusInfo.time_elapsed) : "00:00:00"} 
           />
           <StatItem 
             icon={<ArrowUpDown size={40} strokeWidth={1.5} />} 
             label={t('dataUsage')} 
-            value="50 MB" 
+            value={formatDataUsage()} 
           />
           <StatItem 
             icon={null} 
             topText="----"
             label={t('network')} 
-            value={t('noNetwork')} 
+            value={statusInfo?.network_type_str || t('noNetwork')} 
           />
           <StatItem 
             icon={<Battery size={40} strokeWidth={1.5} className="rotate-0" />} 
             label={t('battery')} 
-            value="100 %" 
+            value={statusInfo ? `${statusInfo.battery_level} %` : "0 %"} 
           />
           <StatItem 
             icon={<TabletSmartphone size={40} strokeWidth={1.5} />} 
             label={t('connected')} 
-            value="8" 
+            value={getConnectedCount()} 
           />
       </div>
 

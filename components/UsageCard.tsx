@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card, CardHeader } from './UIComponents';
 import { useLanguage } from '../utils/i18nContext';
+import { useGlobalState } from '../utils/GlobalStateContext';
 import { Link } from 'react-router-dom';
 
 const DonutChart = ({ value, label, unit, percentage }: { value: number, label: string, unit: string, percentage: number }) => {
@@ -22,8 +23,37 @@ const DonutChart = ({ value, label, unit, percentage }: { value: number, label: 
   );
 };
 
+// Helper to convert MB string to { val, unit }
+const formatTraffic = (mbStr: string | undefined) => {
+  const mb = parseFloat(mbStr || '0');
+  if (isNaN(mb)) return { val: 0, unit: 'MB' };
+
+  if (mb >= 1024) {
+    return { val: mb / 1024, unit: 'GB' };
+  } else if (mb < 1 && mb > 0) {
+    return { val: mb * 1024, unit: 'KB' };
+  }
+  return { val: mb, unit: 'MB' };
+};
+
 export const UsageCard: React.FC = () => {
   const { t } = useLanguage();
+  const { globalData } = useGlobalState();
+  const info = globalData.statusInfo;
+
+  // 1. National Data
+  const natUsedMb = (parseFloat(info?.dl_mon_flow || '0') + parseFloat(info?.ul_mon_flow || '0'));
+  const natTotalMb = parseFloat(info?.nation_limit_size || '0');
+  
+  const natFormatted = formatTraffic(natUsedMb.toString());
+  const natPercentage = natTotalMb > 0 ? (natUsedMb / natTotalMb) * 100 : 0;
+
+  // 2. International Data
+  const intUsedMb = (parseFloat(info?.roam_dl_mon_flow || '0') + parseFloat(info?.roam_ul_mon_flow || '0'));
+  const intTotalMb = parseFloat(info?.internation_limit_size || '0');
+
+  const intFormatted = formatTraffic(intUsedMb.toString());
+  const intPercentage = intTotalMb > 0 ? (intUsedMb / intTotalMb) * 100 : 0;
 
   return (
     <Card className="h-full flex flex-col">
@@ -33,16 +63,16 @@ export const UsageCard: React.FC = () => {
         {/* Charts Area */}
         <div className="flex justify-around items-center w-full mt-8 gap-4">
           <DonutChart 
-            value={465.7} 
-            percentage={45} 
+            value={natFormatted.val} 
+            percentage={natPercentage > 100 ? 100 : natPercentage} 
             label={t('national')} 
-            unit="GB" 
+            unit={natFormatted.unit} 
           />
           <DonutChart 
-            value={931.3} 
-            percentage={15} 
+            value={intFormatted.val} 
+            percentage={intPercentage > 100 ? 100 : intPercentage} 
             label={t('international')} 
-            unit="GB" 
+            unit={intFormatted.unit} 
           />
         </div>
 

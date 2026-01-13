@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { getSessionId, checkAuthStatus, clearSessionId } from './api';
+import { getSessionId, checkAuthStatus, clearSessionId, fetchStatusInfo } from './api';
 
 interface GlobalStateContextType {
   isLoggedIn: boolean;
@@ -42,6 +42,32 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
     if (!isLoggedIn) setIsLoggedIn(true);
     return true;
   }, [isLoggedIn]);
+
+  // Polling for status info (CMD 586) when logged in
+  useEffect(() => {
+    let intervalId: ReturnType<typeof setInterval>;
+
+    const fetchInfo = async () => {
+      if (!isLoggedIn) return;
+      try {
+        const data = await fetchStatusInfo();
+        if (data && data.success) {
+          updateGlobalData('statusInfo', data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch status info', error);
+      }
+    };
+
+    if (isLoggedIn) {
+      fetchInfo(); // Fetch immediately
+      intervalId = setInterval(fetchInfo, 10000); // Fetch every 10 seconds as requested
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [isLoggedIn, updateGlobalData]);
 
   return (
     <GlobalStateContext.Provider value={{ 

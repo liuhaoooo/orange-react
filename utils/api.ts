@@ -9,6 +9,32 @@ export interface ApiResponse<T = any> {
   [key: string]: any;
 }
 
+export interface StatusInfoResponse {
+  time_elapsed: string;
+  roam_dl_mon_flow: string;
+  roam_ul_mon_flow: string;
+  ul_mon_flow: string;
+  dl_mon_flow: string;
+  battery_status: string;
+  battery_level: string;
+  battery_charge_status: string;
+  wan_network_status: string;
+  dhcp_list_info: Array<{
+    mac: string;
+    ip: string;
+    hostname: string;
+    interface: string;
+    expires: string;
+    flow: string;
+    ipv6: string;
+  }> | string; // API might return empty string if no list
+  network_type_str: string;
+  flightMode: string;
+  roamingEnable: string;
+  dialMode: string;
+  [key: string]: any;
+}
+
 // Session Management
 export const setSessionId = (sid: string) => {
   if (sid) {
@@ -214,6 +240,14 @@ export const apiRequest = async <T = any>(
     console.error(`API Request Error (CMD: ${cmd}):`, error);
     throw error;
   }
+};
+
+/**
+ * Get Dashboard Status Info
+ * CMD: 586
+ */
+export const fetchStatusInfo = async (): Promise<StatusInfoResponse> => {
+  return apiRequest<StatusInfoResponse>(586, 'GET');
 };
 
 /**

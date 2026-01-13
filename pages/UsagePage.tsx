@@ -9,7 +9,8 @@ interface UsagePageProps {
 }
 
 const UsageDonut = ({ label, value, unit, total, color }: { label: string, value: number, unit: string, total: number, color: string }) => {
-  const percentage = (value / total) * 100;
+  const percentage = total > 0 ? (value / total) * 100 : 0;
+  
   return (
     <div className="flex flex-col items-center">
       <div className="text-black font-bold mb-4">{label}</div>
@@ -19,7 +20,7 @@ const UsageDonut = ({ label, value, unit, total, color }: { label: string, value
            }}
       >
         <div className="absolute w-44 h-44 bg-white rounded-full flex flex-col items-center justify-center">
-             <span className="text-3xl font-bold text-black">{value.toFixed(1)}</span>
+             <span className="text-3xl font-bold text-black">{value.toFixed(2)}</span>
              <span className="text-xl font-bold text-gray-500">{unit}</span>
         </div>
       </div>
@@ -27,9 +28,23 @@ const UsageDonut = ({ label, value, unit, total, color }: { label: string, value
   );
 }
 
+// Helper: Auto-convert MB string to { val, unit }
+const formatTraffic = (mbStr: string | undefined) => {
+    const mb = parseFloat(mbStr || '0');
+    if (isNaN(mb)) return { val: 0, unit: 'MB' };
+
+    if (mb >= 1024) {
+        return { val: mb / 1024, unit: 'GB' };
+    } else if (mb < 1 && mb > 0) {
+        return { val: mb * 1024, unit: 'KB' };
+    }
+    return { val: mb, unit: 'MB' };
+};
+
 export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
   const { t } = useLanguage();
-  const { isLoggedIn } = useGlobalState();
+  const { isLoggedIn, globalData } = useGlobalState();
+  const info = globalData.statusInfo;
 
   const handleAuthAction = (action: () => void) => {
     if (isLoggedIn) {
@@ -38,6 +53,41 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
         onOpenSettings();
     }
   };
+
+  // --- Calculations for Ring Charts ---
+  
+  // National: dl_mon_flow + ul_mon_flow
+  const natUsedMb = (parseFloat(info?.dl_mon_flow || '0') + parseFloat(info?.ul_mon_flow || '0'));
+  const natTotalMb = parseFloat(info?.nation_limit_size || '0');
+  const natFormatted = formatTraffic(natUsedMb.toString());
+  // Total needs to match the unit of used for the ring percentage logic, 
+  // but usually we display "Used" value. The Ring internal logic handles percentage.
+  // We pass `total` as raw MB to the donut if we wanted to normalize, but our Donut here takes separate value and total.
+  // To keep it simple for display: We pass the converted value to `value`, and we convert `total` to the SAME unit for percentage calc.
+  let natTotalConverted = natTotalMb;
+  if (natFormatted.unit === 'GB') natTotalConverted = natTotalMb / 1024;
+  else if (natFormatted.unit === 'KB') natTotalConverted = natTotalMb * 1024;
+
+
+  // International: roam_dl_mon_flow + roam_ul_mon_flow
+  const intUsedMb = (parseFloat(info?.roam_dl_mon_flow || '0') + parseFloat(info?.roam_ul_mon_flow || '0'));
+  const intTotalMb = parseFloat(info?.internation_limit_size || '0');
+  const intFormatted = formatTraffic(intUsedMb.toString());
+  
+  let intTotalConverted = intTotalMb;
+  if (intFormatted.unit === 'GB') intTotalConverted = intTotalMb / 1024;
+  else if (intFormatted.unit === 'KB') intTotalConverted = intTotalMb * 1024;
+
+  // --- Calculations for Session Details ---
+
+  // National Session
+  const natUpload = formatTraffic(info?.ul_mon_flow);
+  const natDownload = formatTraffic(info?.dl_mon_flow);
+
+  // International Session
+  const intUpload = formatTraffic(info?.roam_ul_mon_flow);
+  const intDownload = formatTraffic(info?.roam_dl_mon_flow);
+
 
   return (
     <div className="w-full">
@@ -77,16 +127,16 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
                 <div className="p-10 flex flex-col md:flex-row justify-around items-center gap-10">
                     <UsageDonut 
                         label={t('national')} 
-                        value={465.7} 
-                        unit="GB" 
-                        total={1000} 
+                        value={natFormatted.val} 
+                        unit={natFormatted.unit} 
+                        total={natTotalConverted} 
                         color="#ff7900" 
                     />
                     <UsageDonut 
                         label={t('international')} 
-                        value={931.3} 
-                        unit="GB" 
-                        total={1000} 
+                        value={intFormatted.val} 
+                        unit={intFormatted.unit} 
+                        total={intTotalConverted} 
                         color="#ff7900" 
                     />
                 </div>
@@ -103,12 +153,12 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
                         <div className="flex items-center text-sm text-gray-600 mb-2">
                             <span className="w-24">{t('uploads')}</span>
                             <ArrowUp size={16} className="me-2 text-black" />
-                            <span className="font-bold text-black">44 KB</span>
+                            <span className="font-bold text-black">{natUpload.val.toFixed(2)} {natUpload.unit}</span>
                         </div>
                         <div className="flex items-center text-sm text-gray-600">
                             <span className="w-24">{t('downloads')}</span>
                             <ArrowDown size={16} className="me-2 text-black" />
-                            <span className="font-bold text-black">49 KB</span>
+                            <span className="font-bold text-black">{natDownload.val.toFixed(2)} {natDownload.unit}</span>
                         </div>
                     </div>
                     
@@ -117,12 +167,12 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
                         <div className="flex items-center text-sm text-gray-600 mb-2">
                             <span className="w-24">{t('uploads')}</span>
                             <ArrowUp size={16} className="me-2 text-black" />
-                            <span className="font-bold text-black">1000 B</span>
+                            <span className="font-bold text-black">{intUpload.val.toFixed(2)} {intUpload.unit}</span>
                         </div>
                         <div className="flex items-center text-sm text-gray-600">
                             <span className="w-24">{t('downloads')}</span>
                             <ArrowDown size={16} className="me-2 text-black" />
-                            <span className="font-bold text-black">10 KB</span>
+                            <span className="font-bold text-black">{intDownload.val.toFixed(2)} {intDownload.unit}</span>
                         </div>
                     </div>
                 </div>

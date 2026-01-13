@@ -28,9 +28,11 @@ const StatBox: React.FC<{
 
 export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, onManageDevices }) => {
   const { t } = useLanguage();
-  const { isLoggedIn } = useGlobalState();
+  const { isLoggedIn, globalData } = useGlobalState();
   const [isConnected, setIsConnected] = useState(false);
   const [isRoaming, setIsRoaming] = useState(false);
+  
+  const statusInfo = globalData.statusInfo;
 
   const handleInteraction = (action: () => void) => {
     if (!isLoggedIn) {
@@ -43,6 +45,42 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
   const handleConnectionToggle = () => handleInteraction(() => setIsConnected(!isConnected));
   const handleRoamingToggle = () => handleInteraction(() => setIsRoaming(!isRoaming));
   const handleManageDevicesClick = () => handleInteraction(() => onManageDevices());
+
+  // --- Format Data ---
+  
+  // Time Elapsed: Seconds to HH:MM:SS
+  const formatTime = (secondsStr: string) => {
+    if (!secondsStr) return "00:00:00";
+    const totalSeconds = parseInt(secondsStr, 10);
+    if (isNaN(totalSeconds)) return "00:00:00";
+
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    const pad = (num: number) => num.toString().padStart(2, '0');
+    return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  };
+
+  // Data Usage: Sum of 4 flows -> Fixed to 2 decimals + MB
+  const formatDataUsage = () => {
+    if (!statusInfo) return "0.00 MB";
+    const total = 
+      parseFloat(statusInfo.roam_dl_mon_flow || "0") + 
+      parseFloat(statusInfo.roam_ul_mon_flow || "0") + 
+      parseFloat(statusInfo.ul_mon_flow || "0") + 
+      parseFloat(statusInfo.dl_mon_flow || "0");
+    return `${total.toFixed(2)} MB`;
+  };
+
+  // Connected Devices Count
+  const getConnectedCount = () => {
+    if (!statusInfo || !statusInfo.dhcp_list_info) return "0";
+    if (Array.isArray(statusInfo.dhcp_list_info)) {
+        return statusInfo.dhcp_list_info.length.toString();
+    }
+    return "0";
+  };
 
   return (
     <div className="w-full">
@@ -63,28 +101,28 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
           <StatBox 
             icon={<Timer size={60} strokeWidth={1.5} />} 
             label={t('timeElapsed')} 
-            value="00:05:34" 
+            value={statusInfo ? formatTime(statusInfo.time_elapsed) : "00:00:00"} 
           />
           <StatBox 
             icon={<ArrowUpDown size={60} strokeWidth={1.5} />} 
             label={t('dataUsage')} 
-            value="50 MB" 
+            value={formatDataUsage()} 
           />
           <StatBox 
             icon={null} 
             topText="----" 
             label={t('network')} 
-            value={t('noNetwork')} 
+            value={statusInfo?.network_type_str || t('noNetwork')} 
           />
           <StatBox 
             icon={<Battery size={60} strokeWidth={1.5} className="rotate-0" />} 
             label={t('battery')} 
-            value="100 %" 
+            value={statusInfo ? `${statusInfo.battery_level} %` : "0 %"} 
           />
           <StatBox 
             icon={<TabletSmartphone size={60} strokeWidth={1.5} />} 
             label={t('connected')} 
-            value="8" 
+            value={getConnectedCount()} 
           />
       </div>
 
