@@ -41,10 +41,24 @@ const formatTraffic = (mbStr: string | undefined) => {
     return { val: mb, unit: 'MB' };
 };
 
+const getLimitInMb = (limit: string | undefined, unit: string | undefined) => {
+    if (!limit) return 0;
+    const val = parseFloat(limit);
+    if (isNaN(val)) return 0;
+    
+    if (unit === '1') {
+      return val * 1000;
+    } else if (unit === '2') {
+      return val * 1000000;
+    }
+    return val;
+  };
+
 export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
   const { t } = useLanguage();
   const { isLoggedIn, globalData } = useGlobalState();
   const info = globalData.statusInfo;
+  const flowLimitUnit = info?.flow_limit_unit;
 
   const handleAuthAction = (action: () => void) => {
     if (isLoggedIn) {
@@ -58,12 +72,15 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
   
   // National: dl_mon_flow + ul_mon_flow
   const natUsedMb = (parseFloat(info?.dl_mon_flow || '0') + parseFloat(info?.ul_mon_flow || '0'));
-  const natTotalMb = parseFloat(info?.nation_limit_size || '0');
+  const natTotalMb = getLimitInMb(info?.nation_limit_size, flowLimitUnit);
   const natFormatted = formatTraffic(natUsedMb.toString());
-  // Total needs to match the unit of used for the ring percentage logic, 
-  // but usually we display "Used" value. The Ring internal logic handles percentage.
-  // We pass `total` as raw MB to the donut if we wanted to normalize, but our Donut here takes separate value and total.
-  // To keep it simple for display: We pass the converted value to `value`, and we convert `total` to the SAME unit for percentage calc.
+  
+  // Convert total to display unit for the Donut component if we were displaying total text,
+  // but here we are using it for calculating percentage inside UsageDonut which uses `value` (in display unit).
+  // The UsageDonut calculates percentage = value / total * 100.
+  // `value` is passed as `natFormatted.val` (e.g., 2.5 GB).
+  // So `total` passed to UsageDonut MUST be converted to the same unit as `value` (GB).
+  
   let natTotalConverted = natTotalMb;
   if (natFormatted.unit === 'GB') natTotalConverted = natTotalMb / 1024;
   else if (natFormatted.unit === 'KB') natTotalConverted = natTotalMb * 1024;
@@ -71,7 +88,7 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
 
   // International: roam_dl_mon_flow + roam_ul_mon_flow
   const intUsedMb = (parseFloat(info?.roam_dl_mon_flow || '0') + parseFloat(info?.roam_ul_mon_flow || '0'));
-  const intTotalMb = parseFloat(info?.internation_limit_size || '0');
+  const intTotalMb = getLimitInMb(info?.internation_limit_size, flowLimitUnit);
   const intFormatted = formatTraffic(intUsedMb.toString());
   
   let intTotalConverted = intTotalMb;

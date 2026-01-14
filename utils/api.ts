@@ -49,6 +49,7 @@ export interface StatusInfoResponse {
   signal_lvl?: string; // Signal level (1-5)
   nation_limit_size?: string;
   internation_limit_size?: string;
+  flow_limit_unit?: string; // Unit for limits: '1' (*1000), '2' (*1000000)
 
   [key: string]: any;
 }

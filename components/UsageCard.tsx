@@ -36,21 +36,35 @@ const formatTraffic = (mbStr: string | undefined) => {
   return { val: mb, unit: 'MB' };
 };
 
+const getLimitInMb = (limit: string | undefined, unit: string | undefined) => {
+  if (!limit) return 0;
+  const val = parseFloat(limit);
+  if (isNaN(val)) return 0;
+  
+  if (unit === '1') {
+    return val * 1000;
+  } else if (unit === '2') {
+    return val * 1000000;
+  }
+  return val;
+};
+
 export const UsageCard: React.FC = () => {
   const { t } = useLanguage();
   const { globalData } = useGlobalState();
   const info = globalData.statusInfo;
+  const flowLimitUnit = info?.flow_limit_unit;
 
   // 1. National Data
   const natUsedMb = (parseFloat(info?.dl_mon_flow || '0') + parseFloat(info?.ul_mon_flow || '0'));
-  const natTotalMb = parseFloat(info?.nation_limit_size || '0');
+  const natTotalMb = getLimitInMb(info?.nation_limit_size, flowLimitUnit);
   
   const natFormatted = formatTraffic(natUsedMb.toString());
   const natPercentage = natTotalMb > 0 ? (natUsedMb / natTotalMb) * 100 : 0;
 
   // 2. International Data
   const intUsedMb = (parseFloat(info?.roam_dl_mon_flow || '0') + parseFloat(info?.roam_ul_mon_flow || '0'));
-  const intTotalMb = parseFloat(info?.internation_limit_size || '0');
+  const intTotalMb = getLimitInMb(info?.internation_limit_size, flowLimitUnit);
 
   const intFormatted = formatTraffic(intUsedMb.toString());
   const intPercentage = intTotalMb > 0 ? (intUsedMb / intTotalMb) * 100 : 0;
