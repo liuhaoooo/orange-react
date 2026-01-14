@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, ChevronDown, HelpCircle, Settings, LogOut, LogIn } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
@@ -27,10 +27,25 @@ const languageAllList: Language[] = [
 export const Header: React.FC<HeaderProps> = ({ onLogout, onLogin }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const { language, setLanguage, t } = useLanguage();
   const { isLoggedIn } = useGlobalState();
 
   const currentLang = languageAllList.find(l => l.value === language) || languageAllList.find(l => l.value === 'en');
+
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) => 
     `h-full flex items-center px-4 transition-colors font-bold text-sm ${
@@ -39,15 +54,21 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, onLogin }) => {
         : 'text-gray-400 hover:text-white hover:bg-white/5'
     }`;
 
+  // Dynamic classes based on scroll state
+  const headerHeightClass = isScrolled ? 'h-[50px]' : 'h-[80px]';
+  const logoBoxClass = isScrolled ? 'px-3' : 'px-5';
+  const logoTextClass = isScrolled ? 'text-lg' : 'text-2xl';
+  const logoTagClass = isScrolled ? 'text-[10px] p-0.5' : 'text-xs p-0.5 px-1';
+
   return (
-    <header className="bg-black text-white h-[60px] flex items-center px-0 relative z-30 shadow-md">
+    <header className={`fixed top-0 left-0 right-0 z-50 bg-black text-white flex items-center px-0 shadow-md transition-all duration-300 ${headerHeightClass}`}>
       {/* Logo Section */}
-      <div className="flex items-center h-full me-4 md:me-8">
-        <Link to="/" className="flex items-center h-full">
-            <div className="bg-orange h-full px-4 flex items-center justify-center font-bold text-xl me-4">
-            <span className="bg-white text-orange text-xs p-0.5 px-1 font-bold me-1">orange</span>
+      <div className="flex items-center h-full me-4 md:me-8 transition-all duration-300">
+        <Link to="/" className="flex items-center h-full group">
+            <div className={`bg-orange h-full flex items-center justify-center font-bold me-4 transition-all duration-300 ${logoBoxClass}`}>
+              <span className={`bg-white text-orange font-bold me-1 transition-all duration-300 ${logoTagClass}`}>orange</span>
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-white">Airbox2</h1>
+            <h1 className={`font-bold tracking-tight text-white transition-all duration-300 ${logoTextClass}`}>Airbox2</h1>
         </Link>
       </div>
 
