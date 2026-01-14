@@ -98,7 +98,7 @@ export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
       <div className="p-6 pt-4 bg-white mt-auto shrink-0">
         <Link 
             to="/messages"
-            className="inline-block bg-orange hover:bg-orange-dark text-black font-bold py-2 px-4 text-sm transition-colors"
+            className="inline-block bg-orange hover:bg-orange-dark text-black font-bold py-2 px-6 text-sm transition-colors rounded-none"
         >
           {t('viewMessages')}
         </Link>

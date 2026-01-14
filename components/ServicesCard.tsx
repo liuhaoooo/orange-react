@@ -64,7 +64,7 @@ export const ServicesCard: React.FC<ServicesCardProps> = ({ onOpenLogin, classNa
            <div className="mt-auto p-4">
               <Link 
                 to="/services"
-                className="inline-block bg-orange hover:bg-orange-dark text-black font-bold py-2 px-6 text-sm transition-colors"
+                className="inline-block bg-orange hover:bg-orange-dark text-black font-bold py-2 px-6 text-sm transition-colors rounded-none"
               >
                 {t('viewServices')}
               </Link>

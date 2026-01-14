@@ -78,7 +78,7 @@ export const UsageCard: React.FC = () => {
 
         {/* Button Area - Pushed to bottom */}
         <div className="mt-auto pt-6">
-             <Link to="/usage" className="inline-block bg-orange hover:bg-orange-dark text-black font-bold py-3 px-8 text-sm transition-colors rounded-none">
+             <Link to="/usage" className="inline-block bg-orange hover:bg-orange-dark text-black font-bold py-2 px-6 text-sm transition-colors rounded-none">
                 {t('viewUsage')}
              </Link>
         </div>
