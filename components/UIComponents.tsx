@@ -19,14 +19,14 @@ interface SquareSwitchProps {
 export const SquareSwitch: React.FC<SquareSwitchProps> = ({ isOn, onChange }) => {
   return (
     <div 
-      className="flex border border-gray-400 w-16 h-8 cursor-pointer select-none"
+      className={`flex border w-16 h-8 cursor-pointer select-none transition-colors ${isOn ? 'border-orange' : 'border-gray-300'}`}
       onClick={onChange}
     >
-      <div className={`flex-1 flex items-center justify-center transition-colors ${isOn ? 'bg-black text-white' : 'bg-white text-black'}`}>
-        {isOn && <Check size={18} strokeWidth={4} />}
+      <div className={`flex-1 flex items-center justify-center transition-colors ${isOn ? 'bg-orange text-black' : 'bg-white'}`}>
+        {isOn && <Check size={20} strokeWidth={3} />}
       </div>
-      <div className={`flex-1 flex items-center justify-center transition-colors ${!isOn ? 'bg-black text-white' : 'bg-white text-black'}`}>
-        {!isOn && <X size={18} strokeWidth={4} />}
+      <div className={`flex-1 flex items-center justify-center transition-colors ${!isOn ? 'bg-gray-100 text-gray-400' : 'bg-white'}`}>
+        {!isOn && <X size={20} strokeWidth={3} />}
       </div>
     </div>
   );
