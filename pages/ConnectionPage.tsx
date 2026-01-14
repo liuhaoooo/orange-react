@@ -17,8 +17,9 @@ const StatBox: React.FC<{
   topText?: string 
 }> = ({ icon, label, value, topText }) => (
   <div className="bg-white border border-gray-200 p-6 flex flex-col items-center justify-center text-center h-[200px] shadow-sm">
-    <div className="text-orange mb-4 flex flex-col items-center">
-        {topText && <div className="text-orange font-bold text-sm leading-none mb-1">{topText}</div>}
+    {/* Fixed height container (h-[60px]) to match large icon size and ensure alignment across grid */}
+    <div className="text-orange mb-4 h-[60px] w-full flex flex-col items-center justify-center">
+        {topText && <div className="text-orange font-bold text-sm leading-none">{topText}</div>}
         {icon}
     </div>
     <div className="text-base text-gray-800 leading-tight mb-2">{label}</div>

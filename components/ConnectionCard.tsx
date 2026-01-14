@@ -18,8 +18,9 @@ const StatItem: React.FC<{
   topText?: string 
 }> = ({ icon, label, value, topText }) => (
   <div className="flex flex-col items-center justify-start text-center h-full min-w-[70px]">
-    <div className="text-orange mb-2">
-        {topText && <div className="text-orange font-bold text-sm leading-none mb-1">{topText}</div>}
+    {/* Fixed height container (h-10 = 40px) to match icon size and ensure alignment */}
+    <div className="text-orange mb-2 h-10 w-full flex flex-col items-center justify-center">
+        {topText && <div className="text-orange font-bold text-sm leading-none">{topText}</div>}
         {icon}
     </div>
     <div className="text-sm text-black leading-tight mb-1">{label}</div>
