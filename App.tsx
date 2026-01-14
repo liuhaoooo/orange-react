@@ -80,8 +80,8 @@ function AppContent() {
       <div className="min-h-screen flex flex-col font-sans bg-[#e5e5e5]">
         <Header onLogout={handleLogout} onLogin={openLoginModal} />
         
-        {/* Added padding-top (pt-[100px]) to compensate for the fixed header + spacing */}
-        <main className="w-full max-w-[1200px] mx-auto p-4 md:p-6 pt-[100px]" dir="ltr">
+        {/* Increased padding-top to pt-[120px] for better spacing below fixed header */}
+        <main className="w-full max-w-[1200px] mx-auto p-4 md:p-6 pt-[120px]" dir="ltr">
           <Routes>
             {/* Main Dashboard Route */}
             <Route 
