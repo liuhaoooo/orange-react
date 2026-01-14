@@ -28,6 +28,14 @@ export interface StatusInfoResponse {
     flow: string;
     ipv6: string;
   }> | string; // API might return empty string if no list
+  
+  offline_history_list_info?: Array<{
+    mac: string;
+    ip: string;
+    hostname: string;
+    [key: string]: any;
+  }> | string;
+
   network_type_str: string;
   flightMode: string;
   roamingEnable: string;
