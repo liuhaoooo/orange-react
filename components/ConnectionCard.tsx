@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Card, CardHeader, SquareSwitch } from './UIComponents';
+import { Card, CardHeader, SquareSwitch, SignalStrengthIcon } from './UIComponents';
 import { Timer, ArrowUpDown, Battery, TabletSmartphone } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
@@ -122,6 +122,8 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
     return "0";
   };
 
+  const signalLevel = parseInt(statusInfo?.signal_lvl || '0', 10);
+
   return (
     <Card className="h-full">
       <CardHeader title={t('connection')} />
@@ -139,8 +141,7 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
             value={formatDataUsage()} 
           />
           <StatItem 
-            icon={null} 
-            topText="----"
+            icon={<SignalStrengthIcon level={signalLevel} className="h-full w-12" />} 
             label={t('network')} 
             value={statusInfo?.network_type_str || t('noNetwork')} 
           />

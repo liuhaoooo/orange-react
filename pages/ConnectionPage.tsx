@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Settings, Timer, ArrowUpDown, Battery, TabletSmartphone, Link as LinkIcon, Globe, Monitor, Smartphone } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
-import { SquareSwitch, Card } from '../components/UIComponents';
+import { SquareSwitch, Card, SignalStrengthIcon } from '../components/UIComponents';
 
 interface ConnectionPageProps {
   onOpenSettings: () => void;
@@ -118,6 +118,8 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
     return "0";
   };
 
+  const signalLevel = parseInt(statusInfo?.signal_lvl || '0', 10);
+
   return (
     <div className="w-full">
       {/* Header Row */}
@@ -145,8 +147,7 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
             value={formatDataUsage()} 
           />
           <StatBox 
-            icon={null} 
-            topText="----" 
+            icon={<SignalStrengthIcon level={signalLevel} className="h-full w-16" barWidth="w-2" />} 
             label={t('network')} 
             value={statusInfo?.network_type_str || t('noNetwork')} 
           />

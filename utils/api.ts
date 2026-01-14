@@ -38,6 +38,7 @@ export interface StatusInfoResponse {
   lock_puk_flag: string;
   lock_pin_flag: string;
   sim_status: string;
+  signal_lvl?: string; // Signal level (1-5)
   nation_limit_size?: string;
   internation_limit_size?: string;
 

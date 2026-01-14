@@ -37,3 +37,17 @@ export const Card: React.FC<{ children: React.ReactNode; className?: string }> =
     {children}
   </div>
 );
+
+export const SignalStrengthIcon: React.FC<{ level: number, className?: string, barWidth?: string }> = ({ level, className = "h-8 w-10", barWidth = "w-1.5" }) => {
+  return (
+    <div className={`flex items-end justify-center space-x-1 ${className}`}>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <div
+          key={i}
+          className={`${barWidth} ${i <= level ? 'bg-orange' : 'bg-gray-300'}`}
+          style={{ height: `${i * 20}%` }}
+        />
+      ))}
+    </div>
+  );
+};
