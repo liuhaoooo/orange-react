@@ -32,6 +32,15 @@ export interface StatusInfoResponse {
   flightMode: string;
   roamingEnable: string;
   dialMode: string;
+  
+  // Added for status logic
+  network_status: string;
+  lock_puk_flag: string;
+  lock_pin_flag: string;
+  sim_status: string;
+  nation_limit_size?: string;
+  internation_limit_size?: string;
+
   [key: string]: any;
 }
 
@@ -108,6 +117,17 @@ export const login = async (username: string, password: string): Promise<{ succe
       sessionId: currentSessionId, // Send current session ID if exists
       isSingleLogin: '1'
     };
+
+    const loginPayload2 = {
+        cmd: 100,
+        method: 'POST',
+        username: username,
+        passwd: hashedPassword,
+        token: loginToken,
+        isAutoUpgrade: '0',
+        sessionId: currentSessionId, // Send current session ID if exists
+        isSingleLogin: '1'
+      };
 
     const loginRes = await fetch(API_BASE_URL, {
       method: 'POST',

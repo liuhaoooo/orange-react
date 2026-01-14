@@ -50,6 +50,41 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
     setIsRoaming(!isRoaming);
   };
 
+  // --- Logic for status texts ---
+
+  const getConnectionBoldText = () => {
+    if (statusInfo?.network_status === "1") return t('connected');
+    return t('notConnected');
+  };
+
+  const getConnectionSmallText = () => {
+    if (!statusInfo) return `${t('dataIs')} ${isConnected ? t('on') : t('off')}`;
+    
+    if (statusInfo.flightMode === "1") return t('flightModeOn');
+    if (statusInfo.lock_puk_flag === "1") return t('pukCodeRequired');
+    if (statusInfo.lock_pin_flag === "1") return t('pinCodeRequired');
+    if (statusInfo.sim_status !== "1") return t('noSimAvailable');
+    if (statusInfo.wan_network_status !== "1" && !statusInfo.network_type_str) return t('noAvailableNetwork');
+    if (!statusInfo.network_type_str) return t('noInternetConnection');
+    
+    // Fallback based on switch
+    return `${t('dataIs')} ${isConnected ? t('on') : t('off')}`;
+  };
+
+  const getRoamingSmallText = () => {
+    if (!statusInfo) return `${t('roamingIs')} ${isRoaming ? t('on') : t('off')}`;
+    
+    if (statusInfo.flightMode === "1") return t('flightModeOn');
+    if (statusInfo.lock_puk_flag === "1") return t('pukCodeRequired');
+    if (statusInfo.lock_pin_flag === "1") return t('pinCodeRequired');
+    if (statusInfo.sim_status !== "1") return t('noSimAvailable');
+    if (statusInfo.wan_network_status !== "1" && !statusInfo.network_type_str) return t('noAvailableNetwork');
+    if (!statusInfo.network_type_str) return t('noInternetConnection');
+
+    // Fallback based on switch
+    return `${t('roamingIs')} ${isRoaming ? t('on') : t('off')}`;
+  };
+
   // --- Format Data ---
   
   // Time Elapsed: Seconds to HH:MM:SS
@@ -126,9 +161,9 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
         {/* Connection Toggle */}
         <div className="flex justify-between items-center py-4 border-b border-gray-200">
           <div className="flex flex-col items-start">
-             <span className="font-bold text-black text-sm">{isConnected ? t('connected') : t('notConnected')}</span>
-             <span className={`text-xs ${!isConnected ? 'text-orange' : 'text-gray-500'}`}>
-                {isConnected ? `${t('dataIs')} ${t('on')}` : t('pinCodeRequired')}
+             <span className="font-bold text-black text-sm">{getConnectionBoldText()}</span>
+             <span className={`text-xs ${getConnectionSmallText().includes(t('on')) ? 'text-gray-500' : 'text-orange'}`}>
+                {getConnectionSmallText()}
              </span>
           </div>
           <SquareSwitch isOn={isConnected} onChange={handleConnectionToggle} />
@@ -138,7 +173,7 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
         <div className="flex justify-between items-center py-4 border-b border-gray-200">
           <div className="flex flex-col items-start">
              <span className="font-bold text-black text-sm">{t('roaming')}</span>
-             <span className="text-xs text-black">{isRoaming ? `${t('roamingIs')} ${t('on')}` : t('roamingOff')}</span>
+             <span className="text-xs text-black">{getRoamingSmallText()}</span>
           </div>
           <SquareSwitch isOn={isRoaming} onChange={handleRoamingToggle} />
         </div>
