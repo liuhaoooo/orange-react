@@ -8,6 +8,7 @@ export default defineConfig({
   server: {
     // Enable host to be accessible from network if needed
     host: '0.0.0.0', 
+    port: 2026,
     proxy: {
       // Intercept requests starting with /cgi-bin
       '/cgi-bin': {
