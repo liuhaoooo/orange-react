@@ -15,11 +15,24 @@ interface WifiCardProps {
 }
 
 const initialNetworks: WifiNetwork[] = [
-  { id: '1', name: 'Flybox-KAV1', frequency: '2.4GHz', clients: 3, hasQr: true, enabled: true },
-  { id: '2', name: '!OFlybox-liuhao-test-5G', frequency: '5GHz', clients: 2, hasQr: true, enabled: true },
-  { id: '3', name: 'Flybox-KAV1-GUEST', frequency: '2.4GHz', clients: 0, hasQr: true, enabled: false, isGuest: true },
-  { id: '4', name: 'Flybox-KAV1-GUEST-5G', frequency: '5GHz', clients: 0, hasQr: true, enabled: false, isGuest: true },
+  { id: '1', name: 'Orange Airbox3', frequency: '2.4GHz', clients: 20, hasQr: true, enabled: true, has24: true, has5: true },
+  { id: '2', name: 'Orange Airbox55', frequency: '5GHz', clients: 5, hasQr: true, enabled: true, has24: false, has5: true },
+  { id: '3', name: 'Orange Airbox87469', frequency: '2.4GHz', clients: 5, hasQr: true, enabled: true, has24: true, has5: false },
 ];
+
+const FreqCheckbox = ({ label, checked }: { label: string, checked: boolean }) => (
+  <div className="flex items-center me-3">
+      <div className={`w-4 h-4 border flex items-center justify-center me-1.5 ${checked ? 'border-gray-400 bg-gray-100' : 'border-gray-300 bg-white'}`}>
+         {checked && (
+             <div 
+                className="w-2.5 h-2.5 bg-gray-500" 
+                style={{ clipPath: 'polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%)' }}
+             />
+         )}
+      </div>
+      <span className={`text-xs font-bold ${checked ? 'text-gray-500' : 'text-gray-300'}`}>{label}</span>
+  </div>
+);
 
 export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin, onEditSsid }) => {
   const [networks, setNetworks] = useState<WifiNetwork[]>(initialNetworks);
@@ -74,12 +87,15 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
                   </div>
                 </div>
 
-                {/* Info - Static display */}
+                {/* Info */}
                 <div className="flex-1 min-w-0 pe-2">
                   <div className="font-bold text-sm truncate text-black text-start">
                       {net.name}
                   </div>
-                  <div className="text-xs text-black text-start">{net.frequency}</div>
+                  <div className="flex items-center mt-1">
+                      <FreqCheckbox label="2.4 GHz" checked={!!net.has24} />
+                      <FreqCheckbox label="5 GHz" checked={!!net.has5} />
+                  </div>
                 </div>
 
                 {/* Actions */}

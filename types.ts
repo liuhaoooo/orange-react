@@ -1,3 +1,4 @@
+
 export interface WifiNetwork {
   id: string;
   name: string;
@@ -6,6 +7,8 @@ export interface WifiNetwork {
   hasQr: boolean;
   enabled: boolean;
   isGuest?: boolean;
+  has24?: boolean;
+  has5?: boolean;
 }
 
 export interface UsageData {
