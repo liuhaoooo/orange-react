@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Check, X } from 'lucide-react';
+import { Check, X, Battery, BatteryWarning, BatteryCharging, Zap } from 'lucide-react';
 
 export const CardHeader: React.FC<{ title: string; extraIcons?: React.ReactNode }> = ({ title, extraIcons }) => (
   <div className="bg-black text-white px-4 py-3 flex justify-between items-center shrink-0">
@@ -50,4 +50,30 @@ export const SignalStrengthIcon: React.FC<{ level: number, className?: string, b
       ))}
     </div>
   );
+};
+
+export const BatteryStatusIcon: React.FC<{ 
+  status: string; 
+  chargeStatus: string; 
+  level: string; 
+  size?: number;
+  className?: string;
+}> = ({ status, chargeStatus, level, size = 40, className = "" }) => {
+  // 1. battery_status != '1' -> No Battery
+  if (status !== '1') {
+    return <BatteryWarning size={size} strokeWidth={1.5} className={`text-red-500 ${className}`} />;
+  }
+
+  // 2. battery_charge_status == '2' -> Fast Charging
+  if (chargeStatus === '2') {
+    return <Zap size={size} strokeWidth={1.5} className={`fill-orange text-orange ${className}`} />;
+  }
+
+  // 3. battery_charge_status == '1' -> Normal Charging
+  if (chargeStatus === '1') {
+    return <BatteryCharging size={size} strokeWidth={1.5} className={className} />;
+  }
+
+  // 4. Normal Battery
+  return <Battery size={size} strokeWidth={1.5} className={className} />;
 };

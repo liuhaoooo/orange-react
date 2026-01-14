@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
-import { Settings, Timer, ArrowUpDown, Battery, TabletSmartphone, Link as LinkIcon, Globe, Monitor, Smartphone } from 'lucide-react';
+import { Settings, Timer, ArrowUpDown, TabletSmartphone, Link as LinkIcon, Globe, Monitor, Smartphone } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
-import { SquareSwitch, Card, SignalStrengthIcon } from '../components/UIComponents';
+import { SquareSwitch, Card, SignalStrengthIcon, BatteryStatusIcon } from '../components/UIComponents';
 
 interface ConnectionPageProps {
   onOpenSettings: () => void;
@@ -120,6 +120,13 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
 
   const signalLevel = parseInt(statusInfo?.signal_lvl || '0', 10);
 
+  // Battery Display Value logic
+  const getBatteryValue = () => {
+    if (!statusInfo) return "0 %";
+    if (statusInfo.battery_status !== '1') return "--";
+    return `${statusInfo.battery_level} %`;
+  };
+
   return (
     <div className="w-full">
       {/* Header Row */}
@@ -152,9 +159,16 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
             value={statusInfo?.network_type_str || t('noNetwork')} 
           />
           <StatBox 
-            icon={<Battery size={60} strokeWidth={1.5} className="rotate-0" />} 
+            icon={
+                <BatteryStatusIcon 
+                    status={statusInfo?.battery_status || '0'}
+                    chargeStatus={statusInfo?.battery_charge_status || '0'}
+                    level={statusInfo?.battery_level || '0'}
+                    size={60}
+                />
+            } 
             label={t('battery')} 
-            value={statusInfo ? `${statusInfo.battery_level} %` : "0 %"} 
+            value={getBatteryValue()} 
           />
           <StatBox 
             icon={<TabletSmartphone size={60} strokeWidth={1.5} />} 
