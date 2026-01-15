@@ -80,8 +80,8 @@ function AppContent() {
       <div className="min-h-screen flex flex-col font-sans bg-[#e5e5e5]">
         <Header onLogout={handleLogout} onLogin={openLoginModal} />
         
-        {/* Updated padding-top to pt-[7rem] as requested */}
-        <main className="w-full max-w-[1200px] mx-auto p-4 md:p-6 pt-[7rem] relative z-0" dir="ltr">
+        {/* Increased padding-top to pt-[160px] to ensure header does not overlap card titles */}
+        <main className="w-full max-w-[1200px] mx-auto p-4 md:p-6 pt-[160px] relative z-0" dir="ltr">
           <Routes>
             {/* Main Dashboard Route */}
             <Route 
