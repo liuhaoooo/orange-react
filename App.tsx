@@ -80,8 +80,10 @@ function AppContent() {
       <div className="min-h-screen flex flex-col font-sans bg-[#e5e5e5]">
         <Header onLogout={handleLogout} onLogin={openLoginModal} />
         
-        {/* Increased padding-top to pt-[120px] for better spacing below fixed header */}
-        <main className="w-full max-w-[1200px] mx-auto p-4 md:p-6 pt-[120px]" dir="ltr">
+        {/* Significantly increased top padding to ensure no overlap with fixed header. 
+            Header is 80px initially. pt-[160px] gives 80px buffer. 
+        */}
+        <main className="w-full max-w-[1200px] mx-auto p-4 md:p-6 pt-[160px] relative z-0" dir="ltr">
           <Routes>
             {/* Main Dashboard Route */}
             <Route 
