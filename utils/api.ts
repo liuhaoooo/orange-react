@@ -73,16 +73,16 @@ export interface ConnectionSettingsResponse {
 // Session Management
 export const setSessionId = (sid: string) => {
   if (sid) {
-    localStorage.setItem('sessionId', sid);
+    sessionStorage.setItem('sessionId', sid);
   }
 };
 
 export const getSessionId = (): string => {
-  return localStorage.getItem('sessionId') || '';
+  return sessionStorage.getItem('sessionId') || '';
 };
 
 export const clearSessionId = () => {
-  localStorage.removeItem('sessionId');
+  sessionStorage.removeItem('sessionId');
 };
 
 /**

@@ -13,7 +13,7 @@ interface GlobalStateContextType {
 const GlobalStateContext = createContext<GlobalStateContextType | undefined>(undefined);
 
 export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Initialize based on existence of session ID in local storage
+  // Initialize based on existence of session ID in session storage
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => !!getSessionId());
   const [globalData, setGlobalData] = useState<Record<string, any>>({});
 
@@ -22,7 +22,7 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
   }, []);
 
   const checkSession = useCallback(async () => {
-    // 1. Check local storage
+    // 1. Check session storage
     if (!getSessionId()) {
       if (isLoggedIn) setIsLoggedIn(false);
       return false;
