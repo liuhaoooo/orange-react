@@ -190,7 +190,7 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
                    </div>
                    <div className="flex flex-col items-start">
                         <span className="font-bold text-black text-lg mb-1">{getConnectionBoldText()}</span>
-                        <span className={`text-sm ${getConnectionSmallText().includes(t('on')) ? 'text-gray-500' : 'text-orange'}`}>
+                        <span className="text-sm text-gray-500">
                             {getConnectionSmallText()}
                         </span>
                     </div>

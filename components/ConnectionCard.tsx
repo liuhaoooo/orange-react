@@ -178,7 +178,7 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
         <div className="flex justify-between items-center py-5 border-b border-gray-200">
           <div className="flex flex-col items-start">
              <span className="font-bold text-black text-base">{getConnectionBoldText()}</span>
-             <span className={`text-sm ${getConnectionSmallText().includes(t('on')) ? 'text-gray-500' : 'text-orange'}`}>
+             <span className="text-sm text-gray-500">
                 {getConnectionSmallText()}
              </span>
           </div>

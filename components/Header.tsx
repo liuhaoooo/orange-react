@@ -92,7 +92,8 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, onLogin }) => {
                   className="flex items-center space-x-1 cursor-pointer text-sm font-bold text-gray-300 hover:text-white"
                   onClick={() => setIsLangOpen(!isLangOpen)}
               >
-                  <span>{currentLang?.value.toUpperCase()}</span>
+                  {/* Changed from currentLang?.value.toUpperCase() to currentLang?.name */}
+                  <span>{currentLang?.name}</span>
                   <ChevronDown size={12} />
               </div>
               {isLangOpen && (
