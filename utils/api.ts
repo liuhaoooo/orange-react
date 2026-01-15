@@ -70,7 +70,7 @@ export interface ConnectionSettingsResponse {
     [key: string]: any;
 }
 
-// Session Management
+// Session Management (Using sessionStorage as requested)
 export const setSessionId = (sid: string) => {
   if (sid) {
     sessionStorage.setItem('sessionId', sid);
@@ -307,14 +307,15 @@ export const logout = async (): Promise<boolean> => {
 /**
  * Check authentication status (Heartbeat)
  * CMD: 104
- * Returns true if authenticated, false if NO_AUTH
+ * Returns true if authenticated, false if NO_AUTH is returned.
  */
 export const checkAuthStatus = async (): Promise<boolean> => {
   try {
     const response = await apiRequest(104, 'GET');
     
-    // Check for specific failure condition: { "success": false, "cmd": 104, "message": "NO_AUTH" }
-    if (response.success === false && response.message === 'NO_AUTH') {
+    // Check specifically for NO_AUTH message regardless of success flag
+    // This indicates the session has expired on the server side
+    if (response.message === 'NO_AUTH') {
       return false;
     }
     return true;

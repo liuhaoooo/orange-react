@@ -22,19 +22,20 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
   }, []);
 
   const checkSession = useCallback(async () => {
-    // 1. Check session storage
+    // 1. Check session storage (client side)
     if (!getSessionId()) {
       if (isLoggedIn) setIsLoggedIn(false);
       return false;
     }
 
-    // 2. Check server status
-    // Note: checkAuthStatus returns false if response is NO_AUTH
+    // 2. Check server status (CMD 104)
+    // If server returns NO_AUTH, checkAuthStatus returns false
     const isValid = await checkAuthStatus();
     
     if (!isValid) {
-      clearSessionId();
-      setIsLoggedIn(false);
+      // Session expired or kicked by server
+      clearSessionId(); // Requirement: Clear sessionStorage
+      setIsLoggedIn(false); // Requirement: Pop up login modal (handled by App.tsx observing this state)
       return false;
     }
     
