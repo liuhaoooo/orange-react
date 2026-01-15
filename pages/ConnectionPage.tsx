@@ -206,7 +206,8 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
                    </div>
                    <div className="flex flex-col items-start">
                         <span className="font-bold text-black text-lg mb-1">{t('roaming')}</span>
-                        <span className="text-sm text-black">{getRoamingSmallText()}</span>
+                        {/* Changed text-black to text-gray-500 */}
+                        <span className="text-sm text-gray-500">{getRoamingSmallText()}</span>
                     </div>
                 </div>
                 <SquareSwitch isOn={isRoaming} onChange={handleRoamingToggle} />
