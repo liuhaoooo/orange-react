@@ -80,8 +80,8 @@ function AppContent() {
       <div className="min-h-screen flex flex-col font-sans bg-[#e5e5e5]">
         <Header onLogout={handleLogout} onLogin={openLoginModal} />
         
-        {/* Updated padding-top to pt-[120px] as requested */}
-        <main className="w-full max-w-[1200px] mx-auto p-4 md:p-6 pt-[120px] relative z-0" dir="ltr">
+        {/* Added md:pt-[120px] to override md:p-6 specific padding-top */}
+        <main className="w-full max-w-[1200px] mx-auto p-4 md:p-6 pt-[120px] md:pt-[120px] relative z-0" dir="ltr">
           <Routes>
             {/* Main Dashboard Route */}
             <Route 
