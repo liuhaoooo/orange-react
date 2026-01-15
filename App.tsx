@@ -80,8 +80,8 @@ function AppContent() {
       <div className="min-h-screen flex flex-col font-sans bg-[#e5e5e5]">
         <Header onLogout={handleLogout} onLogin={openLoginModal} />
         
-        {/* Added md:pt-[120px] to override md:p-6 specific padding-top */}
-        <main className="w-full max-w-[1200px] mx-auto p-4 md:p-6 pt-[120px] md:pt-[120px] relative z-0" dir="ltr">
+        {/* Added flex-grow to main to push footer to bottom if content is short */}
+        <main className="w-full max-w-[1200px] mx-auto p-4 md:p-6 pt-[120px] md:pt-[120px] relative z-0 flex-grow" dir="ltr">
           <Routes>
             {/* Main Dashboard Route */}
             <Route 
@@ -152,6 +152,15 @@ function AppContent() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
+
+        {/* Footer Section */}
+        <footer className="w-full bg-black py-6 mt-auto shrink-0 z-10">
+            <div className="text-center">
+                <span className="text-white font-bold text-sm">
+                    &copy; <span className="text-orange">Orange</span> 2026
+                </span>
+            </div>
+        </footer>
 
         <LoginModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />
         <ConnectedDevicesModal isOpen={isDevicesModalOpen} onClose={closeDevicesModal} filterSsid={devicesFilter} />
