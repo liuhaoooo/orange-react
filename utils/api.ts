@@ -55,7 +55,7 @@ export interface StatusInfoResponse {
 }
 
 /**
- * Connection Settings (CMD 1020)
+ * Connection Settings (CMD 585)
  */
 export interface ConnectionSettingsResponse {
     networkMode: string;
@@ -326,10 +326,10 @@ export const checkAuthStatus = async (): Promise<boolean> => {
 
 /**
  * Get Connection Settings
- * CMD: 1020
+ * CMD: 585
  */
 export const fetchConnectionSettings = async (): Promise<ConnectionSettingsResponse> => {
-  return apiRequest<ConnectionSettingsResponse>(1020, 'GET');
+  return apiRequest<ConnectionSettingsResponse>(585, 'GET');
 };
 
 /**

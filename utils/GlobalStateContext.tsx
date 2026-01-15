@@ -43,7 +43,7 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
     return true;
   }, [isLoggedIn]);
 
-  // Effect 1: Fetch Connection Settings (CMD 1020) - Once on mount and whenever login status changes
+  // Effect 1: Fetch Connection Settings (CMD 585) - Once on mount and whenever login status changes
   useEffect(() => {
     const fetchSettings = async () => {
       try {
