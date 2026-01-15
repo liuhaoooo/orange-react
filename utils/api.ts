@@ -144,17 +144,6 @@ export const login = async (username: string, password: string): Promise<{ succe
       isSingleLogin: '1'
     };
 
-    const loginPayload2 = {
-        cmd: 100,
-        method: 'POST',
-        username: username,
-        passwd: hashedPassword,
-        token: loginToken,
-        isAutoUpgrade: '0',
-        sessionId: currentSessionId, // Send current session ID if exists
-        isSingleLogin: '1'
-      };
-
     const loginRes = await fetch(API_BASE_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -348,4 +337,20 @@ export const fetchConnectionSettings = async (): Promise<ConnectionSettingsRespo
  */
 export const updateConnectionSettings = async (data: Partial<ConnectionSettingsResponse>): Promise<ApiResponse> => {
   return apiRequest(1020, 'POST', data);
+};
+
+/**
+ * Set Dial Mode (Data Switch)
+ * CMD: 222
+ */
+export const setDialMode = async (dialMode: '0' | '1'): Promise<ApiResponse> => {
+  return apiRequest(222, 'POST', { dialMode });
+};
+
+/**
+ * Set Roaming Enable
+ * CMD: 220
+ */
+export const setRoamingEnable = async (roamingEnable: '0' | '1'): Promise<ApiResponse> => {
+  return apiRequest(220, 'POST', { roamingEnable });
 };

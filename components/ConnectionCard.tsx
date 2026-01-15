@@ -1,11 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardHeader, SquareSwitch, SignalStrengthIcon, BatteryStatusIcon } from './UIComponents';
 import { Timer, ArrowUpDown, TabletSmartphone } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { Link } from 'react-router-dom';
-import { updateConnectionSettings } from '../utils/api';
+import { setDialMode, setRoamingEnable, fetchConnectionSettings } from '../utils/api';
 
 interface ConnectionCardProps {
   onOpenSettings: () => void;
@@ -35,6 +35,9 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
   const statusInfo = globalData.statusInfo;
   const connectionSettings = globalData.connectionSettings;
 
+  const [isConnLoading, setIsConnLoading] = useState(false);
+  const [isRoamLoading, setIsRoamLoading] = useState(false);
+
   // Determine switch state from CMD 1020 data
   // '1' = ON, '0' = OFF. Default to false if data not loaded.
   const isConnected = connectionSettings?.dialMode === '1';
@@ -46,18 +49,30 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
       return;
     }
     
+    setIsConnLoading(true);
     const newVal = isConnected ? '0' : '1';
     
-    // Optimistic Update
-    if (connectionSettings) {
-        updateGlobalData('connectionSettings', { ...connectionSettings, dialMode: newVal });
-    }
-
     try {
-        await updateConnectionSettings({ dialMode: newVal });
+        // Send CMD 222
+        const res = await setDialMode(newVal);
+        
+        if (res.success) {
+             // Optimistically update global state so UI reflects change
+             if (connectionSettings) {
+                updateGlobalData('connectionSettings', { ...connectionSettings, dialMode: newVal });
+             }
+             // Refresh data to be sure
+             fetchConnectionSettings().then(data => {
+                // If the response is the object itself (based on api.ts implementation)
+                if(data && data.dialMode) {
+                    updateGlobalData('connectionSettings', data);
+                }
+             });
+        }
     } catch (e) {
         console.error("Failed to update dialMode", e);
-        // Revert on error if needed (not implemented for simplicity)
+    } finally {
+        setIsConnLoading(false);
     }
   };
 
@@ -67,17 +82,29 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
       return;
     }
 
+    setIsRoamLoading(true);
     const newVal = isRoaming ? '0' : '1';
 
-    // Optimistic Update
-    if (connectionSettings) {
-        updateGlobalData('connectionSettings', { ...connectionSettings, roamingEnable: newVal });
-    }
-
     try {
-        await updateConnectionSettings({ roamingEnable: newVal });
+        // Send CMD 220
+        const res = await setRoamingEnable(newVal);
+        
+        if (res.success) {
+            // Optimistically update
+            if (connectionSettings) {
+                updateGlobalData('connectionSettings', { ...connectionSettings, roamingEnable: newVal });
+            }
+             // Refresh data to be sure
+             fetchConnectionSettings().then(data => {
+                if(data && data.roamingEnable) {
+                    updateGlobalData('connectionSettings', data);
+                }
+             });
+        }
     } catch (e) {
         console.error("Failed to update roamingEnable", e);
+    } finally {
+        setIsRoamLoading(false);
     }
   };
 
@@ -212,7 +239,11 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
                 {getConnectionSmallText()}
              </span>
           </div>
-          <SquareSwitch isOn={isConnected} onChange={handleConnectionToggle} />
+          <SquareSwitch 
+            isOn={isConnected} 
+            onChange={handleConnectionToggle} 
+            isLoading={isConnLoading}
+          />
         </div>
 
         {/* Roaming Toggle */}
@@ -222,7 +253,11 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
              {/* Changed text-black to text-gray-500 */}
              <span className="text-sm text-gray-500">{getRoamingSmallText()}</span>
           </div>
-          <SquareSwitch isOn={isRoaming} onChange={handleRoamingToggle} />
+          <SquareSwitch 
+            isOn={isRoaming} 
+            onChange={handleRoamingToggle}
+            isLoading={isRoamLoading} 
+          />
         </div>
 
         {/* Action Button */}

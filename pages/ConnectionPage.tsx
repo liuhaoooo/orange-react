@@ -1,10 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Settings, Timer, ArrowUpDown, TabletSmartphone, Link as LinkIcon, Globe, Monitor, Smartphone } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { SquareSwitch, Card, SignalStrengthIcon, BatteryStatusIcon } from '../components/UIComponents';
-import { updateConnectionSettings } from '../utils/api';
+import { setDialMode, setRoamingEnable, fetchConnectionSettings } from '../utils/api';
 
 interface ConnectionPageProps {
   onOpenSettings: () => void;
@@ -35,6 +35,9 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
   const statusInfo = globalData.statusInfo;
   const connectionSettings = globalData.connectionSettings;
 
+  const [isConnLoading, setIsConnLoading] = useState(false);
+  const [isRoamLoading, setIsRoamLoading] = useState(false);
+
   // Determine switch state from CMD 1020 data
   const isConnected = connectionSettings?.dialMode === '1';
   const isRoaming = connectionSettings?.roamingEnable === '1';
@@ -48,32 +51,52 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
   };
 
   const handleConnectionToggle = () => handleInteraction(async () => {
+    setIsConnLoading(true);
     const newVal = isConnected ? '0' : '1';
     
-    // Optimistic Update
-    if (connectionSettings) {
-        updateGlobalData('connectionSettings', { ...connectionSettings, dialMode: newVal });
-    }
-
     try {
-        await updateConnectionSettings({ dialMode: newVal });
+        const res = await setDialMode(newVal);
+        if (res.success) {
+            // Optimistic Update
+            if (connectionSettings) {
+                updateGlobalData('connectionSettings', { ...connectionSettings, dialMode: newVal });
+            }
+             // Refresh data to be sure
+             fetchConnectionSettings().then(data => {
+                if(data && data.dialMode) {
+                    updateGlobalData('connectionSettings', data);
+                }
+             });
+        }
     } catch (e) {
         console.error("Failed to update dialMode", e);
+    } finally {
+        setIsConnLoading(false);
     }
   });
 
   const handleRoamingToggle = () => handleInteraction(async () => {
+    setIsRoamLoading(true);
     const newVal = isRoaming ? '0' : '1';
 
-    // Optimistic Update
-    if (connectionSettings) {
-        updateGlobalData('connectionSettings', { ...connectionSettings, roamingEnable: newVal });
-    }
-
     try {
-        await updateConnectionSettings({ roamingEnable: newVal });
+        const res = await setRoamingEnable(newVal);
+        if (res.success) {
+            // Optimistic Update
+            if (connectionSettings) {
+                updateGlobalData('connectionSettings', { ...connectionSettings, roamingEnable: newVal });
+            }
+             // Refresh data to be sure
+             fetchConnectionSettings().then(data => {
+                if(data && data.roamingEnable) {
+                    updateGlobalData('connectionSettings', data);
+                }
+             });
+        }
     } catch (e) {
         console.error("Failed to update roamingEnable", e);
+    } finally {
+        setIsRoamLoading(false);
     }
   });
 
@@ -227,7 +250,11 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
                         </span>
                     </div>
                 </div>
-                <SquareSwitch isOn={isConnected} onChange={handleConnectionToggle} />
+                <SquareSwitch 
+                    isOn={isConnected} 
+                    onChange={handleConnectionToggle} 
+                    isLoading={isConnLoading}
+                />
             </div>
 
             {/* Roaming Row */}
@@ -242,7 +269,11 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
                         <span className="text-sm text-gray-500">{getRoamingSmallText()}</span>
                     </div>
                 </div>
-                <SquareSwitch isOn={isRoaming} onChange={handleRoamingToggle} />
+                <SquareSwitch 
+                    isOn={isRoaming} 
+                    onChange={handleRoamingToggle} 
+                    isLoading={isRoamLoading}
+                />
             </div>
         </Card>
 

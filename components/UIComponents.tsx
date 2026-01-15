@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Check, X, Battery, BatteryWarning, BatteryCharging, Zap } from 'lucide-react';
+import { Check, X, Battery, BatteryWarning, BatteryCharging, Zap, Loader2 } from 'lucide-react';
 
 export const CardHeader: React.FC<{ title: string; extraIcons?: React.ReactNode }> = ({ title, extraIcons }) => (
   <div className="bg-black text-white px-5 py-4 flex justify-between items-center shrink-0">
@@ -14,9 +14,18 @@ export const CardHeader: React.FC<{ title: string; extraIcons?: React.ReactNode 
 interface SquareSwitchProps {
   isOn: boolean;
   onChange?: () => void;
+  isLoading?: boolean;
 }
 
-export const SquareSwitch: React.FC<SquareSwitchProps> = ({ isOn, onChange }) => {
+export const SquareSwitch: React.FC<SquareSwitchProps> = ({ isOn, onChange, isLoading }) => {
+  if (isLoading) {
+    return (
+      <div className="flex border border-gray-300 w-16 h-8 items-center justify-center bg-gray-50 select-none">
+        <Loader2 className="animate-spin text-orange" size={18} />
+      </div>
+    );
+  }
+
   return (
     <div 
       className={`flex border w-16 h-8 cursor-pointer select-none transition-colors ${isOn ? 'border-orange' : 'border-black'}`}
