@@ -67,6 +67,20 @@ export interface ConnectionSettingsResponse {
     deviceMode: string;
     lteCA: string;
     nrCA: string;
+    
+    // WiFi Settings
+    main_wifiPriority?: string;
+    main_wifi_switch_24g?: string;
+    main_wifi_ssid_24g?: string;
+    main_wifi_switch_5g?: string;
+    main_wifi_ssid_5g?: string;
+    
+    guest_wifiPriority?: string;
+    guest_wifi_switch_24g?: string;
+    guest_wifi_ssid_24g?: string;
+    guest_wifi_switch_5g?: string;
+    guest_wifi_ssid_5g?: string;
+
     [key: string]: any;
 }
 

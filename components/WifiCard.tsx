@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardHeader, SquareSwitch } from './UIComponents';
 import { User, QrCode } from 'lucide-react';
 import { WifiNetwork } from '../types';
@@ -7,18 +7,13 @@ import { useLanguage } from '../utils/i18nContext';
 import { QrModal } from './QrModal';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { Link } from 'react-router-dom';
+import { updateConnectionSettings, fetchConnectionSettings } from '../utils/api';
 
 interface WifiCardProps {
   onManageDevices: (ssid: string) => void;
   onOpenLogin: () => void;
   onEditSsid: (network: WifiNetwork) => void;
 }
-
-const initialNetworks: WifiNetwork[] = [
-  { id: '1', name: 'Orange Airbox3', frequency: '2.4GHz', clients: 20, hasQr: true, enabled: true, has24: true, has5: true },
-  { id: '2', name: 'Orange Airbox55', frequency: '5GHz', clients: 5, hasQr: true, enabled: true, has24: false, has5: true },
-  { id: '3', name: 'Orange Airbox87469', frequency: '2.4GHz', clients: 5, hasQr: true, enabled: true, has24: true, has5: false },
-];
 
 const FreqCheckbox = ({ label, checked }: { label: string, checked: boolean }) => (
   <div className="flex items-center me-4">
@@ -34,12 +29,69 @@ const FreqCheckbox = ({ label, checked }: { label: string, checked: boolean }) =
   </div>
 );
 
+// Extended interface to store the API key for toggling
+interface MappedWifiNetwork extends WifiNetwork {
+    switchKey: string;
+}
+
 export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin, onEditSsid }) => {
-  const [networks, setNetworks] = useState<WifiNetwork[]>(initialNetworks);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState('');
+  const [loadingIds, setLoadingIds] = useState<Record<string, boolean>>({});
+  
   const { t } = useLanguage();
-  const { isLoggedIn } = useGlobalState();
+  const { isLoggedIn, globalData, updateGlobalData } = useGlobalState();
+  const settings = globalData.connectionSettings || {};
+
+  // Map API data to UI structure
+  const networks: MappedWifiNetwork[] = useMemo(() => {
+    return [
+      {
+        id: 'main_24',
+        name: settings.main_wifi_ssid_24g || 'Main 2.4GHz',
+        frequency: '2.4GHz',
+        clients: 0, // Client count not available in 585
+        hasQr: true,
+        enabled: settings.main_wifi_switch_24g === '1',
+        has24: true,
+        has5: false,
+        switchKey: 'main_wifi_switch_24g'
+      },
+      {
+        id: 'main_5',
+        name: settings.main_wifi_ssid_5g || 'Main 5GHz',
+        frequency: '5GHz',
+        clients: 0,
+        hasQr: true,
+        enabled: settings.main_wifi_switch_5g === '1',
+        has24: false,
+        has5: true,
+        switchKey: 'main_wifi_switch_5g'
+      },
+      {
+        id: 'guest_24',
+        name: settings.guest_wifi_ssid_24g || 'Guest 2.4GHz',
+        frequency: '2.4GHz',
+        clients: 0,
+        hasQr: true,
+        enabled: settings.guest_wifi_switch_24g === '1',
+        has24: true,
+        has5: false,
+        switchKey: 'guest_wifi_switch_24g'
+      },
+      {
+        id: 'guest_5',
+        name: settings.guest_wifi_ssid_5g || 'Guest 5GHz',
+        frequency: '5GHz',
+        clients: 0,
+        hasQr: true,
+        enabled: settings.guest_wifi_switch_5g === '1',
+        has24: false,
+        has5: true,
+        switchKey: 'guest_wifi_switch_5g'
+      }
+    ];
+  }, [settings]);
 
   const handleInteraction = (action: () => void) => {
     if (!isLoggedIn) {
@@ -49,11 +101,32 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
     }
   };
 
-  const toggleNetwork = (id: string) => {
-    handleInteraction(() => {
-      setNetworks(prev => prev.map(net => 
-        net.id === id ? { ...net, enabled: !net.enabled } : net
-      ));
+  const toggleNetwork = async (network: MappedWifiNetwork) => {
+    handleInteraction(async () => {
+      setLoadingIds(prev => ({ ...prev, [network.id]: true }));
+      const newVal = network.enabled ? '0' : '1';
+      
+      try {
+          const payload = { [network.switchKey]: newVal };
+          const res = await updateConnectionSettings(payload);
+          
+          if (res.success) {
+               // Optimistically update
+               if (settings) {
+                   updateGlobalData('connectionSettings', { ...settings, [network.switchKey]: newVal });
+               }
+               // Refresh to ensure consistency
+               fetchConnectionSettings().then(data => {
+                   if (data && data.success) {
+                       updateGlobalData('connectionSettings', data);
+                   }
+               });
+          }
+      } catch (e) {
+          console.error("Failed to toggle wifi", e);
+      } finally {
+          setLoadingIds(prev => ({ ...prev, [network.id]: false }));
+      }
     });
   };
 
@@ -109,7 +182,8 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
                   )}
                   <SquareSwitch 
                     isOn={net.enabled} 
-                    onChange={() => toggleNetwork(net.id)} 
+                    onChange={() => toggleNetwork(net)}
+                    isLoading={loadingIds[net.id]} 
                   />
                 </div>
               </div>

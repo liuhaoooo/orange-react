@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Settings, User, QrCode, Wifi } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { SquareSwitch } from '../components/UIComponents';
 import { QrModal } from '../components/QrModal';
+import { updateConnectionSettings, fetchConnectionSettings } from '../utils/api';
 
 interface WifiNetworksPageProps {
   onOpenSettings: () => void;
@@ -12,6 +13,7 @@ interface WifiNetworksPageProps {
   onOpenDevices: (ssid?: string) => void;
 }
 
+// Internal interface for the page list
 interface PageWifiNetwork {
   id: string;
   name: string;
@@ -19,25 +21,61 @@ interface PageWifiNetwork {
   has24: boolean;
   has5: boolean;
   enabled: boolean;
+  switchKey: string;
   description?: string;
 }
 
-const mockNetworks: PageWifiNetwork[] = [
-  { id: '1', name: 'Orange Airbox3', clients: 20, has24: true, has5: true, enabled: true },
-  { id: '2', name: 'Orange Airbox55', clients: 5, has24: false, has5: true, enabled: true },
-  { id: '3', name: 'Orange Airbox87469', clients: 5, has24: true, has5: false, enabled: true },
-  { id: '4', name: 'Guest wifi network 1', clients: 20, has24: true, has5: true, enabled: true, description: 'guestWifiDesc' },
-  { id: '5', name: 'Guest wifi network 2', clients: 5, has24: true, has5: true, enabled: true, description: 'guestWifiDesc' },
-];
-
 export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettings, onEditSsid, onOpenDevices }) => {
   const { t } = useLanguage();
-  const { isLoggedIn } = useGlobalState();
-  const [networks, setNetworks] = useState(mockNetworks);
-  const [extenderEnabled, setExtenderEnabled] = useState(false);
+  const { isLoggedIn, globalData, updateGlobalData } = useGlobalState();
+  const settings = globalData.connectionSettings || {};
   
+  const [extenderEnabled, setExtenderEnabled] = useState(false);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState('');
+  const [loadingIds, setLoadingIds] = useState<Record<string, boolean>>({});
+
+  // Map API data to UI structure
+  const networks: PageWifiNetwork[] = useMemo(() => {
+    return [
+      {
+        id: 'main_24',
+        name: settings.main_wifi_ssid_24g || 'Main 2.4GHz',
+        clients: 0,
+        has24: true,
+        has5: false,
+        enabled: settings.main_wifi_switch_24g === '1',
+        switchKey: 'main_wifi_switch_24g'
+      },
+      {
+        id: 'main_5',
+        name: settings.main_wifi_ssid_5g || 'Main 5GHz',
+        clients: 0,
+        has24: false,
+        has5: true,
+        enabled: settings.main_wifi_switch_5g === '1',
+        switchKey: 'main_wifi_switch_5g'
+      },
+      {
+        id: 'guest_24',
+        name: settings.guest_wifi_ssid_24g || 'Guest 2.4GHz',
+        clients: 0,
+        has24: true,
+        has5: false,
+        enabled: settings.guest_wifi_switch_24g === '1',
+        switchKey: 'guest_wifi_switch_24g'
+      },
+      {
+        id: 'guest_5',
+        name: settings.guest_wifi_ssid_5g || 'Guest 5GHz',
+        clients: 0,
+        has24: false,
+        has5: true,
+        enabled: settings.guest_wifi_switch_5g === '1',
+        switchKey: 'guest_wifi_switch_5g'
+      }
+    ];
+  }, [settings]);
 
   // Authentication check wrapper
   const handleInteraction = (action: () => void) => {
@@ -48,9 +86,32 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
     }
   };
 
-  const toggleNetwork = (id: string) => {
-      handleInteraction(() => {
-        setNetworks(prev => prev.map(n => n.id === id ? { ...n, enabled: !n.enabled } : n));
+  const toggleNetwork = (network: PageWifiNetwork) => {
+      handleInteraction(async () => {
+        setLoadingIds(prev => ({ ...prev, [network.id]: true }));
+        const newVal = network.enabled ? '0' : '1';
+        
+        try {
+            const payload = { [network.switchKey]: newVal };
+            const res = await updateConnectionSettings(payload);
+            
+            if (res.success) {
+                // Optimistically update
+                if (settings) {
+                    updateGlobalData('connectionSettings', { ...settings, [network.switchKey]: newVal });
+                }
+                // Refresh
+                fetchConnectionSettings().then(data => {
+                    if (data && data.success) {
+                        updateGlobalData('connectionSettings', data);
+                    }
+                });
+            }
+        } catch (e) {
+            console.error("Failed to toggle wifi", e);
+        } finally {
+            setLoadingIds(prev => ({ ...prev, [network.id]: false }));
+        }
       });
   };
 
@@ -124,11 +185,17 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
 
                       {/* Actions */}
                       <div className="flex items-center space-x-4 rtl:space-x-reverse shrink-0">
-                           <QrCode 
+                           {net.enabled && (
+                            <QrCode 
                               className="w-6 h-6 cursor-pointer text-black hover:text-orange transition-colors"
                               onClick={() => openQr(net.name)}
+                            />
+                           )}
+                           <SquareSwitch 
+                            isOn={net.enabled} 
+                            onChange={() => toggleNetwork(net)}
+                            isLoading={loadingIds[net.id]} 
                            />
-                           <SquareSwitch isOn={net.enabled} onChange={() => toggleNetwork(net.id)} />
                       </div>
                   </div>
               ))}
