@@ -261,7 +261,7 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
         </div>
 
         {/* Action Button */}
-        <div className="mt-8">
+        <div className="mt-auto">
             <Link 
                 to="/connection"
                 className="inline-block bg-orange hover:bg-orange-dark text-black font-bold py-2.5 px-8 text-base transition-colors rounded-none"
