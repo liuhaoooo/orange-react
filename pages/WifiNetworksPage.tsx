@@ -13,16 +13,23 @@ interface WifiNetworksPageProps {
   onOpenDevices: (ssid?: string) => void;
 }
 
-// Internal interface for the page list
 interface PageWifiNetwork {
   id: string;
   name: string;
+  isMerged: boolean;
+  
+  // Merged
+  enabled24?: boolean;
+  enabled5?: boolean;
+  key24?: string;
+  key5?: string;
+  
+  // Split
+  frequencyLabel?: string;
+  enabled?: boolean;
+  switchKey?: string;
+
   clients: number;
-  has24: boolean;
-  has5: boolean;
-  enabled: boolean;
-  switchKey: string;
-  description?: string;
 }
 
 export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettings, onEditSsid, onOpenDevices }) => {
@@ -35,49 +42,77 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
   const [selectedNetwork, setSelectedNetwork] = useState('');
   const [loadingIds, setLoadingIds] = useState<Record<string, boolean>>({});
 
-  // Map API data to UI structure
   const networks: PageWifiNetwork[] = useMemo(() => {
-    return [
-      {
-        id: 'main_24',
-        name: settings.main_wifi_ssid_24g || 'Main 2.4GHz',
-        clients: 0,
-        has24: true,
-        has5: false,
-        enabled: settings.main_wifi_switch_24g === '1',
-        switchKey: 'main_wifi_switch_24g'
-      },
-      {
-        id: 'main_5',
-        name: settings.main_wifi_ssid_5g || 'Main 5GHz',
-        clients: 0,
-        has24: false,
-        has5: true,
-        enabled: settings.main_wifi_switch_5g === '1',
-        switchKey: 'main_wifi_switch_5g'
-      },
-      {
-        id: 'guest_24',
-        name: settings.guest_wifi_ssid_24g || 'Guest 2.4GHz',
-        clients: 0,
-        has24: true,
-        has5: false,
-        enabled: settings.guest_wifi_switch_24g === '1',
-        switchKey: 'guest_wifi_switch_24g'
-      },
-      {
-        id: 'guest_5',
-        name: settings.guest_wifi_ssid_5g || 'Guest 5GHz',
-        clients: 0,
-        has24: false,
-        has5: true,
-        enabled: settings.guest_wifi_switch_5g === '1',
-        switchKey: 'guest_wifi_switch_5g'
-      }
-    ];
+    const list: PageWifiNetwork[] = [];
+    
+    // Main WiFi Logic
+    if (settings.main_wifiPriority === '1') {
+        list.push({
+            id: 'main_merged',
+            name: settings.main_wifi_ssid_24g || 'Main Wi-Fi',
+            isMerged: true,
+            enabled24: settings.main_wifi_switch_24g === '1',
+            enabled5: settings.main_wifi_switch_5g === '1',
+            key24: 'main_wifi_switch_24g',
+            key5: 'main_wifi_switch_5g',
+            clients: 0
+        });
+    } else {
+        list.push({
+            id: 'main_24',
+            name: settings.main_wifi_ssid_24g || 'Main 2.4GHz',
+            isMerged: false,
+            frequencyLabel: '2.4GHz',
+            enabled: settings.main_wifi_switch_24g === '1',
+            switchKey: 'main_wifi_switch_24g',
+            clients: 0
+        });
+        list.push({
+            id: 'main_5',
+            name: settings.main_wifi_ssid_5g || 'Main 5GHz',
+            isMerged: false,
+            frequencyLabel: '5GHz',
+            enabled: settings.main_wifi_switch_5g === '1',
+            switchKey: 'main_wifi_switch_5g',
+            clients: 0
+        });
+    }
+
+    // Guest WiFi Logic
+    if (settings.guest_wifiPriority === '1') {
+        list.push({
+            id: 'guest_merged',
+            name: settings.guest_wifi_ssid_24g || 'Guest Wi-Fi',
+            isMerged: true,
+            enabled24: settings.guest_wifi_switch_24g === '1',
+            enabled5: settings.guest_wifi_switch_5g === '1',
+            key24: 'guest_wifi_switch_24g',
+            key5: 'guest_wifi_switch_5g',
+            clients: 0
+        });
+    } else {
+        list.push({
+            id: 'guest_24',
+            name: settings.guest_wifi_ssid_24g || 'Guest 2.4GHz',
+            isMerged: false,
+            frequencyLabel: '2.4GHz',
+            enabled: settings.guest_wifi_switch_24g === '1',
+            switchKey: 'guest_wifi_switch_24g',
+            clients: 0
+        });
+        list.push({
+            id: 'guest_5',
+            name: settings.guest_wifi_ssid_5g || 'Guest 5GHz',
+            isMerged: false,
+            frequencyLabel: '5GHz',
+            enabled: settings.guest_wifi_switch_5g === '1',
+            switchKey: 'guest_wifi_switch_5g',
+            clients: 0
+        });
+    }
+    return list;
   }, [settings]);
 
-  // Authentication check wrapper
   const handleInteraction = (action: () => void) => {
     if (!isLoggedIn) {
       onOpenSettings();
@@ -86,33 +121,56 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
     }
   };
 
-  const toggleNetwork = (network: PageWifiNetwork) => {
-      handleInteraction(async () => {
-        setLoadingIds(prev => ({ ...prev, [network.id]: true }));
-        const newVal = network.enabled ? '0' : '1';
-        
-        try {
-            const payload = { [network.switchKey]: newVal };
-            const res = await updateConnectionSettings(payload);
-            
-            if (res.success) {
-                // Optimistically update
-                if (settings) {
-                    updateGlobalData('connectionSettings', { ...settings, [network.switchKey]: newVal });
-                }
-                // Refresh
-                fetchConnectionSettings().then(data => {
-                    if (data && data.success) {
-                        updateGlobalData('connectionSettings', data);
-                    }
-                });
-            }
-        } catch (e) {
-            console.error("Failed to toggle wifi", e);
-        } finally {
-            setLoadingIds(prev => ({ ...prev, [network.id]: false }));
+  const updateSettings = async (updates: Record<string, string>, loadingKey: string) => {
+    setLoadingIds(prev => ({ ...prev, [loadingKey]: true }));
+    try {
+        const res = await updateConnectionSettings(updates);
+        if (res.success) {
+             if (settings) {
+                 updateGlobalData('connectionSettings', { ...settings, ...updates });
+             }
+             fetchConnectionSettings().then(data => {
+                 if (data && data.success) {
+                     updateGlobalData('connectionSettings', data);
+                 }
+             });
+        }
+    } catch (e) {
+        console.error("Failed to update wifi", e);
+    } finally {
+        setLoadingIds(prev => ({ ...prev, [loadingKey]: false }));
+    }
+  };
+
+  const toggleSplitNetwork = (net: PageWifiNetwork) => {
+      handleInteraction(() => {
+        const newVal = net.enabled ? '0' : '1';
+        if (net.switchKey) {
+            updateSettings({ [net.switchKey]: newVal }, net.id);
         }
       });
+  };
+
+  const toggleMergedNetwork = (net: PageWifiNetwork) => {
+      handleInteraction(() => {
+         const isAnyOn = net.enabled24 || net.enabled5;
+         const newVal = isAnyOn ? '0' : '1';
+         const updates: Record<string, string> = {};
+         if (net.key24) updates[net.key24] = newVal;
+         if (net.key5) updates[net.key5] = newVal;
+         updateSettings(updates, net.id);
+      });
+  };
+
+  const toggleMergedBand = (net: PageWifiNetwork, band: '24' | '5') => {
+    handleInteraction(() => {
+        const key = band === '24' ? net.key24 : net.key5;
+        const current = band === '24' ? net.enabled24 : net.enabled5;
+        const newVal = current ? '0' : '1';
+        if (key) {
+            updateSettings({ [key]: newVal }, net.id);
+        }
+    });
   };
 
   const openQr = (name: string) => {
@@ -122,8 +180,11 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
       });
   };
 
-  const FreqCheckbox = ({ label, checked }: { label: string, checked: boolean }) => (
-      <div className="flex items-center me-4">
+  const FreqCheckbox = ({ label, checked, onChange }: { label: string, checked: boolean, onChange: () => void }) => (
+      <div 
+        className="flex items-center me-4 cursor-pointer"
+        onClick={onChange}
+      >
           <div className={`w-4 h-4 border flex items-center justify-center me-1.5 ${checked ? 'border-gray-400 bg-gray-100' : 'border-gray-300 bg-white'}`}>
              {checked && <div className="w-2.5 h-2.5 bg-gray-400" style={{ clipPath: 'polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%)', backgroundColor: '#9ca3af' }}></div>}
           </div>
@@ -133,7 +194,6 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
 
   return (
     <div className="w-full">
-      {/* Header */}
       <div className="flex justify-between items-center mb-6">
          <h1 className="text-3xl font-bold text-black">{t('wifiNetworks')}</h1>
          <button 
@@ -145,16 +205,13 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
          </button>
       </div>
 
-      {/* Authenticated Content */}
       <div className="bg-white p-6 shadow-sm border border-gray-200">
-          {/* List Container */}
           <div className="border border-gray-300 max-h-[600px] overflow-y-auto mb-6">
               {networks.map((net, index) => (
                   <div 
                       key={net.id} 
                       className={`flex items-center p-4 min-h-[90px] ${index !== networks.length - 1 ? 'border-b border-gray-200' : ''}`}
                   >
-                      {/* Icon */}
                       <div className="me-4 relative shrink-0 cursor-pointer" onClick={() => handleInteraction(() => onOpenDevices(net.name))}>
                            <div className="bg-gray-100 p-2 rounded-sm">
                               <User className="w-6 h-6 text-black fill-current" />
@@ -164,36 +221,46 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
                            </div>
                       </div>
 
-                      {/* Details */}
                       <div className="flex-1 min-w-0 pe-4">
                           <div 
                               className="font-bold text-black text-sm mb-1 cursor-pointer hover:text-orange transition-colors"
-                              onClick={() => handleInteraction(() => onEditSsid({ ...net, frequency: net.has5 ? '5GHz' : '2.4GHz' }))}
+                              onClick={() => handleInteraction(() => onEditSsid({ ...net, frequency: net.frequencyLabel || (net.isMerged ? '2.4GHz' : '') }))}
                           >
                               {net.name}
                           </div>
-                          {net.description && (
-                              <div className="text-xs text-black mb-1 truncate">
-                                  {t(net.description)}
+                          
+                          {net.isMerged ? (
+                              <div className="flex items-center">
+                                  <FreqCheckbox 
+                                    label="2.4 GHz" 
+                                    checked={!!net.enabled24} 
+                                    onChange={() => toggleMergedBand(net, '24')}
+                                  />
+                                  <FreqCheckbox 
+                                    label="5 GHz" 
+                                    checked={!!net.enabled5} 
+                                    onChange={() => toggleMergedBand(net, '5')}
+                                  />
+                              </div>
+                          ) : (
+                              <div className="flex items-center">
+                                  <span className="text-xs text-gray-400 font-bold bg-gray-100 px-1.5 py-0.5 rounded-sm">
+                                      {net.frequencyLabel}
+                                  </span>
                               </div>
                           )}
-                          <div className="flex items-center">
-                              <FreqCheckbox label="2.4 GHz" checked={net.has24} />
-                              <FreqCheckbox label="5 GHz" checked={net.has5} />
-                          </div>
                       </div>
 
-                      {/* Actions */}
                       <div className="flex items-center space-x-4 rtl:space-x-reverse shrink-0">
-                           {net.enabled && (
+                           {((net.isMerged && (net.enabled24 || net.enabled5)) || (!net.isMerged && net.enabled)) && (
                             <QrCode 
                               className="w-6 h-6 cursor-pointer text-black hover:text-orange transition-colors"
                               onClick={() => openQr(net.name)}
                             />
                            )}
                            <SquareSwitch 
-                            isOn={net.enabled} 
-                            onChange={() => toggleNetwork(net)}
+                            isOn={net.isMerged ? (!!net.enabled24 || !!net.enabled5) : !!net.enabled} 
+                            onChange={() => net.isMerged ? toggleMergedNetwork(net) : toggleSplitNetwork(net)}
                             isLoading={loadingIds[net.id]} 
                            />
                       </div>
@@ -201,7 +268,6 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
               ))}
           </div>
 
-          {/* Extender Section */}
           <div className="border border-gray-300 p-4 flex justify-between items-center">
               <div className="flex items-center">
                    <div className="bg-gray-100 p-2 rounded-sm me-4">
