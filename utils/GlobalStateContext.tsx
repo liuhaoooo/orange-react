@@ -43,31 +43,41 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
     return true;
   }, [isLoggedIn]);
 
-  // Polling for status info (CMD 586) and Connection info (CMD 1020) - always active
+  // Effect 1: Fetch Connection Settings (CMD 1020) - Once on mount and whenever login status changes
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const connData = await fetchConnectionSettings();
+        // Check success based on the dynamic response structure
+        if (connData && connData.success) {
+            updateGlobalData('connectionSettings', connData);
+        }
+      } catch (error) {
+        console.error('Failed to fetch connection settings', error);
+      }
+    };
+    
+    fetchSettings();
+  }, [updateGlobalData, isLoggedIn]);
+
+  // Effect 2: Polling for status info (CMD 586) - Loop every 10 seconds
   useEffect(() => {
     let intervalId: ReturnType<typeof setInterval>;
 
-    const fetchInfo = async () => {
+    const fetchStatus = async () => {
       try {
         // Fetch Status Info (CMD 586)
         const data = await fetchStatusInfo();
         if (data && data.success) {
           updateGlobalData('statusInfo', data);
         }
-
-        // Fetch Connection Settings (CMD 1020)
-        const connData = await fetchConnectionSettings();
-        if (connData && connData.success) {
-            updateGlobalData('connectionSettings', connData);
-        }
-
       } catch (error) {
         console.error('Failed to fetch status info', error);
       }
     };
 
-    fetchInfo(); // Fetch immediately on mount
-    intervalId = setInterval(fetchInfo, 10000); // Fetch every 10 seconds
+    fetchStatus(); // Fetch immediately on mount
+    intervalId = setInterval(fetchStatus, 10000); // Fetch every 10 seconds
 
     return () => {
       if (intervalId) clearInterval(intervalId);
