@@ -54,6 +54,22 @@ export interface StatusInfoResponse {
   [key: string]: any;
 }
 
+/**
+ * Connection Settings (CMD 1020)
+ */
+export interface ConnectionSettingsResponse {
+    networkMode: string;
+    checkbox: string;
+    mode5g: string;
+    flightMode: string;
+    dialMode: string;        // '0' | '1' - Data Switch
+    roamingEnable: string;   // '0' | '1' - Roaming Switch
+    deviceMode: string;
+    lteCA: string;
+    nrCA: string;
+    [key: string]: any;
+}
+
 // Session Management
 export const setSessionId = (sid: string) => {
   if (sid) {
@@ -316,4 +332,20 @@ export const checkAuthStatus = async (): Promise<boolean> => {
     // If network fails, we usually don't log out immediately unless we get explicit NO_AUTH
     return true; 
   }
+};
+
+/**
+ * Get Connection Settings
+ * CMD: 1020
+ */
+export const fetchConnectionSettings = async (): Promise<ConnectionSettingsResponse> => {
+  return apiRequest<ConnectionSettingsResponse>(1020, 'GET');
+};
+
+/**
+ * Update Connection Settings
+ * CMD: 1020
+ */
+export const updateConnectionSettings = async (data: Partial<ConnectionSettingsResponse>): Promise<ApiResponse> => {
+  return apiRequest(1020, 'POST', data);
 };

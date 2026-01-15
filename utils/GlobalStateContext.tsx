@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { getSessionId, checkAuthStatus, clearSessionId, fetchStatusInfo } from './api';
+import { getSessionId, checkAuthStatus, clearSessionId, fetchStatusInfo, fetchConnectionSettings } from './api';
 
 interface GlobalStateContextType {
   isLoggedIn: boolean;
@@ -43,16 +43,24 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
     return true;
   }, [isLoggedIn]);
 
-  // Polling for status info (CMD 586) - always active
+  // Polling for status info (CMD 586) and Connection info (CMD 1020) - always active
   useEffect(() => {
     let intervalId: ReturnType<typeof setInterval>;
 
     const fetchInfo = async () => {
       try {
+        // Fetch Status Info (CMD 586)
         const data = await fetchStatusInfo();
         if (data && data.success) {
           updateGlobalData('statusInfo', data);
         }
+
+        // Fetch Connection Settings (CMD 1020)
+        const connData = await fetchConnectionSettings();
+        if (connData && connData.success) {
+            updateGlobalData('connectionSettings', connData);
+        }
+
       } catch (error) {
         console.error('Failed to fetch status info', error);
       }

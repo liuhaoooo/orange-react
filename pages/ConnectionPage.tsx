@@ -1,9 +1,10 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Settings, Timer, ArrowUpDown, TabletSmartphone, Link as LinkIcon, Globe, Monitor, Smartphone } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { SquareSwitch, Card, SignalStrengthIcon, BatteryStatusIcon } from '../components/UIComponents';
+import { updateConnectionSettings } from '../utils/api';
 
 interface ConnectionPageProps {
   onOpenSettings: () => void;
@@ -29,11 +30,14 @@ const StatBox: React.FC<{
 
 export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, onManageDevices }) => {
   const { t } = useLanguage();
-  const { isLoggedIn, globalData } = useGlobalState();
-  const [isConnected, setIsConnected] = useState(false);
-  const [isRoaming, setIsRoaming] = useState(false);
+  const { isLoggedIn, globalData, updateGlobalData } = useGlobalState();
   
   const statusInfo = globalData.statusInfo;
+  const connectionSettings = globalData.connectionSettings;
+
+  // Determine switch state from CMD 1020 data
+  const isConnected = connectionSettings?.dialMode === '1';
+  const isRoaming = connectionSettings?.roamingEnable === '1';
 
   const handleInteraction = (action: () => void) => {
     if (!isLoggedIn) {
@@ -43,8 +47,36 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
     }
   };
 
-  const handleConnectionToggle = () => handleInteraction(() => setIsConnected(!isConnected));
-  const handleRoamingToggle = () => handleInteraction(() => setIsRoaming(!isRoaming));
+  const handleConnectionToggle = () => handleInteraction(async () => {
+    const newVal = isConnected ? '0' : '1';
+    
+    // Optimistic Update
+    if (connectionSettings) {
+        updateGlobalData('connectionSettings', { ...connectionSettings, dialMode: newVal });
+    }
+
+    try {
+        await updateConnectionSettings({ dialMode: newVal });
+    } catch (e) {
+        console.error("Failed to update dialMode", e);
+    }
+  });
+
+  const handleRoamingToggle = () => handleInteraction(async () => {
+    const newVal = isRoaming ? '0' : '1';
+
+    // Optimistic Update
+    if (connectionSettings) {
+        updateGlobalData('connectionSettings', { ...connectionSettings, roamingEnable: newVal });
+    }
+
+    try {
+        await updateConnectionSettings({ roamingEnable: newVal });
+    } catch (e) {
+        console.error("Failed to update roamingEnable", e);
+    }
+  });
+
   const handleManageDevicesClick = () => handleInteraction(() => onManageDevices());
 
   // --- Logic for status texts ---
