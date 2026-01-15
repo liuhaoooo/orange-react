@@ -28,13 +28,13 @@ export const ServicesCard: React.FC<ServicesCardProps> = ({ onOpenLogin, classNa
       <Card className={`overflow-hidden ${className}`}>
         <CardHeader title={t('services')} />
         <div className="flex-1 bg-white flex flex-col items-center p-6 text-center justify-center">
-             <p className="text-black mb-8 text-sm sm:text-base leading-tight px-2">
+             <p className="text-black mb-8 text-base leading-tight px-2">
                {t('ussdLoginMsg')}
              </p>
              
              <button 
                 onClick={onOpenLogin}
-                className="border border-black px-6 py-2 font-bold text-sm text-black hover:bg-gray-100 transition-colors"
+                className="border border-black px-8 py-2.5 font-bold text-base text-black hover:bg-gray-100 transition-colors"
              >
                 {t('loginAsAdminBtn')}
              </button>
@@ -53,7 +53,7 @@ export const ServicesCard: React.FC<ServicesCardProps> = ({ onOpenLogin, classNa
               {menuItems.map((item, index) => (
                 <div 
                     key={item.id}
-                    className={`w-full py-3 px-4 text-start font-bold text-sm border-b border-gray-200 text-black ${index === 0 ? 'bg-gray-100' : 'bg-white'}`}
+                    className={`w-full py-4 px-5 text-start font-bold text-base border-b border-gray-200 text-black ${index === 0 ? 'bg-gray-100' : 'bg-white'}`}
                 >
                     {item.label}
                 </div>
@@ -61,10 +61,10 @@ export const ServicesCard: React.FC<ServicesCardProps> = ({ onOpenLogin, classNa
            </div>
            
            {/* View Services Button */}
-           <div className="mt-auto p-4">
+           <div className="mt-auto p-6">
               <Link 
                 to="/services"
-                className="inline-block bg-orange hover:bg-orange-dark text-black font-bold py-2 px-6 text-sm transition-colors rounded-none"
+                className="inline-block bg-orange hover:bg-orange-dark text-black font-bold py-2.5 px-8 text-base transition-colors rounded-none"
               >
                 {t('viewServices')}
               </Link>

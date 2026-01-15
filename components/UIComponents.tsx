@@ -3,8 +3,8 @@ import React from 'react';
 import { Check, X, Battery, BatteryWarning, BatteryCharging, Zap } from 'lucide-react';
 
 export const CardHeader: React.FC<{ title: string; extraIcons?: React.ReactNode }> = ({ title, extraIcons }) => (
-  <div className="bg-black text-white px-4 py-3 flex justify-between items-center shrink-0">
-    <h2 className="font-bold text-lg">{title}</h2>
+  <div className="bg-black text-white px-5 py-4 flex justify-between items-center shrink-0">
+    <h2 className="font-bold text-xl">{title}</h2>
     <div className="flex items-center space-x-3">
       {extraIcons}
     </div>

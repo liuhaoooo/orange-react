@@ -8,15 +8,17 @@ import { Link } from 'react-router-dom';
 const DonutChart = ({ value, label, unit, percentage }: { value: number, label: string, unit: string, percentage: number }) => {
   return (
     <div className="flex flex-col items-center">
-      <span className="text-sm font-bold mb-3 text-black">{label}</span>
-      <div className="relative w-32 h-32 rounded-full flex items-center justify-center bg-gray-100"
+      <span className="text-base font-bold mb-4 text-black">{label}</span>
+      {/* Increased size from w-32/h-32 to w-40/h-40 */}
+      <div className="relative w-40 h-40 rounded-full flex items-center justify-center bg-gray-100"
            style={{
              backgroundImage: `conic-gradient(#ff7900 ${percentage}%, #f2f2f2 ${percentage}% 100%)`
            }}
       >
-        <div className="absolute w-24 h-24 bg-white rounded-full flex flex-col items-center justify-center">
-             <span className="text-xl font-bold text-black leading-none mb-1">{value.toFixed(1)}</span>
-             <span className="text-sm font-bold text-gray-500 leading-none">{unit}</span>
+        {/* Inner circle increased from w-24/h-24 to w-32/h-32 */}
+        <div className="absolute w-32 h-32 bg-white rounded-full flex flex-col items-center justify-center">
+             <span className="text-2xl font-bold text-black leading-none mb-1">{value.toFixed(1)}</span>
+             <span className="text-base font-bold text-gray-500 leading-none">{unit}</span>
         </div>
       </div>
     </div>
@@ -75,7 +77,7 @@ export const UsageCard: React.FC = () => {
       
       <div className="p-6 flex-1 flex flex-col">
         {/* Charts Area */}
-        <div className="flex justify-around items-center w-full mt-8 gap-4">
+        <div className="flex justify-around items-center w-full mt-6 gap-6">
           <DonutChart 
             value={natFormatted.val} 
             percentage={natPercentage > 100 ? 100 : natPercentage} 
@@ -91,8 +93,8 @@ export const UsageCard: React.FC = () => {
         </div>
 
         {/* Button Area - Pushed to bottom */}
-        <div className="mt-auto pt-6">
-             <Link to="/usage" className="inline-block bg-orange hover:bg-orange-dark text-black font-bold py-2 px-6 text-sm transition-colors rounded-none">
+        <div className="mt-auto pt-8">
+             <Link to="/usage" className="inline-block bg-orange hover:bg-orange-dark text-black font-bold py-2.5 px-8 text-base transition-colors rounded-none">
                 {t('viewUsage')}
              </Link>
         </div>

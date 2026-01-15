@@ -25,7 +25,7 @@ export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
     return (
       <Card className="h-full">
         <CardHeader title={t('messages')} />
-        <div className="flex-1 flex flex-col items-center justify-center p-6 space-y-8">
+        <div className="flex-1 flex flex-col items-center justify-center p-6 space-y-10">
            {/* Graphics: Two Bubbles */}
            <div className="relative w-full h-32 flex justify-center items-center">
              {/* Black bubble on left */}
@@ -50,12 +50,12 @@ export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
            </div>
 
            <div className="text-center w-full px-4 mt-8">
-             <p className="text-black mb-6 text-sm sm:text-base leading-tight">
+             <p className="text-black mb-8 text-base leading-tight">
                {t('loginAsAdminMsg')}
              </p>
              <button
                onClick={onOpenLogin}
-               className="border border-black px-6 py-2 font-bold text-sm text-black hover:bg-gray-100 transition-colors"
+               className="border border-black px-8 py-2.5 font-bold text-base text-black hover:bg-gray-100 transition-colors"
              >
                {t('loginAsAdminBtn')}
              </button>
@@ -72,22 +72,22 @@ export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
       
       {/* Sub Header: Inbox - Added shrink-0 to prevent compression */}
       <div className="px-6 py-4 border-b border-gray-200 flex items-center bg-white shrink-0">
-          <span className="font-bold text-lg text-black me-2">{t('inbox')}</span>
-          <span className="bg-[#4169e1] text-white text-xs font-bold h-6 w-6 flex items-center justify-center rounded-full">2</span>
+          <span className="font-bold text-xl text-black me-3">{t('inbox')}</span>
+          <span className="bg-[#4169e1] text-white text-sm font-bold h-7 w-7 flex items-center justify-center rounded-full">2</span>
       </div>
 
       {/* List - Added overflow-y-auto to enable scrolling */}
       <div className="flex-1 overflow-y-auto flex flex-col bg-white">
           {messages.map((msg) => (
-              <div key={msg.id} className="p-4 px-6 border-b border-gray-200 flex justify-between items-center shrink-0">
+              <div key={msg.id} className="p-5 px-6 border-b border-gray-200 flex justify-between items-center shrink-0">
                   <div className="flex-1 min-w-0 pe-4">
-                      <div className="font-bold text-black text-sm">{msg.sender}</div>
-                      <div className="text-gray-500 text-xs mt-1">{msg.date}</div>
-                      <div className="text-gray-500 text-sm mt-1 truncate font-normal">{msg.content}</div>
+                      <div className="font-bold text-black text-base">{msg.sender}</div>
+                      <div className="text-gray-500 text-sm mt-1">{msg.date}</div>
+                      <div className="text-gray-500 text-base mt-1 truncate font-normal">{msg.content}</div>
                   </div>
                   <div className="flex items-center space-x-2 rtl:space-x-reverse shrink-0">
-                      {msg.hasAlert && <AlertTriangle size={18} className="text-yellow-400 fill-yellow-400" />}
-                      {msg.isNew && <div className="w-3 h-3 bg-[#4169e1] rounded-full"></div>}
+                      {msg.hasAlert && <AlertTriangle size={20} className="text-yellow-400 fill-yellow-400" />}
+                      {msg.isNew && <div className="w-3.5 h-3.5 bg-[#4169e1] rounded-full"></div>}
                   </div>
               </div>
           ))}
@@ -95,10 +95,10 @@ export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
       </div>
 
       {/* Footer - Added shrink-0 */}
-      <div className="p-6 pt-4 bg-white mt-auto shrink-0">
+      <div className="p-6 pt-5 bg-white mt-auto shrink-0">
         <Link 
             to="/messages"
-            className="inline-block bg-orange hover:bg-orange-dark text-black font-bold py-2 px-6 text-sm transition-colors rounded-none"
+            className="inline-block bg-orange hover:bg-orange-dark text-black font-bold py-2.5 px-8 text-base transition-colors rounded-none"
         >
           {t('viewMessages')}
         </Link>

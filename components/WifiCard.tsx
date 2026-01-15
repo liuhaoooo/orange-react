@@ -21,8 +21,8 @@ const initialNetworks: WifiNetwork[] = [
 ];
 
 const FreqCheckbox = ({ label, checked }: { label: string, checked: boolean }) => (
-  <div className="flex items-center me-3">
-      <div className={`w-4 h-4 border flex items-center justify-center me-1.5 ${checked ? 'border-gray-400 bg-gray-100' : 'border-gray-300 bg-white'}`}>
+  <div className="flex items-center me-4">
+      <div className={`w-4 h-4 border flex items-center justify-center me-2 ${checked ? 'border-gray-400 bg-gray-100' : 'border-gray-300 bg-white'}`}>
          {checked && (
              <div 
                 className="w-2.5 h-2.5 bg-gray-500" 
@@ -30,7 +30,7 @@ const FreqCheckbox = ({ label, checked }: { label: string, checked: boolean }) =
              />
          )}
       </div>
-      <span className={`text-xs font-bold ${checked ? 'text-gray-500' : 'text-gray-300'}`}>{label}</span>
+      <span className={`text-sm font-bold ${checked ? 'text-gray-500' : 'text-gray-300'}`}>{label}</span>
   </div>
 );
 
@@ -76,20 +76,20 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
         <div className="flex flex-col flex-1 relative">
           <div className="w-full">
             {networks.map((net) => (
-              <div key={net.id} className="flex items-center p-3 border-b border-gray-200 min-h-[80px]">
+              <div key={net.id} className="flex items-center p-4 border-b border-gray-200 min-h-[90px]">
                 {/* Icon - Static display */}
                 <div 
-                  className="relative me-3"
+                  className="relative me-4"
                 >
-                  <User className="w-6 h-6 text-black fill-current" />
-                  <div className="absolute -top-1 -right-1 bg-blue-500 text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full border border-white font-bold rtl:right-auto rtl:-left-1">
+                  <User className="w-8 h-8 text-black fill-current" />
+                  <div className="absolute -top-1 -right-1 bg-blue-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full border border-white font-bold rtl:right-auto rtl:-left-1">
                     {net.clients}
                   </div>
                 </div>
 
                 {/* Info */}
                 <div className="flex-1 min-w-0 pe-2">
-                  <div className="font-bold text-sm truncate text-black text-start">
+                  <div className="font-bold text-base truncate text-black text-start mb-1">
                       {net.name}
                   </div>
                   <div className="flex items-center mt-1">
@@ -99,11 +99,11 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center space-x-3 shrink-0 rtl:space-x-reverse">
+                <div className="flex items-center space-x-4 shrink-0 rtl:space-x-reverse">
                   {/* QR Code visibility logic: Show if network is enabled AND it has QR capability */}
                   {net.enabled && net.hasQr && (
                       <QrCode 
-                          className="w-5 h-5 cursor-pointer text-black hover:text-orange transition-colors" 
+                          className="w-6 h-6 cursor-pointer text-black hover:text-orange transition-colors" 
                           onClick={() => openQrModal(net.name)}
                       />
                   )}
@@ -116,10 +116,10 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
             ))}
           </div>
 
-          <div className="mt-auto p-4">
+          <div className="mt-auto p-6">
               <Link 
                 to="/wifi"
-                className="inline-block bg-orange hover:bg-orange-dark text-black font-bold py-2 px-6 text-sm transition-colors rounded-none"
+                className="inline-block bg-orange hover:bg-orange-dark text-black font-bold py-2.5 px-8 text-base transition-colors rounded-none"
               >
                 {t('viewWifiNetworks')}
               </Link>

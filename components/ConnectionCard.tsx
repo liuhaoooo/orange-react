@@ -18,13 +18,13 @@ const StatItem: React.FC<{
   topText?: string 
 }> = ({ icon, label, value, topText }) => (
   <div className="flex flex-col items-center justify-start text-center h-full min-w-[70px]">
-    {/* Fixed height container (h-10 = 40px) to match icon size and ensure alignment */}
-    <div className="text-orange mb-2 h-10 w-full flex flex-col items-center justify-center">
+    {/* Fixed height container (h-12 = 48px) increased from h-10 */}
+    <div className="text-orange mb-3 h-12 w-full flex flex-col items-center justify-center">
         {topText && <div className="text-orange font-bold text-sm leading-none">{topText}</div>}
         {icon}
     </div>
-    <div className="text-sm text-black leading-tight mb-1">{label}</div>
-    <div className="font-bold text-black text-sm">{value}</div>
+    <div className="text-base text-black leading-tight mb-1">{label}</div>
+    <div className="font-bold text-black text-lg">{value}</div>
   </div>
 );
 
@@ -136,19 +136,19 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
       <CardHeader title={t('connection')} />
       
       {/* Top Stats Row */}
-      <div className="p-4 pt-6 pb-6 flex justify-between items-start border-b border-gray-200">
+      <div className="p-4 pt-8 pb-8 flex justify-between items-start border-b border-gray-200">
           <StatItem 
-            icon={<Timer size={40} strokeWidth={1.5} />} 
+            icon={<Timer size={44} strokeWidth={1.5} />} 
             label={t('timeElapsed')} 
             value={statusInfo ? formatTime(statusInfo.time_elapsed) : "00:00:00"} 
           />
           <StatItem 
-            icon={<ArrowUpDown size={40} strokeWidth={1.5} />} 
+            icon={<ArrowUpDown size={44} strokeWidth={1.5} />} 
             label={t('dataUsage')} 
             value={formatDataUsage()} 
           />
           <StatItem 
-            icon={<SignalStrengthIcon level={signalLevel} className="h-full w-12" />} 
+            icon={<SignalStrengthIcon level={signalLevel} className="h-full w-14" />} 
             label={t('network')} 
             value={statusInfo?.network_type_str || t('noNetwork')} 
           />
@@ -158,27 +158,27 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
                 status={statusInfo?.battery_status || '0'}
                 chargeStatus={statusInfo?.battery_charge_status || '0'}
                 level={statusInfo?.battery_level || '0'}
-                size={40}
+                size={44}
               />
             } 
             label={t('battery')} 
             value={getBatteryValue()} 
           />
           <StatItem 
-            icon={<TabletSmartphone size={40} strokeWidth={1.5} />} 
+            icon={<TabletSmartphone size={44} strokeWidth={1.5} />} 
             label={t('connected')} 
             value={getConnectedCount()} 
           />
       </div>
 
       {/* Toggles Section */}
-      <div className="flex-1 flex flex-col p-4 pt-2">
+      <div className="flex-1 flex flex-col p-6 pt-4">
         
         {/* Connection Toggle */}
-        <div className="flex justify-between items-center py-4 border-b border-gray-200">
+        <div className="flex justify-between items-center py-5 border-b border-gray-200">
           <div className="flex flex-col items-start">
-             <span className="font-bold text-black text-sm">{getConnectionBoldText()}</span>
-             <span className={`text-xs ${getConnectionSmallText().includes(t('on')) ? 'text-gray-500' : 'text-orange'}`}>
+             <span className="font-bold text-black text-base">{getConnectionBoldText()}</span>
+             <span className={`text-sm ${getConnectionSmallText().includes(t('on')) ? 'text-gray-500' : 'text-orange'}`}>
                 {getConnectionSmallText()}
              </span>
           </div>
@@ -186,19 +186,19 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
         </div>
 
         {/* Roaming Toggle */}
-        <div className="flex justify-between items-center py-4 border-b border-gray-200">
+        <div className="flex justify-between items-center py-5 border-b border-gray-200">
           <div className="flex flex-col items-start">
-             <span className="font-bold text-black text-sm">{t('roaming')}</span>
-             <span className="text-xs text-black">{getRoamingSmallText()}</span>
+             <span className="font-bold text-black text-base">{t('roaming')}</span>
+             <span className="text-sm text-black">{getRoamingSmallText()}</span>
           </div>
           <SquareSwitch isOn={isRoaming} onChange={handleRoamingToggle} />
         </div>
 
         {/* Action Button */}
-        <div className="mt-6">
+        <div className="mt-8">
             <Link 
                 to="/connection"
-                className="inline-block bg-orange hover:bg-orange-dark text-black font-bold py-2 px-6 text-sm transition-colors rounded-none"
+                className="inline-block bg-orange hover:bg-orange-dark text-black font-bold py-2.5 px-8 text-base transition-colors rounded-none"
             >
                 {t('viewConnection')}
             </Link>

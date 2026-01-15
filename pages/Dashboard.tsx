@@ -18,13 +18,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenLogin, onOpenDevices
     <div className="space-y-6">
       {/* Row 1: Connection and Messages */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="h-[450px]">
+        <div className="h-[540px]">
            <ConnectionCard 
              onOpenSettings={onOpenLogin} 
              onManageDevices={() => onOpenDevices()}
            />
         </div>
-        <div className="h-[450px]">
+        <div className="h-[540px]">
            <MessagesCard 
              onOpenLogin={onOpenLogin}
            />
@@ -33,17 +33,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenLogin, onOpenDevices
 
       {/* Row 2: Usage, Wi-Fi, Services */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="h-[450px]">
+        <div className="h-[540px]">
           <UsageCard />
         </div>
-        <div className="h-[450px]">
+        <div className="h-[540px]">
           <WifiCard 
             onManageDevices={onOpenDevices}
             onOpenLogin={onOpenLogin}
             onEditSsid={onEditSsid}
           />
         </div>
-        <div className="h-[450px]">
+        <div className="h-[540px]">
           <ServicesCard 
             onOpenLogin={onOpenLogin}
             className="h-full"

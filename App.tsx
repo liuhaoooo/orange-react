@@ -80,8 +80,8 @@ function AppContent() {
       <div className="min-h-screen flex flex-col font-sans bg-[#e5e5e5]">
         <Header onLogout={handleLogout} onLogin={openLoginModal} />
         
-        {/* Added flex-grow to main to push footer to bottom if content is short */}
-        <main className="w-full max-w-[1200px] mx-auto p-4 md:p-6 pt-[120px] md:pt-[120px] relative z-0 flex-grow" dir="ltr">
+        {/* Updated max-w to 1450px for wider layout */}
+        <main className="w-full max-w-[1450px] mx-auto p-4 md:p-6 pt-[120px] md:pt-[120px] relative z-0 flex-grow" dir="ltr">
           <Routes>
             {/* Main Dashboard Route */}
             <Route 
