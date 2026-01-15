@@ -252,7 +252,8 @@ export const apiRequest = async <T = any>(
   };
 
   // Attach token only for write operations (method: 'POST')
-  if (method === 'POST' && token) {
+  // We ensure the token field is present even if token is empty
+  if (method === 'POST') {
     payload.token = token;
   }
 
