@@ -155,9 +155,9 @@ function AppContent() {
 
         {/* Footer Section */}
         <footer className="w-full bg-black py-6 mt-auto shrink-0 z-10">
-            <div className="text-center">
+            <div className="w-full max-w-[1450px] mx-auto px-4 md:px-6">
                 <span className="text-white font-bold text-sm">
-                    &copy; <span className="text-orange">Orange</span> 2026
+                    &copy; <span className="text-orange">Orange</span> {new Date().getFullYear()}
                 </span>
             </div>
         </footer>
