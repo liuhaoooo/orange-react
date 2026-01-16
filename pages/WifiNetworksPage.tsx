@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { Settings, User, QrCode, Wifi } from 'lucide-react';
+import { Settings, User, QrCode } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { SquareSwitch } from '../components/UIComponents';
@@ -37,7 +37,6 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
   const { isLoggedIn, globalData, updateGlobalData } = useGlobalState();
   const settings = globalData.connectionSettings || {};
   
-  const [extenderEnabled, setExtenderEnabled] = useState(false);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState('');
   const [loadingIds, setLoadingIds] = useState<Record<string, boolean>>({});
@@ -206,7 +205,7 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
       </div>
 
       <div className="bg-white p-6 shadow-sm border border-gray-200">
-          <div className="border border-gray-300 max-h-[600px] overflow-y-auto mb-6">
+          <div className="border border-gray-300 max-h-[600px] overflow-y-auto">
               {networks.map((net, index) => (
                   <div 
                       key={net.id} 
@@ -266,16 +265,6 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
                       </div>
                   </div>
               ))}
-          </div>
-
-          <div className="border border-gray-300 p-4 flex justify-between items-center">
-              <div className="flex items-center">
-                   <div className="bg-gray-100 p-2 rounded-sm me-4">
-                      <Wifi className="w-6 h-6 text-black" />
-                   </div>
-                   <span className="font-bold text-black text-sm">{t('wifiExtender')}</span>
-              </div>
-              <SquareSwitch isOn={extenderEnabled} onChange={() => handleInteraction(() => setExtenderEnabled(!extenderEnabled))} />
           </div>
       </div>
 
