@@ -330,8 +330,12 @@ export const apiRequest = async <T = any>(
     const resData = await response.json();
 
     // Intercept Global Auth Failure (NO_AUTH)
+    // EXCEPTION: CMD 585 and 586 can be requested without login, 
+    // so we do not trigger a forced logout if they return NO_AUTH.
     if (resData && resData.message === 'NO_AUTH') {
-        triggerAuthLogout();
+        if (cmd !== 585 && cmd !== 586) {
+             triggerAuthLogout();
+        }
     }
 
     return resData;

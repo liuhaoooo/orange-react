@@ -58,24 +58,23 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
     return true;
   }, [isLoggedIn]);
 
-  // Effect 1: Fetch Settings (CMD 585 & 587) - Once on mount and whenever login status changes
+  // Effect 1: Fetch Settings (CMD 585 & 587)
+  // CMD 585 can be fetched without login. CMD 587 requires login.
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        // Parallel fetch for efficiency
-        const [connData, wifiRes] = await Promise.all([
-            fetchConnectionSettings(),
-            fetchWifiSettings()
-        ]);
-
-        // Handle Connection Settings (585)
-        if (connData && connData.success !== false) { // Check specific success flag if present, or assume object is success
+        // Always fetch Connection Settings (585) as it is public
+        const connData = await fetchConnectionSettings();
+        if (connData && connData.success !== false) { 
             updateGlobalData('connectionSettings', connData);
         }
         
-        // Handle Wifi Settings (587)
-        if (wifiRes && wifiRes.success && wifiRes.data) {
-            updateGlobalData('wifiSettings', wifiRes.data);
+        // Only fetch Wifi Settings (587) if logged in
+        if (isLoggedIn) {
+            const wifiRes = await fetchWifiSettings();
+            if (wifiRes && wifiRes.success && wifiRes.data) {
+                updateGlobalData('wifiSettings', wifiRes.data);
+            }
         }
 
       } catch (error) {
@@ -83,12 +82,11 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
       }
     };
     
-    if (isLoggedIn) {
-        fetchSettings();
-    }
+    fetchSettings();
   }, [updateGlobalData, isLoggedIn]);
 
   // Effect 2: Polling for status info (CMD 586) - Loop every 10 seconds
+  // CMD 586 can be fetched without login.
   useEffect(() => {
     let intervalId: ReturnType<typeof setInterval>;
 
@@ -104,15 +102,14 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
       }
     };
 
-    if (isLoggedIn) {
-        fetchStatus(); // Fetch immediately
-        intervalId = setInterval(fetchStatus, 10000); // Fetch every 10 seconds
-    }
+    // Always fetch, regardless of login state
+    fetchStatus(); 
+    intervalId = setInterval(fetchStatus, 10000); 
 
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [updateGlobalData, isLoggedIn]);
+  }, [updateGlobalData]);
 
   return (
     <GlobalStateContext.Provider value={{ 
