@@ -37,6 +37,7 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
   const { isLoggedIn, globalData, updateGlobalData } = useGlobalState();
   
   // Prefer wifiSettings (CMD 587) as it is more detailed, fallback to connectionSettings (CMD 585)
+  // Both now return flat objects
   const settings = globalData.wifiSettings || globalData.connectionSettings || {};
   
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);

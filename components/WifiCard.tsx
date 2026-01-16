@@ -71,6 +71,7 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
   const { isLoggedIn, globalData, updateGlobalData } = useGlobalState();
   
   // Prefer wifiSettings (CMD 587) as it is more detailed, fallback to connectionSettings (CMD 585)
+  // Both now return flat objects, so accessing properties is consistent.
   const settings = globalData.wifiSettings || globalData.connectionSettings || {};
 
   // Dynamic Data Mapping based on Priority

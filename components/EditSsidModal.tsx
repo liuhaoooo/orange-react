@@ -57,14 +57,20 @@ export const EditSsidModal: React.FC<EditSsidModalProps> = ({ isOpen, onClose, n
       setShowPassword(false);
 
       // Determine context from network ID
+      // main_merged, main_24, main_5
+      // guest_merged, guest_24, guest_5
+      
       const isGuest = network.id.startsWith('guest');
       const isMerged = network.id.includes('merged');
-      const is5g = network.id.includes('_5');
+      const is5g = network.id.includes('_5'); // matches 'main_5', 'guest_5'
       
       const prefix = isGuest ? 'guest' : 'main';
-      // Merged networks use 2.4G fields
+      // Merged networks use 2.4G fields, Split 5G uses 5G fields
       const band = (is5g && !isMerged) ? '5g' : '24g';
-      // Optimization switch only for 2.4G (Split) or Merged
+      
+      // Optimization switch (Priority) usually controls Merged mode. 
+      // It is a global toggle for the "Main" or "Guest" network group.
+      // We show it when editing 2.4G (Merged/Split) to allow toggling optimization.
       const showOpt = !is5g || isMerged;
 
       setNetworkPrefix(prefix);
@@ -72,18 +78,22 @@ export const EditSsidModal: React.FC<EditSsidModalProps> = ({ isOpen, onClose, n
       setShowOptimizationSwitch(showOpt);
 
       fetchWifiSettings().then(res => {
-        // CMD 587 returns flat response, so we check success directly on res or assume it's the data
+        // CMD 587 returns flat response object
         if (res && res.success !== false) {
            const data = res;
            
-           // Optimization Switch corresponds to wifiPriority
+           // Optimization Switch corresponds to wifiPriority (e.g., main_wifiPriority)
            const priorityKey = `${prefix}_wifiPriority` as keyof WifiSettingsResponse;
            setOptimization(data[priorityKey] === '1');
 
            // Other fields
+           // SSID Input: main_wifi_ssid_24g or main_wifi_ssid_5g
            const ssidKey = `${prefix}_wifi_ssid_${band}` as keyof WifiSettingsResponse;
+           // SSID Broadcast Switch: main_wifi_broadcast_24g
            const broadcastKey = `${prefix}_wifi_broadcast_${band}` as keyof WifiSettingsResponse;
+           // Authentication Type: main_authenticationType_24g
            const authKey = `${prefix}_authenticationType_${band}` as keyof WifiSettingsResponse;
+           // Wi-Fi Password: main_password_24g
            const passKey = `${prefix}_password_${band}` as keyof WifiSettingsResponse;
 
            setSsid((data[ssidKey] as string) || '');
@@ -101,12 +111,10 @@ export const EditSsidModal: React.FC<EditSsidModalProps> = ({ isOpen, onClose, n
       
       const updates: Record<string, string> = {};
       
-      // Map state back to API keys
       const prefix = networkPrefix;
       const band = networkBand;
 
       // 1. Optimization / Priority
-      // Only update priority if the switch is shown (2.4G or Merged context)
       if (showOptimizationSwitch) {
           const priorityKey = `${prefix}_wifiPriority`;
           updates[priorityKey] = optimization ? '1' : '0';
@@ -121,8 +129,7 @@ export const EditSsidModal: React.FC<EditSsidModalProps> = ({ isOpen, onClose, n
       try {
           const res = await updateConnectionSettings(updates);
           if (res.success) {
-              // Refresh global settings to reflect changes immediately in UI if possible
-              // Ideally we fetch settings again, but basic optimistic update or trigger fetch is good
+              // Refresh global settings to reflect changes immediately in UI
               const currentSettings = globalData.connectionSettings || {};
               updateGlobalData('connectionSettings', { ...currentSettings, ...updates });
               onClose();
