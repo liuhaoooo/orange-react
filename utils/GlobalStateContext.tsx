@@ -21,6 +21,20 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
     setGlobalData(prev => ({ ...prev, [key]: value }));
   }, []);
 
+  // Listen for global auth logout event (triggered by api.ts on NO_AUTH response)
+  useEffect(() => {
+    const handleAuthLogout = () => {
+      if (isLoggedIn) {
+        setIsLoggedIn(false);
+      }
+    };
+
+    window.addEventListener('auth-logout', handleAuthLogout);
+    return () => {
+      window.removeEventListener('auth-logout', handleAuthLogout);
+    };
+  }, [isLoggedIn]);
+
   const checkSession = useCallback(async () => {
     // 1. Check session storage (client side)
     if (!getSessionId()) {

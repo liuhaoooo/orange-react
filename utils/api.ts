@@ -128,6 +128,12 @@ export const clearSessionId = () => {
   sessionStorage.removeItem('sessionId');
 };
 
+// Internal Helper to trigger global logout event
+const triggerAuthLogout = () => {
+  clearSessionId();
+  window.dispatchEvent(new Event('auth-logout'));
+};
+
 /**
  * SHA-256 Encryption Helper
  */
@@ -256,6 +262,13 @@ const fetchOneTimeToken = async (): Promise<string> => {
     }
 
     const data = await response.json();
+    
+    // Intercept NO_AUTH during token fetch
+    if (data && data.message === 'NO_AUTH') {
+        triggerAuthLogout();
+        return '';
+    }
+
     // Expected response format: {"success":true,"cmd":233,"token":"..."}
     return data.token || '';
   } catch (error) {
@@ -314,7 +327,14 @@ export const apiRequest = async <T = any>(
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return await response.json();
+    const resData = await response.json();
+
+    // Intercept Global Auth Failure (NO_AUTH)
+    if (resData && resData.message === 'NO_AUTH') {
+        triggerAuthLogout();
+    }
+
+    return resData;
   } catch (error) {
     console.error(`API Request Error (CMD: ${cmd}):`, error);
     throw error;
@@ -336,14 +356,18 @@ export const fetchStatusInfo = async (): Promise<StatusInfoResponse> => {
 export const logout = async (): Promise<boolean> => {
   try {
     const response = await apiRequest(101, 'POST');
+    // We clear the session regardless of whether the API returns success or fails (e.g. token expired).
+    // This ensures the user is logged out locally.
+    clearSessionId();
     if (response.success) {
-      clearSessionId();
       return true;
     }
-    return false;
+    return true; // Treat as success for the UI flow
   } catch (error) {
     console.error('Logout error:', error);
-    return false;
+    // Force logout locally even on network error
+    clearSessionId();
+    return true; 
   }
 };
 
