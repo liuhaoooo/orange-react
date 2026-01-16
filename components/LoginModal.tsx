@@ -12,7 +12,7 @@ interface LoginModalProps {
 }
 
 export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
-  const [username, setUsername] = useState('admin');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -22,7 +22,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   // Reset when opening
   useEffect(() => {
     if (isOpen) {
-      setUsername('admin');
+      setUsername('');
       setPassword('');
       setErrorMsg('');
       setIsLoading(false);
@@ -88,6 +88,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
             <input 
               type="password" 
               value={password}
+              autoComplete="new-password"
               onChange={(e) => setPassword(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
               disabled={isLoading}

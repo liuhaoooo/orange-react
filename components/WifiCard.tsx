@@ -6,7 +6,7 @@ import { useLanguage } from '../utils/i18nContext';
 import { QrModal } from './QrModal';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { Link } from 'react-router-dom';
-import { updateConnectionSettings, fetchConnectionSettings } from '../utils/api';
+import { updateConnectionSettings, fetchConnectionSettings, fetchWifiSettings } from '../utils/api';
 
 interface WifiCardProps {
   onManageDevices: (ssid: string) => void;
@@ -69,7 +69,9 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
   
   const { t } = useLanguage();
   const { isLoggedIn, globalData, updateGlobalData } = useGlobalState();
-  const settings = globalData.connectionSettings || {};
+  
+  // Prefer wifiSettings (CMD 587) as it is more detailed, fallback to connectionSettings (CMD 585)
+  const settings = globalData.wifiSettings || globalData.connectionSettings || {};
 
   // Dynamic Data Mapping based on Priority
   const networks: MappedNetwork[] = useMemo(() => {
@@ -167,12 +169,17 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
       try {
           const res = await updateConnectionSettings(updates);
           if (res.success) {
-               if (settings) {
-                   updateGlobalData('connectionSettings', { ...settings, ...updates });
+               // Update local cache optimistically
+               if (globalData.wifiSettings) {
+                   updateGlobalData('wifiSettings', { ...globalData.wifiSettings, ...updates });
                }
-               fetchConnectionSettings().then(data => {
-                   if (data && data.success) {
-                       updateGlobalData('connectionSettings', data);
+               if (globalData.connectionSettings) {
+                   updateGlobalData('connectionSettings', { ...globalData.connectionSettings, ...updates });
+               }
+
+               fetchWifiSettings().then(data => {
+                   if (data && data.success && data.data) {
+                       updateGlobalData('wifiSettings', data.data);
                    }
                });
           }

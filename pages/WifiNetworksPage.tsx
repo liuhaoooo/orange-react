@@ -5,7 +5,7 @@ import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { SquareSwitch } from '../components/UIComponents';
 import { QrModal } from '../components/QrModal';
-import { updateConnectionSettings, fetchConnectionSettings } from '../utils/api';
+import { updateConnectionSettings, fetchConnectionSettings, fetchWifiSettings } from '../utils/api';
 
 interface WifiNetworksPageProps {
   onOpenSettings: () => void;
@@ -35,7 +35,9 @@ interface PageWifiNetwork {
 export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettings, onEditSsid, onOpenDevices }) => {
   const { t } = useLanguage();
   const { isLoggedIn, globalData, updateGlobalData } = useGlobalState();
-  const settings = globalData.connectionSettings || {};
+  
+  // Prefer wifiSettings (CMD 587) as it is more detailed, fallback to connectionSettings (CMD 585)
+  const settings = globalData.wifiSettings || globalData.connectionSettings || {};
   
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState('');
@@ -125,12 +127,18 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
     try {
         const res = await updateConnectionSettings(updates);
         if (res.success) {
-             if (settings) {
-                 updateGlobalData('connectionSettings', { ...settings, ...updates });
+             // Update local cache optimistically
+             if (globalData.wifiSettings) {
+                 updateGlobalData('wifiSettings', { ...globalData.wifiSettings, ...updates });
              }
-             fetchConnectionSettings().then(data => {
-                 if (data && data.success) {
-                     updateGlobalData('connectionSettings', data);
+             if (globalData.connectionSettings) {
+                 updateGlobalData('connectionSettings', { ...globalData.connectionSettings, ...updates });
+             }
+             
+             // Refresh Data from Server (CMD 587)
+             fetchWifiSettings().then(res => {
+                 if (res && res.success && res.data) {
+                     updateGlobalData('wifiSettings', res.data);
                  }
              });
         }

@@ -215,6 +215,7 @@ export const EditSsidModal: React.FC<EditSsidModalProps> = ({ isOpen, onClose, n
                             <input 
                                 type={showPassword ? "text" : "password"} 
                                 value={password}
+                                autoComplete="new-password"
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="w-full p-2 pr-10 text-sm outline-none text-black bg-transparent"
                             />
