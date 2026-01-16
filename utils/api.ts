@@ -1,4 +1,5 @@
 
+
 // API Configuration
 const API_BASE_URL = '/cgi-bin/http.cgi'; 
 
@@ -80,6 +81,34 @@ export interface ConnectionSettingsResponse {
     guest_wifi_ssid_24g?: string;
     guest_wifi_switch_5g?: string;
     guest_wifi_ssid_5g?: string;
+
+    [key: string]: any;
+}
+
+export interface WifiSettingsResponse {
+    main_wifiPriority?: string;
+    main_wifi_switch_24g?: string;
+    main_wifi_ssid_24g?: string;
+    main_wifi_broadcast_24g?: string;
+    main_authenticationType_24g?: string;
+    main_password_24g?: string;
+    main_wifi_switch_5g?: string;
+    main_wifi_ssid_5g?: string;
+    main_wifi_broadcast_5g?: string;
+    main_authenticationType_5g?: string;
+    main_password_5g?: string;
+    
+    guest_wifiPriority?: string;
+    guest_wifi_switch_24g?: string;
+    guest_wifi_ssid_24g?: string;
+    guest_wifi_broadcast_24g?: string;
+    guest_authenticationType_24g?: string;
+    guest_password_24g?: string;
+    guest_wifi_switch_5g?: string;
+    guest_wifi_ssid_5g?: string;
+    guest_wifi_broadcast_5g?: string;
+    guest_authenticationType_5g?: string;
+    guest_password_5g?: string;
 
     [key: string]: any;
 }
@@ -348,10 +377,18 @@ export const fetchConnectionSettings = async (): Promise<ConnectionSettingsRespo
 };
 
 /**
+ * Get Detailed Wifi Settings
+ * CMD: 587
+ */
+export const fetchWifiSettings = async (): Promise<ApiResponse<WifiSettingsResponse>> => {
+  return apiRequest<ApiResponse<WifiSettingsResponse>>(587, 'GET');
+};
+
+/**
  * Update Connection Settings
  * CMD: 1020
  */
-export const updateConnectionSettings = async (data: Partial<ConnectionSettingsResponse>): Promise<ApiResponse> => {
+export const updateConnectionSettings = async (data: Partial<ConnectionSettingsResponse | WifiSettingsResponse>): Promise<ApiResponse> => {
   return apiRequest(1020, 'POST', data);
 };
 
