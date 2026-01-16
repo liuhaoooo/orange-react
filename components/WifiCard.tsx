@@ -178,8 +178,8 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
                }
 
                fetchWifiSettings().then(data => {
-                   if (data && data.success && data.data) {
-                       updateGlobalData('wifiSettings', data.data);
+                   if (data && data.success !== false) {
+                       updateGlobalData('wifiSettings', data);
                    }
                });
           }

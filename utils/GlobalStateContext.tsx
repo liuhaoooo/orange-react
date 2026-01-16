@@ -72,8 +72,9 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
         // Only fetch Wifi Settings (587) if logged in
         if (isLoggedIn) {
             const wifiRes = await fetchWifiSettings();
-            if (wifiRes && wifiRes.success && wifiRes.data) {
-                updateGlobalData('wifiSettings', wifiRes.data);
+            // CMD 587 returns flat response
+            if (wifiRes && wifiRes.success !== false) {
+                updateGlobalData('wifiSettings', wifiRes);
             }
         }
 

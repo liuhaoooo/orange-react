@@ -72,8 +72,9 @@ export const EditSsidModal: React.FC<EditSsidModalProps> = ({ isOpen, onClose, n
       setShowOptimizationSwitch(showOpt);
 
       fetchWifiSettings().then(res => {
-        if (res.success && res.data) {
-           const data = res.data;
+        // CMD 587 returns flat response, so we check success directly on res or assume it's the data
+        if (res && res.success !== false) {
+           const data = res;
            
            // Optimization Switch corresponds to wifiPriority
            const priorityKey = `${prefix}_wifiPriority` as keyof WifiSettingsResponse;

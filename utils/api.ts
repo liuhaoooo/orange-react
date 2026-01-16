@@ -86,6 +86,7 @@ export interface ConnectionSettingsResponse {
 }
 
 export interface WifiSettingsResponse {
+    success?: boolean;
     main_wifiPriority?: string;
     main_wifi_switch_24g?: string;
     main_wifi_ssid_24g?: string;
@@ -407,9 +408,10 @@ export const fetchConnectionSettings = async (): Promise<ConnectionSettingsRespo
 /**
  * Get Detailed Wifi Settings
  * CMD: 587
+ * Returns flat structure similar to ConnectionSettingsResponse
  */
-export const fetchWifiSettings = async (): Promise<ApiResponse<WifiSettingsResponse>> => {
-  return apiRequest<ApiResponse<WifiSettingsResponse>>(587, 'GET');
+export const fetchWifiSettings = async (): Promise<WifiSettingsResponse> => {
+  return apiRequest<WifiSettingsResponse>(587, 'GET');
 };
 
 /**

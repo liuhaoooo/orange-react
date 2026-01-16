@@ -137,8 +137,8 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
              
              // Refresh Data from Server (CMD 587)
              fetchWifiSettings().then(res => {
-                 if (res && res.success && res.data) {
-                     updateGlobalData('wifiSettings', res.data);
+                 if (res && res.success !== false) {
+                     updateGlobalData('wifiSettings', res);
                  }
              });
         }
