@@ -155,7 +155,6 @@ async function sha256(source: string) {
 export const login = async (username: string, password: string): Promise<{ success: boolean; message?: string }> => {
   try {
     // Step 1: Get Login Token
-    // We use a raw fetch here to avoid the generic CMD 233 token logic in apiRequest
     const tokenRes = await fetch(API_BASE_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -166,10 +165,19 @@ export const login = async (username: string, password: string): Promise<{ succe
       })
     });
     
-    if (!tokenRes.ok) throw new Error('Network error during token fetch');
-    const tokenData = await tokenRes.json();
+    // Attempt to parse JSON regardless of status
+    let tokenData: any;
+    try {
+        tokenData = await tokenRes.json();
+    } catch(e) {
+        tokenData = null;
+    }
+
+    if (!tokenRes.ok && (!tokenData || !tokenData.success)) {
+        throw new Error('Network error during token fetch');
+    }
     
-    if (!tokenData.success || !tokenData.token) {
+    if (!tokenData || !tokenData.success || !tokenData.token) {
       console.error('Login token fetch failed', tokenData);
       return { success: false, message: 'System initialization failed.' };
     }
@@ -180,7 +188,6 @@ export const login = async (username: string, password: string): Promise<{ succe
     const hashedPassword = await sha256(loginToken + password);
 
     // Step 3: Send Login Request (CMD 100)
-    // The prompt implies sending the current session ID if available, or just the flow context.
     const currentSessionId = getSessionId(); 
 
     const loginPayload = {
@@ -200,8 +207,18 @@ export const login = async (username: string, password: string): Promise<{ succe
       body: JSON.stringify(loginPayload)
     });
 
-    if (!loginRes.ok) throw new Error('Network error during login');
-    const loginData = await loginRes.json();
+    let loginData: any;
+    try {
+        loginData = await loginRes.json();
+    } catch(e) {
+        loginData = null;
+    }
+
+    if (!loginRes.ok && !loginData) {
+        throw new Error('Network error during login');
+    }
+    
+    if (!loginData) throw new Error('Invalid login response');
 
     // Specific Error Handling: Already Logged In
     if (loginData.success !== true && loginData.message === 'alreadyLogin') {
@@ -258,20 +275,24 @@ const fetchOneTimeToken = async (): Promise<string> => {
       body: JSON.stringify(payload)
     });
 
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
+    let data: any;
+    try {
+        data = await response.json();
+    } catch(e) {
+        data = null;
     }
-
-    const data = await response.json();
     
-    // Intercept NO_AUTH during token fetch
+    // Intercept NO_AUTH during token fetch (even if status is 500)
     if (data && data.message === 'NO_AUTH') {
         triggerAuthLogout();
         return '';
     }
 
-    // Expected response format: {"success":true,"cmd":233,"token":"..."}
-    return data.token || '';
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    return data?.token || '';
   } catch (error) {
     console.error('Failed to fetch token:', error);
     return ''; 
@@ -308,14 +329,11 @@ export const apiRequest = async <T = any>(
     ...data
   };
 
-  // Attach token only for write operations (method: 'POST')
-  // We ensure the token field is present even if token is empty
   if (method === 'POST') {
     payload.token = token;
   }
 
   try {
-    // "全部使用post请求下发数据" - Always use HTTP POST
     const response = await fetch(API_BASE_URL, {
       method: 'POST', 
       headers: {
@@ -324,19 +342,30 @@ export const apiRequest = async <T = any>(
       body: JSON.stringify(payload),
     });
 
+    // 1. Attempt to parse JSON response regardless of HTTP status
+    //    Crucial for handling 500 Internal Server Errors that carry valid NO_AUTH payloads.
+    let resData: any = null;
+    try {
+        resData = await response.json();
+    } catch (e) {
+        resData = null;
+    }
+
+    // 2. Intercept Global Auth Failure (NO_AUTH) found in JSON body
+    //    If NO_AUTH is detected, trigger logout immediately regardless of the command.
+    if (resData && resData.message === 'NO_AUTH') {
+        triggerAuthLogout();
+        return resData;
+    }
+
+    // 3. If NOT a handled NO_AUTH response, now check for HTTP errors
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-
-    const resData = await response.json();
-
-    // Intercept Global Auth Failure (NO_AUTH)
-    // EXCEPTION: CMD 585 and 586 can be requested without login, 
-    // so we do not trigger a forced logout if they return NO_AUTH.
-    if (resData && resData.message === 'NO_AUTH') {
-        if (cmd !== 585 && cmd !== 586) {
-             triggerAuthLogout();
-        }
+    
+    // 4. Fallback if body was empty
+    if (!resData) {
+        return {} as T; 
     }
 
     return resData;
@@ -361,16 +390,13 @@ export const fetchStatusInfo = async (): Promise<StatusInfoResponse> => {
 export const logout = async (): Promise<boolean> => {
   try {
     const response = await apiRequest(101, 'POST');
-    // We clear the session regardless of whether the API returns success or fails (e.g. token expired).
-    // This ensures the user is logged out locally.
     clearSessionId();
     if (response.success) {
       return true;
     }
-    return true; // Treat as success for the UI flow
+    return true; 
   } catch (error) {
     console.error('Logout error:', error);
-    // Force logout locally even on network error
     clearSessionId();
     return true; 
   }
@@ -385,14 +411,11 @@ export const checkAuthStatus = async (): Promise<boolean> => {
   try {
     const response = await apiRequest(104, 'GET');
     
-    // Check specifically for NO_AUTH message regardless of success flag
-    // This indicates the session has expired on the server side
     if (response.message === 'NO_AUTH') {
       return false;
     }
     return true;
   } catch (error) {
-    // If network fails, we usually don't log out immediately unless we get explicit NO_AUTH
     return true; 
   }
 };
