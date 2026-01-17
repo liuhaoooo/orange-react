@@ -386,30 +386,38 @@ export const fetchStatusInfo = async (): Promise<StatusInfoResponse> => {
 /**
  * Logout Function
  * CMD: 101
- * Note: Manually implemented to avoid pre-fetching token (CMD 233) via apiRequest, 
- * which can cause 500 errors if the token fetch fails or if logout doesn't support the token field.
+ * Backend requirement: Must request token (CMD 233) before sending logout command.
+ * If token fetch fails (e.g. session invalid), we do not send CMD 101 to avoid 500 error.
  */
 export const logout = async (): Promise<boolean> => {
   try {
+    // 1. Fetch Token
+    const token = await fetchOneTimeToken();
+    
+    // 2. If token invalid (empty), we assume session is already bad.
+    // Sending CMD 101 with empty token causes 500 error, so we skip it and just clear local state.
+    if (!token) {
+        clearSessionId();
+        return true;
+    }
+
     const sessionId = getSessionId();
     
-    // We send a direct request without 'token' field if possible, 
-    // or just relying on sessionId. CMD 101 typically clears the session identified by sessionId.
     const payload = {
         cmd: 101,
         method: 'POST',
-        sessionId: sessionId
+        sessionId: sessionId,
+        token: token
     };
 
-    const response = await fetch(API_BASE_URL, {
+    // 3. Send Logout Request
+    await fetch(API_BASE_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
     });
 
-    // We don't strictly check response.ok here for 500s because logout is a best-effort cleanup.
-    // However, if the server returns JSON, we try to parse it.
-    
+    // We clear session regardless of response
     clearSessionId();
     return true; 
   } catch (error) {
