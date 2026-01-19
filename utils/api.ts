@@ -252,58 +252,10 @@ export const login = async (username: string, password: string): Promise<{ succe
 };
 
 /**
- * Fetches a one-time token required for POST (write) operations.
- * Sends a POST request with cmd: 233 and method: 'GET' to the main endpoint.
- */
-const fetchOneTimeToken = async (): Promise<string> => {
-  try {
-    const sessionId = getSessionId();
-    
-    // Payload specifically for fetching the token
-    const payload = {
-        cmd: 233,
-        method: 'GET',
-        sessionId: sessionId
-    };
-
-    // Always use POST for the HTTP transport
-    const response = await fetch(API_BASE_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload)
-    });
-
-    let data: any;
-    try {
-        data = await response.json();
-    } catch(e) {
-        data = null;
-    }
-    
-    // Intercept NO_AUTH during token fetch (even if status is 500)
-    if (data && data.message === 'NO_AUTH') {
-        triggerAuthLogout();
-        return '';
-    }
-
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-
-    return data?.token || '';
-  } catch (error) {
-    console.error('Failed to fetch token:', error);
-    return ''; 
-  }
-};
-
-/**
  * Generic API Request Function
  * 
  * @param cmd - The command ID (e.g., 220)
- * @param method - 'GET' for fetching data, 'POST' for setting data (triggers token fetch)
+ * @param method - 'GET' for fetching data, 'POST' for setting data
  * @param data - Additional payload parameters
  * @returns Promise with the response
  */
@@ -314,12 +266,6 @@ export const apiRequest = async <T = any>(
 ): Promise<T> => {
   
   const sessionId = getSessionId();
-  let token = '';
-
-  // If we are setting data (method: 'POST'), we need to get a token first
-  if (method === 'POST') {
-    token = await fetchOneTimeToken();
-  }
 
   // Construct the base payload structure
   const payload: Record<string, any> = {
@@ -330,7 +276,8 @@ export const apiRequest = async <T = any>(
   };
 
   if (method === 'POST') {
-    payload.token = token;
+    // CMD 233 token requirement removed. Sending empty token for compatibility with schema if needed.
+    payload.token = '';
   }
 
   try {
@@ -386,31 +333,19 @@ export const fetchStatusInfo = async (): Promise<StatusInfoResponse> => {
 /**
  * Logout Function
  * CMD: 101
- * Backend requirement: Must request token (CMD 233) before sending logout command.
- * If token fetch fails (e.g. session invalid), we do not send CMD 101 to avoid 500 error.
  */
 export const logout = async (): Promise<boolean> => {
   try {
-    // 1. Fetch Token
-    const token = await fetchOneTimeToken();
-    
-    // 2. If token invalid (empty), we assume session is already bad.
-    // Sending CMD 101 with empty token causes 500 error, so we skip it and just clear local state.
-    if (!token) {
-        clearSessionId();
-        return true;
-    }
-
     const sessionId = getSessionId();
     
     const payload = {
         cmd: 101,
         method: 'POST',
         sessionId: sessionId,
-        token: token
+        token: '' // Empty token as CMD 233 is no longer required
     };
 
-    // 3. Send Logout Request
+    // Send Logout Request
     await fetch(API_BASE_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
