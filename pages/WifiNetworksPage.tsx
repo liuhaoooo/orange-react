@@ -1,11 +1,13 @@
 
+
+
 import React, { useState, useMemo } from 'react';
 import { Settings, User, QrCode } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { SquareSwitch } from '../components/UIComponents';
 import { QrModal } from '../components/QrModal';
-import { updateConnectionSettings, fetchConnectionSettings, fetchWifiSettings } from '../utils/api';
+import { updateWifiConfig, fetchWifiSettings, WifiSettingsResponse } from '../utils/api';
 
 interface WifiNetworksPageProps {
   onOpenSettings: () => void;
@@ -123,61 +125,97 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
     }
   };
 
-  const updateSettings = async (updates: Record<string, string>, loadingKey: string) => {
-    setLoadingIds(prev => ({ ...prev, [loadingKey]: true }));
-    try {
-        const res = await updateConnectionSettings(updates);
-        if (res.success) {
-             // Update local cache optimistically
-             if (globalData.wifiSettings) {
-                 updateGlobalData('wifiSettings', { ...globalData.wifiSettings, ...updates });
-             }
-             if (globalData.connectionSettings) {
-                 updateGlobalData('connectionSettings', { ...globalData.connectionSettings, ...updates });
-             }
-             
-             // Refresh Data from Server (CMD 587)
-             fetchWifiSettings().then(res => {
-                 if (res && res.success !== false) {
-                     updateGlobalData('wifiSettings', res);
-                 }
-             });
-        }
-    } catch (e) {
-        console.error("Failed to update wifi", e);
-    } finally {
-        setLoadingIds(prev => ({ ...prev, [loadingKey]: false }));
-    }
+  /**
+   * Performs the update using the new CMD 2/211 API.
+   * Requires extracting current full state from globalData.
+   */
+  const performUpdate = async (
+    prefix: 'main' | 'guest',
+    band: '24g' | '5g',
+    newEnabledState: boolean,
+    loadingKey: string
+  ) => {
+      setLoadingIds(prev => ({ ...prev, [loadingKey]: true }));
+      
+      const s = globalData.wifiSettings || globalData.connectionSettings || {};
+      
+      // Determine keys
+      const ssidKey = `${prefix}_wifi_ssid_${band}`;
+      const passKey = `${prefix}_password_${band}`;
+      const authKey = `${prefix}_authenticationType_${band}`;
+      const broadcastKey = `${prefix}_wifi_broadcast_${band}`;
+      const priorityKey = `${prefix}_wifiPriority`; // Optimization
+      
+      // Prepare Payload
+      const payload = {
+          is5g: band === '5g',
+          isGuest: prefix === 'guest',
+          wifiOpen: newEnabledState ? '1' : '0',
+          ssid: s[ssidKey] || '',
+          key: s[passKey] || '',
+          authenticationType: s[authKey] || '3',
+          broadcast: s[broadcastKey] || '1',
+          wifiSames: s[priorityKey] || '0'
+      };
+
+      try {
+          const res = await updateWifiConfig(payload);
+          if (res.success) {
+               const switchKey = `${prefix}_wifi_switch_${band}`;
+               const updates = { [switchKey]: newEnabledState ? '1' : '0' };
+
+               if (globalData.wifiSettings) {
+                   updateGlobalData('wifiSettings', { ...globalData.wifiSettings, ...updates });
+               }
+               if (globalData.connectionSettings) {
+                   updateGlobalData('connectionSettings', { ...globalData.connectionSettings, ...updates });
+               }
+               
+               // Refresh Data from Server (CMD 587)
+               fetchWifiSettings().then(res => {
+                   if (res && res.success !== false) {
+                       updateGlobalData('wifiSettings', res);
+                   }
+               });
+          }
+      } catch (e) {
+          console.error("Failed to update wifi", e);
+      } finally {
+          setLoadingIds(prev => ({ ...prev, [loadingKey]: false }));
+      }
   };
 
   const toggleSplitNetwork = (net: PageWifiNetwork) => {
       handleInteraction(() => {
-        const newVal = net.enabled ? '0' : '1';
-        if (net.switchKey) {
-            updateSettings({ [net.switchKey]: newVal }, net.id);
-        }
+        const parts = net.id.split('_');
+        const prefix = parts[0] as 'main' | 'guest';
+        const band = parts[1] === '5' ? '5g' : '24g';
+        const newState = !net.enabled;
+        performUpdate(prefix, band, newState, net.id);
       });
   };
 
   const toggleMergedNetwork = (net: PageWifiNetwork) => {
-      handleInteraction(() => {
+      handleInteraction(async () => {
          const isAnyOn = net.enabled24 || net.enabled5;
-         const newVal = isAnyOn ? '0' : '1';
-         const updates: Record<string, string> = {};
-         if (net.key24) updates[net.key24] = newVal;
-         if (net.key5) updates[net.key5] = newVal;
-         updateSettings(updates, net.id);
+         const newState = !isAnyOn;
+         const prefix = net.id.startsWith('guest') ? 'guest' : 'main';
+         
+         // Send requests for both bands simultaneously
+         await Promise.all([
+             performUpdate(prefix, '24g', newState, net.id),
+             performUpdate(prefix, '5g', newState, net.id)
+         ]);
       });
   };
 
-  const toggleMergedBand = (net: PageWifiNetwork, band: '24' | '5') => {
+  const toggleMergedBand = (net: PageWifiNetwork, bandKey: '24' | '5') => {
     handleInteraction(() => {
-        const key = band === '24' ? net.key24 : net.key5;
-        const current = band === '24' ? net.enabled24 : net.enabled5;
-        const newVal = current ? '0' : '1';
-        if (key) {
-            updateSettings({ [key]: newVal }, net.id);
-        }
+        const prefix = net.id.startsWith('guest') ? 'guest' : 'main';
+        const band = bandKey === '5' ? '5g' : '24g';
+        const current = bandKey === '5' ? net.enabled5 : net.enabled24;
+        const newState = !current;
+        performUpdate(prefix, band, newState, net.id);
     });
   };
 

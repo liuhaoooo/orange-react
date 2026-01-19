@@ -1,11 +1,13 @@
 
+
+
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Eye, EyeOff, ChevronDown, Loader2 } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { SquareSwitch } from './UIComponents';
 import { WifiNetwork } from '../types';
-import { fetchWifiSettings, updateConnectionSettings, WifiSettingsResponse } from '../utils/api';
+import { fetchWifiSettings, updateWifiConfig, WifiSettingsResponse } from '../utils/api';
 import { useGlobalState } from '../utils/GlobalStateContext';
 
 interface EditSsidModalProps {
@@ -37,6 +39,9 @@ export const EditSsidModal: React.FC<EditSsidModalProps> = ({ isOpen, onClose, n
   const [authType, setAuthType] = useState('3');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  
+  // Keep track of the original switch state (enabled/disabled) to preserve it during save
+  const [wifiOpen, setWifiOpen] = useState('1');
 
   // Context Info
   const [networkPrefix, setNetworkPrefix] = useState<'main' | 'guest'>('main');
@@ -95,11 +100,14 @@ export const EditSsidModal: React.FC<EditSsidModalProps> = ({ isOpen, onClose, n
            const authKey = `${prefix}_authenticationType_${band}` as keyof WifiSettingsResponse;
            // Wi-Fi Password: main_password_24g
            const passKey = `${prefix}_password_${band}` as keyof WifiSettingsResponse;
+           // Wifi Open Status
+           const switchKey = `${prefix}_wifi_switch_${band}` as keyof WifiSettingsResponse;
 
            setSsid((data[ssidKey] as string) || '');
            setBroadcast((data[broadcastKey] as string) === '1');
            setAuthType((data[authKey] as string) || '3');
            setPassword((data[passKey] as string) || '');
+           setWifiOpen((data[switchKey] as string) || '1');
         }
         setLoading(false);
       });
@@ -109,29 +117,46 @@ export const EditSsidModal: React.FC<EditSsidModalProps> = ({ isOpen, onClose, n
   const handleSave = async () => {
       setIsSaving(true);
       
-      const updates: Record<string, string> = {};
-      
       const prefix = networkPrefix;
       const band = networkBand;
 
-      // 1. Optimization / Priority
-      if (showOptimizationSwitch) {
-          const priorityKey = `${prefix}_wifiPriority`;
-          updates[priorityKey] = optimization ? '1' : '0';
-      }
-
-      // 2. Standard Fields
-      updates[`${prefix}_wifi_ssid_${band}`] = ssid;
-      updates[`${prefix}_wifi_broadcast_${band}`] = broadcast ? '1' : '0';
-      updates[`${prefix}_authenticationType_${band}`] = authType;
-      updates[`${prefix}_password_${band}`] = password;
+      const payload = {
+          is5g: band === '5g',
+          isGuest: prefix === 'guest',
+          wifiOpen: wifiOpen,
+          ssid: ssid,
+          broadcast: broadcast ? '1' : '0',
+          key: password,
+          authenticationType: authType,
+          wifiSames: showOptimizationSwitch ? (optimization ? '1' : '0') : undefined
+      };
 
       try {
-          const res = await updateConnectionSettings(updates);
+          const res = await updateWifiConfig(payload);
+          
           if (res.success) {
               // Refresh global settings to reflect changes immediately in UI
+              // Update optimistic cache based on input fields
+              const updates: Record<string, string> = {};
+              
+              if (showOptimizationSwitch) {
+                   updates[`${prefix}_wifiPriority`] = optimization ? '1' : '0';
+              }
+              updates[`${prefix}_wifi_ssid_${band}`] = ssid;
+              updates[`${prefix}_wifi_broadcast_${band}`] = broadcast ? '1' : '0';
+              updates[`${prefix}_authenticationType_${band}`] = authType;
+              updates[`${prefix}_password_${band}`] = password;
+
               const currentSettings = globalData.connectionSettings || {};
               updateGlobalData('connectionSettings', { ...currentSettings, ...updates });
+              
+              // Also refresh for real
+              fetchWifiSettings().then(data => {
+                  if (data && data.success !== false) {
+                       updateGlobalData('wifiSettings', data);
+                  }
+              });
+
               onClose();
           }
       } catch (error) {

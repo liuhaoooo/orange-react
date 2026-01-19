@@ -471,6 +471,43 @@ export const updateConnectionSettings = async (data: Partial<ConnectionSettingsR
 };
 
 /**
+ * Update Wifi Configuration
+ * CMD: 2 (2.4GHz) or CMD: 211 (5GHz)
+ */
+export const updateWifiConfig = async (params: {
+    is5g: boolean;
+    isGuest: boolean;
+    wifiOpen: string; // '0' | '1'
+    ssid: string;
+    broadcast: string; // '0' | '1'
+    key: string;
+    authenticationType: string;
+    wifiSames?: string; // '0' | '1' (Only for 2.4G Optimization)
+}): Promise<ApiResponse> => {
+    const cmd = params.is5g ? 211 : 2;
+    const subcmd = params.isGuest ? 1 : 0;
+    
+    // Base64 encode SSID - handling unicode properly for btoa
+    const encodedSsid = btoa(unescape(encodeURIComponent(params.ssid)));
+
+    const payload: any = {
+        subcmd,
+        wifiOpen: params.wifiOpen,
+        broadcast: params.broadcast,
+        ssid: encodedSsid,
+        key: params.key,
+        authenticationType: params.authenticationType
+    };
+
+    // 5GHz Optimization (wifiSames) is only relevant for CMD 2 (2.4GHz)
+    if (!params.is5g && params.wifiSames !== undefined) {
+        payload.wifiSames = params.wifiSames;
+    }
+
+    return apiRequest(cmd, 'POST', payload);
+};
+
+/**
  * Set Dial Mode (Data Switch)
  * CMD: 222
  */
