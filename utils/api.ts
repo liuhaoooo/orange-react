@@ -1,5 +1,4 @@
 
-
 // API Configuration
 const API_BASE_URL = '/cgi-bin/http.cgi'; 
 
@@ -561,4 +560,13 @@ export const setRoamingEnable = async (roamingEnable: '0' | '1'): Promise<ApiRes
  */
 export const fetchSmsList = async (pageNum: number = 1, subcmd: number = 0): Promise<SmsListResponse> => {
     return apiRequest<SmsListResponse>(12, 'GET', { page_num: pageNum, subcmd });
+};
+
+/**
+ * Mark SMS as Read
+ * CMD: 12
+ * @param indexes Array of message IDs/indexes
+ */
+export const markSmsAsRead = async (indexes: string[]): Promise<ApiResponse> => {
+    return apiRequest(12, 'POST', { index: indexes.join(',') });
 };

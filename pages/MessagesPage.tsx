@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Settings, Plus, CornerUpRight, Search, AlertTriangle, MessageSquare, User } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
-import { fetchSmsList, parseSmsList, SmsMessage } from '../utils/api';
+import { fetchSmsList, parseSmsList, SmsMessage, markSmsAsRead } from '../utils/api';
 import { useLocation } from 'react-router-dom';
 
 interface MessagesPageProps {
@@ -58,7 +58,14 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
             const res = await fetchSmsList(1, subcmd);
             if (res && res.success) {
                 const parsed = parseSmsList(res.sms_list);
+                
+                // Note: We don't overwrite if the data hasn't changed to avoid jitter, 
+                // but for simplicity in this implementation we overwrite. 
+                // However, we must be careful not to undo our "optimistic" read status updates 
+                // until the server confirms them. 
+                // In this simple polling model, the server source of truth eventually overwrites.
                 setMessages(parsed);
+                
                 setStats({
                     total: parseInt(res.sms_total || "0"),
                     unread: parseInt(res.sms_unread || "0"),
@@ -126,6 +133,42 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
       return [...activeThread.messages].sort((a, b) => a.date > b.date ? 1 : -1);
   }, [activeThread]);
 
+  // Helper to mark thread as read
+  const markThreadAsRead = async (sender: string) => {
+    // Only mark as read if in Inbox
+    if (activeTab !== 'inbox') return;
+
+    // Find all unread messages for this sender in the current messages list
+    const targetMessages = messages.filter(m => (m.sender === sender || (!m.sender && sender === t('unknown'))) && m.status === '0');
+    const unreadIds = targetMessages.map(m => m.id);
+
+    if (unreadIds.length > 0) {
+        // 1. Optimistic Update: Update UI immediately
+        setMessages(prev => prev.map(msg => 
+            unreadIds.includes(msg.id) ? { ...msg, status: '1' } : msg
+        ));
+
+        setStats(prev => ({
+            ...prev,
+            unread: Math.max(0, prev.unread - unreadIds.length)
+        }));
+
+        // 2. Send Request
+        try {
+            await markSmsAsRead(unreadIds);
+            // Success: state is already updated.
+            // Failure: next poll will revert state to server truth.
+        } catch (e) {
+            console.error("Failed to mark messages as read", e);
+        }
+    }
+  };
+
+  const handleThreadSelect = (sender: string) => {
+      setSelectedSender(sender);
+      markThreadAsRead(sender);
+  };
+
   // Reset selection on tab change
   useEffect(() => {
       setSelectedSender(null);
@@ -137,8 +180,25 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
           // Ensure we are on inbox if coming from card (Card usually shows inbox)
           // Since default is inbox, we just set sender
           setSelectedSender(location.state.sender);
+          // Also trigger mark read for this deep link
+          // We need to wait for messages to load if they haven't yet, but since
+          // messages depend on state, we can try. 
+          // However, if messages are empty initially, this might do nothing.
+          // The click handler works because messages are loaded when clicked.
+          // For deep linking, we rely on the user seeing the view, triggering the effect below.
       }
   }, [location.state]);
+
+  // Trigger mark read if selectedSender changes and messages exist
+  // This handles the Deep Link case where messages might load AFTER selectedSender is set
+  useEffect(() => {
+      if (selectedSender && messages.length > 0 && activeTab === 'inbox') {
+          const hasUnread = messages.some(m => m.sender === selectedSender && m.status === '0');
+          if (hasUnread) {
+              markThreadAsRead(selectedSender);
+          }
+      }
+  }, [selectedSender, messages, activeTab]);
 
   // Login Check
   if (!isLoggedIn) {
@@ -258,7 +318,7 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
                     threads.map((thread) => (
                         <div 
                             key={thread.sender} 
-                            onClick={() => setSelectedSender(thread.sender)}
+                            onClick={() => handleThreadSelect(thread.sender)}
                             className={`p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer flex items-start ${selectedSender === thread.sender ? 'bg-orange/10 border-s-4 border-s-orange' : 'border-s-4 border-s-transparent'}`}
                         >
                              <div className="pt-1 pe-3" onClick={(e) => e.stopPropagation()}>
