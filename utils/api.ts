@@ -114,6 +114,25 @@ export interface WifiSettingsResponse {
     [key: string]: any;
 }
 
+export interface SmsMessage {
+    id: string;
+    status: string; // '0' = unread, '1' = read
+    sender: string;
+    date: string;
+    content: string;
+}
+
+export interface SmsListResponse {
+    success: boolean;
+    sms_list: string; // Comma separated base64 strings
+    sms_total: string;
+    sms_unread: string;
+    receive_full: string;
+    send_full: string;
+    draft_full: string;
+    [key: string]: any;
+}
+
 // Session Management (Using sessionStorage as requested)
 export const setSessionId = (sid: string) => {
   if (sid) {
@@ -144,6 +163,61 @@ async function sha256(source: string) {
   const resultBytes = [...new Uint8Array(digest)];
   return resultBytes.map(x => x.toString(16).padStart(2, '0')).join("");
 }
+
+/**
+ * Base64 Decode with UTF-8 support
+ */
+function b64DecodeUtf8(str: string): string {
+    try {
+        // Standard solution for decoding UTF-8 strings passed as base64
+        return decodeURIComponent(atob(str).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+    } catch (e) {
+        console.error("Base64 Decode Error", e);
+        return "";
+    }
+}
+
+/**
+ * Helper to parse the SMS list string returned by API
+ * Format: ID, STATUS(0=Unread,1=Read), SENDER, DATE, TIME, CONTENT
+ * Decoded string is comma separated.
+ */
+export const parseSmsList = (rawList: string): SmsMessage[] => {
+    if (!rawList) return [];
+    
+    // Split by comma to get individual messages (each is base64 encoded)
+    const items = rawList.split(',');
+    
+    return items.map(b64 => {
+        if (!b64.trim()) return null;
+        
+        const decoded = b64DecodeUtf8(b64);
+        
+        // Split by comma
+        // NOTE: Content might contain commas, so we need to handle that.
+        const parts = decoded.split(',');
+        
+        if (parts.length < 6) return null;
+        
+        const id = parts[0];
+        const status = parts[1]; // 0: Unread, 1: Read
+        const sender = parts[2];
+        const date = parts[3];
+        const time = parts[4];
+        // Join the rest as content, in case content contained commas
+        const content = parts.slice(5).join(',');
+        
+        return {
+            id,
+            status,
+            sender,
+            date: `${date} ${time}`,
+            content
+        };
+    }).filter((msg): msg is SmsMessage => msg !== null);
+};
 
 /**
  * Login Function
@@ -456,4 +530,14 @@ export const setDialMode = async (dialMode: '0' | '1'): Promise<ApiResponse> => 
  */
 export const setRoamingEnable = async (roamingEnable: '0' | '1'): Promise<ApiResponse> => {
   return apiRequest(220, 'POST', { roamingEnable });
+};
+
+/**
+ * Fetch SMS List
+ * CMD: 12
+ * @param pageNum Page number (default 1)
+ * @param subcmd 0=Inbox, 1=Sent, 2=Draft
+ */
+export const fetchSmsList = async (pageNum: number = 1, subcmd: number = 0): Promise<SmsListResponse> => {
+    return apiRequest<SmsListResponse>(12, 'GET', { page_num: pageNum, subcmd });
 };

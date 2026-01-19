@@ -1,8 +1,11 @@
 
-import React, { useState } from 'react';
+
+
+import React, { useState, useEffect } from 'react';
 import { Settings, Plus, CornerUpRight, Search, AlertTriangle, MessageSquare } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
+import { fetchSmsList, parseSmsList, SmsMessage } from '../utils/api';
 
 interface MessagesPageProps {
   onOpenSettings: () => void;
@@ -10,16 +13,20 @@ interface MessagesPageProps {
 
 type TabType = 'inbox' | 'sent' | 'draft';
 
-const mockMessages = [
-  { id: 1, sender: '0624681012', date: '2025/07/31 17:37:12', content: 'content test...', isNew: true, hasAlert: false },
-  { id: 2, sender: '06987654321', date: '2025/07/31 10:00:11', content: 'content test2', isNew: false, hasAlert: true },
-  { id: 3, sender: '06987654200', date: '2025/07/30 22:19:00', content: '<img onerror=alert(3)/><p>...', isNew: true, hasAlert: true },
-];
-
 export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) => {
   const { t } = useLanguage();
   const { isLoggedIn } = useGlobalState();
   const [activeTab, setActiveTab] = useState<TabType>('inbox');
+  
+  const [messages, setMessages] = useState<SmsMessage[]>([]);
+  const [stats, setStats] = useState({
+      total: 0,
+      unread: 0,
+      receiveFull: false,
+      sendFull: false,
+      draftFull: false
+  });
+  const [loading, setLoading] = useState(false);
 
   const handleAuthAction = (action: () => void) => {
     if (isLoggedIn) {
@@ -28,6 +35,52 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
         onOpenSettings();
     }
   };
+
+  // Poll for messages
+  useEffect(() => {
+    let intervalId: ReturnType<typeof setInterval>;
+    
+    const getSubCmd = (tab: TabType) => {
+        switch(tab) {
+            case 'inbox': return 0;
+            case 'sent': return 1;
+            case 'draft': return 2;
+            default: return 0;
+        }
+    };
+
+    const loadMessages = async () => {
+        try {
+            const subcmd = getSubCmd(activeTab);
+            const res = await fetchSmsList(1, subcmd);
+            if (res && res.success) {
+                const parsed = parseSmsList(res.sms_list);
+                setMessages(parsed);
+                setStats({
+                    total: parseInt(res.sms_total || "0"),
+                    unread: parseInt(res.sms_unread || "0"),
+                    receiveFull: res.receive_full === '1',
+                    sendFull: res.send_full === '1',
+                    draftFull: res.draft_full === '1'
+                });
+            }
+        } catch (error) {
+            console.error("Failed to load messages page", error);
+        }
+    };
+
+    if (isLoggedIn) {
+        setLoading(true);
+        loadMessages().finally(() => setLoading(false));
+        intervalId = setInterval(loadMessages, 10000);
+    } else {
+        setMessages([]);
+    }
+
+    return () => {
+        if (intervalId) clearInterval(intervalId);
+    };
+  }, [isLoggedIn, activeTab]);
 
   // Login Check
   if (!isLoggedIn) {
@@ -100,7 +153,7 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
 
       {/* Tabs */}
       <div className="px-6 flex border-b border-gray-200">
-         {renderTab('inbox', t('inbox'), 2)}
+         {renderTab('inbox', t('inbox'), activeTab === 'inbox' ? stats.unread : 0)}
          {renderTab('sent', t('sent'))}
          {renderTab('draft', t('draft'))}
       </div>
@@ -111,7 +164,10 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
          {/* Left Column: List */}
          <div className="w-full lg:w-[420px] shrink-0 border-r border-gray-200 flex flex-col">
             <div className="p-6 border-b border-gray-200">
-                <div className="font-bold text-sm mb-4">{t('msgStats', 3, 2)}</div>
+                <div className="font-bold text-sm mb-4">
+                    {/* Simplified Stats Text logic */}
+                    {t('msgStats', stats.total, stats.unread)}
+                </div>
                 <div className="relative mb-4">
                     <input 
                         type="text" 
@@ -127,24 +183,30 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
             </div>
 
             <div className="flex-1 overflow-y-auto">
-                {mockMessages.map((msg) => (
-                    <div key={msg.id} className="p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer flex items-start">
-                         <div className="pt-1 pe-3">
-                            <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-orange focus:ring-orange" />
-                         </div>
-                         <div className="flex-1 min-w-0">
-                             <div className="flex justify-between items-start">
-                                 <div className="font-bold text-black text-sm mb-1">{msg.sender}</div>
-                                 <div className="flex space-x-1 items-center">
-                                    {msg.hasAlert && <AlertTriangle size={14} className="text-yellow-500 fill-yellow-500" />}
-                                    {msg.isNew && <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>}
-                                 </div>
+                {messages.length > 0 ? (
+                    messages.map((msg) => (
+                        <div key={msg.id} className="p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer flex items-start">
+                             <div className="pt-1 pe-3">
+                                <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-orange focus:ring-orange" />
                              </div>
-                             <div className="text-xs text-gray-400 mb-1">{msg.date}</div>
-                             <div className="text-sm text-gray-600 truncate">{msg.content}</div>
-                         </div>
+                             <div className="flex-1 min-w-0">
+                                 <div className="flex justify-between items-start">
+                                     <div className="font-bold text-black text-sm mb-1">{msg.sender}</div>
+                                     <div className="flex space-x-1 items-center">
+                                        {/* Status '0' means unread/new based on requirement */}
+                                        {msg.status === '0' && <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>}
+                                     </div>
+                                 </div>
+                                 <div className="text-xs text-gray-400 mb-1">{msg.date}</div>
+                                 <div className="text-sm text-gray-600 truncate">{msg.content}</div>
+                             </div>
+                        </div>
+                    ))
+                ) : (
+                    <div className="p-8 text-center text-gray-400 italic">
+                        {t('noData')}
                     </div>
-                ))}
+                )}
             </div>
          </div>
 
@@ -152,7 +214,6 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
          <div className="flex-1 flex flex-col items-center justify-center p-10 bg-white">
              {/* Illustration */}
              <div className="mb-6 relative w-64 h-48">
-                {/* Generic placeholder illustration composed of CSS/SVG elements trying to mimic the style */}
                  <div className="flex justify-center items-end space-x-4 h-full">
                      <MessageSquare className="w-24 h-24 text-orange fill-orange opacity-90 transform -scale-x-100" />
                      <MessageSquare className="w-24 h-24 text-black fill-black opacity-90" />
