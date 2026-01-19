@@ -1,8 +1,6 @@
 
-
-
 import React, { useState, useEffect, useMemo } from 'react';
-import { Settings, Plus, CornerUpRight, Search, AlertTriangle, MessageSquare } from 'lucide-react';
+import { Settings, Plus, CornerUpRight, Search, AlertTriangle, MessageSquare, User } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { fetchSmsList, parseSmsList, SmsMessage } from '../utils/api';
@@ -27,6 +25,9 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
       draftFull: false
   });
   const [loading, setLoading] = useState(false);
+  
+  // Selection State
+  const [selectedSender, setSelectedSender] = useState<string | null>(null);
 
   const handleAuthAction = (action: () => void) => {
     if (isLoggedIn) {
@@ -88,6 +89,45 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
     if (activeTab === 'draft') return stats.draftFull;
     return false;
   }, [activeTab, stats]);
+
+  // Group Messages by Sender
+  const threads = useMemo(() => {
+    const groups: Record<string, SmsMessage[]> = {};
+    messages.forEach(msg => {
+        const key = msg.sender || t('unknown');
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(msg);
+    });
+
+    return Object.entries(groups).map(([sender, msgs]) => {
+        // Sort DESC for preview (newest first)
+        const sortedDesc = [...msgs].sort((a, b) => a.date > b.date ? -1 : 1);
+        return {
+            sender,
+            count: msgs.length,
+            messages: sortedDesc,
+            latest: sortedDesc[0],
+            hasUnread: msgs.some(m => m.status === '0')
+        };
+    }).sort((a, b) => a.latest.date > b.latest.date ? -1 : 1); // Sort threads by latest message
+  }, [messages, t]);
+
+  // Selected Thread Data
+  const activeThread = useMemo(() => {
+      if (!selectedSender) return null;
+      return threads.find(t => t.sender === selectedSender);
+  }, [selectedSender, threads]);
+
+  // Messages for the chat view (Sorted Ascending)
+  const chatMessages = useMemo(() => {
+      if (!activeThread) return [];
+      return [...activeThread.messages].sort((a, b) => a.date > b.date ? 1 : -1);
+  }, [activeThread]);
+
+  // Reset selection on tab change
+  useEffect(() => {
+      setSelectedSender(null);
+  }, [activeTab]);
 
   // Login Check
   if (!isLoggedIn) {
@@ -198,22 +238,30 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
             </div>
 
             <div className="flex-1 overflow-y-auto">
-                {messages.length > 0 ? (
-                    messages.map((msg) => (
-                        <div key={msg.id} className="p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer flex items-start">
-                             <div className="pt-1 pe-3">
+                {threads.length > 0 ? (
+                    threads.map((thread) => (
+                        <div 
+                            key={thread.sender} 
+                            onClick={() => setSelectedSender(thread.sender)}
+                            className={`p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer flex items-start ${selectedSender === thread.sender ? 'bg-orange/10 border-s-4 border-s-orange' : 'border-s-4 border-s-transparent'}`}
+                        >
+                             <div className="pt-1 pe-3" onClick={(e) => e.stopPropagation()}>
                                 <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-orange focus:ring-orange" />
                              </div>
                              <div className="flex-1 min-w-0">
                                  <div className="flex justify-between items-start">
-                                     <div className="font-bold text-black text-sm mb-1">{msg.sender}</div>
-                                     <div className="flex space-x-1 items-center">
-                                        {/* Status '0' means unread/new based on requirement */}
-                                        {msg.status === '0' && <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>}
+                                     <div className="font-bold text-black text-sm mb-1 truncate pe-2" title={thread.sender}>{thread.sender}</div>
+                                     <div className="flex space-x-1 items-center shrink-0">
+                                         {thread.count > 1 && (
+                                            <span className="text-[10px] bg-gray-200 text-gray-600 px-1.5 rounded-full font-bold h-4 flex items-center">{thread.count}</span>
+                                         )}
+                                        {thread.hasUnread && <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>}
                                      </div>
                                  </div>
-                                 <div className="text-xs text-gray-400 mb-1">{msg.date}</div>
-                                 <div className="text-sm text-gray-600 truncate">{msg.content}</div>
+                                 <div className="flex justify-between items-baseline">
+                                     <div className="text-sm text-gray-600 truncate flex-1 pe-2">{thread.latest.content}</div>
+                                     <div className="text-xs text-gray-400 shrink-0 whitespace-nowrap">{thread.latest.date.split(' ')[0]}</div>
+                                 </div>
                              </div>
                         </div>
                     ))
@@ -225,21 +273,54 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
             </div>
          </div>
 
-         {/* Right Column: Details/Placeholder */}
-         <div className="flex-1 flex flex-col items-center justify-center p-10 bg-white">
-             {/* Illustration */}
-             <div className="mb-6 relative w-64 h-48">
-                 <div className="flex justify-center items-end space-x-4 h-full">
-                     <MessageSquare className="w-24 h-24 text-orange fill-orange opacity-90 transform -scale-x-100" />
-                     <MessageSquare className="w-24 h-24 text-black fill-black opacity-90" />
+         {/* Right Column: Chat View or Placeholder */}
+         <div className="flex-1 flex flex-col h-full bg-[#f8f9fa]">
+             {activeThread ? (
+                <>
+                    {/* Chat Header */}
+                    <div className="p-4 border-b border-gray-200 bg-white flex justify-between items-center shadow-sm shrink-0">
+                        <div className="flex items-center">
+                            <div className="w-10 h-10 bg-orange/20 rounded-full flex items-center justify-center text-orange font-bold me-3">
+                                <User size={20} />
+                            </div>
+                            <div>
+                                <div className="font-bold text-black text-sm">{activeThread.sender}</div>
+                                <div className="text-xs text-gray-500">{activeThread.count} {t('messages')}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Messages List */}
+                    <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                        {chatMessages.map((msg) => (
+                            <div key={msg.id} className={`flex flex-col ${activeTab === 'sent' ? 'items-end' : 'items-start'}`}>
+                                <div className={`max-w-[80%] p-3 rounded-lg shadow-sm text-sm break-words ${activeTab === 'sent' ? 'bg-[#ffedcc] text-black rounded-tr-none border border-orange/20' : 'bg-white text-black rounded-tl-none border border-gray-200'}`}>
+                                    {msg.content}
+                                </div>
+                                <div className="text-[10px] text-gray-400 mt-1 px-1">
+                                    {msg.date}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </>
+             ) : (
+                 <div className="flex-1 flex flex-col items-center justify-center p-10 bg-white">
+                     {/* Illustration */}
+                     <div className="mb-6 relative w-64 h-48">
+                         <div className="flex justify-center items-end space-x-4 h-full">
+                             <MessageSquare className="w-24 h-24 text-orange fill-orange opacity-90 transform -scale-x-100" />
+                             <MessageSquare className="w-24 h-24 text-black fill-black opacity-90" />
+                         </div>
+                         {/* Decorative elements */}
+                         <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-orange rotate-45"></div>
+                         <div className="absolute top-1/4 left-1/3 w-2 h-2 bg-black rounded-full"></div>
+                         <div className="absolute top-1/3 right-1/3 w-2 h-2 bg-orange rounded-full"></div>
+                     </div>
+                     
+                     <p className="text-black text-sm">{t('selectMsgToRead')}</p>
                  </div>
-                 {/* Decorative elements */}
-                 <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-orange rotate-45"></div>
-                 <div className="absolute top-1/4 left-1/3 w-2 h-2 bg-black rounded-full"></div>
-                 <div className="absolute top-1/3 right-1/3 w-2 h-2 bg-orange rounded-full"></div>
-             </div>
-             
-             <p className="text-black text-sm">{t('selectMsgToRead')}</p>
+             )}
          </div>
 
       </div>
