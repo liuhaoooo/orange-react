@@ -1,7 +1,7 @@
 
 
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Settings, Plus, CornerUpRight, Search, AlertTriangle, MessageSquare } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
@@ -81,6 +81,13 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
         if (intervalId) clearInterval(intervalId);
     };
   }, [isLoggedIn, activeTab]);
+
+  const isCurrentBoxFull = useMemo(() => {
+    if (activeTab === 'inbox') return stats.receiveFull;
+    if (activeTab === 'sent') return stats.sendFull;
+    if (activeTab === 'draft') return stats.draftFull;
+    return false;
+  }, [activeTab, stats]);
 
   // Login Check
   if (!isLoggedIn) {
@@ -164,10 +171,18 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
          {/* Left Column: List */}
          <div className="w-full lg:w-[420px] shrink-0 border-r border-gray-200 flex flex-col">
             <div className="p-6 border-b border-gray-200">
-                <div className="font-bold text-sm mb-4">
-                    {/* Simplified Stats Text logic */}
-                    {t('msgStats', stats.total, stats.unread)}
+                <div className="flex justify-between items-center mb-4">
+                    <div className="font-bold text-sm">
+                        {t('msgStats', stats.total, stats.unread)}
+                    </div>
+                    {isCurrentBoxFull && (
+                        <div className="flex items-center text-red-500 text-xs font-bold animate-pulse">
+                            <AlertTriangle size={14} className="me-1" />
+                            {t('storageFull')}
+                        </div>
+                    )}
                 </div>
+                
                 <div className="relative mb-4">
                     <input 
                         type="text" 

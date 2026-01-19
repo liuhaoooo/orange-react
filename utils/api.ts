@@ -181,8 +181,9 @@ function b64DecodeUtf8(str: string): string {
 
 /**
  * Helper to parse the SMS list string returned by API
- * Format: ID, STATUS(0=Unread,1=Read), SENDER, DATE, TIME, CONTENT
- * Decoded string is comma separated.
+ * Format: ID STATUS SENDER DATE TIME CONTENT
+ * Decoded string is space separated.
+ * Content starts after the 5th space.
  */
 export const parseSmsList = (rawList: string): SmsMessage[] => {
     if (!rawList) return [];
@@ -195,19 +196,39 @@ export const parseSmsList = (rawList: string): SmsMessage[] => {
         
         const decoded = b64DecodeUtf8(b64);
         
-        // Split by comma
-        // NOTE: Content might contain commas, so we need to handle that.
-        const parts = decoded.split(',');
+        // We use split to get metadata easily, but we use substring for content to avoid split/join artifacts
+        const parts = decoded.split(' ');
         
-        if (parts.length < 6) return null;
+        // We expect at least 5 parts (id, status, sender, date, time).
+        if (parts.length < 5) return null;
         
         const id = parts[0];
         const status = parts[1]; // 0: Unread, 1: Read
         const sender = parts[2];
         const date = parts[3];
         const time = parts[4];
-        // Join the rest as content, in case content contained commas
-        const content = parts.slice(5).join(',');
+        
+        // Extract content: Everything after the 5th space
+        let content = "";
+        let spaceCount = 0;
+        let fifthSpaceIndex = -1;
+        
+        for (let i = 0; i < decoded.length; i++) {
+            if (decoded[i] === ' ') {
+                spaceCount++;
+                if (spaceCount === 5) {
+                    fifthSpaceIndex = i;
+                    break;
+                }
+            }
+        }
+        
+        if (fifthSpaceIndex !== -1) {
+            content = decoded.substring(fifthSpaceIndex + 1);
+        } else if (parts.length > 5) {
+            // Fallback: If 5 spaces weren't found in loop (unlikely if parts.length > 5), use join
+            content = parts.slice(5).join(' ');
+        }
         
         return {
             id,

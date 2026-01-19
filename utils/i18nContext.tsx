@@ -1,4 +1,5 @@
 
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 type LanguageCode = 'en' | 'cn' | 'fr' | 'ar' | 'el';
@@ -118,7 +119,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     googleSearch: "google search",
     viewServices: "View Services",
     viewWifiNetworks: "View Wi-Fi Networks",
-    viewMessages: "View Messages"
+    viewMessages: "View Messages",
+    storageFull: "Storage Full"
   },
   cn: {
     menu: "菜单",
@@ -227,7 +229,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     googleSearch: "谷歌搜索",
     viewServices: "查看服务",
     viewWifiNetworks: "查看 Wi-Fi 网络",
-    viewMessages: "查看消息"
+    viewMessages: "查看消息",
+    storageFull: "存储已满"
   },
   fr: {
     menu: "Menu",
@@ -336,7 +339,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     googleSearch: "google search",
     viewServices: "Voir les services",
     viewWifiNetworks: "Voir les réseaux Wi-Fi",
-    viewMessages: "Voir les messages"
+    viewMessages: "Voir les messages",
+    storageFull: "Mémoire pleine"
   },
   ar: {
     menu: "قائمة",
@@ -445,7 +449,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     googleSearch: "google search",
     viewServices: "عرض الخدمات",
     viewWifiNetworks: "عرض شبكات Wi-Fi",
-    viewMessages: "عرض الرسائل"
+    viewMessages: "عرض الرسائل",
+    storageFull: "الذاكرة ممتلئة"
   },
   el: {
     menu: "Menú",
@@ -554,7 +559,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     googleSearch: "google search",
     viewServices: "Ver servicios",
     viewWifiNetworks: "Ver redes Wi-Fi",
-    viewMessages: "Ver mensajes"
+    viewMessages: "Ver mensajes",
+    storageFull: "Memoria llena"
   }
 };
 
