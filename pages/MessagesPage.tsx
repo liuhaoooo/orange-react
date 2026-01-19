@@ -4,6 +4,7 @@ import { Settings, Plus, CornerUpRight, Search, AlertTriangle, MessageSquare, Us
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { fetchSmsList, parseSmsList, SmsMessage } from '../utils/api';
+import { useLocation } from 'react-router-dom';
 
 interface MessagesPageProps {
   onOpenSettings: () => void;
@@ -14,6 +15,7 @@ type TabType = 'inbox' | 'sent' | 'draft';
 export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) => {
   const { t } = useLanguage();
   const { isLoggedIn } = useGlobalState();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState<TabType>('inbox');
   
   const [messages, setMessages] = useState<SmsMessage[]>([]);
@@ -129,6 +131,15 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
       setSelectedSender(null);
   }, [activeTab]);
 
+  // Handle Navigation State from Card
+  useEffect(() => {
+      if (location.state && location.state.sender) {
+          // Ensure we are on inbox if coming from card (Card usually shows inbox)
+          // Since default is inbox, we just set sender
+          setSelectedSender(location.state.sender);
+      }
+  }, [location.state]);
+
   // Login Check
   if (!isLoggedIn) {
       return (
@@ -213,7 +224,12 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
             <div className="p-6 border-b border-gray-200">
                 <div className="flex justify-between items-center mb-4">
                     <div className="font-bold text-sm">
-                        {t('msgStats', stats.total, stats.unread)}
+                        {activeTab === 'inbox' 
+                           ? t('msgStats', stats.total, stats.unread) 
+                           : activeTab === 'sent' 
+                             ? t('sentStats', stats.total)
+                             : t('draftStats', stats.total)
+                        }
                     </div>
                     {isCurrentBoxFull && (
                         <div className="flex items-center text-red-500 text-xs font-bold animate-pulse">

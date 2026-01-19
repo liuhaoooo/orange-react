@@ -1,12 +1,10 @@
 
-
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardHeader } from './UIComponents';
 import { MessageSquare, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { fetchSmsList, parseSmsList, SmsMessage } from '../utils/api';
 
 interface MessagesCardProps {
@@ -16,6 +14,7 @@ interface MessagesCardProps {
 export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
   const { t } = useLanguage();
   const { isLoggedIn } = useGlobalState();
+  const navigate = useNavigate();
   
   const [messages, setMessages] = useState<SmsMessage[]>([]);
   const [unreadCount, setUnreadCount] = useState<string>("0");
@@ -46,6 +45,27 @@ export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
         if (intervalId) clearInterval(intervalId);
     };
   }, [isLoggedIn]);
+
+  // Group Messages by Sender
+  const threads = useMemo(() => {
+    const groups: Record<string, SmsMessage[]> = {};
+    messages.forEach(msg => {
+        const key = msg.sender || t('unknown');
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(msg);
+    });
+
+    return Object.entries(groups).map(([sender, msgs]) => {
+        // Sort DESC for preview (newest first)
+        const sortedDesc = [...msgs].sort((a, b) => a.date > b.date ? -1 : 1);
+        return {
+            sender,
+            count: msgs.length,
+            latest: sortedDesc[0],
+            hasUnread: msgs.some(m => m.status === '0')
+        };
+    }).sort((a, b) => a.latest.date > b.latest.date ? -1 : 1); // Sort threads by latest message
+  }, [messages, t]);
 
 
   // State: Not Logged In
@@ -108,18 +128,27 @@ export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
 
       {/* List - Added overflow-y-auto to enable scrolling */}
       <div className="flex-1 overflow-y-auto flex flex-col bg-white">
-          {messages.length > 0 ? (
-              messages.map((msg) => (
-                  <div key={msg.id} className="p-5 px-6 border-b border-gray-200 flex justify-between items-center shrink-0">
+          {threads.length > 0 ? (
+              threads.map((thread) => (
+                  <div 
+                    key={thread.sender} 
+                    className="p-5 px-6 border-b border-gray-200 flex justify-between items-start shrink-0 cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={() => navigate('/messages', { state: { sender: thread.sender } })}
+                  >
                       <div className="flex-1 min-w-0 pe-4">
-                          <div className="font-bold text-black text-base">{msg.sender}</div>
-                          <div className="text-gray-500 text-sm mt-1">{msg.date}</div>
-                          <div className="text-gray-500 text-base mt-1 truncate font-normal">{msg.content}</div>
+                          <div className="flex justify-between items-baseline mb-1">
+                              <div className="font-bold text-black text-base truncate pe-2">{thread.sender}</div>
+                              <div className="text-gray-400 text-xs shrink-0 whitespace-nowrap">{thread.latest.date.split(' ')[0]}</div>
+                          </div>
+                          <div className="text-gray-500 text-base mt-0 truncate font-normal">{thread.latest.content}</div>
                       </div>
-                      <div className="flex items-center space-x-2 rtl:space-x-reverse shrink-0">
-                          {/* Alert icon logic can be refined based on additional status if available */}
-                          {/* {msg.hasAlert && <AlertTriangle size={20} className="text-yellow-400 fill-yellow-400" />} */}
-                          {msg.status === '0' && <div className="w-3.5 h-3.5 bg-[#4169e1] rounded-full"></div>}
+                      <div className="flex items-center space-x-2 rtl:space-x-reverse shrink-0 mt-1">
+                          {thread.count > 1 && (
+                              <span className="text-[10px] bg-gray-200 text-gray-600 px-1.5 rounded-full font-bold h-4 flex items-center justify-center">
+                                  {thread.count}
+                              </span>
+                          )}
+                          {thread.hasUnread && <div className="w-3.5 h-3.5 bg-[#4169e1] rounded-full"></div>}
                       </div>
                   </div>
               ))
