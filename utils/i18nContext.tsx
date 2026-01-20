@@ -139,7 +139,15 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     version: "Version",
     helpSupport: "Help & Support",
     helpSupportText: "Help and support text goes here",
-    userGuide: "Userguide"
+    userGuide: "Userguide",
+    deviceInfo: "Device Information",
+    networkInfo: "Network Information",
+    simFunction: "SIM Function",
+    displaySolution: "4/5G display solution",
+    imsSetting: "IMS Setting",
+    wifi: "Wi-Fi",
+    guestWifi: "Guest Wi-Fi",
+    dhcp: "DHCP"
   },
   cn: {
     menu: "菜单",
@@ -269,7 +277,15 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     version: "版本",
     helpSupport: "帮助与支持",
     helpSupportText: "帮助与支持文本在此处",
-    userGuide: "用户指南"
+    userGuide: "用户指南",
+    deviceInfo: "设备信息",
+    networkInfo: "网络信息",
+    simFunction: "SIM 卡功能",
+    displaySolution: "4/5G 显示方案",
+    imsSetting: "IMS 设置",
+    wifi: "Wi-Fi",
+    guestWifi: "访客 Wi-Fi",
+    dhcp: "DHCP"
   },
   fr: {
     menu: "Menu",
@@ -399,7 +415,15 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     version: "Version",
     helpSupport: "Aide & Support",
     helpSupportText: "Texte d'aide et de support ici",
-    userGuide: "Guide de l'utilisateur"
+    userGuide: "Guide de l'utilisateur",
+    deviceInfo: "Informations sur l'appareil",
+    networkInfo: "Informations réseau",
+    simFunction: "Fonction SIM",
+    displaySolution: "Solution d'affichage 4/5G",
+    imsSetting: "Paramètres IMS",
+    wifi: "Wi-Fi",
+    guestWifi: "Wi-Fi Invité",
+    dhcp: "DHCP"
   },
   ar: {
     menu: "قائمة",
@@ -529,7 +553,15 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     version: "الإصدار",
     helpSupport: "المساعدة والدعم",
     helpSupportText: "نص المساعدة والدعم هنا",
-    userGuide: "دليل المستخدم"
+    userGuide: "دليل المستخدم",
+    deviceInfo: "معلومات الجهاز",
+    networkInfo: "معلومات الشبكة",
+    simFunction: "وظيفة SIM",
+    displaySolution: "حل عرض 4/5G",
+    imsSetting: "إعداد IMS",
+    wifi: "Wi-Fi",
+    guestWifi: "شبكة Wi-Fi للضيوف",
+    dhcp: "DHCP"
   },
   el: {
     menu: "Menú",
@@ -659,7 +691,15 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     version: "Versión",
     helpSupport: "Ayuda y soporte",
     helpSupportText: "El texto de ayuda y soporte va aquí",
-    userGuide: "Guía del usuario"
+    userGuide: "Guía del usuario",
+    deviceInfo: "Información del dispositivo",
+    networkInfo: "Información de red",
+    simFunction: "Función SIM",
+    displaySolution: "Solución de pantalla 4/5G",
+    imsSetting: "Ajuste IMS",
+    wifi: "Wi-Fi",
+    guestWifi: "Wi-Fi de invitados",
+    dhcp: "DHCP"
   }
 };
 

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { User, ChevronDown, HelpCircle, Settings, LogOut, LogIn } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
   onLogout: () => void;
@@ -30,6 +30,7 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, onLogin }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const { language, setLanguage, t } = useLanguage();
   const { isLoggedIn } = useGlobalState();
+  const navigate = useNavigate();
 
   const currentLang = languageAllList.find(l => l.value === language) || languageAllList.find(l => l.value === 'en');
 
@@ -141,7 +142,15 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, onLogin }) => {
                   </Link>
                   <button 
                     className="flex items-center w-full px-4 py-2.5 text-sm hover:bg-gray-100 hover:text-orange transition-colors text-black"
-                    onClick={() => setIsMenuOpen(false)}
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      // If not logged in, prompt login first, otherwise navigate to settings
+                      if (!isLoggedIn) {
+                        onLogin();
+                      } else {
+                        navigate('/settings');
+                      }
+                    }}
                   >
                     <Settings size={16} className="me-3" />
                     {t('settings')}
