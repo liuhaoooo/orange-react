@@ -124,7 +124,9 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     deleteMessageConfirm: "Are you sure you want to delete these messages?",
     receiver: "Receiver",
     messageLabel: "Message",
-    saveDraft: "Save draft"
+    saveDraft: "Save draft",
+    outboxFull: "Outbox is full",
+    draftboxFull: "Draft box is full"
   },
   cn: {
     menu: "菜单",
@@ -239,7 +241,9 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     deleteMessageConfirm: "您确定要删除这些消息吗？",
     receiver: "收件人",
     messageLabel: "消息",
-    saveDraft: "保存草稿"
+    saveDraft: "保存草稿",
+    outboxFull: "发件箱已满",
+    draftboxFull: "草稿箱已满"
   },
   fr: {
     menu: "Menu",
@@ -354,7 +358,9 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     deleteMessageConfirm: "Êtes-vous sûr de vouloir supprimer ces messages ?",
     receiver: "Destinataire",
     messageLabel: "Message",
-    saveDraft: "Enregistrer brouillon"
+    saveDraft: "Enregistrer brouillon",
+    outboxFull: "Boîte d'envoi pleine",
+    draftboxFull: "Boîte de brouillons pleine"
   },
   ar: {
     menu: "قائمة",
@@ -469,7 +475,9 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     deleteMessageConfirm: "هل أنت متأكد أنك تريد حذف هذه الرسائل؟",
     receiver: "المستلم",
     messageLabel: "رسالة",
-    saveDraft: "حفظ المسودة"
+    saveDraft: "حفظ المسودة",
+    outboxFull: "صندوق الصادر ممتلئ",
+    draftboxFull: "صندوق المسودات ممتلئ"
   },
   el: {
     menu: "Menú",
@@ -584,7 +592,9 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     deleteMessageConfirm: "¿Estás seguro de que quieres eliminar estos mensajes?",
     receiver: "Destinatario",
     messageLabel: "Mensaje",
-    saveDraft: "Guardar borrador"
+    saveDraft: "Guardar borrador",
+    outboxFull: "Bandeja de salida llena",
+    draftboxFull: "Borradores llenos"
   }
 };
 

@@ -9,15 +9,24 @@ interface NewMessageModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialReceiver?: string;
+  isSendFull?: boolean;
+  isDraftFull?: boolean;
 }
 
-export const NewMessageModal: React.FC<NewMessageModalProps> = ({ isOpen, onClose, initialReceiver = '' }) => {
+export const NewMessageModal: React.FC<NewMessageModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  initialReceiver = '',
+  isSendFull = false,
+  isDraftFull = false
+}) => {
   const { t } = useLanguage();
   const [receiver, setReceiver] = useState('');
   const [content, setContent] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [parts, setParts] = useState(1);
+  const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
     if (isOpen) {
@@ -26,6 +35,7 @@ export const NewMessageModal: React.FC<NewMessageModalProps> = ({ isOpen, onClos
       setParts(1);
       setIsSending(false);
       setIsSaving(false);
+      setErrorMsg('');
     }
   }, [isOpen, initialReceiver]);
 
@@ -38,8 +48,14 @@ export const NewMessageModal: React.FC<NewMessageModalProps> = ({ isOpen, onClos
   }, [content]);
 
   const handleSend = async () => {
+    if (isSendFull) {
+        setErrorMsg(t('outboxFull'));
+        return;
+    }
+    
     if (!receiver || !content) return;
     setIsSending(true);
+    setErrorMsg('');
     try {
       const res = await sendSms(receiver, content);
       if (res && res.success) {
@@ -53,8 +69,14 @@ export const NewMessageModal: React.FC<NewMessageModalProps> = ({ isOpen, onClos
   };
 
   const handleSaveDraft = async () => {
+    if (isDraftFull) {
+        setErrorMsg(t('draftboxFull'));
+        return;
+    }
+
     if (!content) return; // Can save draft without receiver usually, but content is needed
     setIsSaving(true);
+    setErrorMsg('');
     try {
       const res = await saveSmsDraft(receiver, content);
       if (res && res.success) {
@@ -113,6 +135,12 @@ export const NewMessageModal: React.FC<NewMessageModalProps> = ({ isOpen, onClos
               className="w-full border border-gray-400 p-2 text-sm outline-none focus:border-orange text-black resize-none h-40 align-top"
             />
           </div>
+          
+          {errorMsg && (
+              <div className="mb-4 text-red-500 text-sm font-bold text-end">
+                  {errorMsg}
+              </div>
+          )}
 
           {/* Buttons */}
           <div className="flex justify-end items-center space-x-3 rtl:space-x-reverse">
@@ -126,14 +154,16 @@ export const NewMessageModal: React.FC<NewMessageModalProps> = ({ isOpen, onClos
             <button 
               onClick={handleSaveDraft}
               disabled={isSending || isSaving}
-              className="px-6 py-2 bg-black text-white font-bold text-sm hover:bg-gray-800 transition-colors h-10 min-w-[120px] flex items-center justify-center"
+              className={`px-6 py-2 bg-black text-white font-bold text-sm h-10 min-w-[120px] flex items-center justify-center ${isDraftFull ? 'opacity-50 hover:bg-black cursor-not-allowed' : 'hover:bg-gray-800 transition-colors'}`}
+              title={isDraftFull ? t('draftboxFull') : t('saveDraft')}
             >
               {isSaving ? <Loader2 className="animate-spin w-4 h-4" /> : t('saveDraft')}
             </button>
             <button 
               onClick={handleSend}
               disabled={isSending || isSaving || !receiver || !content}
-              className={`px-8 py-2 bg-orange text-black font-bold text-sm transition-colors h-10 min-w-[100px] flex items-center justify-center ${(!receiver || !content) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-orange-dark'}`}
+              className={`px-8 py-2 bg-orange text-black font-bold text-sm h-10 min-w-[100px] flex items-center justify-center ${(!receiver || !content || isSendFull) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-orange-dark transition-colors'}`}
+              title={isSendFull ? t('outboxFull') : t('send')}
             >
               {isSending ? <Loader2 className="animate-spin w-4 h-4" /> : t('send')}
             </button>

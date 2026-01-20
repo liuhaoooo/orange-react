@@ -17,7 +17,7 @@ export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
   const navigate = useNavigate();
   
   const [messages, setMessages] = useState<SmsMessage[]>([]);
-  const [unreadCount, setUnreadCount] = useState<string>("0");
+  const [totalCount, setTotalCount] = useState<string>("0");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -29,7 +29,8 @@ export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
             if (res && res.success) {
                 const parsed = parseSmsList(res.sms_list);
                 setMessages(parsed);
-                setUnreadCount(res.sms_unread || "0");
+                // Updated to show total count instead of unread count
+                setTotalCount(res.sms_total || "0");
             }
         } catch (error) {
             console.error("Failed to load messages", error);
@@ -122,7 +123,7 @@ export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
       <div className="px-6 py-4 border-b border-gray-200 flex items-center bg-white shrink-0">
           <span className="font-bold text-xl text-black me-3">{t('inbox')}</span>
           <span className="bg-[#4169e1] text-white text-sm font-bold h-7 w-7 flex items-center justify-center rounded-full">
-             {unreadCount}
+             {totalCount}
           </span>
       </div>
 

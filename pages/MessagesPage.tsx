@@ -583,6 +583,8 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
       <NewMessageModal 
         isOpen={isNewMessageModalOpen}
         onClose={() => setIsNewMessageModalOpen(false)}
+        isSendFull={stats.sendFull}
+        isDraftFull={stats.draftFull}
       />
     </>
   );
