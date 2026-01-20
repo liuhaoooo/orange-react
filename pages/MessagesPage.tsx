@@ -30,6 +30,9 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
   });
   const [loading, setLoading] = useState(false);
   
+  // Search State
+  const [searchQuery, setSearchQuery] = useState('');
+
   // Selection State
   const [selectedSender, setSelectedSender] = useState<string | null>(null);
   
@@ -109,7 +112,7 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
     return false;
   }, [activeTab, stats]);
 
-  // Group Messages by Sender
+  // Group Messages by Sender & Filter by Search
   const threads = useMemo(() => {
     const groups: Record<string, SmsMessage[]> = {};
     messages.forEach(msg => {
@@ -118,7 +121,7 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
         groups[key].push(msg);
     });
 
-    return Object.entries(groups).map(([sender, msgs]) => {
+    let threadList = Object.entries(groups).map(([sender, msgs]) => {
         // Sort DESC for preview (newest first)
         const sortedDesc = [...msgs].sort((a, b) => a.date > b.date ? -1 : 1);
         return {
@@ -128,8 +131,16 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
             latest: sortedDesc[0],
             hasUnread: msgs.some(m => m.status === '0')
         };
-    }).sort((a, b) => a.latest.date > b.latest.date ? -1 : 1); // Sort threads by latest message
-  }, [messages, t]);
+    });
+
+    // Apply Search Filter (only if query exists)
+    if (searchQuery.trim()) {
+        const lowerQ = searchQuery.toLowerCase();
+        threadList = threadList.filter(t => t.sender.toLowerCase().includes(lowerQ));
+    }
+
+    return threadList.sort((a, b) => a.latest.date > b.latest.date ? -1 : 1); // Sort threads by latest message
+  }, [messages, t, searchQuery]);
 
   // Selected Thread Data
   const activeThread = useMemo(() => {
@@ -284,6 +295,7 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
   useEffect(() => {
       setSelectedSender(null);
       setCheckedThreadSenders([]);
+      setSearchQuery(''); // Reset search on tab change
   }, [activeTab]);
 
   useEffect(() => {
@@ -404,6 +416,8 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
                       <input 
                           type="text" 
                           placeholder={t('search')}
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
                           className="w-full border border-gray-300 p-2 text-sm outline-none focus:border-orange text-black rounded-sm"
                       />
                       <Search className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
@@ -476,7 +490,7 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
                       ))
                   ) : (
                       <div className="p-8 text-center text-gray-400 italic">
-                          {t('noData')}
+                          {searchQuery ? t('noData') : t('noData')}
                       </div>
                   )}
               </div>
