@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Settings, Plus, CornerUpRight, Search, AlertTriangle, MessageSquare, User } from 'lucide-react';
+import { Settings, Plus, CornerUpRight, Search, AlertTriangle, MessageSquare, User, Trash2 } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
-import { fetchSmsList, parseSmsList, SmsMessage, markSmsAsRead } from '../utils/api';
+import { fetchSmsList, parseSmsList, SmsMessage, markSmsAsRead, deleteSms } from '../utils/api';
 import { useLocation } from 'react-router-dom';
 
 interface MessagesPageProps {
@@ -30,6 +30,9 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
   
   // Selection State
   const [selectedSender, setSelectedSender] = useState<string | null>(null);
+  
+  // Checkbox State for Bulk Actions (Stores Senders)
+  const [checkedThreadSenders, setCheckedThreadSenders] = useState<string[]>([]);
 
   const handleAuthAction = (action: () => void) => {
     if (isLoggedIn) {
@@ -39,19 +42,19 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
     }
   };
 
+  const getSubCmd = (tab: TabType) => {
+    switch(tab) {
+        case 'inbox': return 0;
+        case 'sent': return 1;
+        case 'draft': return 2;
+        default: return 0;
+    }
+  };
+
   // Poll for messages
   useEffect(() => {
     let intervalId: ReturnType<typeof setInterval>;
     
-    const getSubCmd = (tab: TabType) => {
-        switch(tab) {
-            case 'inbox': return 0;
-            case 'sent': return 1;
-            case 'draft': return 2;
-            default: return 0;
-        }
-    };
-
     const loadMessages = async () => {
         try {
             const subcmd = getSubCmd(activeTab);
@@ -61,9 +64,6 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
                 
                 // Note: We don't overwrite if the data hasn't changed to avoid jitter, 
                 // but for simplicity in this implementation we overwrite. 
-                // However, we must be careful not to undo our "optimistic" read status updates 
-                // until the server confirms them. 
-                // In this simple polling model, the server source of truth eventually overwrites.
                 setMessages(parsed);
                 
                 setStats({
@@ -133,6 +133,88 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
       return [...activeThread.messages].sort((a, b) => a.date > b.date ? 1 : -1);
   }, [activeThread]);
 
+  // --- Deletion Logic ---
+
+  const handleDelete = async (idsToDelete: string[]) => {
+      if (idsToDelete.length === 0) return;
+
+      const subcmd = getSubCmd(activeTab);
+      
+      // 1. Optimistic Update
+      setMessages(prev => prev.filter(msg => !idsToDelete.includes(msg.id)));
+      
+      // Update stats roughly
+      setStats(prev => ({
+          ...prev,
+          total: Math.max(0, prev.total - idsToDelete.length)
+      }));
+
+      // Check if we deleted the currently selected thread's messages
+      if (activeThread) {
+          const remainingInThread = activeThread.messages.filter(m => !idsToDelete.includes(m.id));
+          if (remainingInThread.length === 0) {
+              setSelectedSender(null);
+          }
+      }
+
+      // 2. API Call
+      try {
+          await deleteSms(idsToDelete, subcmd);
+          // Success: State remains filtered.
+          // Failure: Next poll will restore messages.
+      } catch (e) {
+          console.error("Failed to delete messages", e);
+      }
+  };
+
+  const deleteThread = (sender: string, e?: React.MouseEvent) => {
+      if (e) e.stopPropagation();
+      const threadToDelete = threads.find(t => t.sender === sender);
+      if (threadToDelete) {
+          const ids = threadToDelete.messages.map(m => m.id);
+          handleDelete(ids);
+          // Also uncheck if checked
+          setCheckedThreadSenders(prev => prev.filter(s => s !== sender));
+      }
+  };
+
+  const deleteBulk = () => {
+      const idsToDelete: string[] = [];
+      checkedThreadSenders.forEach(sender => {
+          const thread = threads.find(t => t.sender === sender);
+          if (thread) {
+              thread.messages.forEach(m => idsToDelete.push(m.id));
+          }
+      });
+      handleDelete(idsToDelete);
+      setCheckedThreadSenders([]);
+  };
+
+  const deleteSingleMessage = (id: string) => {
+      handleDelete([id]);
+  };
+
+  // --- Checkbox Logic ---
+
+  const toggleThreadCheck = (sender: string, e: React.MouseEvent) => {
+      e.stopPropagation();
+      setCheckedThreadSenders(prev => {
+          if (prev.includes(sender)) return prev.filter(s => s !== sender);
+          return [...prev, sender];
+      });
+  };
+
+  const toggleSelectAll = () => {
+      if (checkedThreadSenders.length === threads.length && threads.length > 0) {
+          setCheckedThreadSenders([]);
+      } else {
+          setCheckedThreadSenders(threads.map(t => t.sender));
+      }
+  };
+
+
+  // --- Read Logic ---
+  
   // Helper to mark thread as read
   const markThreadAsRead = async (sender: string) => {
     // Only mark as read if in Inbox
@@ -156,8 +238,6 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
         // 2. Send Request
         try {
             await markSmsAsRead(unreadIds);
-            // Success: state is already updated.
-            // Failure: next poll will revert state to server truth.
         } catch (e) {
             console.error("Failed to mark messages as read", e);
         }
@@ -172,25 +252,17 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
   // Reset selection on tab change
   useEffect(() => {
       setSelectedSender(null);
+      setCheckedThreadSenders([]);
   }, [activeTab]);
 
   // Handle Navigation State from Card
   useEffect(() => {
       if (location.state && location.state.sender) {
-          // Ensure we are on inbox if coming from card (Card usually shows inbox)
-          // Since default is inbox, we just set sender
           setSelectedSender(location.state.sender);
-          // Also trigger mark read for this deep link
-          // We need to wait for messages to load if they haven't yet, but since
-          // messages depend on state, we can try. 
-          // However, if messages are empty initially, this might do nothing.
-          // The click handler works because messages are loaded when clicked.
-          // For deep linking, we rely on the user seeing the view, triggering the effect below.
       }
   }, [location.state]);
 
   // Trigger mark read if selectedSender changes and messages exist
-  // This handles the Deep Link case where messages might load AFTER selectedSender is set
   useEffect(() => {
       if (selectedSender && messages.length > 0 && activeTab === 'inbox') {
           const hasUnread = messages.some(m => m.sender === selectedSender && m.status === '0');
@@ -307,9 +379,27 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
                     />
                     <Search className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                 </div>
-                <div className="flex items-center">
-                    <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-orange focus:ring-orange" />
-                    <span className="ms-2 text-sm font-bold text-black">{t('selectAll')}</span>
+                
+                {/* Header Action Row: Select All + Delete */}
+                <div className="flex items-center justify-between h-6">
+                    <div className="flex items-center">
+                        <input 
+                            type="checkbox" 
+                            className="w-4 h-4 rounded border-gray-300 text-orange focus:ring-orange cursor-pointer" 
+                            checked={threads.length > 0 && checkedThreadSenders.length === threads.length}
+                            onChange={toggleSelectAll}
+                        />
+                        <span className="ms-2 text-sm font-bold text-black">{t('selectAll')}</span>
+                    </div>
+                    {checkedThreadSenders.length > 0 && (
+                        <button 
+                            onClick={deleteBulk}
+                            className="text-black hover:text-red-600 transition-colors"
+                            title="Delete Selected"
+                        >
+                            <Trash2 size={18} />
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -319,15 +409,29 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
                         <div 
                             key={thread.sender} 
                             onClick={() => handleThreadSelect(thread.sender)}
-                            className={`p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer flex items-start ${selectedSender === thread.sender ? 'bg-orange/10 border-s-4 border-s-orange' : 'border-s-4 border-s-transparent'}`}
+                            className={`group/item p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer flex items-start ${selectedSender === thread.sender ? 'bg-orange/10 border-s-4 border-s-orange' : 'border-s-4 border-s-transparent'}`}
                         >
-                             <div className="pt-1 pe-3" onClick={(e) => e.stopPropagation()}>
-                                <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-orange focus:ring-orange" />
+                             <div className="pt-1 pe-3" onClick={(e) => toggleThreadCheck(thread.sender, e)}>
+                                <input 
+                                    type="checkbox" 
+                                    className="w-4 h-4 rounded border-gray-300 text-orange focus:ring-orange cursor-pointer" 
+                                    checked={checkedThreadSenders.includes(thread.sender)}
+                                    onChange={(e) => { e.stopPropagation(); /* Controlled by parent div click but handled here for visual sync */ }}
+                                />
                              </div>
                              <div className="flex-1 min-w-0">
                                  <div className="flex justify-between items-start">
                                      <div className="font-bold text-black text-sm mb-1 truncate pe-2" title={thread.sender}>{thread.sender}</div>
-                                     <div className="flex space-x-1 items-center shrink-0">
+                                     <div className="flex space-x-2 items-center shrink-0">
+                                         {/* Delete Icon on Hover */}
+                                         <button 
+                                            onClick={(e) => deleteThread(thread.sender, e)}
+                                            className="invisible group-hover/item:visible text-gray-400 hover:text-red-600 transition-colors"
+                                            title="Delete Thread"
+                                         >
+                                             <Trash2 size={14} />
+                                         </button>
+
                                          {thread.count > 1 && (
                                             <span className="text-[10px] bg-gray-200 text-gray-600 px-1.5 rounded-full font-bold h-4 flex items-center">{thread.count}</span>
                                          )}
@@ -369,10 +473,36 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
                     {/* Messages List */}
                     <div className="flex-1 overflow-y-auto p-6 space-y-4">
                         {chatMessages.map((msg) => (
-                            <div key={msg.id} className={`flex flex-col ${activeTab === 'sent' ? 'items-end' : 'items-start'}`}>
-                                <div className={`max-w-[80%] p-3 rounded-lg shadow-sm text-sm break-words ${activeTab === 'sent' ? 'bg-[#ffedcc] text-black rounded-tr-none border border-orange/20' : 'bg-white text-black rounded-tl-none border border-gray-200'}`}>
-                                    {msg.content}
+                            <div key={msg.id} className={`flex flex-col group/msg ${activeTab === 'sent' ? 'items-end' : 'items-start'}`}>
+                                <div className="flex items-center max-w-[90%]">
+                                    {/* Delete Button (Left side for Sent, Right side for Inbox to avoid clutter, or simply adjacent) 
+                                        Let's put it adjacent to the bubble, opposite to alignment side.
+                                    */}
+                                    {activeTab === 'sent' && (
+                                        <button 
+                                            onClick={() => deleteSingleMessage(msg.id)}
+                                            className="opacity-0 group-hover/msg:opacity-100 transition-opacity p-2 text-gray-300 hover:text-red-500"
+                                            title="Delete Message"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    )}
+
+                                    <div className={`p-3 rounded-lg shadow-sm text-sm break-words ${activeTab === 'sent' ? 'bg-[#ffedcc] text-black rounded-tr-none border border-orange/20' : 'bg-white text-black rounded-tl-none border border-gray-200'}`}>
+                                        {msg.content}
+                                    </div>
+
+                                    {activeTab !== 'sent' && (
+                                        <button 
+                                            onClick={() => deleteSingleMessage(msg.id)}
+                                            className="opacity-0 group-hover/msg:opacity-100 transition-opacity p-2 text-gray-300 hover:text-red-500"
+                                            title="Delete Message"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    )}
                                 </div>
+                                
                                 <div className="text-[10px] text-gray-400 mt-1 px-1">
                                     {msg.date}
                                 </div>

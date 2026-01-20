@@ -570,3 +570,13 @@ export const fetchSmsList = async (pageNum: number = 1, subcmd: number = 0): Pro
 export const markSmsAsRead = async (indexes: string[]): Promise<ApiResponse> => {
     return apiRequest(12, 'POST', { index: indexes.join(',') });
 };
+
+/**
+ * Delete SMS
+ * CMD: 14
+ * @param indexes Array of message IDs/indexes
+ * @param subcmd 0=Inbox, 1=Sent, 2=Draft
+ */
+export const deleteSms = async (indexes: string[], subcmd: number = 0): Promise<ApiResponse> => {
+    return apiRequest(14, 'POST', { index: indexes.join(','), subcmd });
+};
