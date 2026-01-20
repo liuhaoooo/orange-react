@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { User, ChevronDown, HelpCircle, Settings, LogOut, LogIn } from 'lucide-react';
-import { useLanguage } from '../utils/i18nContext';
+import { useLanguage, languageAllList } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 
@@ -9,20 +9,6 @@ interface HeaderProps {
   onLogout: () => void;
   onLogin: () => void;
 }
-
-interface Language {
-  value: string;
-  name: string;
-  bit: number;
-}
-
-const languageAllList: Language[] = [
-  { value: 'cn', name: '中文（简体）', bit: 0 },
-  { value: 'en', name: 'English', bit: 1 },
-  { value: 'el', name: 'Español', bit: 3 },
-  { value: 'ar', name: 'العربية', bit: 6 },
-  { value: 'fr', name: 'Français', bit: 7 },
-];
 
 export const Header: React.FC<HeaderProps> = ({ onLogout, onLogin }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

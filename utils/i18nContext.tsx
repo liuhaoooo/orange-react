@@ -10,6 +10,20 @@ interface LanguageContextType {
   dir: 'ltr' | 'rtl';
 }
 
+interface Language {
+  value: string;
+  name: string;
+  bit: number;
+}
+
+export const languageAllList: Language[] = [
+  { value: 'cn', name: '中文（简体）', bit: 0 },
+  { value: 'en', name: 'English', bit: 1 },
+  { value: 'el', name: 'Español', bit: 3 },
+  { value: 'ar', name: 'العربية', bit: 6 },
+  { value: 'fr', name: 'Français', bit: 7 },
+];
+
 const translations: Record<LanguageCode, Record<string, string>> = {
   en: {
     menu: "Menu",
@@ -147,7 +161,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     imsSetting: "IMS Setting",
     wifi: "Wi-Fi",
     guestWifi: "Guest Wi-Fi",
-    dhcp: "DHCP"
+    dhcp: "DHCP",
+    selectLanguage: "Select Language"
   },
   cn: {
     menu: "菜单",
@@ -285,7 +300,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     imsSetting: "IMS 设置",
     wifi: "Wi-Fi",
     guestWifi: "访客 Wi-Fi",
-    dhcp: "DHCP"
+    dhcp: "DHCP",
+    selectLanguage: "选择语言"
   },
   fr: {
     menu: "Menu",
@@ -423,7 +439,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     imsSetting: "Paramètres IMS",
     wifi: "Wi-Fi",
     guestWifi: "Wi-Fi Invité",
-    dhcp: "DHCP"
+    dhcp: "DHCP",
+    selectLanguage: "Choisir la langue"
   },
   ar: {
     menu: "قائمة",
@@ -561,7 +578,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     imsSetting: "إعداد IMS",
     wifi: "Wi-Fi",
     guestWifi: "شبكة Wi-Fi للضيوف",
-    dhcp: "DHCP"
+    dhcp: "DHCP",
+    selectLanguage: "اختر اللغة"
   },
   el: {
     menu: "Menú",
@@ -699,7 +717,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     imsSetting: "Ajuste IMS",
     wifi: "Wi-Fi",
     guestWifi: "Wi-Fi de invitados",
-    dhcp: "DHCP"
+    dhcp: "DHCP",
+    selectLanguage: "Seleccionar idioma"
   }
 };
 

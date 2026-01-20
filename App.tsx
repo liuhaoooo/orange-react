@@ -13,9 +13,10 @@ import { SettingsPage } from './pages/SettingsPage';
 import { LoginModal } from './components/LoginModal';
 import { ConnectedDevicesModal } from './components/ConnectedDevicesModal';
 import { EditSsidModal } from './components/EditSsidModal';
+import { LanguageSelectionModal } from './components/LanguageSelectionModal';
 import { LanguageProvider } from './utils/i18nContext';
 import { GlobalStateProvider, useGlobalState } from './utils/GlobalStateContext';
-import { logout } from './utils/api';
+import { logout, fetchConnectionSettings } from './utils/api';
 import { WifiNetwork } from './types';
 
 function AppContent() {
@@ -23,10 +24,14 @@ function AppContent() {
   const [isDevicesModalOpen, setIsDevicesModalOpen] = useState(false);
   const [isEditSsidModalOpen, setIsEditSsidModalOpen] = useState(false);
   
+  // Language Modal State
+  const [isLangModalOpen, setIsLangModalOpen] = useState(false);
+  const [initialLang, setInitialLang] = useState('en');
+  
   const [devicesFilter, setDevicesFilter] = useState<string | undefined>(undefined);
   const [editingNetwork, setEditingNetwork] = useState<WifiNetwork | undefined>(undefined);
   
-  const { isLoggedIn, checkSession, setIsLoggedIn } = useGlobalState();
+  const { isLoggedIn, checkSession, setIsLoggedIn, globalData, updateGlobalData } = useGlobalState();
   
   const prevIsLoggedIn = useRef(isLoggedIn);
 
@@ -59,6 +64,36 @@ function AppContent() {
       if (success) {
         setIsLoggedIn(false);
       }
+    }
+  };
+
+  // Check for Language Selection Requirement (CMD 585)
+  useEffect(() => {
+    const settings = globalData.connectionSettings;
+    if (settings) {
+      // "if need_change_language != '1', then need pop up"
+      if (settings.need_change_language && settings.need_change_language !== '1') {
+        if (settings.language) {
+            setInitialLang(settings.language);
+        }
+        setIsLangModalOpen(true);
+      } else {
+        // Ensure modal is closed if condition met (e.g. after update)
+        setIsLangModalOpen(false);
+      }
+    }
+  }, [globalData.connectionSettings]);
+
+  const handleLanguageSelected = async () => {
+    setIsLangModalOpen(false);
+    // Refresh 585 to get updated status (and hopefully need_change_language = '1')
+    try {
+        const data = await fetchConnectionSettings();
+        if (data && data.success !== false) {
+            updateGlobalData('connectionSettings', data);
+        }
+    } catch (e) {
+        console.error("Failed to refresh settings after language select", e);
     }
   };
 
@@ -179,6 +214,11 @@ function AppContent() {
         <LoginModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />
         <ConnectedDevicesModal isOpen={isDevicesModalOpen} onClose={closeDevicesModal} filterSsid={devicesFilter} />
         <EditSsidModal isOpen={isEditSsidModalOpen} onClose={closeEditSsidModal} network={editingNetwork} />
+        <LanguageSelectionModal 
+            isOpen={isLangModalOpen} 
+            onSuccess={handleLanguageSelected}
+            defaultLanguage={initialLang} 
+        />
       </div>
     </Router>
   );

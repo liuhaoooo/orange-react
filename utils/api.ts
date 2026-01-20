@@ -68,6 +68,10 @@ export interface ConnectionSettingsResponse {
     lteCA: string;
     nrCA: string;
     
+    // Language Settings
+    need_change_language?: string; // '1' means set/done, others mean need selection
+    language?: string;             // Current language code
+
     // WiFi Settings
     main_wifiPriority?: string;
     main_wifi_switch_24g?: string;
@@ -566,6 +570,14 @@ export const setDialMode = async (dialMode: '0' | '1'): Promise<ApiResponse> => 
  */
 export const setRoamingEnable = async (roamingEnable: '0' | '1'): Promise<ApiResponse> => {
   return apiRequest(220, 'POST', { roamingEnable });
+};
+
+/**
+ * Set Language Selection
+ * CMD: 97
+ */
+export const setLanguageSelection = async (languageSelect: string): Promise<ApiResponse> => {
+  return apiRequest(97, 'POST', { languageSelect });
 };
 
 /**
