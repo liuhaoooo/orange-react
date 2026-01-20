@@ -1,5 +1,4 @@
 
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 type LanguageCode = 'en' | 'cn' | 'fr' | 'ar' | 'el';
@@ -120,7 +119,9 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     viewServices: "View Services",
     viewWifiNetworks: "View Wi-Fi Networks",
     viewMessages: "View Messages",
-    storageFull: "Storage Full"
+    storageFull: "Storage Full",
+    deleteConfirmation: "Delete Confirmation",
+    deleteMessageConfirm: "Are you sure you want to delete these messages?"
   },
   cn: {
     menu: "菜单",
@@ -230,7 +231,9 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     viewServices: "查看服务",
     viewWifiNetworks: "查看 Wi-Fi 网络",
     viewMessages: "查看消息",
-    storageFull: "存储已满"
+    storageFull: "存储已满",
+    deleteConfirmation: "删除确认",
+    deleteMessageConfirm: "您确定要删除这些消息吗？"
   },
   fr: {
     menu: "Menu",
@@ -340,7 +343,9 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     viewServices: "Voir les services",
     viewWifiNetworks: "Voir les réseaux Wi-Fi",
     viewMessages: "Voir les messages",
-    storageFull: "Mémoire pleine"
+    storageFull: "Mémoire pleine",
+    deleteConfirmation: "Confirmation de suppression",
+    deleteMessageConfirm: "Êtes-vous sûr de vouloir supprimer ces messages ?"
   },
   ar: {
     menu: "قائمة",
@@ -450,7 +455,9 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     viewServices: "عرض الخدمات",
     viewWifiNetworks: "عرض شبكات Wi-Fi",
     viewMessages: "عرض الرسائل",
-    storageFull: "الذاكرة ممتلئة"
+    storageFull: "الذاكرة ممتلئة",
+    deleteConfirmation: "تأكيد الحذف",
+    deleteMessageConfirm: "هل أنت متأكد أنك تريد حذف هذه الرسائل؟"
   },
   el: {
     menu: "Menú",
@@ -560,7 +567,9 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     viewServices: "Ver servicios",
     viewWifiNetworks: "Ver redes Wi-Fi",
     viewMessages: "Ver mensajes",
-    storageFull: "Memoria llena"
+    storageFull: "Memoria llena",
+    deleteConfirmation: "Confirmación de eliminación",
+    deleteMessageConfirm: "¿Estás seguro de que quieres eliminar estos mensajes?"
   }
 };
 
