@@ -103,7 +103,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenSettings }) =>
         <div className="flex-1 bg-white border border-gray-200 p-6 pt-4">
             <h3 className="font-bold text-black text-lg mb-4">{t('useKeyboard')}</h3>
             
-            <div className="w-full max-w-2xl">
+            <div className="w-full">
                 
                 {/* Screen Display */}
                 <div className="border border-gray-300 h-48 mb-4 p-2 text-sm font-mono overflow-y-auto bg-white shadow-inner text-black whitespace-pre-wrap">
@@ -120,7 +120,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenSettings }) =>
                         onClick={handleBackspace}
                         className="w-16 border border-black flex items-center justify-center hover:bg-gray-100 transition-colors bg-white h-10"
                     >
-                        <Delete size={20} className="text-black transform rotate-180" />
+                        <Delete size={20} className="text-black" />
                     </button>
 
                     <button 
