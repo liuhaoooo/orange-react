@@ -72,6 +72,9 @@ export interface ConnectionSettingsResponse {
     need_change_language?: string; // '1' means set/done, others mean need selection
     language?: string;             // Current language code
 
+    // Password Settings
+    need_change_password?: string; // '1' means strong/changed, others mean weak/default
+
     // WiFi Settings
     main_wifiPriority?: string;
     main_wifi_switch_24g?: string;
@@ -578,6 +581,20 @@ export const setRoamingEnable = async (roamingEnable: '0' | '1'): Promise<ApiRes
  */
 export const setLanguageSelection = async (languageSelect: string): Promise<ApiResponse> => {
   return apiRequest(97, 'POST', { languageSelect });
+};
+
+/**
+ * Modify User Password
+ * CMD: 9
+ */
+export const modifyPassword = async (username: string, newPass: string): Promise<ApiResponse> => {
+    const encodedPass = b64EncodeUtf8(newPass);
+    return apiRequest(9, 'POST', {
+        username,
+        password: encodedPass,
+        // Typically oldPassword might be needed, but based on the prompt's UI flow (no old password input),
+        // we assume authenticated session is enough or it updates the current user.
+    });
 };
 
 /**

@@ -14,6 +14,8 @@ import { LoginModal } from './components/LoginModal';
 import { ConnectedDevicesModal } from './components/ConnectedDevicesModal';
 import { EditSsidModal } from './components/EditSsidModal';
 import { LanguageSelectionModal } from './components/LanguageSelectionModal';
+import { PasswordWarningModal } from './components/PasswordWarningModal';
+import { PasswordChangeModal } from './components/PasswordChangeModal';
 import { LanguageProvider } from './utils/i18nContext';
 import { GlobalStateProvider, useGlobalState } from './utils/GlobalStateContext';
 import { logout, fetchConnectionSettings } from './utils/api';
@@ -28,6 +30,11 @@ function AppContent() {
   const [isLangModalOpen, setIsLangModalOpen] = useState(false);
   const [initialLang, setInitialLang] = useState('en');
   
+  // Password Modal States
+  const [isPwdWarningOpen, setIsPwdWarningOpen] = useState(false);
+  const [isPwdChangeOpen, setIsPwdChangeOpen] = useState(false);
+  const [pwdWarningDismissed, setPwdWarningDismissed] = useState(false);
+
   const [devicesFilter, setDevicesFilter] = useState<string | undefined>(undefined);
   const [editingNetwork, setEditingNetwork] = useState<WifiNetwork | undefined>(undefined);
   
@@ -63,6 +70,10 @@ function AppContent() {
       const success = await logout();
       if (success) {
         setIsLoggedIn(false);
+        // Reset warnings on logout
+        setPwdWarningDismissed(false);
+        setIsPwdWarningOpen(false);
+        setIsPwdChangeOpen(false);
       }
     }
   };
@@ -71,22 +82,33 @@ function AppContent() {
   useEffect(() => {
     const settings = globalData.connectionSettings;
     if (settings) {
-      // "if need_change_language != '1', then need pop up"
+      // 1. Check Language
       if (settings.need_change_language && settings.need_change_language !== '1') {
         if (settings.language) {
             setInitialLang(settings.language);
         }
         setIsLangModalOpen(true);
       } else {
-        // Ensure modal is closed if condition met (e.g. after update)
         setIsLangModalOpen(false);
       }
+
+      // 2. Check Password (only if logged in and language selection isn't active/pending)
+      if (isLoggedIn && !isLangModalOpen && settings.need_change_password && settings.need_change_password !== '1') {
+          if (!pwdWarningDismissed && !isPwdChangeOpen) {
+              setIsPwdWarningOpen(true);
+          }
+      } else {
+          // Close if condition no longer met (e.g. password changed)
+          if (settings.need_change_password === '1') {
+              setIsPwdWarningOpen(false);
+          }
+      }
     }
-  }, [globalData.connectionSettings]);
+  }, [globalData.connectionSettings, isLoggedIn, isLangModalOpen, pwdWarningDismissed, isPwdChangeOpen]);
 
   const handleLanguageSelected = async () => {
     setIsLangModalOpen(false);
-    // Refresh 585 to get updated status (and hopefully need_change_language = '1')
+    // Refresh 585 to get updated status
     try {
         const data = await fetchConnectionSettings();
         if (data && data.success !== false) {
@@ -95,6 +117,32 @@ function AppContent() {
     } catch (e) {
         console.error("Failed to refresh settings after language select", e);
     }
+  };
+
+  const handleClosePwdWarning = (doNotRemind: boolean) => {
+      setIsPwdWarningOpen(false);
+      // Set dismissed to true so it doesn't pop up again this session
+      // (Assuming 'doNotRemind' implies session or permanent dismissal logic, 
+      // but for frontend session state, we just set dismissed = true)
+      setPwdWarningDismissed(true);
+  };
+
+  const handleChangePwdNow = () => {
+      setIsPwdWarningOpen(false);
+      setIsPwdChangeOpen(true);
+  };
+
+  const handlePwdChangeSuccess = async () => {
+      setIsPwdChangeOpen(false);
+      // Refresh settings to verify need_change_password is now '1'
+      try {
+        const data = await fetchConnectionSettings();
+        if (data && data.success !== false) {
+            updateGlobalData('connectionSettings', data);
+        }
+      } catch (e) {
+        console.error("Failed to refresh settings after password change", e);
+      }
   };
 
   useEffect(() => {
@@ -219,6 +267,19 @@ function AppContent() {
             onSuccess={handleLanguageSelected}
             defaultLanguage={initialLang} 
         />
+        
+        {/* Password Modals */}
+        <PasswordWarningModal 
+            isOpen={isPwdWarningOpen} 
+            onClose={handleClosePwdWarning}
+            onChangeNow={handleChangePwdNow}
+        />
+        <PasswordChangeModal 
+            isOpen={isPwdChangeOpen} 
+            onClose={() => setIsPwdChangeOpen(false)}
+            onSuccess={handlePwdChangeSuccess}
+        />
+
       </div>
     </Router>
   );
