@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 
@@ -54,25 +54,14 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
     }
   };
 
-  const getBreadcrumb = () => {
-    let path = `${t('settings')} / ${activeSection.label}`;
-    if (activeSection.subTabs && activeSubTabId) {
-       const subTab = activeSection.subTabs.find(t => t.id === activeSubTabId);
-       if (subTab) {
-           path += ` / ${subTab.label}`;
-       }
-    }
-    return path;
-  };
-
   if (!isLoggedIn) {
      return (
-          <div className="w-full h-[500px] flex items-center justify-center bg-white border border-gray-200 shadow-sm">
+          <div className="w-full h-[500px] flex items-center justify-center bg-white border border-gray-200 shadow-sm rounded-xl">
              <div className="text-center p-8">
                  <p className="mb-4 font-bold text-lg">{t('loginAsAdminMsg')}</p>
                  <button 
                     onClick={onOpenLogin}
-                    className="bg-orange hover:bg-orange-dark text-black font-bold py-2 px-6 transition-colors"
+                    className="bg-orange hover:bg-orange-dark text-black font-bold py-2 px-6 transition-colors rounded-lg"
                  >
                     {t('loginAsAdminBtn')}
                  </button>
@@ -82,48 +71,60 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full max-w-7xl mx-auto pb-12">
       {/* Breadcrumb Header */}
-      <div className="bg-white p-4 mb-6 shadow-sm border border-gray-200 flex items-center">
-         <button onClick={() => navigate(-1)} className="me-4 text-gray-500 hover:text-black">
-            <ChevronLeft size={24} />
+      <div className="bg-white px-6 py-4 mb-8 shadow-sm border border-gray-200 flex items-center rounded-xl transition-all hover:shadow-md">
+         <button onClick={() => navigate(-1)} className="me-4 text-gray-400 hover:text-orange transition-colors">
+            <ChevronLeft size={28} strokeWidth={2.5} />
          </button>
-         <span className="font-bold text-gray-700 text-sm">
-            {getBreadcrumb()}
-         </span>
+         <div className="flex flex-col">
+            <span className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-0.5">{t('settings')}</span>
+            <span className="font-bold text-black text-xl flex items-center">
+                {activeSection.label} 
+                {activeSubTabId && activeSection.subTabs && (
+                    <>
+                        <span className="mx-2 text-gray-300">/</span>
+                        <span className="text-orange">{activeSection.subTabs.find(t => t.id === activeSubTabId)?.label}</span>
+                    </>
+                )}
+            </span>
+         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
-          <div className="w-full lg:w-64 shrink-0 flex flex-col gap-2">
+          <div className="w-full lg:w-72 shrink-0 flex flex-col gap-3">
              {menuItems.map(item => (
                  <button
                     key={item.id}
                     onClick={() => handleSectionClick(item.id)}
-                    className={`text-start px-4 py-3 font-bold text-sm border transition-colors ${
-                        activeSectionId === item.id 
-                        ? 'bg-black text-white border-black shadow-md' 
-                        : 'bg-[#e5e5e5] text-black border-black hover:bg-gray-200'
-                    }`}
+                    className={`
+                        group flex items-center justify-between px-5 py-4 font-bold text-sm border-2 transition-all duration-200 rounded-xl
+                        ${activeSectionId === item.id 
+                            ? 'bg-black text-white border-black shadow-lg scale-[1.02] z-10' 
+                            : 'bg-white text-gray-600 border-transparent hover:border-orange hover:text-orange hover:shadow-md hover:bg-orange/5'
+                        }
+                    `}
                  >
-                    {item.label}
+                    <span>{item.label}</span>
+                    {activeSectionId === item.id && <ChevronRight size={18} className="animate-fade-in" />}
                  </button>
              ))}
           </div>
 
           {/* Content Area */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
              {/* Sub Tabs (if any) */}
              {activeSection.subTabs && (
-                 <div className="flex mb-0">
+                 <div className="flex mb-5 gap-2 overflow-x-auto pb-1 px-1">
                      {activeSection.subTabs.map(tab => (
                          <button
                             key={tab.id}
                             onClick={() => setActiveSubTabId(tab.id)}
-                            className={`px-6 py-3 font-bold text-sm border-t border-x transition-colors ${
+                            className={`px-6 py-2.5 font-bold text-sm rounded-full border-2 transition-all whitespace-nowrap ${
                                 activeSubTabId === tab.id
-                                ? 'bg-black text-white border-black'
-                                : 'bg-white text-gray-500 border-transparent hover:bg-gray-100'
+                                ? 'bg-black text-white border-black shadow-md'
+                                : 'bg-white text-gray-500 border-transparent hover:border-gray-300 hover:text-black hover:bg-white'
                             }`}
                          >
                             {tab.label}
@@ -133,10 +134,25 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
              )}
 
              {/* Main Content Box */}
-             <div className={`bg-white border-t-4 border-black p-6 min-h-[500px] shadow-sm ${activeSection.subTabs ? '' : 'border-t-0'}`}>
-                 {/* Placeholder Content */}
-                 <div className="h-full flex items-center justify-center text-gray-400 italic">
-                     Content for {activeSection.label} {activeSubTabId ? `- ${activeSection.subTabs?.find(t => t.id === activeSubTabId)?.label}` : ''} goes here.
+             <div className="bg-white border border-gray-200 p-8 min-h-[600px] shadow-sm rounded-2xl relative overflow-hidden transition-all hover:shadow-md">
+                 {/* Decorative background element */}
+                 <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-gray-50 to-transparent rounded-bl-full opacity-60 pointer-events-none"></div>
+                 
+                 <div className="relative z-10">
+                    <h2 className="text-2xl font-bold mb-8 text-black pb-4 border-b border-gray-100">
+                        {activeSection.label}
+                        {activeSubTabId && activeSection.subTabs && (
+                            <span className="text-gray-400 font-normal ms-2 text-lg">
+                                - {activeSection.subTabs.find(t => t.id === activeSubTabId)?.label}
+                            </span>
+                        )}
+                    </h2>
+
+                    {/* Placeholder Content Area */}
+                    <div className="flex flex-col items-center justify-center h-[400px] text-gray-400 border-2 border-dashed border-gray-100 rounded-xl bg-gray-50/50">
+                        <p className="italic mb-3">Configuration panel for:</p>
+                        <p className="font-bold text-black text-xl bg-white px-6 py-2 rounded-lg shadow-sm">{activeSection.label}</p>
+                    </div>
                  </div>
              </div>
           </div>
