@@ -6,6 +6,7 @@ import { useGlobalState } from '../utils/GlobalStateContext';
 import { fetchSmsList, parseSmsList, SmsMessage, markSmsAsRead, deleteSms } from '../utils/api';
 import { useLocation } from 'react-router-dom';
 import { ConfirmModal } from '../components/ConfirmModal';
+import { NewMessageModal } from '../components/NewMessageModal';
 
 interface MessagesPageProps {
   onOpenSettings: () => void;
@@ -43,6 +44,9 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
       type: 'bulk' | 'thread' | 'single';
   }>({ isOpen: false, ids: [], type: 'single' });
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // New Message Modal State
+  const [isNewMessageModalOpen, setIsNewMessageModalOpen] = useState(false);
 
   const handleAuthAction = (action: () => void) => {
     if (isLoggedIn) {
@@ -357,7 +361,7 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
                   {t('redirectMessages')}
               </button>
               <button 
-                  onClick={() => handleAuthAction(() => console.log('New'))}
+                  onClick={() => handleAuthAction(() => setIsNewMessageModalOpen(true))}
                   className="bg-orange border border-orange px-4 py-2 font-bold text-sm text-black flex items-center hover:bg-orange-dark transition-colors whitespace-nowrap"
               >
                   <Plus size={16} className="me-2" />
@@ -560,6 +564,11 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
         onClose={() => setDeleteModalState(prev => ({ ...prev, isOpen: false }))}
         onConfirm={confirmDelete}
         isLoading={isDeleting}
+      />
+      
+      <NewMessageModal 
+        isOpen={isNewMessageModalOpen}
+        onClose={() => setIsNewMessageModalOpen(false)}
       />
     </>
   );

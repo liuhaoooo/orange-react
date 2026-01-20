@@ -179,6 +179,13 @@ function b64DecodeUtf8(str: string): string {
 }
 
 /**
+ * Base64 Encode with UTF-8 support
+ */
+function b64EncodeUtf8(str: string): string {
+    return btoa(unescape(encodeURIComponent(str)));
+}
+
+/**
  * Helper to parse the SMS list string returned by API
  * Format: ID STATUS SENDER DATE TIME CONTENT
  * Decoded string is space separated.
@@ -579,4 +586,22 @@ export const markSmsAsRead = async (indexes: string[]): Promise<ApiResponse> => 
  */
 export const deleteSms = async (indexes: string[], subcmd: number = 0): Promise<ApiResponse> => {
     return apiRequest(14, 'POST', { index: indexes.join(','), subcmd });
+};
+
+/**
+ * Send SMS
+ * CMD: 13
+ */
+export const sendSms = async (phoneNo: string, content: string): Promise<ApiResponse> => {
+    const encodedContent = b64EncodeUtf8(content);
+    return apiRequest(13, 'POST', { phoneNo, content: encodedContent });
+};
+
+/**
+ * Save SMS Draft
+ * CMD: 13
+ */
+export const saveSmsDraft = async (phoneNo: string, content: string): Promise<ApiResponse> => {
+    const encodedContent = b64EncodeUtf8(content);
+    return apiRequest(13, 'POST', { type: 'save', phoneNo, content: encodedContent });
 };

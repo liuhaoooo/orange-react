@@ -121,7 +121,10 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     viewMessages: "View Messages",
     storageFull: "Storage Full",
     deleteConfirmation: "Delete Confirmation",
-    deleteMessageConfirm: "Are you sure you want to delete these messages?"
+    deleteMessageConfirm: "Are you sure you want to delete these messages?",
+    receiver: "Receiver",
+    messageLabel: "Message",
+    saveDraft: "Save draft"
   },
   cn: {
     menu: "菜单",
@@ -233,7 +236,10 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     viewMessages: "查看消息",
     storageFull: "存储已满",
     deleteConfirmation: "删除确认",
-    deleteMessageConfirm: "您确定要删除这些消息吗？"
+    deleteMessageConfirm: "您确定要删除这些消息吗？",
+    receiver: "收件人",
+    messageLabel: "消息",
+    saveDraft: "保存草稿"
   },
   fr: {
     menu: "Menu",
@@ -345,7 +351,10 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     viewMessages: "Voir les messages",
     storageFull: "Mémoire pleine",
     deleteConfirmation: "Confirmation de suppression",
-    deleteMessageConfirm: "Êtes-vous sûr de vouloir supprimer ces messages ?"
+    deleteMessageConfirm: "Êtes-vous sûr de vouloir supprimer ces messages ?",
+    receiver: "Destinataire",
+    messageLabel: "Message",
+    saveDraft: "Enregistrer brouillon"
   },
   ar: {
     menu: "قائمة",
@@ -457,7 +466,10 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     viewMessages: "عرض الرسائل",
     storageFull: "الذاكرة ممتلئة",
     deleteConfirmation: "تأكيد الحذف",
-    deleteMessageConfirm: "هل أنت متأكد أنك تريد حذف هذه الرسائل؟"
+    deleteMessageConfirm: "هل أنت متأكد أنك تريد حذف هذه الرسائل؟",
+    receiver: "المستلم",
+    messageLabel: "رسالة",
+    saveDraft: "حفظ المسودة"
   },
   el: {
     menu: "Menú",
@@ -569,7 +581,10 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     viewMessages: "Ver mensajes",
     storageFull: "Memoria llena",
     deleteConfirmation: "Confirmación de eliminación",
-    deleteMessageConfirm: "¿Estás seguro de que quieres eliminar estos mensajes?"
+    deleteMessageConfirm: "¿Estás seguro de que quieres eliminar estos mensajes?",
+    receiver: "Destinatario",
+    messageLabel: "Mensaje",
+    saveDraft: "Guardar borrador"
   }
 };
 
