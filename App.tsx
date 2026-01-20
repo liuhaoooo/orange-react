@@ -96,14 +96,16 @@ function AppContent() {
     let showUpdate = false;
 
     // 1. Language (Always check first)
-    if (settings.need_change_language && settings.need_change_language !== '1') {
+    // Check if explicitly not '1' (allows empty string or undefined to trigger)
+    if (settings.need_change_language !== '1') {
         showLang = true;
         if (settings.language) setInitialLang(settings.language);
     } 
     // 2. Password (Only if logged in)
     else if (isLoggedIn) {
         // Password Check
-        if (settings.need_change_password && settings.need_change_password !== '1' && !pwdWarningDismissed) {
+        // Check if explicitly not '1'
+        if (settings.need_change_password !== '1' && !pwdWarningDismissed) {
              if (!isPwdChangeOpen) {
                  showPwd = true;
              }
@@ -117,7 +119,8 @@ function AppContent() {
 
             // 4. Software Update Check (Only if PIN handled/skipped)
             if (!showPin) {
-                if (settings.needSelectAutoupgrade && settings.needSelectAutoupgrade !== '1') {
+                // Check if explicitly not '1'
+                if (settings.needSelectAutoupgrade !== '1') {
                     showUpdate = true;
                 }
             }
