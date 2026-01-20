@@ -603,7 +603,8 @@ export const modifyPassword = async (username: string, newPass: string): Promise
         first_login: '0',
         setPasswd: encodedPass,
         subcmd: 1,
-        tz_account: 'Mw==' // Fixed value as requested
+        tz_account: 'Mw==', // Fixed value as requested
+        reset_status: '1'
     });
 };
 
