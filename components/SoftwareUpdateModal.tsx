@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Loader2 } from 'lucide-react';
-import { updateConnectionSettings } from '../utils/api';
+import { setAutoUpgrade } from '../utils/api';
 
 interface SoftwareUpdateModalProps {
   isOpen: boolean;
@@ -28,20 +28,13 @@ export const SoftwareUpdateModal: React.FC<SoftwareUpdateModalProps> = ({ isOpen
 
     setIsLoading(true);
     try {
-        // Send CMD 1020 to update settings
-        // Assuming 'auto_upgrade' is the field key and '1'/'0' are values.
-        // Also setting needSelectAutoupgrade to '1' to indicate selection done.
-        const payload = {
-            auto_upgrade: autoUpdate ? '1' : '0',
-            needSelectAutoupgrade: '1' 
-        };
-        
-        const res = await updateConnectionSettings(payload);
+        // Send CMD 240 as requested
+        const res = await setAutoUpgrade(autoUpdate ? '1' : '0');
         
         if (res && (res.success || res.result === 'success')) {
             onSuccess();
         } else {
-            console.warn("API returned unsuccessful response for update settings", res);
+            console.warn("API returned unsuccessful response for auto update settings", res);
             onSuccess(); // Proceed anyway to avoid blocking
         }
     } catch (e) {

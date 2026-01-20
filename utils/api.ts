@@ -594,15 +594,16 @@ export const setLanguageSelection = async (languageSelect: string): Promise<ApiR
 
 /**
  * Modify User Password
- * CMD: 9
+ * CMD: 102
  */
 export const modifyPassword = async (username: string, newPass: string): Promise<ApiResponse> => {
     const encodedPass = b64EncodeUtf8(newPass);
-    return apiRequest(9, 'POST', {
-        username,
-        password: encodedPass,
-        // Typically oldPassword might be needed, but based on the prompt's UI flow (no old password input),
-        // we assume authenticated session is enough or it updates the current user.
+    return apiRequest(102, 'POST', {
+        first_login_flag: '1',
+        first_login: '0',
+        setPasswd: encodedPass,
+        subcmd: 1,
+        tz_account: 'Mw==' // Fixed value as requested
     });
 };
 
@@ -675,4 +676,12 @@ export const sendSms = async (phoneNo: string, content: string): Promise<ApiResp
 export const saveSmsDraft = async (phoneNo: string, content: string): Promise<ApiResponse> => {
     const encodedContent = b64EncodeUtf8(content);
     return apiRequest(13, 'POST', { type: 'save', phoneNo, content: encodedContent });
+};
+
+/**
+ * Set Auto Upgrade (Software Update)
+ * CMD: 240
+ */
+export const setAutoUpgrade = async (autoValue: '0' | '1'): Promise<ApiResponse> => {
+    return apiRequest(240, 'POST', { autoValue });
 };
