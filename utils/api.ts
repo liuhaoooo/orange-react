@@ -75,6 +75,15 @@ export interface ConnectionSettingsResponse {
     // Password Settings
     need_change_password?: string; // '1' means strong/changed, others mean weak/default
 
+    // SIM/PIN Settings (CMD 585)
+    sim_status?: string; 
+    lock_pin_flag?: string;
+    pin_remaining_count?: string;
+
+    // Software Update Settings
+    needSelectAutoupgrade?: string; // '1' means selected, others mean need selection
+    auto_upgrade?: string;          // '0' | '1'
+
     // WiFi Settings
     main_wifiPriority?: string;
     main_wifi_switch_24g?: string;
@@ -594,6 +603,30 @@ export const modifyPassword = async (username: string, newPass: string): Promise
         password: encodedPass,
         // Typically oldPassword might be needed, but based on the prompt's UI flow (no old password input),
         // we assume authenticated session is enough or it updates the current user.
+    });
+};
+
+/**
+ * Unlock SIM PIN
+ * CMD: 7, Type: 1
+ */
+export const unlockSimPin = async (pin: string): Promise<ApiResponse> => {
+    const encodedPin = b64EncodeUtf8(pin);
+    return apiRequest(7, 'POST', { 
+        type: '1', // 1=Verify/Unlock
+        pin: encodedPin 
+    });
+};
+
+/**
+ * Disable SIM PIN Lock
+ * CMD: 7, Type: 3
+ */
+export const disablePinLock = async (pin: string): Promise<ApiResponse> => {
+    const encodedPin = b64EncodeUtf8(pin);
+    return apiRequest(7, 'POST', { 
+        type: '3', // 3=Disable PIN Lock
+        pin: encodedPin 
     });
 };
 

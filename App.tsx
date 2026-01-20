@@ -16,6 +16,8 @@ import { EditSsidModal } from './components/EditSsidModal';
 import { LanguageSelectionModal } from './components/LanguageSelectionModal';
 import { PasswordWarningModal } from './components/PasswordWarningModal';
 import { PasswordChangeModal } from './components/PasswordChangeModal';
+import { PinRequiredModal } from './components/PinRequiredModal';
+import { SoftwareUpdateModal } from './components/SoftwareUpdateModal';
 import { LanguageProvider } from './utils/i18nContext';
 import { GlobalStateProvider, useGlobalState } from './utils/GlobalStateContext';
 import { logout, fetchConnectionSettings } from './utils/api';
@@ -26,14 +28,17 @@ function AppContent() {
   const [isDevicesModalOpen, setIsDevicesModalOpen] = useState(false);
   const [isEditSsidModalOpen, setIsEditSsidModalOpen] = useState(false);
   
-  // Language Modal State
+  // Modal States
   const [isLangModalOpen, setIsLangModalOpen] = useState(false);
   const [initialLang, setInitialLang] = useState('en');
   
-  // Password Modal States
   const [isPwdWarningOpen, setIsPwdWarningOpen] = useState(false);
   const [isPwdChangeOpen, setIsPwdChangeOpen] = useState(false);
   const [pwdWarningDismissed, setPwdWarningDismissed] = useState(false);
+  
+  const [isPinModalOpen, setIsPinModalOpen] = useState(false);
+
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 
   const [devicesFilter, setDevicesFilter] = useState<string | undefined>(undefined);
   const [editingNetwork, setEditingNetwork] = useState<WifiNetwork | undefined>(undefined);
@@ -74,56 +79,71 @@ function AppContent() {
         setPwdWarningDismissed(false);
         setIsPwdWarningOpen(false);
         setIsPwdChangeOpen(false);
+        setIsPinModalOpen(false);
+        setIsUpdateModalOpen(false);
       }
     }
   };
 
-  // Check for Language Selection Requirement (CMD 585)
+  // Check Settings Loop (Language -> Password -> PIN -> Software Update)
   useEffect(() => {
     const settings = globalData.connectionSettings;
-    if (settings) {
-      // 1. Check Language
-      if (settings.need_change_language && settings.need_change_language !== '1') {
-        if (settings.language) {
-            setInitialLang(settings.language);
-        }
-        setIsLangModalOpen(true);
-      } else {
-        setIsLangModalOpen(false);
-      }
+    if (!settings) return;
 
-      // 2. Check Password (only if logged in and language selection isn't active/pending)
-      if (isLoggedIn && !isLangModalOpen && settings.need_change_password && settings.need_change_password !== '1') {
-          if (!pwdWarningDismissed && !isPwdChangeOpen) {
-              setIsPwdWarningOpen(true);
-          }
-      } else {
-          // Close if condition no longer met (e.g. password changed)
-          if (settings.need_change_password === '1') {
-              setIsPwdWarningOpen(false);
-          }
-      }
+    let showLang = false;
+    let showPwd = false;
+    let showPin = false;
+    let showUpdate = false;
+
+    // 1. Language (Always check first)
+    if (settings.need_change_language && settings.need_change_language !== '1') {
+        showLang = true;
+        if (settings.language) setInitialLang(settings.language);
+    } 
+    // 2. Password (Only if logged in)
+    else if (isLoggedIn) {
+        // Password Check
+        if (settings.need_change_password && settings.need_change_password !== '1' && !pwdWarningDismissed) {
+             if (!isPwdChangeOpen) {
+                 showPwd = true;
+             }
+        } 
+        
+        // 3. PIN Check (Only if Password handled/skipped)
+        if (!showPwd && !isPwdChangeOpen) {
+            if (settings.sim_status === '1' && settings.lock_pin_flag === '1') {
+                showPin = true;
+            }
+
+            // 4. Software Update Check (Only if PIN handled/skipped)
+            if (!showPin) {
+                if (settings.needSelectAutoupgrade && settings.needSelectAutoupgrade !== '1') {
+                    showUpdate = true;
+                }
+            }
+        }
     }
-  }, [globalData.connectionSettings, isLoggedIn, isLangModalOpen, pwdWarningDismissed, isPwdChangeOpen]);
+
+    // Apply States
+    setIsLangModalOpen(showLang);
+    
+    // Only toggle warning if change modal is NOT open to avoid flicker/conflict
+    if (!isPwdChangeOpen) {
+        setIsPwdWarningOpen(showPwd);
+    }
+    
+    setIsPinModalOpen(showPin);
+    setIsUpdateModalOpen(showUpdate);
+
+  }, [globalData.connectionSettings, isLoggedIn, pwdWarningDismissed, isPwdChangeOpen]);
 
   const handleLanguageSelected = async () => {
     setIsLangModalOpen(false);
-    // Refresh 585 to get updated status
-    try {
-        const data = await fetchConnectionSettings();
-        if (data && data.success !== false) {
-            updateGlobalData('connectionSettings', data);
-        }
-    } catch (e) {
-        console.error("Failed to refresh settings after language select", e);
-    }
+    refreshSettings();
   };
 
   const handleClosePwdWarning = (doNotRemind: boolean) => {
       setIsPwdWarningOpen(false);
-      // Set dismissed to true so it doesn't pop up again this session
-      // (Assuming 'doNotRemind' implies session or permanent dismissal logic, 
-      // but for frontend session state, we just set dismissed = true)
       setPwdWarningDismissed(true);
   };
 
@@ -134,15 +154,28 @@ function AppContent() {
 
   const handlePwdChangeSuccess = async () => {
       setIsPwdChangeOpen(false);
-      // Refresh settings to verify need_change_password is now '1'
-      try {
+      refreshSettings();
+  };
+
+  const handlePinSuccess = async () => {
+      setIsPinModalOpen(false);
+      refreshSettings();
+  };
+
+  const handleUpdateSuccess = async () => {
+      setIsUpdateModalOpen(false);
+      refreshSettings();
+  };
+
+  const refreshSettings = async () => {
+    try {
         const data = await fetchConnectionSettings();
         if (data && data.success !== false) {
             updateGlobalData('connectionSettings', data);
         }
-      } catch (e) {
-        console.error("Failed to refresh settings after password change", e);
-      }
+    } catch (e) {
+        console.error("Failed to refresh settings", e);
+    }
   };
 
   useEffect(() => {
@@ -278,6 +311,20 @@ function AppContent() {
             isOpen={isPwdChangeOpen} 
             onClose={() => setIsPwdChangeOpen(false)}
             onSuccess={handlePwdChangeSuccess}
+        />
+        
+        {/* PIN Modal */}
+        <PinRequiredModal 
+            isOpen={isPinModalOpen}
+            onClose={() => setIsPinModalOpen(false)}
+            onSuccess={handlePinSuccess}
+            remainingAttempts={globalData.connectionSettings?.pin_remaining_count || '3'}
+        />
+
+        {/* Software Update Modal */}
+        <SoftwareUpdateModal 
+            isOpen={isUpdateModalOpen}
+            onSuccess={handleUpdateSuccess}
         />
 
       </div>
