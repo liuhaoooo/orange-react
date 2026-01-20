@@ -8,6 +8,7 @@ import { UsagePage } from './pages/UsagePage';
 import { MessagesPage } from './pages/MessagesPage';
 import { WifiNetworksPage } from './pages/WifiNetworksPage';
 import { ServicesPage } from './pages/ServicesPage';
+import { HelpPage } from './pages/HelpPage';
 import { LoginModal } from './components/LoginModal';
 import { ConnectedDevicesModal } from './components/ConnectedDevicesModal';
 import { EditSsidModal } from './components/EditSsidModal';
@@ -146,6 +147,12 @@ function AppContent() {
                   onOpenSettings={openLoginModal}
                 />
               } 
+            />
+
+            {/* Help Page */}
+            <Route 
+              path="/help" 
+              element={<HelpPage />} 
             />
             
             {/* Catch-all redirect */}

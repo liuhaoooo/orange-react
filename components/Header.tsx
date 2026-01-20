@@ -131,15 +131,16 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, onLogin }) => {
               <>
                 <div className="fixed inset-0 z-40 cursor-default" onClick={() => setIsMenuOpen(false)} />
                 <div className="absolute right-0 top-full mt-3 w-48 bg-white text-black shadow-xl border border-gray-200 py-2 z-50 rounded-sm animate-fade-in">
-                  <button 
-                    className="flex items-center w-full px-4 py-2.5 text-sm hover:bg-gray-100 hover:text-orange transition-colors"
+                  <Link 
+                    to="/help"
+                    className="flex items-center w-full px-4 py-2.5 text-sm hover:bg-gray-100 hover:text-orange transition-colors text-black"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <HelpCircle size={16} className="me-3" />
                     {t('help')}
-                  </button>
+                  </Link>
                   <button 
-                    className="flex items-center w-full px-4 py-2.5 text-sm hover:bg-gray-100 hover:text-orange transition-colors"
+                    className="flex items-center w-full px-4 py-2.5 text-sm hover:bg-gray-100 hover:text-orange transition-colors text-black"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <Settings size={16} className="me-3" />

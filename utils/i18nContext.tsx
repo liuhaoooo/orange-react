@@ -126,7 +126,20 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     messageLabel: "Message",
     saveDraft: "Save draft",
     outboxFull: "Outbox is full",
-    draftboxFull: "Draft box is full"
+    draftboxFull: "Draft box is full",
+    usefulInformation: "Useful information",
+    faq: "FAQ",
+    myInformation: "My information",
+    personalDataNotice: "Personal Data Notice \"MOBILE BROADBAND Product\"",
+    phoneNumber: "Phone number",
+    model: "Model",
+    firmware: "Firmware",
+    apn: "APN",
+    networkStatus: "Network status",
+    version: "Version",
+    helpSupport: "Help & Support",
+    helpSupportText: "Help and support text goes here",
+    userGuide: "Userguide"
   },
   cn: {
     menu: "菜单",
@@ -243,7 +256,20 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     messageLabel: "消息",
     saveDraft: "保存草稿",
     outboxFull: "发件箱已满",
-    draftboxFull: "草稿箱已满"
+    draftboxFull: "草稿箱已满",
+    usefulInformation: "有用信息",
+    faq: "常见问题",
+    myInformation: "我的信息",
+    personalDataNotice: "个人数据声明 \"移动宽带产品\"",
+    phoneNumber: "电话号码",
+    model: "型号",
+    firmware: "固件",
+    apn: "APN",
+    networkStatus: "网络状态",
+    version: "版本",
+    helpSupport: "帮助与支持",
+    helpSupportText: "帮助与支持文本在此处",
+    userGuide: "用户指南"
   },
   fr: {
     menu: "Menu",
@@ -360,7 +386,20 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     messageLabel: "Message",
     saveDraft: "Enregistrer brouillon",
     outboxFull: "Boîte d'envoi pleine",
-    draftboxFull: "Boîte de brouillons pleine"
+    draftboxFull: "Boîte de brouillons pleine",
+    usefulInformation: "Informations utiles",
+    faq: "FAQ",
+    myInformation: "Mes informations",
+    personalDataNotice: "Notice Données Personnelles \"Produit MOBILE BROADBAND\"",
+    phoneNumber: "Numéro de téléphone",
+    model: "Modèle",
+    firmware: "Firmware",
+    apn: "APN",
+    networkStatus: "État du réseau",
+    version: "Version",
+    helpSupport: "Aide & Support",
+    helpSupportText: "Texte d'aide et de support ici",
+    userGuide: "Guide de l'utilisateur"
   },
   ar: {
     menu: "قائمة",
@@ -477,7 +516,20 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     messageLabel: "رسالة",
     saveDraft: "حفظ المسودة",
     outboxFull: "صندوق الصادر ممتلئ",
-    draftboxFull: "صندوق المسودات ممتلئ"
+    draftboxFull: "صندوق المسودات ممتلئ",
+    usefulInformation: "معلومات مفيدة",
+    faq: "أسئلة مكررة",
+    myInformation: "معلوماتي",
+    personalDataNotice: "إشعار البيانات الشخصية \"منتج النطاق العريض المتنقل\"",
+    phoneNumber: "رقم الهاتف",
+    model: "الموديل",
+    firmware: "البرامج الثابتة",
+    apn: "APN",
+    networkStatus: "حالة الشبكة",
+    version: "الإصدار",
+    helpSupport: "المساعدة والدعم",
+    helpSupportText: "نص المساعدة والدعم هنا",
+    userGuide: "دليل المستخدم"
   },
   el: {
     menu: "Menú",
@@ -594,7 +646,20 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     messageLabel: "Mensaje",
     saveDraft: "Guardar borrador",
     outboxFull: "Bandeja de salida llena",
-    draftboxFull: "Borradores llenos"
+    draftboxFull: "Borradores llenos",
+    usefulInformation: "Información útil",
+    faq: "FAQ",
+    myInformation: "Mi información",
+    personalDataNotice: "Aviso de datos personales \"Producto MOBILE BROADBAND\"",
+    phoneNumber: "Número de teléfono",
+    model: "Modelo",
+    firmware: "Firmware",
+    apn: "APN",
+    networkStatus: "Estado de la red",
+    version: "Versión",
+    helpSupport: "Ayuda y soporte",
+    helpSupportText: "El texto de ayuda y soporte va aquí",
+    userGuide: "Guía del usuario"
   }
 };
 
