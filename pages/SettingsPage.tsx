@@ -56,12 +56,12 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
 
   if (!isLoggedIn) {
      return (
-          <div className="w-full h-[500px] flex items-center justify-center bg-white border border-gray-200 shadow-sm rounded-xl">
+          <div className="w-full h-[500px] flex items-center justify-center bg-white border border-gray-200 shadow-sm rounded-[6px]">
              <div className="text-center p-8">
                  <p className="mb-4 font-bold text-lg">{t('loginAsAdminMsg')}</p>
                  <button 
                     onClick={onOpenLogin}
-                    className="bg-orange hover:bg-orange-dark text-black font-bold py-2 px-6 transition-colors rounded-lg"
+                    className="bg-orange hover:bg-orange-dark text-black font-bold py-2 px-6 transition-colors rounded-[6px]"
                  >
                     {t('loginAsAdminBtn')}
                  </button>
@@ -73,7 +73,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
   return (
     <div className="w-full max-w-7xl mx-auto pb-12">
       {/* Breadcrumb Header */}
-      <div className="bg-white px-6 py-4 mb-8 shadow-sm border border-gray-200 flex items-center rounded-xl transition-all hover:shadow-md">
+      <div className="bg-white px-6 py-4 mb-8 shadow-sm border border-gray-200 flex items-center rounded-[6px] transition-all hover:shadow-md">
          <button onClick={() => navigate(-1)} className="me-4 text-gray-400 hover:text-orange transition-colors">
             <ChevronLeft size={28} strokeWidth={2.5} />
          </button>
@@ -99,7 +99,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
                     key={item.id}
                     onClick={() => handleSectionClick(item.id)}
                     className={`
-                        group flex items-center justify-between px-5 py-4 font-bold text-sm border-2 transition-all duration-200 rounded-xl
+                        group flex items-center justify-between px-5 py-4 font-bold text-sm border-2 transition-all duration-200 rounded-[6px]
                         ${activeSectionId === item.id 
                             ? 'bg-black text-white border-black shadow-lg scale-[1.02] z-10' 
                             : 'bg-white text-gray-600 border-transparent hover:border-orange hover:text-orange hover:shadow-md hover:bg-orange/5'
@@ -121,7 +121,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
                          <button
                             key={tab.id}
                             onClick={() => setActiveSubTabId(tab.id)}
-                            className={`px-6 py-2.5 font-bold text-sm rounded-full border-2 transition-all whitespace-nowrap ${
+                            className={`px-6 py-2.5 font-bold text-sm rounded-[6px] border-2 transition-all whitespace-nowrap ${
                                 activeSubTabId === tab.id
                                 ? 'bg-black text-white border-black shadow-md'
                                 : 'bg-white text-gray-500 border-transparent hover:border-gray-300 hover:text-black hover:bg-white'
@@ -134,7 +134,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
              )}
 
              {/* Main Content Box */}
-             <div className="bg-white border border-gray-200 p-8 min-h-[600px] shadow-sm rounded-2xl relative overflow-hidden transition-all hover:shadow-md">
+             <div className="bg-white border border-gray-200 p-8 min-h-[600px] shadow-sm rounded-[6px] relative overflow-hidden transition-all hover:shadow-md">
                  {/* Decorative background element */}
                  <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-gray-50 to-transparent rounded-bl-full opacity-60 pointer-events-none"></div>
                  
@@ -149,9 +149,9 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
                     </h2>
 
                     {/* Placeholder Content Area */}
-                    <div className="flex flex-col items-center justify-center h-[400px] text-gray-400 border-2 border-dashed border-gray-100 rounded-xl bg-gray-50/50">
+                    <div className="flex flex-col items-center justify-center h-[400px] text-gray-400 border-2 border-dashed border-gray-100 rounded-[6px] bg-gray-50/50">
                         <p className="italic mb-3">Configuration panel for:</p>
-                        <p className="font-bold text-black text-xl bg-white px-6 py-2 rounded-lg shadow-sm">{activeSection.label}</p>
+                        <p className="font-bold text-black text-xl bg-white px-6 py-2 rounded-[6px] shadow-sm">{activeSection.label}</p>
                     </div>
                  </div>
              </div>
