@@ -136,6 +136,8 @@ export interface SmsListResponse {
 export const setSessionId = (sid: string) => {
   if (sid) {
     sessionStorage.setItem('sessionId', sid);
+    // Sync to cookie for API headers
+    document.cookie = `sessionId=${sid}; path=/`;
   }
 };
 
@@ -145,6 +147,8 @@ export const getSessionId = (): string => {
 
 export const clearSessionId = () => {
   sessionStorage.removeItem('sessionId');
+  // Clear cookie
+  document.cookie = 'sessionId=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
 };
 
 // Internal Helper to trigger global logout event
@@ -367,6 +371,11 @@ export const apiRequest = async <T = any>(
 ): Promise<T> => {
   
   const sessionId = getSessionId();
+
+  // Ensure cookie is present for the request header
+  if (sessionId && (!document.cookie || !document.cookie.includes(`sessionId=${sessionId}`))) {
+     document.cookie = `sessionId=${sessionId}; path=/`;
+  }
 
   // Construct the base payload structure
   const payload: Record<string, any> = {
