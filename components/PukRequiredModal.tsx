@@ -9,7 +9,7 @@ interface PukRequiredModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  remainingAttempts?: string;
+  remainingAttempts?: string | number; // Accept number as well just in case
 }
 
 export const PukRequiredModal: React.FC<PukRequiredModalProps> = ({ 
@@ -86,12 +86,15 @@ export const PukRequiredModal: React.FC<PukRequiredModalProps> = ({
             onSuccess();
         } else {
             setErrorMsg('Operation failed. Please check PUK code.');
-            // Refresh attempts
-            fetchConnectionSettings().then(settings => {
-                 if (settings && settings.success !== false) {
+            // Update: Await the refresh so the UI updates before loading spinner stops
+            try {
+                const settings = await fetchConnectionSettings();
+                if (settings && settings.success !== false) {
                      updateGlobalData('connectionSettings', settings);
-                 }
-            }).catch(() => {});
+                }
+            } catch (err) {
+                console.error("Failed to refresh PUK attempts", err);
+            }
         }
     } catch (e) {
         setErrorMsg('An error occurred.');
@@ -104,6 +107,9 @@ export const PukRequiredModal: React.FC<PukRequiredModalProps> = ({
 
   const inputClass = (hasError?: boolean) => `w-full border-2 p-2 text-sm outline-none font-medium text-black rounded-[4px] ${hasError ? 'border-[#ff0000]' : 'border-gray-300 focus:border-orange'}`;
   const errorTextClass = "text-[#ff0000] text-sm mt-1";
+
+  // Helper to determine if we show the counter (handle 0 case)
+  const showAttempts = remainingAttempts !== undefined && remainingAttempts !== null && remainingAttempts !== '';
 
   return createPortal(
     <div className="fixed inset-0 bg-black/70 z-[10000] flex items-center justify-center p-4">
@@ -127,7 +133,11 @@ export const PukRequiredModal: React.FC<PukRequiredModalProps> = ({
           <div className="mb-4">
             <label className="block font-bold text-sm mb-1 text-black text-start">
                <span className="text-[#ff0000] me-1">*</span>PUK code required. 
-               {remainingAttempts && <span className="text-gray-500 font-normal ms-1">(remaining attempts: {remainingAttempts})</span>}
+               {showAttempts && (
+                   <span className="text-gray-500 font-normal ms-1">
+                       (remaining attempts: {remainingAttempts})
+                   </span>
+               )}
             </label>
             <input 
               type="text" 
