@@ -23,7 +23,10 @@ export const LanguageSelectionModal: React.FC<LanguageSelectionModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       // If the incoming defaultLanguage matches one of our supported codes, use it
-      const match = languageAllList.find(l => l.value === defaultLanguage);
+      // Handle case-insensitivity as API might return uppercase (e.g. 'CN')
+      const normalizedDefault = (defaultLanguage || '').toLowerCase();
+      const match = languageAllList.find(l => l.value.toLowerCase() === normalizedDefault);
+      
       if (match) {
         setSelectedLang(match.value);
         setAppLanguage(match.value as any);
