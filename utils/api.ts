@@ -79,6 +79,7 @@ export interface ConnectionSettingsResponse {
     sim_status?: string; 
     lock_pin_flag?: string;
     pin_remaining_count?: string;
+    pin_left_times?: string; // Added for remaining attempts display
 
     // Software Update Settings
     needSelectAutoupgrade?: string; // '1' means selected, others mean need selection
@@ -623,6 +624,20 @@ export const unlockSimPin = async (pin: string): Promise<ApiResponse> => {
     return apiRequest(7, 'POST', { 
         type: '1', // 1=Verify/Unlock
         pin: encodedPin 
+    });
+};
+
+/**
+ * Verify SIM PIN (CMD 51)
+ * CMD: 51
+ */
+export const verifySimPin = async (pin: string, dontPrompt: boolean): Promise<ApiResponse> => {
+    // Standard practice for this API family is to encode PINs in Base64
+    const encodedPin = b64EncodeUtf8(pin);
+    return apiRequest(51, 'POST', { 
+        pin: encodedPin,
+        subcmd: '2',
+        dont_prompt: dontPrompt ? '1' : '0'
     });
 };
 

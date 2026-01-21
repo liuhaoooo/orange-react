@@ -323,7 +323,7 @@ function AppContent() {
             isOpen={isPinModalOpen}
             onClose={() => setIsPinModalOpen(false)}
             onSuccess={handlePinSuccess}
-            remainingAttempts={globalData.connectionSettings?.pin_remaining_count || '3'}
+            remainingAttempts={globalData.connectionSettings?.pin_left_times || '3'}
         />
 
         {/* Software Update Modal */}

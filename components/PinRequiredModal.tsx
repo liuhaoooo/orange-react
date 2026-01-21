@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Loader2 } from 'lucide-react';
-import { unlockSimPin, disablePinLock } from '../utils/api';
+import { verifySimPin, fetchConnectionSettings } from '../utils/api';
+import { useGlobalState } from '../utils/GlobalStateContext';
 
 interface PinRequiredModalProps {
   isOpen: boolean;
@@ -21,6 +22,9 @@ export const PinRequiredModal: React.FC<PinRequiredModalProps> = ({
   const [dontAskAgain, setDontAskAgain] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  
+  // Use global state context to refresh data (attempts count) on failure
+  const { updateGlobalData } = useGlobalState();
 
   useEffect(() => {
     if (isOpen) {
@@ -42,19 +46,27 @@ export const PinRequiredModal: React.FC<PinRequiredModalProps> = ({
     setErrorMsg('');
 
     try {
-        let res;
-        if (dontAskAgain) {
-            // "Don't ask me again" implies disabling the PIN lock feature
-            res = await disablePinLock(pin);
-        } else {
-            // Standard unlock for this session
-            res = await unlockSimPin(pin);
-        }
+        // Use CMD 51 via verifySimPin
+        const res = await verifySimPin(pin, dontAskAgain);
 
-        if (res.success) {
+        // Logic based on requirements:
+        // "success":true and "message":"0" means success
+        if (res.success && res.message === '0') {
             onSuccess();
-        } else {
-            setErrorMsg(res.message || 'Incorrect PIN code.');
+        } 
+        // message "507" means timeout
+        else if (res.message === '507') {
+            setErrorMsg('System timeout.');
+        } 
+        // All others are failures
+        else {
+            setErrorMsg('Incorrect PIN code.');
+            // Refresh connection settings to update "remainingAttempts" (pin_left_times)
+            fetchConnectionSettings().then(settings => {
+                 if (settings && settings.success !== false) {
+                     updateGlobalData('connectionSettings', settings);
+                 }
+            }).catch(() => {});
         }
     } catch (e) {
         setErrorMsg('An error occurred.');
