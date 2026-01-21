@@ -273,7 +273,14 @@ export const parseSmsList = (rawList: string): SmsMessage[] => {
  * 2. Hash Password (Token + Password)
  * 3. Send Login Request (CMD 100)
  */
-export const login = async (username: string, password: string): Promise<{ success: boolean; message?: string }> => {
+export const login = async (username: string, password: string): Promise<{ 
+  success: boolean; 
+  message?: string;
+  login_fail?: string;
+  login_fail2?: string;
+  login_times?: string;
+  login_time?: string;
+}> => {
   try {
     // Step 1: Get Login Token
     const tokenRes = await fetch(API_BASE_URL, {
@@ -349,22 +356,21 @@ export const login = async (username: string, password: string): Promise<{ succe
       };
     }
 
-    // Specific Error Handling: Explicit Fail Flag
-    if (loginData.login_fail === 'fail' || loginData.login_fail2 === 'fail') {
-      return { 
-        success: false, 
-        message: 'Login failed. Please check your credentials.' 
-      };
-    }
-
     if (loginData.success && loginData.sessionId) {
       // Login Successful: Save the new session ID
       setSessionId(loginData.sessionId);
       return { success: true };
-    } else {
-      console.error('Login failed', loginData);
-      return { success: false, message: 'Login failed.' };
-    }
+    } 
+
+    // Return detailed failure data including failure counts and lock times
+    return { 
+        success: false, 
+        message: loginData.message || 'Login failed.',
+        login_fail: loginData.login_fail,
+        login_fail2: loginData.login_fail2,
+        login_times: loginData.login_times,
+        login_time: loginData.login_time
+    };
 
   } catch (error) {
     console.error('Login Exception:', error);

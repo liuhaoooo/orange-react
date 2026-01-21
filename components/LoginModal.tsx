@@ -29,6 +29,15 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     }
   }, [isOpen]);
 
+  const formatLockTime = (seconds?: string) => {
+    if (!seconds) return "00:00";
+    const totalSec = parseInt(seconds, 10);
+    if (isNaN(totalSec)) return "00:00";
+    const m = Math.floor(totalSec / 60);
+    const s = totalSec % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
   const handleSubmit = async () => {
     if (!username || !password) {
       setErrorMsg(t('emptyError'));
@@ -45,8 +54,21 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         setIsLoggedIn(true);
         onClose();
       } else {
-        // Display the specific error message returned by the API
-        setErrorMsg(result.message || 'Login failed. Please check your credentials.');
+        // Handle specific API failure states
+        if (result.login_fail2 === 'fail') {
+             // Account Locked
+             const timeStr = formatLockTime(result.login_time);
+             setErrorMsg(`The account has been locked, there is still left: ${timeStr}`);
+        } else if (result.login_fail === 'fail') {
+             // Incorrect Credentials with Counter
+             setErrorMsg(`The username or password is incorrect.Number of consecutive errors:${result.login_times}`);
+        } else if (result.message === 'The account has been logged in on other terminal. Please try again later.') {
+             // Already Logged In (passed from api.ts as message)
+             setErrorMsg(result.message);
+        } else {
+             // General Fallback
+             setErrorMsg(result.message || 'Login failed. Please check your credentials.');
+        }
       }
     } catch (e) {
       setErrorMsg('An unexpected error occurred.');
@@ -96,7 +118,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
             />
           </div>
 
-          {errorMsg && <p className="text-red-500 text-xs mb-4 text-start">{errorMsg}</p>}
+          {errorMsg && <p className="text-red-500 text-xs mb-4 text-start font-bold">{errorMsg}</p>}
 
           <div className="flex justify-end rtl:justify-start">
             <button 
