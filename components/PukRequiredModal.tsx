@@ -36,6 +36,8 @@ export const PukRequiredModal: React.FC<PukRequiredModalProps> = ({
         setPuk('');
         setNewPin('');
         setConfirmPin('');
+        setShowNewPin(false);
+        setShowConfirmPin(false);
         setErrors({});
         setErrorMsg('');
         setIsLoading(false);
@@ -124,7 +126,8 @@ export const PukRequiredModal: React.FC<PukRequiredModalProps> = ({
           {/* PUK Input */}
           <div className="mb-4">
             <label className="block font-bold text-sm mb-1 text-black text-start">
-               <span className="text-[#ff0000] me-1">*</span>PUK code required. {remainingAttempts ? `(${remainingAttempts})` : ''}
+               <span className="text-[#ff0000] me-1">*</span>PUK code required. 
+               {remainingAttempts && <span className="text-gray-500 font-normal ms-1">(remaining attempts: {remainingAttempts})</span>}
             </label>
             <input 
               type="text" 
