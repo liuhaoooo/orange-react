@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { getSessionId, checkAuthStatus, clearSessionId, fetchStatusInfo, fetchConnectionSettings, fetchWifiSettings } from './api';
+import { getSessionId, checkAuthStatus, clearSessionId, fetchStatusInfo, fetchConnectionSettings, fetchWifiSettings, fetchAccountLevel } from './api';
 
 interface GlobalStateContextType {
   isLoggedIn: boolean;
@@ -58,8 +58,8 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
     return true;
   }, [isLoggedIn]);
 
-  // Effect 1: Fetch Settings (CMD 585 & 587)
-  // CMD 585 can be fetched without login. CMD 587 requires login.
+  // Effect 1: Fetch Settings (CMD 585 & 587 & 588)
+  // CMD 585 can be fetched without login. CMD 587 and 588 require login.
   useEffect(() => {
     const fetchSettings = async () => {
       try {
@@ -69,12 +69,22 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
             updateGlobalData('connectionSettings', connData);
         }
         
-        // Only fetch Wifi Settings (587) if logged in
+        // Only fetch Wifi Settings (587) and Account Level (588) if logged in
         if (isLoggedIn) {
             const wifiRes = await fetchWifiSettings();
             // CMD 587 returns flat response
             if (wifiRes && wifiRes.success !== false) {
                 updateGlobalData('wifiSettings', wifiRes);
+            }
+
+            // Fetch Account Level (CMD 588)
+            try {
+                const accRes = await fetchAccountLevel();
+                if (accRes && accRes.account_level) {
+                    updateGlobalData('accountLevel', accRes.account_level);
+                }
+            } catch (e) {
+                console.error("Failed to fetch account level", e);
             }
         }
 

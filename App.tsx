@@ -88,6 +88,8 @@ function AppContent() {
   // Check Settings Loop (Language -> Password -> PIN -> Software Update)
   useEffect(() => {
     const settings = globalData.connectionSettings;
+    const accountLevel = globalData.accountLevel;
+
     if (!settings) return;
 
     let showLang = false;
@@ -104,8 +106,8 @@ function AppContent() {
     // 2. Password (Only if logged in)
     else if (isLoggedIn) {
         // Password Check
-        // Check if explicitly not '1'
-        if (settings.need_change_password !== '1' && !pwdWarningDismissed) {
+        // Check if explicitly not '1' AND accountLevel is '3' (Normal User)
+        if (settings.need_change_password !== '1' && !pwdWarningDismissed && accountLevel === '3') {
              if (!isPwdChangeOpen) {
                  showPwd = true;
              }
@@ -138,7 +140,7 @@ function AppContent() {
     setIsPinModalOpen(showPin);
     setIsUpdateModalOpen(showUpdate);
 
-  }, [globalData.connectionSettings, isLoggedIn, pwdWarningDismissed, isPwdChangeOpen]);
+  }, [globalData.connectionSettings, globalData.accountLevel, isLoggedIn, pwdWarningDismissed, isPwdChangeOpen]);
 
   const handleLanguageSelected = async () => {
     setIsLangModalOpen(false);

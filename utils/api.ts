@@ -686,3 +686,11 @@ export const saveSmsDraft = async (phoneNo: string, content: string): Promise<Ap
 export const setAutoUpgrade = async (autoValue: '0' | '1'): Promise<ApiResponse> => {
     return apiRequest(240, 'POST', { autoValue });
 };
+
+/**
+ * Get Account Level
+ * CMD: 588
+ */
+export const fetchAccountLevel = async (): Promise<{ account_level: string }> => {
+  return apiRequest<{ account_level: string }>(588, 'GET');
+};
