@@ -162,7 +162,10 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     wifi: "Wi-Fi",
     guestWifi: "Guest Wi-Fi",
     dhcp: "DHCP",
-    selectLanguage: "Select Language"
+    selectLanguage: "Select Language",
+    pwdModificationFailed: "Modification failed",
+    pwdSameAsOld: "The new password cannot be the same as the old password",
+    pwdSameAsUser: "The new password cannot be the same as the username"
   },
   cn: {
     menu: "菜单",
@@ -301,7 +304,10 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     wifi: "Wi-Fi",
     guestWifi: "访客 Wi-Fi",
     dhcp: "DHCP",
-    selectLanguage: "选择语言"
+    selectLanguage: "选择语言",
+    pwdModificationFailed: "修改失败",
+    pwdSameAsOld: "新密码不能与旧密码相同",
+    pwdSameAsUser: "新密码不能与用户名相同"
   },
   fr: {
     menu: "Menu",
@@ -440,7 +446,10 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     wifi: "Wi-Fi",
     guestWifi: "Wi-Fi Invité",
     dhcp: "DHCP",
-    selectLanguage: "Choisir la langue"
+    selectLanguage: "Choisir la langue",
+    pwdModificationFailed: "Modification failed",
+    pwdSameAsOld: "The new password cannot be the same as the old password",
+    pwdSameAsUser: "The new password cannot be the same as the username"
   },
   ar: {
     menu: "قائمة",
@@ -579,7 +588,10 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     wifi: "Wi-Fi",
     guestWifi: "شبكة Wi-Fi للضيوف",
     dhcp: "DHCP",
-    selectLanguage: "اختر اللغة"
+    selectLanguage: "اختر اللغة",
+    pwdModificationFailed: "Modification failed",
+    pwdSameAsOld: "The new password cannot be the same as the old password",
+    pwdSameAsUser: "The new password cannot be the same as the username"
   },
   el: {
     menu: "Menú",
@@ -718,7 +730,10 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     wifi: "Wi-Fi",
     guestWifi: "Wi-Fi de invitados",
     dhcp: "DHCP",
-    selectLanguage: "Seleccionar idioma"
+    selectLanguage: "Seleccionar idioma",
+    pwdModificationFailed: "Modification failed",
+    pwdSameAsOld: "The new password cannot be the same as the old password",
+    pwdSameAsUser: "The new password cannot be the same as the username"
   }
 };
 

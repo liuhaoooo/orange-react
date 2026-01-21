@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Loader2 } from 'lucide-react';
 import { modifyPassword } from '../utils/api';
+import { useLanguage } from '../utils/i18nContext';
 
 interface PasswordChangeModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface PasswordChangeModalProps {
 }
 
 export const PasswordChangeModal: React.FC<PasswordChangeModalProps> = ({ isOpen, onClose, onSuccess }) => {
+  const { t } = useLanguage();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -36,7 +38,7 @@ export const PasswordChangeModal: React.FC<PasswordChangeModalProps> = ({ isOpen
 
   const handleSubmit = async () => {
     if (!password) {
-        setErrorMsg('Password cannot be empty.');
+        setErrorMsg(t('emptyError'));
         return;
     }
     if (password !== confirmPassword) {
@@ -44,18 +46,24 @@ export const PasswordChangeModal: React.FC<PasswordChangeModalProps> = ({ isOpen
         return;
     }
 
-    // Basic strength check if strictly enforcing, but UI just warns "Weak".
-    // Proceeding to API.
-
     setIsLoading(true);
     setErrorMsg('');
 
     try {
         const res = await modifyPassword('admin', password);
-        if (res.success) {
+        
+        // Logic based on specific message values as requested
+        if (res.message === 'success') {
             onSuccess();
+        } else if (res.message === 'ERROR') {
+            setErrorMsg(t('pwdModificationFailed'));
+        } else if (res.message === 'passwd same') {
+            setErrorMsg(t('pwdSameAsOld'));
+        } else if (res.message === 'username passwd same') {
+            setErrorMsg(t('pwdSameAsUser'));
         } else {
-            setErrorMsg(res.message || 'Failed to update password.');
+            // Fallback for other errors
+            setErrorMsg(res.message || t('pwdModificationFailed'));
         }
     } catch (e) {
         setErrorMsg('An error occurred.');
