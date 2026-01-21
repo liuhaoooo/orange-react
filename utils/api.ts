@@ -1,4 +1,5 @@
 
+
 // API Configuration
 const API_BASE_URL = '/cgi-bin/http.cgi'; 
 
@@ -79,7 +80,11 @@ export interface ConnectionSettingsResponse {
     sim_status?: string; 
     lock_pin_flag?: string;
     pin_remaining_count?: string;
-    pin_left_times?: string; // Added for remaining attempts display
+    pin_left_times?: string; // Remaining PIN attempts
+    
+    lock_puk_flag?: string;
+    puk_remaining_count?: string;
+    puk_left_times?: string; // Added: Remaining PUK attempts
 
     // Software Update Settings
     needSelectAutoupgrade?: string; // '1' means selected, others mean need selection
@@ -637,6 +642,19 @@ export const verifySimPin = async (pin: string, dontPrompt: boolean): Promise<Ap
         pin: pin,
         subcmd: '2',
         dont_prompt: dontPrompt ? '1' : '0'
+    });
+};
+
+/**
+ * Unlock SIM PUK (CMD 51)
+ * CMD: 51, subcmd: 3
+ */
+export const unlockSimPuk = async (puk: string, newPin: string): Promise<ApiResponse> => {
+    return apiRequest(51, 'POST', { 
+        puk: puk,
+        pin: newPin,
+        subcmd: '3',
+        dont_prompt: '0'
     });
 };
 

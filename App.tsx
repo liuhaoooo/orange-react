@@ -17,6 +17,7 @@ import { LanguageSelectionModal } from './components/LanguageSelectionModal';
 import { PasswordWarningModal } from './components/PasswordWarningModal';
 import { PasswordChangeModal } from './components/PasswordChangeModal';
 import { PinRequiredModal } from './components/PinRequiredModal';
+import { PukRequiredModal } from './components/PukRequiredModal';
 import { SoftwareUpdateModal } from './components/SoftwareUpdateModal';
 import { LanguageProvider } from './utils/i18nContext';
 import { GlobalStateProvider, useGlobalState } from './utils/GlobalStateContext';
@@ -37,6 +38,7 @@ function AppContent() {
   const [pwdWarningDismissed, setPwdWarningDismissed] = useState(false);
   
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
+  const [isPukModalOpen, setIsPukModalOpen] = useState(false);
 
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 
@@ -80,12 +82,13 @@ function AppContent() {
         setIsPwdWarningOpen(false);
         setIsPwdChangeOpen(false);
         setIsPinModalOpen(false);
+        setIsPukModalOpen(false);
         setIsUpdateModalOpen(false);
       }
     }
   };
 
-  // Check Settings Loop (Language -> Password -> PIN -> Software Update)
+  // Check Settings Loop (Language -> PUK -> Password -> PIN -> Software Update)
   useEffect(() => {
     const settings = globalData.connectionSettings;
     const accountLevel = globalData.accountLevel;
@@ -95,33 +98,35 @@ function AppContent() {
     let showLang = false;
     let showPwd = false;
     let showPin = false;
+    let showPuk = false;
     let showUpdate = false;
 
     // 1. Language (Always check first)
-    // Check if explicitly not '1' (allows empty string or undefined to trigger)
     if (settings.need_change_language !== '1') {
         showLang = true;
         if (settings.language) setInitialLang(settings.language);
     } 
-    // 2. Password (Only if logged in)
+    // 2. PUK Check (Highest Priority for SIM)
+    else if (settings.lock_puk_flag === '1') {
+        showPuk = true;
+    }
+    // 3. Password (Only if logged in and PUK not showing)
     else if (isLoggedIn) {
         // Password Check
-        // Check if explicitly not '1' AND accountLevel is '3' (Normal User)
         if (settings.need_change_password !== '1' && !pwdWarningDismissed && accountLevel === '3') {
              if (!isPwdChangeOpen) {
                  showPwd = true;
              }
         } 
         
-        // 3. PIN Check (Only if Password handled/skipped)
+        // 4. PIN Check (Only if Password handled/skipped)
         if (!showPwd && !isPwdChangeOpen) {
             if (settings.sim_status === '1' && settings.lock_pin_flag === '1') {
                 showPin = true;
             }
 
-            // 4. Software Update Check (Only if PIN handled/skipped)
+            // 5. Software Update Check (Only if PIN handled/skipped)
             if (!showPin) {
-                // Check if explicitly not '1'
                 if (settings.needSelectAutoupgrade !== '1') {
                     showUpdate = true;
                 }
@@ -137,6 +142,7 @@ function AppContent() {
         setIsPwdWarningOpen(showPwd);
     }
     
+    setIsPukModalOpen(showPuk);
     setIsPinModalOpen(showPin);
     setIsUpdateModalOpen(showUpdate);
 
@@ -164,6 +170,11 @@ function AppContent() {
 
   const handlePinSuccess = async () => {
       setIsPinModalOpen(false);
+      refreshSettings();
+  };
+
+  const handlePukSuccess = async () => {
+      setIsPukModalOpen(false);
       refreshSettings();
   };
 
@@ -324,6 +335,14 @@ function AppContent() {
             onClose={() => setIsPinModalOpen(false)}
             onSuccess={handlePinSuccess}
             remainingAttempts={globalData.connectionSettings?.pin_left_times || '3'}
+        />
+
+        {/* PUK Modal */}
+        <PukRequiredModal 
+            isOpen={isPukModalOpen}
+            onClose={() => setIsPukModalOpen(false)}
+            onSuccess={handlePukSuccess}
+            remainingAttempts={globalData.connectionSettings?.puk_left_times}
         />
 
         {/* Software Update Modal */}
