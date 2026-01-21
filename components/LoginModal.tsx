@@ -16,6 +16,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [lockCountdown, setLockCountdown] = useState<number | null>(null);
   const { t } = useLanguage();
   const { setIsLoggedIn } = useGlobalState();
   
@@ -26,17 +27,37 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       setPassword('');
       setErrorMsg('');
       setIsLoading(false);
+      setLockCountdown(null);
     }
   }, [isOpen]);
 
-  const formatLockTime = (seconds?: string) => {
-    if (!seconds) return "00:00";
-    const totalSec = parseInt(seconds, 10);
-    if (isNaN(totalSec)) return "00:00";
-    const m = Math.floor(totalSec / 60);
-    const s = totalSec % 60;
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  };
+  // Handle Countdown Timer
+  useEffect(() => {
+    if (lockCountdown === null) return;
+
+    if (lockCountdown <= 0) {
+        // Countdown finished
+        setLockCountdown(null);
+        setErrorMsg(''); // Clear the lock message
+        return;
+    }
+
+    const timer = setInterval(() => {
+        setLockCountdown(prev => (prev !== null && prev > 0 ? prev - 1 : 0));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [lockCountdown]);
+
+  // Update Error Message dynamically based on countdown
+  useEffect(() => {
+      if (lockCountdown !== null) {
+          const m = Math.floor(lockCountdown / 60);
+          const s = lockCountdown % 60;
+          const timeStr = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+          setErrorMsg(`The account has been locked, there is still left: ${timeStr}`);
+      }
+  }, [lockCountdown]);
 
   const handleSubmit = async () => {
     if (!username || !password) {
@@ -46,6 +67,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 
     setIsLoading(true);
     setErrorMsg('');
+    setLockCountdown(null); // Reset countdown on new attempt
 
     try {
       const result = await login(username, password);
@@ -56,9 +78,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       } else {
         // Handle specific API failure states
         if (result.login_fail2 === 'fail') {
-             // Account Locked
-             const timeStr = formatLockTime(result.login_time);
-             setErrorMsg(`The account has been locked, there is still left: ${timeStr}`);
+             // Account Locked - Start Countdown
+             const seconds = parseInt(result.login_time || '0', 10);
+             if (!isNaN(seconds) && seconds > 0) {
+                 setLockCountdown(seconds);
+             } else {
+                 setErrorMsg(`The account has been locked.`);
+             }
         } else if (result.login_fail === 'fail') {
              // Incorrect Credentials with Counter
              setErrorMsg(`The username or password is incorrect.Number of consecutive errors:${result.login_times}`);
@@ -123,8 +149,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
           <div className="flex justify-end rtl:justify-start">
             <button 
               onClick={handleSubmit}
-              disabled={isLoading}
-              className="px-8 py-2 border border-black text-sm font-bold hover:bg-gray-100 transition-colors uppercase text-black flex items-center"
+              disabled={isLoading || (lockCountdown !== null && lockCountdown > 0)}
+              className={`px-8 py-2 border border-black text-sm font-bold transition-colors uppercase text-black flex items-center ${(isLoading || (lockCountdown !== null && lockCountdown > 0)) ? 'bg-gray-100 cursor-not-allowed' : 'hover:bg-gray-100'}`}
             >
               {isLoading && <Loader2 className="animate-spin w-4 h-4 me-2" />}
               {t('ok')}
