@@ -121,7 +121,8 @@ function AppContent() {
         
         // 4. PIN Check (Only if Password handled/skipped)
         if (!showPwd && !isPwdChangeOpen) {
-            if (settings.sim_status === '1' && settings.lock_pin_flag === '1') {
+            // Check dont_prompt flag as well
+            if (settings.sim_status === '1' && settings.lock_pin_flag === '1' && settings.dont_prompt !== '1') {
                 showPin = true;
             }
 

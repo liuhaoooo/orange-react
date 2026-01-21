@@ -81,6 +81,7 @@ export interface ConnectionSettingsResponse {
     lock_pin_flag?: string;
     pin_remaining_count?: string;
     pin_left_times?: string; // Remaining PIN attempts
+    dont_prompt?: string; // '1' if "Don't ask me again" was selected previously
     
     lock_puk_flag?: string;
     puk_remaining_count?: string;
