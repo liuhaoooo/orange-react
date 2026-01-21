@@ -632,10 +632,9 @@ export const unlockSimPin = async (pin: string): Promise<ApiResponse> => {
  * CMD: 51
  */
 export const verifySimPin = async (pin: string, dontPrompt: boolean): Promise<ApiResponse> => {
-    // Standard practice for this API family is to encode PINs in Base64
-    const encodedPin = b64EncodeUtf8(pin);
+    // PIN sent as plaintext as per requirements
     return apiRequest(51, 'POST', { 
-        pin: encodedPin,
+        pin: pin,
         subcmd: '2',
         dont_prompt: dontPrompt ? '1' : '0'
     });

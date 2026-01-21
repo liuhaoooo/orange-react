@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Loader2 } from 'lucide-react';
+import { X, Loader2, Eye, EyeOff } from 'lucide-react';
 import { verifySimPin, fetchConnectionSettings } from '../utils/api';
 import { useGlobalState } from '../utils/GlobalStateContext';
 
@@ -19,6 +19,7 @@ export const PinRequiredModal: React.FC<PinRequiredModalProps> = ({
   remainingAttempts 
 }) => {
   const [pin, setPin] = useState('');
+  const [showPin, setShowPin] = useState(false);
   const [dontAskAgain, setDontAskAgain] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -29,6 +30,7 @@ export const PinRequiredModal: React.FC<PinRequiredModalProps> = ({
   useEffect(() => {
     if (isOpen) {
         setPin('');
+        setShowPin(false);
         setErrorMsg('');
         setIsLoading(false);
         // dontAskAgain state can persist or reset, reseting for safety
@@ -98,12 +100,21 @@ export const PinRequiredModal: React.FC<PinRequiredModalProps> = ({
             <label className="block font-bold text-sm mb-2 text-black text-start">
                Enter your PIN code <span className="text-gray-500 font-normal">(remaining attempts: {remainingAttempts || '3'})</span>
             </label>
-            <input 
-              type="password" 
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              className="w-full border-2 border-black p-2 text-sm outline-none focus:border-orange text-black font-medium" 
-            />
+            <div className="relative w-full">
+                <input 
+                  type={showPin ? "text" : "password"} 
+                  value={pin}
+                  onChange={(e) => setPin(e.target.value)}
+                  className="w-full border-2 border-black p-2 text-sm outline-none focus:border-orange text-black font-medium pr-10" 
+                />
+                <button 
+                  type="button"
+                  onClick={() => setShowPin(!showPin)}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-black"
+                >
+                  {showPin ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+            </div>
           </div>
           
           <div className="flex items-center mb-8">
