@@ -165,7 +165,13 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     selectLanguage: "Select Language",
     pwdModificationFailed: "Modification failed",
     pwdSameAsOld: "The new password cannot be the same as the old password",
-    pwdSameAsUser: "The new password cannot be the same as the username"
+    pwdSameAsUser: "The new password cannot be the same as the username",
+    loginIncorrect: "The username or password is incorrect.Number of consecutive errors:{0}",
+    accountLockedTime: "The account has been locked, there is still left: {0}",
+    accountLocked: "The account has been locked.",
+    loginFailedGeneral: "Login failed. Please check your credentials.",
+    loginUnexpected: "An unexpected error occurred.",
+    alreadyLoggedIn: "The account has been logged in on other terminal. Please try again later."
   },
   cn: {
     menu: "菜单",
@@ -307,7 +313,13 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     selectLanguage: "选择语言",
     pwdModificationFailed: "修改失败",
     pwdSameAsOld: "新密码不能与旧密码相同",
-    pwdSameAsUser: "新密码不能与用户名相同"
+    pwdSameAsUser: "新密码不能与用户名相同",
+    loginIncorrect: "用户名或密码错误。连续错误次数：{0}",
+    accountLockedTime: "账户已被锁定，剩余时间：{0}",
+    accountLocked: "账户已被锁定。",
+    loginFailedGeneral: "登录失败。请检查您的凭据。",
+    loginUnexpected: "发生意外错误。",
+    alreadyLoggedIn: "该账户已在其他终端登录。请稍后再试。"
   },
   fr: {
     menu: "Menu",
@@ -449,7 +461,13 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     selectLanguage: "Choisir la langue",
     pwdModificationFailed: "Modification failed",
     pwdSameAsOld: "The new password cannot be the same as the old password",
-    pwdSameAsUser: "The new password cannot be the same as the username"
+    pwdSameAsUser: "The new password cannot be the same as the username",
+    loginIncorrect: "Le nom d'utilisateur ou le mot de passe est incorrect. Nombre d'erreurs consécutives :{0}",
+    accountLockedTime: "Le compte a été verrouillé, il reste encore : {0}",
+    accountLocked: "Le compte a été verrouillé.",
+    loginFailedGeneral: "Échec de la connexion. Veuillez vérifier vos identifiants.",
+    loginUnexpected: "Une erreur inattendue s'est produite.",
+    alreadyLoggedIn: "Le compte est déjà connecté sur un autre terminal. Veuillez réessayer plus tard."
   },
   ar: {
     menu: "قائمة",
@@ -591,7 +609,13 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     selectLanguage: "اختر اللغة",
     pwdModificationFailed: "Modification failed",
     pwdSameAsOld: "The new password cannot be the same as the old password",
-    pwdSameAsUser: "The new password cannot be the same as the username"
+    pwdSameAsUser: "The new password cannot be the same as the username",
+    loginIncorrect: "اسم المستخدم أو كلمة المرور غير صحيحة. عدد الأخطاء المتتالية: {0}",
+    accountLockedTime: "تم قفل الحساب، لا يزال متبقيًا: {0}",
+    accountLocked: "تم قفل الحساب.",
+    loginFailedGeneral: "فشل تسجيل الدخول. يرجى التحقق من بيانات الاعتماد الخاصة بك.",
+    loginUnexpected: "حدث خطأ غير متوقع.",
+    alreadyLoggedIn: "تم تسجيل الدخول إلى الحساب على محطة أخرى. يرجى المحاولة مرة أخرى لاحقًا."
   },
   el: {
     menu: "Menú",
@@ -733,7 +757,13 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     selectLanguage: "Seleccionar idioma",
     pwdModificationFailed: "Modification failed",
     pwdSameAsOld: "The new password cannot be the same as the old password",
-    pwdSameAsUser: "The new password cannot be the same as the username"
+    pwdSameAsUser: "The new password cannot be the same as the username",
+    loginIncorrect: "El nombre de usuario o la contraseña son incorrectos. Número de errores consecutivos: {0}",
+    accountLockedTime: "La cuenta ha sido bloqueada, todavía queda: {0}",
+    accountLocked: "La cuenta ha sido bloqueada.",
+    loginFailedGeneral: "Inicio de sesión fallido. Por favor, verifique sus credenciales.",
+    loginUnexpected: "Ocurrió un error inesperado.",
+    alreadyLoggedIn: "La cuenta ha iniciado sesión en otro terminal. Por favor, inténtelo de nuevo más tarde."
   }
 };
 

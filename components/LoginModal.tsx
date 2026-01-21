@@ -55,9 +55,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
           const m = Math.floor(lockCountdown / 60);
           const s = lockCountdown % 60;
           const timeStr = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-          setErrorMsg(`The account has been locked, there is still left: ${timeStr}`);
+          setErrorMsg(t('accountLockedTime', timeStr));
       }
-  }, [lockCountdown]);
+  }, [lockCountdown, t]);
 
   const handleSubmit = async () => {
     if (!username || !password) {
@@ -83,21 +83,21 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
              if (!isNaN(seconds) && seconds > 0) {
                  setLockCountdown(seconds);
              } else {
-                 setErrorMsg(`The account has been locked.`);
+                 setErrorMsg(t('accountLocked'));
              }
         } else if (result.login_fail === 'fail') {
              // Incorrect Credentials with Counter
-             setErrorMsg(`The username or password is incorrect.Number of consecutive errors:${result.login_times}`);
+             setErrorMsg(t('loginIncorrect', result.login_times || '0'));
         } else if (result.message === 'The account has been logged in on other terminal. Please try again later.') {
-             // Already Logged In (passed from api.ts as message)
-             setErrorMsg(result.message);
+             // Already Logged In
+             setErrorMsg(t('alreadyLoggedIn'));
         } else {
              // General Fallback
-             setErrorMsg(result.message || 'Login failed. Please check your credentials.');
+             setErrorMsg(result.message || t('loginFailedGeneral'));
         }
       }
     } catch (e) {
-      setErrorMsg('An unexpected error occurred.');
+      setErrorMsg(t('loginUnexpected'));
     } finally {
       setIsLoading(false);
     }
@@ -135,7 +135,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
             <label className="block font-bold text-sm mb-1 text-black text-start">{t('passwordLabel')}</label>
             <input 
               type="password" 
-              value={password}
+              value={password} 
               autoComplete="new-password"
               onChange={(e) => setPassword(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
