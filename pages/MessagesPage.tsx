@@ -17,7 +17,7 @@ type TabType = 'inbox' | 'sent' | 'draft';
 
 export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) => {
   const { t } = useLanguage();
-  const { isLoggedIn } = useGlobalState();
+  const { isLoggedIn, globalData } = useGlobalState();
   const location = useLocation();
   const [activeTab, setActiveTab] = useState<TabType>('inbox');
   
@@ -57,8 +57,26 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
   const [isRedirectWarningOpen, setIsRedirectWarningOpen] = useState(false);
   const [isRedirectConfigOpen, setIsRedirectConfigOpen] = useState(false);
 
-  const handleAuthAction = (action: () => void) => {
+  const checkSmsReady = (): { ready: boolean; reason?: string } => {
+      const s = globalData.connectionSettings;
+      // If data isn't loaded yet, we can't be sure, but usually it is loaded by now if logged in
+      if (!s) return { ready: false, reason: t('loginUnexpected') };
+
+      if (s.sim_status !== '1') return { ready: false, reason: t('noSimAvailable') };
+      if (s.lock_puk_flag === '1') return { ready: false, reason: t('pukCodeRequired') };
+      if (s.lock_pin_flag === '1') return { ready: false, reason: t('pinCodeRequired') };
+      if (s.sms_sw !== '1') return { ready: false, reason: "SMS function is disabled." };
+
+      return { ready: true };
+  };
+
+  const handleSmsAction = (action: () => void) => {
     if (isLoggedIn) {
+        const check = checkSmsReady();
+        if (!check.ready) {
+            alert(check.reason);
+            return;
+        }
         action();
     } else {
         onOpenSettings();
@@ -381,14 +399,14 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
                   {t('settings')}
               </button>
               <button 
-                  onClick={() => handleAuthAction(openRedirectFlow)}
+                  onClick={() => handleSmsAction(openRedirectFlow)}
                   className="bg-black border border-black px-4 py-2 font-bold text-sm text-white flex items-center hover:bg-gray-900 transition-colors whitespace-nowrap"
               >
                   <CornerUpRight size={16} className="me-2" />
                   {t('redirectMessages')}
               </button>
               <button 
-                  onClick={() => handleAuthAction(() => {
+                  onClick={() => handleSmsAction(() => {
                       setNewMessageReceiver('');
                       setIsNewMessageModalOpen(true);
                   })}
@@ -532,7 +550,7 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
                           
                           {/* Reply Button */}
                           <button 
-                            onClick={() => handleAuthAction(() => {
+                            onClick={() => handleSmsAction(() => {
                                 setNewMessageReceiver(activeThread.sender);
                                 setIsNewMessageModalOpen(true);
                             })}

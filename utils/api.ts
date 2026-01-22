@@ -68,6 +68,9 @@ export interface ConnectionSettingsResponse {
     lteCA: string;
     nrCA: string;
     
+    // SMS Switch
+    sms_sw?: string;
+
     // Language Settings
     need_change_language?: string; // '1' means set/done, others mean need selection
     language?: string;             // Current language code
