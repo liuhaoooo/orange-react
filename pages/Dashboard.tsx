@@ -11,9 +11,11 @@ interface DashboardProps {
   onOpenLogin: () => void;
   onOpenDevices: (ssid?: string) => void;
   onEditSsid: (network: WifiNetwork) => void;
+  onShowPin: () => void;
+  onShowPuk: () => void;
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ onOpenLogin, onOpenDevices, onEditSsid }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ onOpenLogin, onOpenDevices, onEditSsid, onShowPin, onShowPuk }) => {
   return (
     <div className="space-y-6">
       {/* Row 1: Connection and Messages */}
@@ -22,6 +24,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenLogin, onOpenDevices
            <ConnectionCard 
              onOpenSettings={onOpenLogin} 
              onManageDevices={() => onOpenDevices()}
+             onShowPin={onShowPin}
+             onShowPuk={onShowPuk}
            />
         </div>
         <div className="h-[540px]">

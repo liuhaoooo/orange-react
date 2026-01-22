@@ -72,6 +72,9 @@ function AppContent() {
     setEditingNetwork(undefined);
   };
 
+  const openPinModal = () => setIsPinModalOpen(true);
+  const openPukModal = () => setIsPukModalOpen(true);
+
   const handleLogout = async () => {
     if (isLoggedIn) {
       const success = await logout();
@@ -226,6 +229,8 @@ function AppContent() {
                   onOpenLogin={openLoginModal} 
                   onOpenDevices={openDevicesModal} 
                   onEditSsid={openEditSsidModal} 
+                  onShowPin={openPinModal}
+                  onShowPuk={openPukModal}
                 />
               } 
             />
@@ -237,6 +242,8 @@ function AppContent() {
                 <ConnectionPage 
                   onOpenSettings={openLoginModal}
                   onManageDevices={() => openDevicesModal()}
+                  onShowPin={openPinModal}
+                  onShowPuk={openPukModal}
                 />
               } 
             />

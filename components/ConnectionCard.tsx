@@ -10,6 +10,8 @@ import { setDialMode, setRoamingEnable, fetchConnectionSettings } from '../utils
 interface ConnectionCardProps {
   onOpenSettings: () => void;
   onManageDevices: () => void;
+  onShowPin: () => void;
+  onShowPuk: () => void;
 }
 
 const StatItem: React.FC<{ 
@@ -29,7 +31,7 @@ const StatItem: React.FC<{
   </div>
 );
 
-export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, onManageDevices }) => {
+export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, onManageDevices, onShowPin, onShowPuk }) => {
   const { t } = useLanguage();
   const { isLoggedIn, globalData, updateGlobalData } = useGlobalState();
   const statusInfo = globalData.statusInfo;
@@ -44,6 +46,18 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
   const isRoaming = connectionSettings?.roamingEnable === '1';
 
   const handleConnectionToggle = async () => {
+    // 1. Check PUK Lock (Highest Priority)
+    if (connectionSettings?.lock_puk_flag === '1') {
+        onShowPuk();
+        return;
+    }
+
+    // 2. Check PIN Lock
+    if (connectionSettings?.lock_pin_flag === '1') {
+        onShowPin();
+        return;
+    }
+
     if (!isLoggedIn) {
       onOpenSettings();
       return;
@@ -77,6 +91,18 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
   };
 
   const handleRoamingToggle = async () => {
+    // 1. Check PUK Lock (Highest Priority)
+    if (connectionSettings?.lock_puk_flag === '1') {
+        onShowPuk();
+        return;
+    }
+
+    // 2. Check PIN Lock
+    if (connectionSettings?.lock_pin_flag === '1') {
+        onShowPin();
+        return;
+    }
+
     if (!isLoggedIn) {
       onOpenSettings();
       return;

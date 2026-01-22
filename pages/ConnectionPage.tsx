@@ -9,6 +9,8 @@ import { setDialMode, setRoamingEnable, fetchConnectionSettings } from '../utils
 interface ConnectionPageProps {
   onOpenSettings: () => void;
   onManageDevices: () => void;
+  onShowPin: () => void;
+  onShowPuk: () => void;
 }
 
 const StatBox: React.FC<{ 
@@ -28,7 +30,7 @@ const StatBox: React.FC<{
   </div>
 );
 
-export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, onManageDevices }) => {
+export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, onManageDevices, onShowPin, onShowPuk }) => {
   const { t } = useLanguage();
   const { isLoggedIn, globalData, updateGlobalData } = useGlobalState();
   
@@ -43,6 +45,18 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
   const isRoaming = connectionSettings?.roamingEnable === '1';
 
   const handleInteraction = (action: () => void) => {
+    // 1. Check PUK Lock (Highest Priority)
+    if (connectionSettings?.lock_puk_flag === '1') {
+        onShowPuk();
+        return;
+    }
+
+    // 2. Check PIN Lock
+    if (connectionSettings?.lock_pin_flag === '1') {
+        onShowPin();
+        return;
+    }
+
     if (!isLoggedIn) {
       onOpenSettings();
     } else {
