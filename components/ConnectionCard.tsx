@@ -46,6 +46,12 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
   const isRoaming = connectionSettings?.roamingEnable === '1';
 
   const handleConnectionToggle = async () => {
+    // 0. Check Login First
+    if (!isLoggedIn) {
+      onOpenSettings();
+      return;
+    }
+
     // 1. Check PUK Lock (Highest Priority)
     if (connectionSettings?.lock_puk_flag === '1') {
         onShowPuk();
@@ -56,11 +62,6 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
     if (connectionSettings?.lock_pin_flag === '1') {
         onShowPin();
         return;
-    }
-
-    if (!isLoggedIn) {
-      onOpenSettings();
-      return;
     }
     
     setIsConnLoading(true);
@@ -91,6 +92,12 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
   };
 
   const handleRoamingToggle = async () => {
+    // 0. Check Login First
+    if (!isLoggedIn) {
+      onOpenSettings();
+      return;
+    }
+
     // 1. Check PUK Lock (Highest Priority)
     if (connectionSettings?.lock_puk_flag === '1') {
         onShowPuk();
@@ -101,11 +108,6 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
     if (connectionSettings?.lock_pin_flag === '1') {
         onShowPin();
         return;
-    }
-
-    if (!isLoggedIn) {
-      onOpenSettings();
-      return;
     }
 
     setIsRoamLoading(true);

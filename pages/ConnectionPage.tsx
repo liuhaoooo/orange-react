@@ -44,24 +44,27 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
   const isConnected = connectionSettings?.dialMode === '1';
   const isRoaming = connectionSettings?.roamingEnable === '1';
 
-  const handleInteraction = (action: () => void) => {
-    // 1. Check PUK Lock (Highest Priority)
-    if (connectionSettings?.lock_puk_flag === '1') {
-        onShowPuk();
-        return;
-    }
-
-    // 2. Check PIN Lock
-    if (connectionSettings?.lock_pin_flag === '1') {
-        onShowPin();
-        return;
-    }
-
+  const handleInteraction = (action: () => void, checkSimLocks: boolean = false) => {
     if (!isLoggedIn) {
       onOpenSettings();
-    } else {
-      action();
+      return;
     }
+
+    if (checkSimLocks) {
+        // 1. Check PUK Lock (Highest Priority)
+        if (connectionSettings?.lock_puk_flag === '1') {
+            onShowPuk();
+            return;
+        }
+
+        // 2. Check PIN Lock
+        if (connectionSettings?.lock_pin_flag === '1') {
+            onShowPin();
+            return;
+        }
+    }
+
+    action();
   };
 
   const handleConnectionToggle = () => handleInteraction(async () => {
@@ -87,7 +90,7 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
     } finally {
         setIsConnLoading(false);
     }
-  });
+  }, true);
 
   const handleRoamingToggle = () => handleInteraction(async () => {
     setIsRoamLoading(true);
@@ -112,9 +115,9 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
     } finally {
         setIsRoamLoading(false);
     }
-  });
+  }, true);
 
-  const handleManageDevicesClick = () => handleInteraction(() => onManageDevices());
+  const handleManageDevicesClick = () => handleInteraction(() => onManageDevices(), false);
 
   // --- Logic for status texts ---
 
