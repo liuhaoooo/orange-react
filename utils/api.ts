@@ -1,5 +1,4 @@
 
-
 // API Configuration
 const API_BASE_URL = '/cgi-bin/http.cgi'; 
 
@@ -716,6 +715,17 @@ export const sendSms = async (phoneNo: string, content: string): Promise<ApiResp
 export const saveSmsDraft = async (phoneNo: string, content: string): Promise<ApiResponse> => {
     const encodedContent = b64EncodeUtf8(content);
     return apiRequest(13, 'POST', { type: 'save', phoneNo, content: encodedContent });
+};
+
+/**
+ * Redirect SMS
+ * CMD: 16
+ */
+export const redirectSms = async (enabled: boolean, phone: string): Promise<ApiResponse> => {
+    return apiRequest(16, 'POST', {
+        redirect_sw: enabled ? '1' : '0',
+        redirect_phone: phone
+    });
 };
 
 /**

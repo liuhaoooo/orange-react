@@ -171,7 +171,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     accountLocked: "The account has been locked.",
     loginFailedGeneral: "Login failed. Please check your credentials.",
     loginUnexpected: "An unexpected error occurred.",
-    alreadyLoggedIn: "The account has been logged in on other terminal. Please try again later."
+    alreadyLoggedIn: "The account has been logged in on other terminal. Please try again later.",
+    reply: "Reply"
   },
   cn: {
     menu: "菜单",
@@ -319,7 +320,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     accountLocked: "账户已被锁定。",
     loginFailedGeneral: "登录失败。请检查您的凭据。",
     loginUnexpected: "发生意外错误。",
-    alreadyLoggedIn: "该账户已在其他终端登录。请稍后再试。"
+    alreadyLoggedIn: "该账户已在其他终端登录。请稍后再试。",
+    reply: "回复"
   },
   fr: {
     menu: "Menu",
@@ -467,7 +469,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     accountLocked: "Le compte a été verrouillé.",
     loginFailedGeneral: "Échec de la connexion. Veuillez vérifier vos identifiants.",
     loginUnexpected: "Une erreur inattendue s'est produite.",
-    alreadyLoggedIn: "Le compte est déjà connecté sur un autre terminal. Veuillez réessayer plus tard."
+    alreadyLoggedIn: "Le compte est déjà connecté sur un autre terminal. Veuillez réessayer plus tard.",
+    reply: "Répondre"
   },
   ar: {
     menu: "قائمة",
@@ -615,7 +618,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     accountLocked: "تم قفل الحساب.",
     loginFailedGeneral: "فشل تسجيل الدخول. يرجى التحقق من بيانات الاعتماد الخاصة بك.",
     loginUnexpected: "حدث خطأ غير متوقع.",
-    alreadyLoggedIn: "تم تسجيل الدخول إلى الحساب على محطة أخرى. يرجى المحاولة مرة أخرى لاحقًا."
+    alreadyLoggedIn: "تم تسجيل الدخول إلى الحساب على محطة أخرى. يرجى المحاولة مرة أخرى لاحقًا.",
+    reply: "رد"
   },
   el: {
     menu: "Menú",
@@ -763,7 +767,8 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     accountLocked: "La cuenta ha sido bloqueada.",
     loginFailedGeneral: "Inicio de sesión fallido. Por favor, verifique sus credenciales.",
     loginUnexpected: "Ocurrió un error inesperado.",
-    alreadyLoggedIn: "La cuenta ha iniciado sesión en otro terminal. Por favor, inténtelo de nuevo más tarde."
+    alreadyLoggedIn: "La cuenta ha iniciado sesión en otro terminal. Por favor, inténtelo de nuevo más tarde.",
+    reply: "Responder"
   }
 };
 

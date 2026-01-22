@@ -110,6 +110,16 @@ export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
              </button>
            </div>
         </div>
+        
+        {/* Footer */}
+        <div className="p-6 pt-5 bg-white mt-auto shrink-0">
+            <Link 
+                to="/messages"
+                className="inline-block bg-orange hover:bg-orange-dark text-black font-bold py-2.5 px-8 text-base transition-colors rounded-none"
+            >
+                {t('viewMessages')}
+            </Link>
+        </div>
       </Card>
     );
   }

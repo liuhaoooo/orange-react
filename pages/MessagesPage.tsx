@@ -1,12 +1,13 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Settings, Plus, CornerUpRight, Search, AlertTriangle, MessageSquare, User, Trash2 } from 'lucide-react';
+import { Settings, Plus, CornerUpRight, Search, AlertTriangle, MessageSquare, User, Trash2, Reply } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { fetchSmsList, parseSmsList, SmsMessage, markSmsAsRead, deleteSms } from '../utils/api';
 import { useLocation } from 'react-router-dom';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { NewMessageModal } from '../components/NewMessageModal';
+import { RedirectWarningModal, RedirectConfigModal } from '../components/RedirectMessagesModals';
 
 interface MessagesPageProps {
   onOpenSettings: () => void;
@@ -50,6 +51,11 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
 
   // New Message Modal State
   const [isNewMessageModalOpen, setIsNewMessageModalOpen] = useState(false);
+  const [newMessageReceiver, setNewMessageReceiver] = useState('');
+  
+  // Redirect Messages Modal State
+  const [isRedirectWarningOpen, setIsRedirectWarningOpen] = useState(false);
+  const [isRedirectConfigOpen, setIsRedirectConfigOpen] = useState(false);
 
   const handleAuthAction = (action: () => void) => {
     if (isLoggedIn) {
@@ -57,6 +63,15 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
     } else {
         onOpenSettings();
     }
+  };
+  
+  const openRedirectFlow = () => {
+    setIsRedirectWarningOpen(true);
+  };
+
+  const handleWarningConfirm = () => {
+    setIsRedirectWarningOpen(false);
+    setIsRedirectConfigOpen(true);
   };
 
   const getSubCmd = (tab: TabType) => {
@@ -366,14 +381,17 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
                   {t('settings')}
               </button>
               <button 
-                  onClick={() => handleAuthAction(() => console.log('Redirect'))}
+                  onClick={() => handleAuthAction(openRedirectFlow)}
                   className="bg-black border border-black px-4 py-2 font-bold text-sm text-white flex items-center hover:bg-gray-900 transition-colors whitespace-nowrap"
               >
                   <CornerUpRight size={16} className="me-2" />
                   {t('redirectMessages')}
               </button>
               <button 
-                  onClick={() => handleAuthAction(() => setIsNewMessageModalOpen(true))}
+                  onClick={() => handleAuthAction(() => {
+                      setNewMessageReceiver('');
+                      setIsNewMessageModalOpen(true);
+                  })}
                   className="bg-orange border border-orange px-4 py-2 font-bold text-sm text-black flex items-center hover:bg-orange-dark transition-colors whitespace-nowrap"
               >
                   <Plus size={16} className="me-2" />
@@ -511,6 +529,18 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
                                   <div className="text-xs text-gray-500">{activeThread.count} {t('messages')}</div>
                               </div>
                           </div>
+                          
+                          {/* Reply Button */}
+                          <button 
+                            onClick={() => handleAuthAction(() => {
+                                setNewMessageReceiver(activeThread.sender);
+                                setIsNewMessageModalOpen(true);
+                            })}
+                            className="p-2 text-gray-400 hover:text-orange hover:bg-orange/10 rounded-full transition-colors"
+                            title={t('reply')}
+                          >
+                            <Reply size={20} />
+                          </button>
                       </div>
 
                       {/* Messages List */}
@@ -583,8 +613,20 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
       <NewMessageModal 
         isOpen={isNewMessageModalOpen}
         onClose={() => setIsNewMessageModalOpen(false)}
+        initialReceiver={newMessageReceiver}
         isSendFull={stats.sendFull}
         isDraftFull={stats.draftFull}
+      />
+
+      <RedirectWarningModal 
+        isOpen={isRedirectWarningOpen} 
+        onClose={() => setIsRedirectWarningOpen(false)} 
+        onConfirm={handleWarningConfirm} 
+      />
+
+      <RedirectConfigModal 
+        isOpen={isRedirectConfigOpen} 
+        onClose={() => setIsRedirectConfigOpen(false)} 
       />
     </>
   );
