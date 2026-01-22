@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Loader2 } from 'lucide-react';
+import { X, Loader2, Eye, EyeOff } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { login } from '../utils/api';
 import { useGlobalState } from '../utils/GlobalStateContext';
@@ -14,6 +14,7 @@ interface LoginModalProps {
 export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [lockCountdown, setLockCountdown] = useState<number | null>(null);
@@ -25,6 +26,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     if (isOpen) {
       setUsername('');
       setPassword('');
+      setShowPassword(false);
       setErrorMsg('');
       setIsLoading(false);
       setLockCountdown(null);
@@ -133,15 +135,24 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 
           <div className="mb-4">
             <label className="block font-bold text-sm mb-1 text-black text-start">{t('passwordLabel')}</label>
-            <input 
-              type="password" 
-              value={password} 
-              autoComplete="new-password"
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-              disabled={isLoading}
-              className={`w-full border bg-white p-2 text-sm outline-none text-black ${errorMsg ? 'border-red-500' : 'border-gray-300 focus:border-orange'}`}
-            />
+            <div className="relative w-full">
+                <input 
+                  type={showPassword ? "text" : "password"} 
+                  value={password} 
+                  autoComplete="new-password"
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+                  disabled={isLoading}
+                  className={`w-full border bg-white p-2 pr-10 text-sm outline-none text-black ${errorMsg ? 'border-red-500' : 'border-gray-300 focus:border-orange'}`}
+                />
+                <button 
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-black"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+            </div>
           </div>
 
           {errorMsg && <p className="text-red-500 text-xs mb-4 text-start font-bold">{errorMsg}</p>}

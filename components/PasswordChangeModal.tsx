@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Loader2 } from 'lucide-react';
+import { X, Loader2, Eye, EyeOff } from 'lucide-react';
 import { modifyPassword } from '../utils/api';
 import { useLanguage } from '../utils/i18nContext';
 
@@ -15,6 +15,8 @@ export const PasswordChangeModal: React.FC<PasswordChangeModalProps> = ({ isOpen
   const { t } = useLanguage();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -23,6 +25,8 @@ export const PasswordChangeModal: React.FC<PasswordChangeModalProps> = ({ isOpen
     if (isOpen) {
         setPassword('');
         setConfirmPassword('');
+        setShowPassword(false);
+        setShowConfirmPassword(false);
         setErrorMsg('');
         setIsLoading(false);
     }
@@ -107,12 +111,21 @@ export const PasswordChangeModal: React.FC<PasswordChangeModalProps> = ({ isOpen
 
            <div className="mb-4">
               <label className="block font-bold text-sm mb-1 text-black">Password</label>
-              <input 
-                type="password" 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full border-2 border-black p-2 text-sm outline-none focus:border-orange text-black font-medium" 
-              />
+              <div className="relative w-full">
+                  <input 
+                    type={showPassword ? "text" : "password"} 
+                    value={password} 
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full border-2 border-black p-2 pr-10 text-sm outline-none focus:border-orange text-black font-medium" 
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-black"
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+              </div>
               
               {/* Strength Meter */}
               <div className="flex mt-3 h-2 w-full max-w-[200px]">
@@ -127,12 +140,21 @@ export const PasswordChangeModal: React.FC<PasswordChangeModalProps> = ({ isOpen
 
            <div className="mb-6">
               <label className="block font-bold text-sm mb-1 text-black">Confirm password</label>
-              <input 
-                type="password" 
-                value={confirmPassword} 
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full border-2 border-gray-200 p-2 text-sm outline-none focus:border-orange text-black font-medium" 
-              />
+              <div className="relative w-full">
+                  <input 
+                    type={showConfirmPassword ? "text" : "password"} 
+                    value={confirmPassword} 
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full border-2 border-gray-200 p-2 pr-10 text-sm outline-none focus:border-orange text-black font-medium" 
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-black"
+                  >
+                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+              </div>
            </div>
 
            {errorMsg && (
