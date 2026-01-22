@@ -50,6 +50,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onOpenLogin, onOpenDevices
         <div className="h-[540px]">
           <ServicesCard 
             onOpenLogin={onOpenLogin}
+            onShowPin={onShowPin}
+            onShowPuk={onShowPuk}
             className="h-full"
           />
         </div>

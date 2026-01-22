@@ -127,12 +127,6 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenSettings, onSh
                      >
                         {isPukLocked ? t('pukCodeRequired') : t('pinCodeRequired')}
                      </button>
-
-                     <button 
-                        className="w-full max-w-[280px] bg-orange hover:bg-orange-dark text-black font-bold py-3 px-6 transition-colors text-base"
-                     >
-                        {t('viewServices')}
-                     </button>
                  </div>
              </div>
         </div>
