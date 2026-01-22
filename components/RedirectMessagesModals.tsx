@@ -54,6 +54,7 @@ export const RedirectConfigModal: React.FC<RedirectConfigModalProps> = ({ isOpen
   const [enabled, setEnabled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
   // Reset state on open
   useEffect(() => {
@@ -62,6 +63,7 @@ export const RedirectConfigModal: React.FC<RedirectConfigModalProps> = ({ isOpen
         setEnabled(false);
         setIsLoading(false);
         setErrorMsg('');
+        setSuccessMsg('');
     }
   }, [isOpen]);
 
@@ -103,11 +105,23 @@ export const RedirectConfigModal: React.FC<RedirectConfigModalProps> = ({ isOpen
       }
 
       setIsLoading(true);
+      setErrorMsg('');
+      setSuccessMsg('');
+
       try {
-          await redirectSms(enabled, phone);
-          onClose();
+          const res = await redirectSms(enabled, phone);
+          
+          if (res.success && res.message === "") {
+              setSuccessMsg('Success');
+              setTimeout(() => {
+                  onClose();
+              }, 1000);
+          } else {
+              setErrorMsg(res.message || 'Operation failed');
+          }
       } catch (e) {
           console.error(e);
+          setErrorMsg('An error occurred');
       } finally {
           setIsLoading(false);
       }
@@ -120,7 +134,7 @@ export const RedirectConfigModal: React.FC<RedirectConfigModalProps> = ({ isOpen
       <div className="bg-white w-full max-w-lg shadow-2xl relative animate-fade-in text-black border border-gray-300">
         <div className="flex justify-between items-center p-5 pb-4">
           <h2 className="text-xl font-bold text-black">Redirect my messages to handset</h2>
-          <button onClick={onClose} disabled={isLoading} className="text-black hover:text-gray-600 transition-colors">
+          <button onClick={onClose} disabled={isLoading || !!successMsg} className="text-black hover:text-gray-600 transition-colors">
             <X size={24} strokeWidth={4} />
           </button>
         </div>
@@ -131,6 +145,7 @@ export const RedirectConfigModal: React.FC<RedirectConfigModalProps> = ({ isOpen
                     type="text" 
                     value={phone}
                     onChange={handleInputChange}
+                    disabled={isLoading || !!successMsg}
                     className={`w-full border p-2 text-sm text-black h-10 outline-none font-bold ${errorMsg ? 'border-red-500' : 'border-gray-400 focus:border-orange'}`}
                 />
                 {errorMsg && (
@@ -138,10 +153,15 @@ export const RedirectConfigModal: React.FC<RedirectConfigModalProps> = ({ isOpen
                         {errorMsg}
                     </p>
                 )}
+                {successMsg && (
+                    <p className="text-green-600 text-sm font-bold mt-2 leading-snug">
+                        {successMsg}
+                    </p>
+                )}
             </div>
             
-            <div className="flex items-center mb-8 cursor-pointer" onClick={() => setEnabled(!enabled)}>
-                <div className={`w-6 h-6 border flex items-center justify-center me-3 transition-colors ${enabled ? 'bg-orange border-orange' : 'bg-white border-gray-400'}`}>
+            <div className="flex items-center mb-8 cursor-pointer" onClick={() => !isLoading && !successMsg && setEnabled(!enabled)}>
+                <div className={`w-6 h-6 border flex items-center justify-center me-3 transition-colors ${(isLoading || !!successMsg) ? 'opacity-50' : ''} ${enabled ? 'bg-orange border-orange' : 'bg-white border-gray-400'}`}>
                     {enabled && <Check className="text-white w-5 h-5" strokeWidth={3} />}
                 </div>
                 <span className="text-sm text-black">SMS automatically forwarded</span>
@@ -150,14 +170,14 @@ export const RedirectConfigModal: React.FC<RedirectConfigModalProps> = ({ isOpen
             <div className="flex justify-end space-x-3 rtl:space-x-reverse">
                 <button 
                     onClick={onClose}
-                    disabled={isLoading}
+                    disabled={isLoading || !!successMsg}
                     className="px-6 py-2 border border-black bg-white text-black font-bold text-sm hover:bg-gray-50 transition-colors h-10 min-w-[100px]"
                 >
                     Back
                 </button>
                 <button 
                     onClick={handleSave}
-                    disabled={isLoading}
+                    disabled={isLoading || !!successMsg}
                     className="px-6 py-2 bg-orange hover:bg-orange-dark text-black font-bold text-sm h-10 min-w-[100px] flex items-center justify-center transition-colors"
                 >
                     {isLoading ? <Loader2 className="animate-spin w-4 h-4" /> : 'Save'}
