@@ -21,6 +21,7 @@ import { PukRequiredModal } from './components/PukRequiredModal';
 import { SoftwareUpdateModal } from './components/SoftwareUpdateModal';
 import { LanguageProvider } from './utils/i18nContext';
 import { GlobalStateProvider, useGlobalState } from './utils/GlobalStateContext';
+import { AlertProvider } from './utils/AlertContext';
 import { logout, fetchConnectionSettings } from './utils/api';
 import { WifiNetwork } from './types';
 
@@ -389,7 +390,9 @@ export default function App() {
   return (
     <LanguageProvider>
       <GlobalStateProvider>
-        <AppContent />
+        <AlertProvider>
+          <AppContent />
+        </AlertProvider>
       </GlobalStateProvider>
     </LanguageProvider>
   );

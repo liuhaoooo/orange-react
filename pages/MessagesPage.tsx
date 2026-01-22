@@ -8,6 +8,7 @@ import { useLocation } from 'react-router-dom';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { NewMessageModal } from '../components/NewMessageModal';
 import { RedirectWarningModal, RedirectConfigModal } from '../components/RedirectMessagesModals';
+import { useAlert } from '../utils/AlertContext';
 
 interface MessagesPageProps {
   onOpenSettings: () => void;
@@ -18,6 +19,7 @@ type TabType = 'inbox' | 'sent' | 'draft';
 export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) => {
   const { t } = useLanguage();
   const { isLoggedIn, globalData } = useGlobalState();
+  const { showAlert } = useAlert();
   const location = useLocation();
   const [activeTab, setActiveTab] = useState<TabType>('inbox');
   
@@ -74,7 +76,7 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
     if (isLoggedIn) {
         const check = checkSmsReady();
         if (!check.ready) {
-            alert(check.reason);
+            showAlert(check.reason || '', 'warning', 'Warning');
             return;
         }
         action();
