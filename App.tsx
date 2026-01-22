@@ -38,6 +38,7 @@ function AppContent() {
   const [pwdWarningDismissed, setPwdWarningDismissed] = useState(false);
   
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
+  const [isPinManual, setIsPinManual] = useState(false); // Track manual PIN trigger
   const [isPukModalOpen, setIsPukModalOpen] = useState(false);
 
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
@@ -72,7 +73,10 @@ function AppContent() {
     setEditingNetwork(undefined);
   };
 
-  const openPinModal = () => setIsPinModalOpen(true);
+  const openPinModal = () => {
+    setIsPinManual(true);
+    setIsPinModalOpen(true);
+  };
   const openPukModal = () => setIsPukModalOpen(true);
 
   const handleLogout = async () => {
@@ -85,6 +89,7 @@ function AppContent() {
         setIsPwdWarningOpen(false);
         setIsPwdChangeOpen(false);
         setIsPinModalOpen(false);
+        setIsPinManual(false);
         setIsPukModalOpen(false);
         setIsUpdateModalOpen(false);
       }
@@ -147,10 +152,19 @@ function AppContent() {
     }
     
     setIsPukModalOpen(showPuk);
-    setIsPinModalOpen(showPin);
+    
+    // PIN Modal Logic handling Manual vs Auto
+    if (showPin) {
+        setIsPinModalOpen(true);
+        setIsPinManual(false); // Force auto mode if condition met
+    } else if (!isPinManual) {
+        // Only close if not manually opened
+        setIsPinModalOpen(false);
+    }
+    
     setIsUpdateModalOpen(showUpdate);
 
-  }, [globalData.connectionSettings, globalData.accountLevel, isLoggedIn, pwdWarningDismissed, isPwdChangeOpen]);
+  }, [globalData.connectionSettings, globalData.accountLevel, isLoggedIn, pwdWarningDismissed, isPwdChangeOpen, isPinManual]);
 
   const handleLanguageSelected = async () => {
     setIsLangModalOpen(false);
@@ -174,6 +188,7 @@ function AppContent() {
 
   const handlePinSuccess = async () => {
       setIsPinModalOpen(false);
+      setIsPinManual(false);
       refreshSettings();
   };
 
@@ -340,9 +355,13 @@ function AppContent() {
         {/* PIN Modal */}
         <PinRequiredModal 
             isOpen={isPinModalOpen}
-            onClose={() => setIsPinModalOpen(false)}
+            onClose={() => {
+                setIsPinModalOpen(false);
+                setIsPinManual(false);
+            }}
             onSuccess={handlePinSuccess}
             remainingAttempts={globalData.connectionSettings?.pin_left_times || '3'}
+            isManual={isPinManual}
         />
 
         {/* PUK Modal */}

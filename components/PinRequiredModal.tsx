@@ -10,13 +10,15 @@ interface PinRequiredModalProps {
   onClose: () => void; // Usually just to dismiss locally, though it might persist
   onSuccess: () => void;
   remainingAttempts?: string;
+  isManual?: boolean;
 }
 
 export const PinRequiredModal: React.FC<PinRequiredModalProps> = ({ 
   isOpen, 
   onClose, 
   onSuccess,
-  remainingAttempts 
+  remainingAttempts,
+  isManual = false
 }) => {
   const [pin, setPin] = useState('');
   const [showPin, setShowPin] = useState(false);
@@ -117,6 +119,7 @@ export const PinRequiredModal: React.FC<PinRequiredModalProps> = ({
             </div>
           </div>
           
+          {!isManual && (
           <div className="flex items-center mb-8">
              <input 
                 type="checkbox" 
@@ -127,6 +130,7 @@ export const PinRequiredModal: React.FC<PinRequiredModalProps> = ({
              />
              <label htmlFor="dontAsk" className="ms-2 text-sm text-black cursor-pointer">Don't ask me again</label>
           </div>
+          )}
           
           {errorMsg && (
               <div className="mb-4 text-red-500 text-sm font-bold text-end">
