@@ -301,6 +301,8 @@ function AppContent() {
               element={
                 <ServicesPage 
                   onOpenSettings={openLoginModal}
+                  onShowPin={openPinModal}
+                  onShowPuk={openPukModal}
                 />
               } 
             />
