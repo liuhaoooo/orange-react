@@ -118,7 +118,7 @@ export const ServicesCard: React.FC<ServicesCardProps> = ({
            <div className="p-6 pt-0 bg-white mt-auto">
               <Link 
                 to="/services"
-                className="inline-block bg-orange hover:bg-orange-dark text-black font-bold py-2.5 px-8 text-base transition-colors rounded-none w-full text-center"
+                className="inline-block bg-orange hover:bg-orange-dark text-black font-bold py-2.5 px-8 text-base transition-colors rounded-none"
               >
                 {t('viewServices')}
               </Link>
