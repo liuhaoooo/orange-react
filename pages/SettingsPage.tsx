@@ -285,7 +285,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
                      {canScrollLeft && (
                          <button 
                             onClick={() => scrollTabs('left')}
-                            className="shrink-0 z-10 bg-white shadow-sm border border-gray-200 rounded-full p-1.5 text-gray-700 hover:text-orange hover:border-orange transition-all"
+                            className="px-3 py-2.5 rounded-[6px] border-2 bg-white text-gray-500 border-transparent hover:border-gray-300 hover:text-black transition-all shrink-0 flex items-center justify-center"
                          >
                              <ChevronLeft size={20} strokeWidth={2.5} />
                          </button>
@@ -316,7 +316,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
                      {canScrollRight && (
                          <button 
                             onClick={() => scrollTabs('right')}
-                            className="shrink-0 z-10 bg-white shadow-sm border border-gray-200 rounded-full p-1.5 text-gray-700 hover:text-orange hover:border-orange transition-all"
+                            className="px-3 py-2.5 rounded-[6px] border-2 bg-white text-gray-500 border-transparent hover:border-gray-300 hover:text-black transition-all shrink-0 flex items-center justify-center"
                          >
                              <ChevronRight size={20} strokeWidth={2.5} />
                          </button>
