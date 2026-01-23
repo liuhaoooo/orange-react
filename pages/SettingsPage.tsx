@@ -16,10 +16,31 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
   
   // Menu Configuration
   const menuItems = [
-    { id: 'network', label: t('network') },
+    { 
+      id: 'network', 
+      label: t('network'),
+      subTabs: [
+          { id: 'apn_settings', label: t('apnSettings') },
+          { id: 'multiple_apn', label: t('multipleApn') },
+          { id: 'network_mode', label: t('networkMode') },
+          { id: 'network_config', label: t('networkConfig') },
+          { id: 'plmn_scan', label: t('plmnScan') },
+          { id: 'lock_band', label: t('lockBand') },
+          { id: 'cell_locking', label: t('cellLocking') },
+          { id: 'link_detection', label: t('linkDetection') },
+          { id: 'vlan', label: t('vlan') },
+      ]
+    },
     { id: 'device_info', label: t('deviceInfo') },
     { id: 'network_info', label: t('networkInfo') },
-    { id: 'sim', label: t('simFunction') },
+    { 
+      id: 'sim', 
+      label: t('simFunction'),
+      subTabs: [
+          { id: 'sim_function', label: t('simFunction') },
+          { id: 'sim_switching', label: t('simCardSwitching') }
+      ]
+    },
     { id: 'display_solution', label: t('displaySolution') },
     { 
       id: 'usage', 
@@ -31,17 +52,118 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
     },
     { id: 'messages', label: t('messages') },
     { id: 'ims', label: t('imsSetting') },
-    { id: 'wifi', label: t('wifi') },
-    { id: 'guest_wifi', label: t('guestWifi') },
-    { id: 'dhcp', label: t('dhcp') }
+    { 
+      id: 'wifi', 
+      label: t('wifi'),
+      subTabs: [
+          { id: 'mac_filtering_24', label: t('macFiltering24') },
+          { id: 'wps_settings_24', label: t('wpsSettings24') },
+          { id: 'adv_settings_24', label: t('advSettings24') },
+          { id: 'mac_filtering_5', label: t('macFiltering5') },
+          { id: 'wps_settings_5', label: t('wpsSettings5') },
+          { id: 'adv_settings_5', label: t('advSettings5') }
+      ]
+    },
+    { 
+      id: 'dhcp', 
+      label: t('dhcp'),
+      subTabs: [
+          { id: 'dhcp_settings', label: t('dhcp') },
+          { id: 'multiple_dhcp', label: t('multipleDhcp') }
+      ]
+    },
+    { id: 'routing', label: t('routingConfiguration') },
+    { 
+      id: 'mesh', 
+      label: t('meshNetworking'),
+      subTabs: [
+          { id: 'basic_config', label: t('basicConfig') },
+          { id: 'topology_diagram', label: t('topologyDiagram') }
+      ]
+    },
+    { 
+      id: 'vpn', 
+      label: t('vpnSettings'),
+      subTabs: [
+          { id: 'vpn_main', label: t('vpn') },
+          { id: 'gre_settings', label: t('greSettings') },
+          { id: 'ipsec_vpn', label: t('ipsecVpn') },
+          { id: 'ipsec_status', label: t('ipsecStatus') }
+      ]
+    },
+    { id: 'sipalg', label: t('sipAlg') },
+    { id: 'voice', label: t('voice') },
+    { 
+      id: 'ip_passthrough', 
+      label: t('ipPassthrough'),
+      subTabs: [
+          { id: 'ip_passthrough_main', label: t('ipPassthrough') },
+          { id: 'multiple_ip_passthrough', label: t('multipleIpPassthrough') }
+      ]
+    },
+    { id: 'tr069', label: t('tr069') },
+    { 
+      id: 'parental', 
+      label: t('parentalControl'),
+      subTabs: [
+          { id: 'parental_mode', label: t('parentalMode') },
+          { id: 'url_limit', label: t('urlLimit') },
+          { id: 'time_limit', label: t('timeLimit') }
+      ]
+    },
+    { 
+      id: 'firewall', 
+      label: t('firewall'),
+      subTabs: [
+          { id: 'url_filter', label: t('urlFilter') },
+          { id: 'dmz', label: t('dmz') },
+          { id: 'port_forwarding', label: t('portForwarding') },
+          { id: 'upnp', label: t('upnp') },
+          { id: 'mac_filtering', label: t('macFiltering') },
+          { id: 'port_filtering', label: t('portFiltering') },
+          { id: 'ddos_protection', label: t('ddosProtection') }
+      ]
+    },
+    { id: 'access_control', label: t('accessControl') },
+    { 
+      id: 'diagnosis', 
+      label: t('diagnosis'),
+      subTabs: [
+          { id: 'ping', label: t('ping') },
+          { id: 'trace', label: t('trace') }
+      ]
+    },
+    { 
+      id: 'system', 
+      label: t('systemSettings'),
+      subTabs: [
+          { id: 'system_settings_main', label: t('systemSettings') },
+          { id: 'change_password', label: t('changePassword') },
+          { id: 'change_username', label: t('changeUsername') },
+          { id: 'time_settings', label: t('timeSettings') },
+          { id: 'system_upgrade', label: t('systemUpgrade') },
+          { id: 'system_auto_upgrade', label: t('systemAutoUpgrade') },
+          { id: 'fota_upgrade', label: t('fotaUpgrade') },
+          { id: 'log_settings', label: t('logSettings') },
+          { id: 'web_setting', label: t('webSetting') }
+      ]
+    },
+    { id: 'clat', label: t('clat') },
   ];
 
-  // State for Navigation
-  const [activeSectionId, setActiveSectionId] = useState('usage'); // Default to Usage as in screenshot
-  const [activeSubTabId, setActiveSubTabId] = useState('national'); // Default to National
+  // State for Navigation - Default to 'network' as it is the first item
+  const [activeSectionId, setActiveSectionId] = useState('network'); 
+  const [activeSubTabId, setActiveSubTabId] = useState(''); 
 
   const activeSection = menuItems.find(item => item.id === activeSectionId) || menuItems[0];
   
+  // Initialize subtab on first load if needed
+  React.useEffect(() => {
+    if (activeSectionId === 'network' && !activeSubTabId) {
+        setActiveSubTabId('apn_settings');
+    }
+  }, []); // Run once on mount
+
   // Handle Section Click
   const handleSectionClick = (id: string) => {
     setActiveSectionId(id);
@@ -151,7 +273,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
                     {/* Placeholder Content Area */}
                     <div className="flex flex-col items-center justify-center h-[400px] text-gray-400 border-2 border-dashed border-gray-100 rounded-[6px] bg-gray-50/50">
                         <p className="italic mb-3">Configuration panel for:</p>
-                        <p className="font-bold text-black text-xl bg-white px-6 py-2 rounded-[6px] shadow-sm">{activeSection.label}</p>
+                        <p className="font-bold text-black text-xl bg-white px-6 py-2 rounded-[6px] shadow-sm">
+                            {activeSection.label}
+                            {activeSubTabId && activeSection.subTabs ? ` > ${activeSection.subTabs.find(t => t.id === activeSubTabId)?.label}` : ''}
+                        </p>
                     </div>
                  </div>
              </div>
