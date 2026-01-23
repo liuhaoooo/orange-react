@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
@@ -12,6 +12,7 @@ interface SettingsPageProps {
 export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
   const { isLoggedIn } = useGlobalState();
   
   // Menu Configuration
@@ -163,12 +164,32 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
 
   const activeSection = menuItems.find(item => item.id === activeSectionId) || menuItems[0];
   
-  // Initialize subtab on first load if needed
+  // Initialize navigation state from location.state or default
   useEffect(() => {
-    if (activeSectionId === 'network' && !activeSubTabId) {
-        setActiveSubTabId('apn_settings');
+    const state = location.state as { sectionId?: string; subTabId?: string } | null;
+    
+    if (state?.sectionId) {
+        setActiveSectionId(state.sectionId);
+        
+        if (state.subTabId) {
+            setActiveSubTabId(state.subTabId);
+        } else {
+             // If no specific subtab requested, default to the first one of the section
+             const item = menuItems.find(i => i.id === state.sectionId);
+             if (item?.subTabs?.length) {
+                 setActiveSubTabId(item.subTabs[0].id);
+             } else {
+                 setActiveSubTabId('');
+             }
+        }
+    } else {
+        // Default initialization if no state provided
+        if (activeSectionId === 'network' && !activeSubTabId) {
+            setActiveSubTabId('apn_settings');
+        }
     }
-  }, []); // Run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state]); 
 
   // Check scroll possibilities
   const checkScrollButtons = () => {

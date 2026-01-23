@@ -1,8 +1,7 @@
 
-
-
 import React, { useState, useMemo } from 'react';
 import { Settings, User, QrCode } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { SquareSwitch } from '../components/UIComponents';
@@ -36,6 +35,7 @@ interface PageWifiNetwork {
 
 export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettings, onEditSsid, onOpenDevices }) => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const { isLoggedIn, globalData, updateGlobalData } = useGlobalState();
   
   // Prefer wifiSettings (CMD 587) as it is more detailed, fallback to connectionSettings (CMD 585)
@@ -123,6 +123,13 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
     } else {
       action();
     }
+  };
+
+  const handleSettingsClick = () => {
+    // Navigate to Settings -> Wi-Fi -> 2.4GHz Advanced Settings
+    navigate('/settings', { 
+        state: { sectionId: 'wifi', subTabId: 'adv_settings_24' } 
+    });
   };
 
   /**
@@ -243,7 +250,7 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
       <div className="flex justify-between items-center mb-6">
          <h1 className="text-3xl font-bold text-black">{t('wifiNetworks')}</h1>
          <button 
-           onClick={onOpenSettings}
+           onClick={handleSettingsClick}
            className="bg-orange hover:bg-orange-dark text-black px-4 py-2 font-bold text-sm flex items-center transition-colors border border-orange"
          >
             <Settings size={16} className="me-2" />

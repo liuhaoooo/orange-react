@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Settings, Timer, ArrowUpDown, TabletSmartphone, Link as LinkIcon, Globe, Monitor, Smartphone } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { SquareSwitch, Card, SignalStrengthIcon, BatteryStatusIcon } from '../components/UIComponents';
@@ -32,6 +33,7 @@ const StatBox: React.FC<{
 
 export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, onManageDevices, onShowPin, onShowPuk }) => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const { isLoggedIn, globalData, updateGlobalData } = useGlobalState();
   
   const statusInfo = globalData.statusInfo;
@@ -119,6 +121,13 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
 
   const handleManageDevicesClick = () => handleInteraction(() => onManageDevices(), false);
 
+  const handleSettingsClick = () => {
+    // Navigate to Settings -> Network -> APN Settings
+    navigate('/settings', { 
+        state: { sectionId: 'network', subTabId: 'apn_settings' } 
+    });
+  };
+
   // --- Logic for status texts ---
 
   const getConnectionBoldText = () => {
@@ -205,7 +214,7 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
       <div className="flex justify-between items-center mb-6">
          <h1 className="text-3xl font-bold text-black">{t('connection')}</h1>
          <button 
-           onClick={onOpenSettings}
+           onClick={handleSettingsClick}
            className="border border-black bg-white hover:bg-gray-50 text-black px-4 py-2 font-bold text-sm flex items-center transition-colors"
          >
             <Settings size={16} className="me-2" />

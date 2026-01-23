@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Settings, Plus, CornerUpRight, Search, AlertTriangle, MessageSquare, User, Trash2, Reply } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { fetchSmsList, parseSmsList, SmsMessage, markSmsAsRead, deleteSms } from '../utils/api';
-import { useLocation } from 'react-router-dom';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { NewMessageModal } from '../components/NewMessageModal';
 import { RedirectWarningModal, RedirectConfigModal } from '../components/RedirectMessagesModals';
@@ -18,6 +18,7 @@ type TabType = 'inbox' | 'sent' | 'draft';
 
 export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const { isLoggedIn, globalData } = useGlobalState();
   const { showAlert } = useAlert();
   const location = useLocation();
@@ -92,6 +93,13 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
   const handleWarningConfirm = () => {
     setIsRedirectWarningOpen(false);
     setIsRedirectConfigOpen(true);
+  };
+
+  const handleSettingsClick = () => {
+    // Navigate to Settings -> Messages
+    navigate('/settings', { 
+        state: { sectionId: 'messages' } 
+    });
   };
 
   const getSubCmd = (tab: TabType) => {
@@ -394,7 +402,7 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
           
           <div className="flex space-x-2 w-full md:w-auto overflow-x-auto">
               <button 
-                  onClick={onOpenSettings}
+                  onClick={handleSettingsClick}
                   className="bg-white border border-black px-4 py-2 font-bold text-sm text-black flex items-center hover:bg-gray-50 transition-colors whitespace-nowrap"
               >
                   <Settings size={16} className="me-2" />

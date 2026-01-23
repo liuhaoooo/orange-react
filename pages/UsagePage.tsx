@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Settings, RotateCcw, ArrowUp, ArrowDown } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 
@@ -56,6 +57,7 @@ const getLimitInMb = (limit: string | undefined, unit: string | undefined) => {
 
 export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const { isLoggedIn, globalData } = useGlobalState();
   const info = globalData.statusInfo;
   const flowLimitUnit = info?.flow_limit_unit;
@@ -66,6 +68,13 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
     } else {
         onOpenSettings();
     }
+  };
+
+  const handleSettingsClick = () => {
+    // Navigate to Settings -> Usage -> National
+    navigate('/settings', { 
+        state: { sectionId: 'usage', subTabId: 'national' } 
+    });
   };
 
   // --- Calculations for Ring Charts ---
@@ -116,7 +125,7 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
         </div>
         <div className="flex space-x-3">
              <button 
-                onClick={onOpenSettings}
+                onClick={handleSettingsClick}
                 className="bg-white border border-black px-4 py-2 font-bold text-sm text-black flex items-center hover:bg-gray-50 transition-colors"
              >
                 <Settings size={16} className="me-2" />
