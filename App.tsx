@@ -243,7 +243,8 @@ function AppContent() {
         <Header onLogout={handleLogout} onLogin={openLoginModal} />
         
         {/* Updated max-w to 1450px for wider layout */}
-        <main className="w-full max-w-[1450px] mx-auto p-4 md:p-6 pt-[120px] md:pt-[120px] relative z-0 flex-grow" dir="ltr">
+        {/* Reduced pt from 120px to 100px to decrease distance between fixed header and page content */}
+        <main className="w-full max-w-[1450px] mx-auto p-4 md:p-6 pt-[100px] md:pt-[100px] relative z-0 flex-grow" dir="ltr">
           <Routes>
             {/* Main Dashboard Route */}
             <Route 

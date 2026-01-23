@@ -284,7 +284,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
           <div className="flex-1 min-w-0">
              {/* Sub Tabs (if any) */}
              {activeSection.subTabs && (
-                 <div className="flex items-start mb-5 gap-2 group/tabs">
+                 <div className="flex items-start mb-2 gap-2 group/tabs">
                      {/* Left Arrow */}
                      {hasOverflow && (
                          <button 
