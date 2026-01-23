@@ -175,7 +175,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
       const { scrollLeft, scrollWidth, clientWidth } = tabsContainerRef.current;
       setCanScrollLeft(scrollLeft > 0);
       // Use a small tolerance of 1px for floating point issues
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
+      setCanScrollRight(Math.ceil(scrollLeft + clientWidth) < scrollWidth);
     }
   };
 
@@ -280,16 +280,20 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
           <div className="flex-1 min-w-0">
              {/* Sub Tabs (if any) */}
              {activeSection.subTabs && (
-                 <div className="flex items-center mb-5 gap-1 group/tabs">
+                 <div className="flex items-start mb-5 gap-2 group/tabs">
                      {/* Left Arrow */}
-                     {canScrollLeft && (
-                         <button 
-                            onClick={() => scrollTabs('left')}
-                            className="px-3 py-2.5 rounded-[6px] border-2 bg-white text-gray-500 border-transparent hover:border-gray-300 hover:text-black transition-all shrink-0 flex items-center justify-center"
-                         >
-                             <ChevronLeft size={20} strokeWidth={2.5} />
-                         </button>
-                     )}
+                     <button 
+                        onClick={() => scrollTabs('left')}
+                        disabled={!canScrollLeft}
+                        className={`px-3 py-2.5 rounded-[6px] border-2 transition-all shrink-0 flex items-center justify-center
+                            ${!canScrollLeft 
+                                ? 'bg-gray-50 text-gray-200 border-transparent cursor-not-allowed' 
+                                : 'bg-white text-gray-500 border-transparent hover:border-gray-300 hover:text-black cursor-pointer'
+                            }
+                        `}
+                     >
+                         <ChevronLeft size={20} strokeWidth={2.5} />
+                     </button>
 
                      {/* Scroll Container */}
                      <div 
@@ -313,14 +317,18 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
                      </div>
 
                      {/* Right Arrow */}
-                     {canScrollRight && (
-                         <button 
-                            onClick={() => scrollTabs('right')}
-                            className="px-3 py-2.5 rounded-[6px] border-2 bg-white text-gray-500 border-transparent hover:border-gray-300 hover:text-black transition-all shrink-0 flex items-center justify-center"
-                         >
-                             <ChevronRight size={20} strokeWidth={2.5} />
-                         </button>
-                     )}
+                     <button 
+                        onClick={() => scrollTabs('right')}
+                        disabled={!canScrollRight}
+                        className={`px-3 py-2.5 rounded-[6px] border-2 transition-all shrink-0 flex items-center justify-center
+                            ${!canScrollRight 
+                                ? 'bg-gray-50 text-gray-200 border-transparent cursor-not-allowed' 
+                                : 'bg-white text-gray-500 border-transparent hover:border-gray-300 hover:text-black cursor-pointer'
+                            }
+                        `}
+                     >
+                         <ChevronRight size={20} strokeWidth={2.5} />
+                     </button>
                  </div>
              )}
 
