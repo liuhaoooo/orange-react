@@ -179,10 +179,17 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
     }
   };
 
+  // Re-check scroll state when tabs change
   useEffect(() => {
-    checkScrollButtons();
+    // Small timeout to allow DOM to update
+    const timer = setTimeout(() => {
+        checkScrollButtons();
+    }, 0);
     window.addEventListener('resize', checkScrollButtons);
-    return () => window.removeEventListener('resize', checkScrollButtons);
+    return () => {
+        window.removeEventListener('resize', checkScrollButtons);
+        clearTimeout(timer);
+    };
   }, [activeSectionId, activeSection.subTabs]);
 
   const scrollTabs = (direction: 'left' | 'right') => {
@@ -273,14 +280,14 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
           <div className="flex-1 min-w-0">
              {/* Sub Tabs (if any) */}
              {activeSection.subTabs && (
-                 <div className="relative mb-5 group/tabs">
+                 <div className="flex items-center mb-5 gap-1 group/tabs">
                      {/* Left Arrow */}
                      {canScrollLeft && (
                          <button 
                             onClick={() => scrollTabs('left')}
-                            className="absolute left-0 top-[22px] -translate-y-1/2 z-10 bg-white/90 shadow-md border border-gray-200 rounded-full p-1.5 text-gray-700 hover:text-orange hover:border-orange transition-all"
+                            className="shrink-0 z-10 bg-white shadow-sm border border-gray-200 rounded-full p-1.5 text-gray-700 hover:text-orange hover:border-orange transition-all"
                          >
-                             <ChevronLeft size={18} strokeWidth={2.5} />
+                             <ChevronLeft size={20} strokeWidth={2.5} />
                          </button>
                      )}
 
@@ -288,7 +295,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
                      <div 
                         ref={tabsContainerRef}
                         onScroll={checkScrollButtons}
-                        className="flex gap-2 overflow-x-auto pb-2 px-1 thin-scrollbar scroll-smooth"
+                        className="flex-1 flex gap-2 overflow-x-auto pb-2 px-1 thin-scrollbar scroll-smooth"
                      >
                          {activeSection.subTabs.map(tab => (
                              <button
@@ -309,9 +316,9 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
                      {canScrollRight && (
                          <button 
                             onClick={() => scrollTabs('right')}
-                            className="absolute right-0 top-[22px] -translate-y-1/2 z-10 bg-white/90 shadow-md border border-gray-200 rounded-full p-1.5 text-gray-700 hover:text-orange hover:border-orange transition-all"
+                            className="shrink-0 z-10 bg-white shadow-sm border border-gray-200 rounded-full p-1.5 text-gray-700 hover:text-orange hover:border-orange transition-all"
                          >
-                             <ChevronRight size={18} strokeWidth={2.5} />
+                             <ChevronRight size={20} strokeWidth={2.5} />
                          </button>
                      )}
                  </div>

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { Header } from './components/Header';
 import { Dashboard } from './pages/Dashboard';
 import { ConnectionPage } from './pages/ConnectionPage';
@@ -26,6 +26,7 @@ import { logout, fetchConnectionSettings } from './utils/api';
 import { WifiNetwork } from './types';
 
 function AppContent() {
+  const navigate = useNavigate();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isDevicesModalOpen, setIsDevicesModalOpen] = useState(false);
   const [isEditSsidModalOpen, setIsEditSsidModalOpen] = useState(false);
@@ -215,11 +216,19 @@ function AppContent() {
   };
 
   useEffect(() => {
+    // Session Expired or Logout
     if (prevIsLoggedIn.current === true && isLoggedIn === false) {
       setIsLoginModalOpen(true);
+      navigate('/'); // Auto redirect to dashboard
     }
+    
+    // Login Successful
+    if (prevIsLoggedIn.current === false && isLoggedIn === true) {
+      navigate('/'); // Auto redirect to dashboard
+    }
+
     prevIsLoggedIn.current = isLoggedIn;
-  }, [isLoggedIn]);
+  }, [isLoggedIn, navigate]);
 
   useEffect(() => {
     checkSession();
@@ -230,7 +239,6 @@ function AppContent() {
   }, [checkSession]);
 
   return (
-    <Router>
       <div className="min-h-screen flex flex-col font-sans bg-[#e5e5e5]">
         <Header onLogout={handleLogout} onLogin={openLoginModal} />
         
@@ -382,7 +390,6 @@ function AppContent() {
         />
 
       </div>
-    </Router>
   );
 }
 
@@ -391,7 +398,9 @@ export default function App() {
     <LanguageProvider>
       <GlobalStateProvider>
         <AlertProvider>
-          <AppContent />
+          <Router>
+            <AppContent />
+          </Router>
         </AlertProvider>
       </GlobalStateProvider>
     </LanguageProvider>
