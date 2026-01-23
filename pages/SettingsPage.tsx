@@ -241,7 +241,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
   return (
     <div className="w-full max-w-7xl mx-auto pb-12">
       {/* Breadcrumb Header */}
-      <div className="bg-white px-6 py-4 mb-8 shadow-sm border border-gray-200 flex items-center rounded-[6px] transition-all hover:shadow-md">
+      <div className="bg-white px-6 py-2 mb-4 shadow-sm border border-gray-200 flex items-center rounded-[6px] transition-all hover:shadow-md">
          <button onClick={() => navigate(-1)} className="me-4 text-gray-400 hover:text-orange transition-colors">
             <ChevronLeft size={28} strokeWidth={2.5} />
          </button>
