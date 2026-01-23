@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
@@ -154,15 +154,46 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
   // State for Navigation - Default to 'network' as it is the first item
   const [activeSectionId, setActiveSectionId] = useState('network'); 
   const [activeSubTabId, setActiveSubTabId] = useState(''); 
+  
+  // Scroll Logic State
+  const tabsContainerRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
 
   const activeSection = menuItems.find(item => item.id === activeSectionId) || menuItems[0];
   
   // Initialize subtab on first load if needed
-  React.useEffect(() => {
+  useEffect(() => {
     if (activeSectionId === 'network' && !activeSubTabId) {
         setActiveSubTabId('apn_settings');
     }
   }, []); // Run once on mount
+
+  // Check scroll possibilities
+  const checkScrollButtons = () => {
+    if (tabsContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = tabsContainerRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      // Use a small tolerance of 1px for floating point issues
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
+    }
+  };
+
+  useEffect(() => {
+    checkScrollButtons();
+    window.addEventListener('resize', checkScrollButtons);
+    return () => window.removeEventListener('resize', checkScrollButtons);
+  }, [activeSectionId, activeSection.subTabs]);
+
+  const scrollTabs = (direction: 'left' | 'right') => {
+    if (tabsContainerRef.current) {
+      const scrollAmount = 200;
+      tabsContainerRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   // Handle Section Click
   const handleSectionClick = (id: string) => {
@@ -173,6 +204,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
       setActiveSubTabId(item.subTabs[0].id);
     } else {
       setActiveSubTabId('');
+    }
+    // Reset scroll position
+    if (tabsContainerRef.current) {
+        tabsContainerRef.current.scrollTo({ left: 0 });
     }
   };
 
@@ -238,20 +273,47 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
           <div className="flex-1 min-w-0">
              {/* Sub Tabs (if any) */}
              {activeSection.subTabs && (
-                 <div className="flex mb-5 gap-2 overflow-x-auto pb-1 px-1">
-                     {activeSection.subTabs.map(tab => (
-                         <button
-                            key={tab.id}
-                            onClick={() => setActiveSubTabId(tab.id)}
-                            className={`px-6 py-2.5 font-bold text-sm rounded-[6px] border-2 transition-all whitespace-nowrap ${
-                                activeSubTabId === tab.id
-                                ? 'bg-black text-white border-black shadow-md'
-                                : 'bg-white text-gray-500 border-transparent hover:border-gray-300 hover:text-black hover:bg-white'
-                            }`}
+                 <div className="relative mb-5 group/tabs">
+                     {/* Left Arrow */}
+                     {canScrollLeft && (
+                         <button 
+                            onClick={() => scrollTabs('left')}
+                            className="absolute left-0 top-[22px] -translate-y-1/2 z-10 bg-white/90 shadow-md border border-gray-200 rounded-full p-1.5 text-gray-700 hover:text-orange hover:border-orange transition-all"
                          >
-                            {tab.label}
+                             <ChevronLeft size={18} strokeWidth={2.5} />
                          </button>
-                     ))}
+                     )}
+
+                     {/* Scroll Container */}
+                     <div 
+                        ref={tabsContainerRef}
+                        onScroll={checkScrollButtons}
+                        className="flex gap-2 overflow-x-auto pb-2 px-1 thin-scrollbar scroll-smooth"
+                     >
+                         {activeSection.subTabs.map(tab => (
+                             <button
+                                key={tab.id}
+                                onClick={() => setActiveSubTabId(tab.id)}
+                                className={`px-6 py-2.5 font-bold text-sm rounded-[6px] border-2 transition-all whitespace-nowrap shrink-0 ${
+                                    activeSubTabId === tab.id
+                                    ? 'bg-black text-white border-black shadow-md'
+                                    : 'bg-white text-gray-500 border-transparent hover:border-gray-300 hover:text-black hover:bg-white'
+                                }`}
+                             >
+                                {tab.label}
+                             </button>
+                         ))}
+                     </div>
+
+                     {/* Right Arrow */}
+                     {canScrollRight && (
+                         <button 
+                            onClick={() => scrollTabs('right')}
+                            className="absolute right-0 top-[22px] -translate-y-1/2 z-10 bg-white/90 shadow-md border border-gray-200 rounded-full p-1.5 text-gray-700 hover:text-orange hover:border-orange transition-all"
+                         >
+                             <ChevronRight size={18} strokeWidth={2.5} />
+                         </button>
+                     )}
                  </div>
              )}
 
