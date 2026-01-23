@@ -157,6 +157,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
   
   // Scroll Logic State
   const tabsContainerRef = useRef<HTMLDivElement>(null);
+  const [hasOverflow, setHasOverflow] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
@@ -173,6 +174,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
   const checkScrollButtons = () => {
     if (tabsContainerRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = tabsContainerRef.current;
+      setHasOverflow(scrollWidth > clientWidth);
       setCanScrollLeft(scrollLeft > 0);
       // Use a small tolerance of 1px for floating point issues
       setCanScrollRight(Math.ceil(scrollLeft + clientWidth) < scrollWidth);
@@ -212,10 +214,12 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
     } else {
       setActiveSubTabId('');
     }
-    // Reset scroll position
+    // Reset scroll position of the tabs
     if (tabsContainerRef.current) {
         tabsContainerRef.current.scrollTo({ left: 0 });
     }
+    // Scroll page to top
+    window.scrollTo(0, 0);
   };
 
   if (!isLoggedIn) {
@@ -282,18 +286,20 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
              {activeSection.subTabs && (
                  <div className="flex items-start mb-5 gap-2 group/tabs">
                      {/* Left Arrow */}
-                     <button 
-                        onClick={() => scrollTabs('left')}
-                        disabled={!canScrollLeft}
-                        className={`px-3 py-2.5 rounded-[6px] border-2 transition-all shrink-0 flex items-center justify-center
-                            ${!canScrollLeft 
-                                ? 'bg-gray-50 text-gray-200 border-transparent cursor-not-allowed' 
-                                : 'bg-white text-gray-500 border-transparent hover:border-gray-300 hover:text-black cursor-pointer'
-                            }
-                        `}
-                     >
-                         <ChevronLeft size={20} strokeWidth={2.5} />
-                     </button>
+                     {hasOverflow && (
+                         <button 
+                            onClick={() => scrollTabs('left')}
+                            disabled={!canScrollLeft}
+                            className={`px-3 py-2.5 rounded-[6px] border-2 transition-all shrink-0 flex items-center justify-center
+                                ${!canScrollLeft 
+                                    ? 'bg-gray-50 text-gray-200 border-transparent cursor-not-allowed' 
+                                    : 'bg-white text-gray-500 border-transparent hover:border-gray-300 hover:text-black cursor-pointer'
+                                }
+                            `}
+                         >
+                             <ChevronLeft size={20} strokeWidth={2.5} />
+                         </button>
+                     )}
 
                      {/* Scroll Container */}
                      <div 
@@ -317,18 +323,20 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
                      </div>
 
                      {/* Right Arrow */}
-                     <button 
-                        onClick={() => scrollTabs('right')}
-                        disabled={!canScrollRight}
-                        className={`px-3 py-2.5 rounded-[6px] border-2 transition-all shrink-0 flex items-center justify-center
-                            ${!canScrollRight 
-                                ? 'bg-gray-50 text-gray-200 border-transparent cursor-not-allowed' 
-                                : 'bg-white text-gray-500 border-transparent hover:border-gray-300 hover:text-black cursor-pointer'
-                            }
-                        `}
-                     >
-                         <ChevronRight size={20} strokeWidth={2.5} />
-                     </button>
+                     {hasOverflow && (
+                         <button 
+                            onClick={() => scrollTabs('right')}
+                            disabled={!canScrollRight}
+                            className={`px-3 py-2.5 rounded-[6px] border-2 transition-all shrink-0 flex items-center justify-center
+                                ${!canScrollRight 
+                                    ? 'bg-gray-50 text-gray-200 border-transparent cursor-not-allowed' 
+                                    : 'bg-white text-gray-500 border-transparent hover:border-gray-300 hover:text-black cursor-pointer'
+                                }
+                            `}
+                         >
+                             <ChevronRight size={20} strokeWidth={2.5} />
+                         </button>
+                     )}
                  </div>
              )}
 
