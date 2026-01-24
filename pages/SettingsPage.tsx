@@ -435,17 +435,14 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
                  <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-gray-50 to-transparent rounded-bl-full opacity-60 pointer-events-none"></div>
                  
                  <div className="relative z-10">
-                    {/* Header logic moved to renderContent cases or specific pages if needed, but keeping breadcrumb logic clean here */}
-                    {activeSubTabId !== 'apn_settings' && (
-                        <h2 className="text-xl md:text-2xl font-bold mb-6 md:mb-8 text-black pb-4 border-b border-gray-100">
-                            {activeSection.label}
-                            {activeSubTabId && activeSection.subTabs && (
-                                <span className="text-gray-400 font-normal ms-2 text-base md:text-lg block md:inline mt-1 md:mt-0">
-                                    - {activeSection.subTabs.find(t => t.id === activeSubTabId)?.label}
-                                </span>
-                            )}
-                        </h2>
-                    )}
+                    <h2 className="text-xl md:text-2xl font-bold mb-6 md:mb-8 text-black pb-4 border-b border-gray-100">
+                        {activeSection.label}
+                        {activeSubTabId && activeSection.subTabs && (
+                            <span className="text-gray-400 font-normal ms-2 text-base md:text-lg block md:inline mt-1 md:mt-0">
+                                - {activeSection.subTabs.find(t => t.id === activeSubTabId)?.label}
+                            </span>
+                        )}
+                    </h2>
 
                     {renderContent()}
                  </div>

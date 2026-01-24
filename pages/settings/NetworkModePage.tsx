@@ -14,7 +14,7 @@ export const NetworkModePage: React.FC = () => {
                 <label className="font-bold text-sm text-black">Network Mode</label>
              </div>
              <div className="w-full sm:w-2/3">
-                 <div className="relative w-full max-w-lg">
+                 <div className="relative w-full">
                     <select
                         value={mode}
                         onChange={(e) => setMode(e.target.value)}
