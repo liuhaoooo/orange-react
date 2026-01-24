@@ -126,6 +126,10 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
   };
 
   const handleSettingsClick = () => {
+    if (!isLoggedIn) {
+        onOpenSettings();
+        return;
+    }
     // Navigate to Settings -> Wi-Fi -> 2.4GHz Advanced Settings
     navigate('/settings', { 
         state: { sectionId: 'wifi', subTabId: 'adv_settings_24' } 

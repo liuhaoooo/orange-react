@@ -96,6 +96,10 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
   };
 
   const handleSettingsClick = () => {
+    if (!isLoggedIn) {
+        onOpenSettings();
+        return;
+    }
     // Navigate to Settings -> Messages
     navigate('/settings', { 
         state: { sectionId: 'messages' } 

@@ -122,6 +122,10 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
   const handleManageDevicesClick = () => handleInteraction(() => onManageDevices(), false);
 
   const handleSettingsClick = () => {
+    if (!isLoggedIn) {
+        onOpenSettings();
+        return;
+    }
     // Navigate to Settings -> Network -> APN Settings
     navigate('/settings', { 
         state: { sectionId: 'network', subTabId: 'apn_settings' } 

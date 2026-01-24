@@ -71,6 +71,10 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
   };
 
   const handleSettingsClick = () => {
+    if (!isLoggedIn) {
+        onOpenSettings();
+        return;
+    }
     // Navigate to Settings -> Usage -> National
     navigate('/settings', { 
         state: { sectionId: 'usage', subTabId: 'national' } 
