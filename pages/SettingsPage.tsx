@@ -9,6 +9,7 @@ import { MultipleApnPage } from './settings/MultipleApnPage';
 import { NetworkModePage } from './settings/NetworkModePage';
 import { NetworkConfigPage } from './settings/NetworkConfigPage';
 import { PlmnScanPage } from './settings/PlmnScanPage';
+import { LockBandPage } from './settings/LockBandPage';
 
 interface SettingsPageProps {
   onOpenLogin: () => void;
@@ -267,6 +268,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <NetworkConfigPage />;
           case 'plmn_scan':
               return <PlmnScanPage />;
+          case 'lock_band':
+              return <LockBandPage />;
           
           // Future cases can be added here, importing separate components for each page.
           // case 'wifi': return <WifiSettingsPage />;
