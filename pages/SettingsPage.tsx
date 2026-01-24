@@ -6,6 +6,9 @@ import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { ApnSettingsPage } from './settings/ApnSettingsPage';
 import { MultipleApnPage } from './settings/MultipleApnPage';
+import { NetworkModePage } from './settings/NetworkModePage';
+import { NetworkConfigPage } from './settings/NetworkConfigPage';
+import { PlmnScanPage } from './settings/PlmnScanPage';
 
 interface SettingsPageProps {
   onOpenLogin: () => void;
@@ -258,6 +261,12 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <ApnSettingsPage />;
           case 'multiple_apn':
               return <MultipleApnPage />;
+          case 'network_mode':
+              return <NetworkModePage />;
+          case 'network_config':
+              return <NetworkConfigPage />;
+          case 'plmn_scan':
+              return <PlmnScanPage />;
           
           // Future cases can be added here, importing separate components for each page.
           // case 'wifi': return <WifiSettingsPage />;
