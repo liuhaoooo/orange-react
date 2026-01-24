@@ -1,17 +1,6 @@
 
 import React, { useState } from 'react';
-
-// iOS-style rounded switch matching the screenshot
-const RoundedSwitch = ({ isOn, onChange }: { isOn: boolean; onChange: () => void }) => (
-  <div 
-    className={`w-12 h-7 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 ${isOn ? 'bg-orange' : 'bg-[#e2e2e5]'}`}
-    onClick={onChange}
-  >
-    <div 
-        className={`bg-white w-5 h-5 rounded-full shadow-sm transform duration-300 ease-in-out ${isOn ? 'translate-x-5' : 'translate-x-0'}`}
-    />
-  </div>
-);
+import { SquareSwitch } from '../../components/UIComponents';
 
 export const NetworkConfigPage: React.FC = () => {
   const [flightMode, setFlightMode] = useState(false);
@@ -22,7 +11,7 @@ export const NetworkConfigPage: React.FC = () => {
       {/* Flight Mode Row */}
       <div className="flex items-center justify-between mb-12">
          <label className="font-bold text-sm text-black">Flight Mode</label>
-         <RoundedSwitch isOn={flightMode} onChange={() => setFlightMode(!flightMode)} />
+         <SquareSwitch isOn={flightMode} onChange={() => setFlightMode(!flightMode)} />
       </div>
 
       {/* Re-search Network Row */}

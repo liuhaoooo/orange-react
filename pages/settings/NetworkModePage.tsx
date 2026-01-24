@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Save } from 'lucide-react';
 
 export const NetworkModePage: React.FC = () => {
   const [mode, setMode] = useState('Auto');
@@ -35,7 +35,8 @@ export const NetworkModePage: React.FC = () => {
 
        {/* Footer Actions */}
        <div className="flex justify-end pt-12">
-            <button className="bg-[#eeeeee] border-2 border-black text-black hover:bg-black hover:text-white font-bold py-2 px-12 text-sm transition-all rounded-[2px] shadow-sm">
+            <button className="bg-white border-2 border-black text-black hover:bg-black hover:text-white font-bold py-2.5 px-12 text-sm transition-all rounded-[2px] shadow-sm uppercase tracking-wide flex items-center">
+                <Save size={18} className="me-2" />
                 Save
             </button>
        </div>
