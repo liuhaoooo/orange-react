@@ -20,14 +20,18 @@ const StatItem: React.FC<{
   value: string; 
   topText?: string 
 }> = ({ icon, label, value, topText }) => (
-  <div className="flex flex-col items-center justify-start text-center h-full min-w-[70px]">
-    {/* Fixed height container (h-12 = 48px) increased from h-10 */}
-    <div className="text-orange mb-3 h-12 w-full flex flex-col items-center justify-center">
-        {topText && <div className="text-orange font-bold text-sm leading-none">{topText}</div>}
-        {icon}
+  <div className="flex flex-col items-center justify-start text-center h-full min-w-[60px] sm:min-w-[70px] flex-1">
+    {/* Fixed height container, adjusted for mobile responsiveness */}
+    <div className="text-orange mb-1.5 sm:mb-3 h-10 sm:h-12 w-full flex flex-col items-center justify-center">
+        {topText && <div className="text-orange font-bold text-[10px] sm:text-sm leading-none">{topText}</div>}
+        {/* Scale icons down on small screens to match text scaling */}
+        <div className="transform scale-[0.75] sm:scale-100 origin-center flex items-center justify-center">
+            {icon}
+        </div>
     </div>
-    <div className="text-base text-black leading-tight mb-1">{label}</div>
-    <div className="font-bold text-black text-lg">{value}</div>
+    {/* Responsive text sizes: start small (10px), grow to base (16px) */}
+    <div className="text-[10px] sm:text-xs md:text-sm lg:text-base text-black leading-tight mb-0.5 sm:mb-1 w-full px-0.5 break-words">{label}</div>
+    <div className="font-bold text-black text-xs sm:text-sm md:text-base lg:text-lg w-full px-0.5 truncate">{value}</div>
   </div>
 );
 
@@ -220,8 +224,8 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
     <Card className="h-full">
       <CardHeader title={t('connection')} />
       
-      {/* Top Stats Row */}
-      <div className="p-4 pt-8 pb-8 flex justify-between items-start border-b border-gray-200">
+      {/* Top Stats Row: Reduced padding on mobile, responsive Gap */}
+      <div className="p-2 pt-4 pb-4 sm:p-4 sm:pt-8 sm:pb-8 flex justify-between items-start border-b border-gray-200 gap-1 sm:gap-2 overflow-x-auto sm:overflow-visible">
           <StatItem 
             icon={<Timer size={44} strokeWidth={1.5} />} 
             label={t('timeElapsed')} 
@@ -257,42 +261,46 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
       </div>
 
       {/* Toggles Section */}
-      <div className="flex-1 flex flex-col p-6 pt-4">
+      <div className="flex-1 flex flex-col p-4 sm:p-6 pt-2 sm:pt-4">
         
         {/* Connection Toggle */}
-        <div className="flex justify-between items-center py-5 border-b border-gray-200">
-          <div className="flex flex-col items-start">
-             <span className="font-bold text-black text-base">{getConnectionBoldText()}</span>
-             <span className="text-sm text-gray-500">
+        <div className="flex justify-between items-center py-4 sm:py-5 border-b border-gray-200">
+          <div className="flex flex-col items-start pe-2">
+             {/* Responsive Text Size for Switches */}
+             <span className="font-bold text-black text-sm sm:text-base">{getConnectionBoldText()}</span>
+             <span className="text-xs sm:text-sm text-gray-500">
                 {getConnectionSmallText()}
              </span>
           </div>
-          <SquareSwitch 
-            isOn={isConnected} 
-            onChange={handleConnectionToggle} 
-            isLoading={isConnLoading}
-          />
+          <div className="shrink-0">
+            <SquareSwitch 
+                isOn={isConnected} 
+                onChange={handleConnectionToggle} 
+                isLoading={isConnLoading}
+            />
+          </div>
         </div>
 
         {/* Roaming Toggle */}
-        <div className="flex justify-between items-center py-5 border-b border-gray-200">
-          <div className="flex flex-col items-start">
-             <span className="font-bold text-black text-base">{t('roaming')}</span>
-             {/* Changed text-black to text-gray-500 */}
-             <span className="text-sm text-gray-500">{getRoamingSmallText()}</span>
+        <div className="flex justify-between items-center py-4 sm:py-5 border-b border-gray-200">
+          <div className="flex flex-col items-start pe-2">
+             <span className="font-bold text-black text-sm sm:text-base">{t('roaming')}</span>
+             <span className="text-xs sm:text-sm text-gray-500">{getRoamingSmallText()}</span>
           </div>
-          <SquareSwitch 
-            isOn={isRoaming} 
-            onChange={handleRoamingToggle}
-            isLoading={isRoamLoading} 
-          />
+          <div className="shrink-0">
+            <SquareSwitch 
+                isOn={isRoaming} 
+                onChange={handleRoamingToggle}
+                isLoading={isRoamLoading} 
+            />
+          </div>
         </div>
 
         {/* Action Button */}
-        <div className="mt-auto">
+        <div className="mt-auto pt-4 sm:pt-0">
             <Link 
                 to="/connection"
-                className="inline-block bg-orange hover:bg-orange-dark text-black font-bold py-2.5 px-8 text-base transition-colors rounded-none"
+                className="inline-block bg-orange hover:bg-orange-dark text-black font-bold py-2 sm:py-2.5 px-6 sm:px-8 text-sm sm:text-base transition-colors rounded-none"
             >
                 {t('viewConnection')}
             </Link>

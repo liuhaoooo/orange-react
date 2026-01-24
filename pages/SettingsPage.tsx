@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Menu, ChevronUp, ChevronDown } from 'lucide-
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { ApnSettingsPage } from './settings/ApnSettingsPage';
+import { MultipleApnPage } from './settings/MultipleApnPage';
 
 interface SettingsPageProps {
   onOpenLogin: () => void;
@@ -255,9 +256,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
       switch (targetId) {
           case 'apn_settings':
               return <ApnSettingsPage />;
+          case 'multiple_apn':
+              return <MultipleApnPage />;
           
           // Future cases can be added here, importing separate components for each page.
-          // case 'multiple_apn': return <MultipleApnPage />;
           // case 'wifi': return <WifiSettingsPage />;
           
           default:
