@@ -1,142 +1,14 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
+import { ApnSettingsPage } from './settings/ApnSettingsPage';
 
 interface SettingsPageProps {
   onOpenLogin: () => void;
 }
-
-// --- APN Settings Component ---
-const ApnSettingsContent = () => {
-  const [natEnabled, setNatEnabled] = useState(true);
-  const [apnMode, setApnMode] = useState<'auto' | 'manual'>('auto');
-  const [mtu, setMtu] = useState('1500');
-  const [profile, setProfile] = useState('Orange IPv6');
-
-  // Custom Radio Button Component
-  const RadioButton = ({ 
-    label, 
-    checked, 
-    onChange 
-  }: { 
-    label: string; 
-    checked: boolean; 
-    onChange: () => void; 
-  }) => (
-    <label className="flex items-center cursor-pointer select-none">
-        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center me-2 ${checked ? 'border-black' : 'border-gray-300'}`}>
-            {checked && <div className="w-2.5 h-2.5 rounded-full bg-black"></div>}
-        </div>
-        <span className={`text-sm font-bold ${checked ? 'text-black' : 'text-gray-500'}`}>{label}</span>
-        <input type="radio" className="hidden" checked={checked} onChange={onChange} />
-    </label>
-  );
-
-  return (
-    <div className="w-full max-w-4xl">
-      {/* Warning Banner */}
-      <div className="bg-[#fffcf5] p-3 mb-10 flex items-center">
-         <div className="bg-[#b4860b] rounded-full w-4 h-4 flex items-center justify-center text-white font-bold text-xs me-3 shrink-0">!</div>
-         <span className="font-bold text-sm text-[#8a6d3b]">The NAT switch is only effective for IPv4 networks</span>
-      </div>
-
-      {/* Form Grid */}
-      <div className="space-y-10">
-        
-        {/* NAT */}
-        <div className="flex items-center">
-            <div className="w-1/4 font-bold text-black text-sm">NAT</div>
-            <div className="flex items-center space-x-8">
-                <RadioButton label="Enabled" checked={natEnabled} onChange={() => setNatEnabled(true)} />
-                <RadioButton label="Disabled" checked={!natEnabled} onChange={() => setNatEnabled(false)} />
-            </div>
-        </div>
-
-        {/* APN Mode */}
-        <div className="flex items-center">
-            <div className="w-1/4 font-bold text-black text-sm">APN Mode</div>
-            <div className="flex items-center space-x-8">
-                <RadioButton label="Auto" checked={apnMode === 'auto'} onChange={() => setApnMode('auto')} />
-                <RadioButton label="Manual" checked={apnMode === 'manual'} onChange={() => setApnMode('manual')} />
-            </div>
-        </div>
-
-        {/* MTU */}
-        <div className="flex items-center">
-            <div className="w-1/4 font-bold text-black text-sm">
-                <span className="text-red-500 me-1">*</span>MTU
-            </div>
-            <div className="w-3/4">
-                <input 
-                    type="text" 
-                    value={mtu} 
-                    onChange={(e) => setMtu(e.target.value)}
-                    className="w-full border border-gray-300 p-2.5 text-sm outline-none text-black rounded-[2px] focus:border-orange shadow-sm" 
-                />
-            </div>
-        </div>
-
-        {/* Profile Name */}
-        <div className="flex items-center">
-            <div className="w-1/4 font-bold text-black text-sm">Profile Name</div>
-            <div className="w-3/4 relative">
-                <select 
-                    value={profile} 
-                    onChange={(e) => setProfile(e.target.value)}
-                    className="w-full border border-black p-2.5 text-sm outline-none text-black rounded-[2px] appearance-none bg-white cursor-pointer font-normal shadow-sm"
-                >
-                    <option value="Orange IPv6">Orange IPv6</option>
-                    <option value="Orange IPv4">Orange IPv4</option>
-                </select>
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                    <ChevronDown size={16} className="text-gray-400" />
-                </div>
-            </div>
-        </div>
-
-        {/* Action Buttons Row */}
-        <div className="flex justify-end space-x-4 pt-2">
-            <button className="bg-[#cccccc] text-black font-bold text-sm py-2.5 px-8 rounded-[2px] cursor-not-allowed opacity-80 shadow-sm" disabled>
-                Add APN
-            </button>
-            <button className="bg-[#cccccc] text-black font-bold text-sm py-2.5 px-8 rounded-[2px] cursor-not-allowed opacity-80 shadow-sm" disabled>
-                Edit APN
-            </button>
-            <button className="bg-[#cccccc] text-black font-bold text-sm py-2.5 px-8 rounded-[2px] cursor-not-allowed opacity-80 shadow-sm" disabled>
-                Delete APN
-            </button>
-        </div>
-
-        {/* Read-only Info */}
-        <div className="space-y-8 pt-6">
-            <div className="flex justify-between items-center">
-                <div className="font-bold text-black text-sm">PDP Type</div>
-                <div className="text-black text-sm font-bold">IPv6</div>
-            </div>
-            <div className="flex justify-between items-center">
-                <div className="font-bold text-black text-sm">APN</div>
-                <div className="text-black text-sm font-bold">orange</div>
-            </div>
-            <div className="flex justify-between items-center">
-                <div className="font-bold text-black text-sm">Authentication</div>
-                <div className="text-black text-sm uppercase font-bold">NONE</div>
-            </div>
-        </div>
-
-        {/* Save Button Footer */}
-        <div className="flex justify-end pt-12">
-            <button className="border-2 border-black bg-white hover:bg-gray-100 text-black font-bold py-2.5 px-12 text-sm transition-colors rounded-[2px] shadow-sm">
-                Save
-            </button>
-        </div>
-
-      </div>
-    </div>
-  );
-};
 
 export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
   const { t } = useLanguage();
@@ -373,21 +245,29 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
   };
 
   const renderContent = () => {
-      // 1. APN Settings Specific Layout
-      if (activeSubTabId === 'apn_settings') {
-          return <ApnSettingsContent />;
-      }
+      // Dispatch based on active tab ID or section ID
+      const targetId = activeSubTabId || activeSectionId;
 
-      // Default Placeholder Layout
-      return (
-        <div className="flex flex-col items-center justify-center h-[400px] text-gray-400 border-2 border-dashed border-gray-100 rounded-[6px] bg-gray-50/50">
-            <p className="italic mb-3">Configuration panel for:</p>
-            <p className="font-bold text-black text-xl bg-white px-6 py-2 rounded-[6px] shadow-sm">
-                {activeSection.label}
-                {activeSubTabId && activeSection.subTabs ? ` > ${activeSection.subTabs.find(t => t.id === activeSubTabId)?.label}` : ''}
-            </p>
-        </div>
-      );
+      switch (targetId) {
+          case 'apn_settings':
+              return <ApnSettingsPage />;
+          
+          // Future cases can be added here, importing separate components for each page.
+          // case 'multiple_apn': return <MultipleApnPage />;
+          // case 'wifi': return <WifiSettingsPage />;
+          
+          default:
+              // Default Placeholder Layout
+              return (
+                <div className="flex flex-col items-center justify-center h-[400px] text-gray-400 border-2 border-dashed border-gray-100 rounded-[6px] bg-gray-50/50">
+                    <p className="italic mb-3">Configuration panel for:</p>
+                    <p className="font-bold text-black text-xl bg-white px-6 py-2 rounded-[6px] shadow-sm">
+                        {activeSection.label}
+                        {activeSubTabId && activeSection.subTabs ? ` > ${activeSection.subTabs.find(t => t.id === activeSubTabId)?.label}` : ''}
+                    </p>
+                </div>
+              );
+      }
   };
 
   if (!isLoggedIn) {
@@ -514,6 +394,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
                  <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-gray-50 to-transparent rounded-bl-full opacity-60 pointer-events-none"></div>
                  
                  <div className="relative z-10">
+                    {/* Header logic moved to renderContent cases or specific pages if needed, but keeping breadcrumb logic clean here */}
                     {activeSubTabId !== 'apn_settings' && (
                         <h2 className="text-2xl font-bold mb-8 text-black pb-4 border-b border-gray-100">
                             {activeSection.label}
