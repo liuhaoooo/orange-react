@@ -4,8 +4,8 @@ import { ChevronDown, AlertTriangle, Plus, Edit2, Trash2, Save } from 'lucide-re
 
 // Reusable Form Components for consistent style across Settings
 const SectionRow = ({ label, children, required = false }: { label: string; children: React.ReactNode; required?: boolean }) => (
-  <div className="flex flex-col sm:flex-row sm:items-center py-4 border-b border-gray-100 last:border-0">
-    <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
+  <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100 last:border-0">
+    <div className="w-full sm:w-1/3 mb-1 sm:mb-0">
       <label className="font-bold text-sm text-black">
         {required && <span className="text-orange me-1">*</span>}
         {label}
@@ -20,7 +20,7 @@ const SectionRow = ({ label, children, required = false }: { label: string; chil
 const StyledInput = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
   <input 
     {...props}
-    className="w-full border border-gray-300 px-3 py-2.5 text-sm text-black outline-none focus:border-orange focus:ring-1 focus:ring-orange transition-all rounded-[2px] bg-white placeholder-gray-400"
+    className="w-full border border-gray-300 px-3 py-2 text-sm text-black outline-none focus:border-orange focus:ring-1 focus:ring-orange transition-all rounded-[2px] bg-white placeholder-gray-400"
   />
 );
 
@@ -29,7 +29,7 @@ const StyledSelect = ({ value, onChange, options }: { value: string, onChange: (
     <select 
       value={value} 
       onChange={onChange}
-      className="w-full border border-black px-3 py-2.5 text-sm text-black outline-none focus:border-orange focus:ring-1 focus:ring-orange transition-all rounded-[2px] appearance-none bg-white cursor-pointer font-medium"
+      className="w-full border border-black px-3 py-2 text-sm text-black outline-none focus:border-orange focus:ring-1 focus:ring-orange transition-all rounded-[2px] appearance-none bg-white cursor-pointer font-medium"
     >
       {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
     </select>
@@ -40,10 +40,10 @@ const StyledSelect = ({ value, onChange, options }: { value: string, onChange: (
 );
 
 const RadioGroup = ({ options, value, onChange }: { options: { label: string; value: any }[], value: any, onChange: (val: any) => void }) => (
-  <div className="flex items-center space-x-8">
+  <div className="flex flex-wrap gap-4 sm:gap-6 items-center">
     {options.map((opt) => (
       <label key={opt.label} className="flex items-center cursor-pointer select-none group">
-        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center me-2 transition-colors ${value === opt.value ? 'border-black' : 'border-gray-300 group-hover:border-gray-400'}`}>
+        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center me-2 transition-colors shrink-0 ${value === opt.value ? 'border-black' : 'border-gray-300 group-hover:border-gray-400'}`}>
             {value === opt.value && <div className="w-2.5 h-2.5 rounded-full bg-black"></div>}
         </div>
         <span className={`text-sm font-bold ${value === opt.value ? 'text-black' : 'text-gray-500 group-hover:text-gray-700'}`}>{opt.label}</span>
@@ -67,13 +67,13 @@ export const ApnSettingsPage: React.FC = () => {
   return (
     <div className="w-full max-w-4xl animate-fade-in">
       {/* Warning Banner */}
-      <div className="bg-orange/10 border-l-4 border-orange p-4 mb-8 flex items-start">
+      <div className="bg-orange/10 border-l-4 border-orange p-3 mb-6 flex items-start">
          <AlertTriangle className="text-orange w-5 h-5 me-3 shrink-0 mt-0.5" />
          <span className="font-bold text-sm text-black">The NAT switch is only effective for IPv4 networks.</span>
       </div>
 
       {/* Settings Form */}
-      <div className="space-y-2">
+      <div className="space-y-0.5">
         
         {/* NAT */}
         <SectionRow label="NAT">
@@ -117,40 +117,40 @@ export const ApnSettingsPage: React.FC = () => {
         </SectionRow>
 
         {/* Action Buttons Toolbar */}
-        <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 pt-6 pb-8 border-b border-gray-200">
-            <button className="flex items-center justify-center bg-[#f2f2f2] text-gray-400 font-bold text-sm py-2.5 px-6 rounded-[2px] cursor-not-allowed shadow-sm border border-transparent">
+        <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 pt-4 pb-6 border-b border-gray-200">
+            <button className="flex items-center justify-center bg-[#f2f2f2] text-gray-400 font-bold text-sm py-2 px-6 rounded-[2px] cursor-not-allowed shadow-sm border border-transparent">
                 <Plus size={16} className="me-2" />
                 Add APN
             </button>
-            <button className="flex items-center justify-center bg-[#f2f2f2] text-gray-400 font-bold text-sm py-2.5 px-6 rounded-[2px] cursor-not-allowed shadow-sm border border-transparent">
+            <button className="flex items-center justify-center bg-[#f2f2f2] text-gray-400 font-bold text-sm py-2 px-6 rounded-[2px] cursor-not-allowed shadow-sm border border-transparent">
                 <Edit2 size={16} className="me-2" />
                 Edit APN
             </button>
-            <button className="flex items-center justify-center bg-[#f2f2f2] text-gray-400 font-bold text-sm py-2.5 px-6 rounded-[2px] cursor-not-allowed shadow-sm border border-transparent">
+            <button className="flex items-center justify-center bg-[#f2f2f2] text-gray-400 font-bold text-sm py-2 px-6 rounded-[2px] cursor-not-allowed shadow-sm border border-transparent">
                 <Trash2 size={16} className="me-2" />
                 Delete APN
             </button>
         </div>
 
         {/* Read-only Info Display */}
-        <div className="pt-8 space-y-1">
-            <div className="flex justify-between items-center py-3 border-b border-gray-100 border-dashed">
+        <div className="pt-6 space-y-0">
+            <div className="flex justify-between items-center py-2 border-b border-gray-100 border-dashed">
                 <span className="font-bold text-gray-600 text-sm">PDP Type</span>
                 <span className="text-black text-sm font-bold">IPv6</span>
             </div>
-            <div className="flex justify-between items-center py-3 border-b border-gray-100 border-dashed">
+            <div className="flex justify-between items-center py-2 border-b border-gray-100 border-dashed">
                 <span className="font-bold text-gray-600 text-sm">APN</span>
                 <span className="text-black text-sm font-bold">orange</span>
             </div>
-            <div className="flex justify-between items-center py-3 border-b border-gray-100 border-dashed">
+            <div className="flex justify-between items-center py-2 border-b border-gray-100 border-dashed">
                 <span className="font-bold text-gray-600 text-sm">Authentication</span>
                 <span className="text-black text-sm uppercase font-bold">NONE</span>
             </div>
         </div>
 
         {/* Footer Actions */}
-        <div className="flex justify-end pt-12">
-            <button className="bg-white border-2 border-black text-black hover:bg-black hover:text-white font-bold py-3 px-12 text-sm transition-all rounded-[2px] shadow-sm uppercase tracking-wide flex items-center">
+        <div className="flex justify-end pt-8">
+            <button className="bg-white border-2 border-black text-black hover:bg-black hover:text-white font-bold py-2.5 px-12 text-sm transition-all rounded-[2px] shadow-sm uppercase tracking-wide flex items-center">
                 <Save size={18} className="me-2" />
                 Save
             </button>

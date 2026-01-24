@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Menu, ChevronUp, ChevronDown } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { ApnSettingsPage } from './settings/ApnSettingsPage';
@@ -156,6 +156,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
   // State for Navigation - Default to 'network' as it is the first item
   const [activeSectionId, setActiveSectionId] = useState('network'); 
   const [activeSubTabId, setActiveSubTabId] = useState(''); 
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // Scroll Logic State
   const tabsContainerRef = useRef<HTMLDivElement>(null);
@@ -236,6 +237,9 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
     } else {
       setActiveSubTabId('');
     }
+    // Close mobile menu
+    setIsMobileMenuOpen(false);
+
     // Reset scroll position of the tabs
     if (tabsContainerRef.current) {
         tabsContainerRef.current.scrollTo({ left: 0 });
@@ -289,13 +293,13 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
   return (
     <div className="w-full max-w-7xl mx-auto pb-12">
       {/* Breadcrumb Header */}
-      <div className="bg-white px-6 py-2 mb-4 shadow-sm border border-gray-200 flex items-center rounded-[6px] transition-all hover:shadow-md">
+      <div className="bg-white px-4 md:px-6 py-2 mb-4 shadow-sm border border-gray-200 flex items-center rounded-[6px] transition-all hover:shadow-md">
          <button onClick={() => navigate(-1)} className="me-4 text-gray-400 hover:text-orange transition-colors">
             <ChevronLeft size={28} strokeWidth={2.5} />
          </button>
          <div className="flex flex-col">
             <span className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-0.5">{t('settings')}</span>
-            <span className="font-bold text-black text-xl flex items-center">
+            <span className="font-bold text-black text-lg md:text-xl flex items-center flex-wrap">
                 {activeSection.label} 
                 {activeSubTabId && activeSection.subTabs && (
                     <>
@@ -307,29 +311,55 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
          </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-8">
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
           {/* Sidebar */}
-          <div className="w-full lg:w-72 shrink-0 flex flex-col gap-3">
-             {menuItems.map(item => (
-                 <button
-                    key={item.id}
-                    onClick={() => handleSectionClick(item.id)}
-                    className={`
-                        group flex items-center justify-between px-5 py-4 font-bold text-sm border-2 transition-all duration-200 rounded-[6px]
-                        ${activeSectionId === item.id 
-                            ? 'bg-black text-white border-black shadow-lg scale-[1.02] z-10' 
-                            : 'bg-white text-gray-600 border-transparent hover:border-orange hover:text-orange hover:shadow-md hover:bg-orange/5'
-                        }
-                    `}
-                 >
-                    <span>{item.label}</span>
-                    {activeSectionId === item.id && <ChevronRight size={18} className="animate-fade-in" />}
-                 </button>
-             ))}
+          <div className="w-full lg:w-72 shrink-0 z-20">
+             
+             {/* Mobile Menu Toggle */}
+             <button 
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="lg:hidden w-full bg-white border border-gray-200 p-3 flex items-center justify-between rounded-[6px] shadow-sm font-bold text-black mb-2 hover:border-orange transition-colors"
+             >
+                <div className="flex items-center">
+                    <Menu size={20} className="me-3 text-orange" />
+                    <span className="uppercase text-sm tracking-wide">Menu</span>
+                </div>
+                <div className="flex items-center text-gray-500 font-normal">
+                    <span className="me-2 text-xs truncate max-w-[150px]">{activeSection.label}</span>
+                    {isMobileMenuOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                </div>
+             </button>
+
+             {/* Menu List - Hidden on mobile unless open */}
+             <div className={`
+                flex-col gap-2 
+                ${isMobileMenuOpen ? 'flex' : 'hidden'} 
+                lg:flex lg:gap-3
+             `}>
+                {menuItems.map(item => (
+                    <button
+                        key={item.id}
+                        onClick={() => handleSectionClick(item.id)}
+                        className={`
+                            group flex items-center justify-between px-5 py-4 font-bold text-sm border-2 transition-all duration-200 rounded-[6px]
+                            ${activeSectionId === item.id 
+                                ? 'bg-black text-white border-black shadow-lg scale-[1.02] z-10' 
+                                : 'bg-white text-gray-600 border-transparent hover:border-orange hover:text-orange hover:shadow-md hover:bg-orange/5'
+                            }
+                        `}
+                    >
+                        <span>{item.label}</span>
+                        {/* Desktop Arrow */}
+                        {activeSectionId === item.id && <ChevronRight size={18} className="animate-fade-in hidden lg:block" />}
+                        {/* Mobile Active Indicator */}
+                        {activeSectionId === item.id && <ChevronDown size={18} className="animate-fade-in lg:hidden" />}
+                    </button>
+                ))}
+             </div>
           </div>
 
           {/* Content Area */}
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 w-full">
              {/* Sub Tabs (if any) */}
              {activeSection.subTabs && (
                  <div className="flex items-start mb-2 gap-2 group/tabs">
@@ -389,17 +419,17 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
              )}
 
              {/* Main Content Box */}
-             <div className="bg-white border border-gray-200 p-8 min-h-[600px] shadow-sm rounded-[6px] relative overflow-hidden transition-all hover:shadow-md">
+             <div className="bg-white border border-gray-200 p-4 md:p-8 min-h-[500px] md:min-h-[600px] shadow-sm rounded-[6px] relative overflow-hidden transition-all hover:shadow-md">
                  {/* Decorative background element */}
                  <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-gray-50 to-transparent rounded-bl-full opacity-60 pointer-events-none"></div>
                  
                  <div className="relative z-10">
                     {/* Header logic moved to renderContent cases or specific pages if needed, but keeping breadcrumb logic clean here */}
                     {activeSubTabId !== 'apn_settings' && (
-                        <h2 className="text-2xl font-bold mb-8 text-black pb-4 border-b border-gray-100">
+                        <h2 className="text-xl md:text-2xl font-bold mb-6 md:mb-8 text-black pb-4 border-b border-gray-100">
                             {activeSection.label}
                             {activeSubTabId && activeSection.subTabs && (
-                                <span className="text-gray-400 font-normal ms-2 text-lg">
+                                <span className="text-gray-400 font-normal ms-2 text-base md:text-lg block md:inline mt-1 md:mt-0">
                                     - {activeSection.subTabs.find(t => t.id === activeSubTabId)?.label}
                                 </span>
                             )}
