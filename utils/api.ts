@@ -68,8 +68,10 @@ export interface ConnectionSettingsResponse {
     lteCA: string;
     nrCA: string;
     
-    // SMS Switch
+    // SMS Settings
     sms_sw?: string;
+    dmCsca?: string;
+    maxSize?: string;
 
     // Language Settings
     need_change_language?: string; // '1' means set/done, others mean need selection
@@ -729,6 +731,14 @@ export const redirectSms = async (enabled: boolean, phone: string): Promise<ApiR
         redirect_sw: enabled ? '1' : '0',
         redirect_phone: phone
     });
+};
+
+/**
+ * Save Message Settings
+ * CMD: 16
+ */
+export const saveMessageSettings = async (smsSw: string, dmCsca: string, maxSize: string): Promise<ApiResponse> => {
+    return apiRequest(16, 'POST', { smsSw, dmCsca, maxSize });
 };
 
 /**

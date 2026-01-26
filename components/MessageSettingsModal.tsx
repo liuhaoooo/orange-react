@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { X, Loader2 } from 'lucide-react';
 import { SquareSwitch } from './UIComponents';
 import { useGlobalState } from '../utils/GlobalStateContext';
-import { updateConnectionSettings, fetchConnectionSettings } from '../utils/api';
+import { saveMessageSettings, fetchConnectionSettings } from '../utils/api';
 import { useLanguage } from '../utils/i18nContext';
 
 interface MessageSettingsModalProps {
@@ -20,7 +20,7 @@ export const MessageSettingsModal: React.FC<MessageSettingsModalProps> = ({ isOp
 
   useEffect(() => {
     if (isOpen) {
-      // CMD 585/1020 'sms_sw'. '1' = Enabled, '0' = Disabled.
+      // CMD 585 'sms_sw'. '1' = Enabled, '0' = Disabled.
       const currentSw = globalData.connectionSettings?.sms_sw;
       setSmsEnabled(currentSw === '0' ? false : true);
     }
@@ -29,11 +29,15 @@ export const MessageSettingsModal: React.FC<MessageSettingsModalProps> = ({ isOp
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      const res = await updateConnectionSettings({ sms_sw: smsEnabled ? '1' : '0' });
+      const settings = globalData.connectionSettings || {};
+      const dmCsca = settings.dmCsca || '';
+      const maxSize = settings.maxSize || '500';
+
+      const res = await saveMessageSettings(smsEnabled ? '1' : '0', dmCsca, maxSize);
       
       // Update global state locally immediately for responsiveness
-      const currentSettings = globalData.connectionSettings || {};
-      updateGlobalData('connectionSettings', { ...currentSettings, sms_sw: smsEnabled ? '1' : '0' });
+      // Note: 'sms_sw' is the key used in 585 response, so we update that for UI consistency.
+      updateGlobalData('connectionSettings', { ...settings, sms_sw: smsEnabled ? '1' : '0' });
 
       if (res && res.success) {
          // Refresh in background to ensure sync
@@ -44,8 +48,7 @@ export const MessageSettingsModal: React.FC<MessageSettingsModalProps> = ({ isOp
          });
          onClose();
       } else {
-          // Even if API doesn't return standard success true, we might want to close if it's a known quirk, 
-          // but let's assume it works like others.
+          // Even if API doesn't return standard success true, we assume typical success behavior for these commands
           onClose();
       }
     } catch (e) {
