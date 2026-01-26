@@ -13,7 +13,7 @@ interface MessagesCardProps {
 
 export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
   const { t } = useLanguage();
-  const { isLoggedIn } = useGlobalState();
+  const { isLoggedIn, globalData } = useGlobalState();
   const navigate = useNavigate();
   
   const [messages, setMessages] = useState<SmsMessage[]>([]);
@@ -39,13 +39,25 @@ export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
 
     if (isLoggedIn) {
         loadMessages(); // Initial load
-        intervalId = setInterval(loadMessages, 10000); // Refresh every 10s
+        
+        // Optimization: Only poll if SIM is ready and SMS is enabled
+        const s = globalData.connectionSettings;
+        let shouldPoll = true;
+        if (s) {
+            if (s.sim_status !== '1' || s.lock_puk_flag === '1' || s.lock_pin_flag === '1' || s.sms_sw !== '1') {
+                shouldPoll = false;
+            }
+        }
+
+        if (shouldPoll) {
+            intervalId = setInterval(loadMessages, 10000); 
+        }
     }
 
     return () => {
         if (intervalId) clearInterval(intervalId);
     };
-  }, [isLoggedIn]);
+  }, [isLoggedIn, globalData.connectionSettings]);
 
   // Group Messages by Sender
   const threads = useMemo(() => {

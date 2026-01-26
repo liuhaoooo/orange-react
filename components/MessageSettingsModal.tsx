@@ -75,8 +75,8 @@ export const MessageSettingsModal: React.FC<MessageSettingsModalProps> = ({ isOp
 
         {/* Content */}
         <div className="p-8 pb-8">
-           <div className="flex items-center mb-16">
-              <label className="font-bold text-sm text-black w-48">Message Function</label>
+           <div className="flex items-center justify-between mb-16">
+              <label className="font-bold text-sm text-black">Message Function</label>
               <SquareSwitch isOn={smsEnabled} onChange={() => setSmsEnabled(!smsEnabled)} />
            </div>
 

@@ -143,7 +143,19 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
     if (isLoggedIn) {
         setLoading(true);
         loadMessages().finally(() => setLoading(false));
-        intervalId = setInterval(loadMessages, 10000);
+
+        // Optimization: Only poll if SIM is ready and SMS is enabled
+        const s = globalData.connectionSettings;
+        let shouldPoll = true;
+        if (s) {
+            if (s.sim_status !== '1' || s.lock_puk_flag === '1' || s.lock_pin_flag === '1' || s.sms_sw !== '1') {
+                shouldPoll = false;
+            }
+        }
+
+        if (shouldPoll) {
+            intervalId = setInterval(loadMessages, 10000);
+        }
     } else {
         setMessages([]);
     }
@@ -151,7 +163,7 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
     return () => {
         if (intervalId) clearInterval(intervalId);
     };
-  }, [isLoggedIn, activeTab]);
+  }, [isLoggedIn, activeTab, globalData.connectionSettings]);
 
   const isCurrentBoxFull = useMemo(() => {
     if (activeTab === 'inbox') return stats.receiveFull;
