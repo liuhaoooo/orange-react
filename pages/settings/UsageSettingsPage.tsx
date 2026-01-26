@@ -4,8 +4,8 @@ import { ChevronDown, Save } from 'lucide-react';
 import { SquareSwitch } from '../../components/UIComponents';
 
 const FormRow = ({ label, children, required = false, alignTop = false }: { label: string; children: React.ReactNode; required?: boolean, alignTop?: boolean }) => (
-  <div className={`flex flex-col sm:flex-row ${alignTop ? 'items-start' : 'sm:items-center'} py-4 border-b border-gray-100 last:border-0`}>
-    <div className={`w-full sm:w-1/3 mb-2 sm:mb-0 ${alignTop ? 'pt-2' : ''}`}>
+  <div className={`flex flex-col sm:flex-row ${alignTop ? 'items-start' : 'sm:items-center'} py-2 border-b border-gray-100 last:border-0`}>
+    <div className={`w-full sm:w-1/3 mb-1 sm:mb-0 ${alignTop ? 'pt-1' : ''}`}>
       <label className="font-bold text-sm text-black">
         {required && <span className="text-red-500 me-1">*</span>}
         {label}
@@ -108,7 +108,7 @@ export const UsageSettingsPage: React.FC<{ type: 'national' | 'international' }>
       </FormRow>
 
       {/* Footer */}
-      <div className="flex justify-end pt-12 mt-4 pb-6">
+      <div className="flex justify-end pt-6 mt-4 pb-6">
         <button className="bg-white border-2 border-black text-black hover:bg-black hover:text-white font-bold py-2.5 px-12 text-sm transition-all rounded-[2px] shadow-sm uppercase tracking-wide flex items-center">
             <Save size={18} className="me-2" />
             Save

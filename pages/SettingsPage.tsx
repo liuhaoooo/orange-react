@@ -66,7 +66,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
         { id: 'international', label: t('international') }
       ] 
     },
-    { id: 'messages', label: t('messages') },
     { id: 'ims', label: t('imsSetting') },
     { 
       id: 'wifi', 
