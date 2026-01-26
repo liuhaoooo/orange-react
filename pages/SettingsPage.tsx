@@ -15,6 +15,10 @@ import { LinkDetectionPage } from './settings/LinkDetectionPage';
 import { VlanPage } from './settings/VlanPage';
 import { DeviceInfoPage } from './settings/DeviceInfoPage';
 import { NetworkInfoPage } from './settings/NetworkInfoPage';
+import { SimFunctionPage } from './settings/SimFunctionPage';
+import { SimSwitchingPage } from './settings/SimSwitchingPage';
+import { DisplaySolutionPage } from './settings/DisplaySolutionPage';
+import { UsageSettingsPage } from './settings/UsageSettingsPage';
 
 interface SettingsPageProps {
   onOpenLogin: () => void;
@@ -285,6 +289,16 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <DeviceInfoPage />;
           case 'network_info':
               return <NetworkInfoPage />;
+          case 'sim_function':
+              return <SimFunctionPage />;
+          case 'sim_switching':
+              return <SimSwitchingPage />;
+          case 'display_solution':
+              return <DisplaySolutionPage />;
+          case 'national':
+              return <UsageSettingsPage type="national" />;
+          case 'international':
+              return <UsageSettingsPage type="international" />;
           
           // Future cases can be added here, importing separate components for each page.
           // case 'wifi': return <WifiSettingsPage />;
