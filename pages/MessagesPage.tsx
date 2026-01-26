@@ -8,6 +8,7 @@ import { fetchSmsList, parseSmsList, SmsMessage, markSmsAsRead, deleteSms } from
 import { ConfirmModal } from '../components/ConfirmModal';
 import { NewMessageModal } from '../components/NewMessageModal';
 import { RedirectWarningModal, RedirectConfigModal } from '../components/RedirectMessagesModals';
+import { MessageSettingsModal } from '../components/MessageSettingsModal';
 import { useAlert } from '../utils/AlertContext';
 
 interface MessagesPageProps {
@@ -60,6 +61,9 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
   const [isRedirectWarningOpen, setIsRedirectWarningOpen] = useState(false);
   const [isRedirectConfigOpen, setIsRedirectConfigOpen] = useState(false);
 
+  // Message Settings Modal State
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+
   const checkSmsReady = (): { ready: boolean; reason?: string } => {
       const s = globalData.connectionSettings;
       // If data isn't loaded yet, we can't be sure, but usually it is loaded by now if logged in
@@ -100,10 +104,7 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
         onOpenSettings();
         return;
     }
-    // Navigate to Settings -> Messages
-    navigate('/settings', { 
-        state: { sectionId: 'messages' } 
-    });
+    setIsSettingsModalOpen(true);
   };
 
   const getSubCmd = (tab: TabType) => {
@@ -659,6 +660,11 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
       <RedirectConfigModal 
         isOpen={isRedirectConfigOpen} 
         onClose={() => setIsRedirectConfigOpen(false)} 
+      />
+
+      <MessageSettingsModal 
+        isOpen={isSettingsModalOpen} 
+        onClose={() => setIsSettingsModalOpen(false)} 
       />
     </>
   );
