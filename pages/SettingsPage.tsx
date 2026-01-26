@@ -11,6 +11,8 @@ import { NetworkConfigPage } from './settings/NetworkConfigPage';
 import { PlmnScanPage } from './settings/PlmnScanPage';
 import { LockBandPage } from './settings/LockBandPage';
 import { CellLockingPage } from './settings/CellLockingPage';
+import { LinkDetectionPage } from './settings/LinkDetectionPage';
+import { VlanPage } from './settings/VlanPage';
 
 interface SettingsPageProps {
   onOpenLogin: () => void;
@@ -273,6 +275,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <LockBandPage />;
           case 'cell_locking':
               return <CellLockingPage />;
+          case 'link_detection':
+              return <LinkDetectionPage />;
+          case 'vlan':
+              return <VlanPage />;
           
           // Future cases can be added here, importing separate components for each page.
           // case 'wifi': return <WifiSettingsPage />;
