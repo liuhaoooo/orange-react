@@ -24,6 +24,8 @@ import { MacFiltering24Page } from './settings/MacFiltering24Page';
 import { MacFiltering5Page } from './settings/MacFiltering5Page';
 import { WpsSettings24Page } from './settings/WpsSettings24Page';
 import { WpsSettings5Page } from './settings/WpsSettings5Page';
+import { AdvSettings24Page } from './settings/AdvSettings24Page';
+import { AdvSettings5Page } from './settings/AdvSettings5Page';
 
 interface SettingsPageProps {
   onOpenLogin: () => void;
@@ -313,6 +315,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <WpsSettings24Page />;
           case 'wps_settings_5':
               return <WpsSettings5Page />;
+          case 'adv_settings_24':
+              return <AdvSettings24Page />;
+          case 'adv_settings_5':
+              return <AdvSettings5Page />;
           
           default:
               // Default Placeholder Layout
