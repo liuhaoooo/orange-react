@@ -1,9 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Settings, RotateCcw, ArrowUp, ArrowDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
+import { ConfirmModal } from '../components/ConfirmModal';
+import { resetStatistics, fetchStatusInfo } from '../utils/api';
 
 interface UsagePageProps {
   onOpenSettings: () => void;
@@ -58,9 +60,12 @@ const getLimitInMb = (limit: string | undefined, unit: string | undefined) => {
 export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const { isLoggedIn, globalData } = useGlobalState();
+  const { isLoggedIn, globalData, updateGlobalData } = useGlobalState();
   const info = globalData.statusInfo;
   const flowLimitUnit = info?.flow_limit_unit;
+
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   const handleAuthAction = (action: () => void) => {
     if (isLoggedIn) {
@@ -81,18 +86,35 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
     });
   };
 
+  const handleResetClick = () => {
+      handleAuthAction(() => setIsConfirmOpen(true));
+  };
+
+  const handleConfirmReset = async () => {
+      setIsResetting(true);
+      try {
+          const res = await resetStatistics();
+          if (res && res.success) {
+              // Refresh status info to reflect zeroed counters
+              const statusData = await fetchStatusInfo();
+              if (statusData && statusData.success) {
+                  updateGlobalData('statusInfo', statusData);
+              }
+          }
+      } catch (e) {
+          console.error("Failed to reset statistics", e);
+      } finally {
+          setIsResetting(false);
+          setIsConfirmOpen(false);
+      }
+  };
+
   // --- Calculations for Ring Charts ---
   
   // National: dl_mon_flow + ul_mon_flow
   const natUsedMb = (parseFloat(info?.dl_mon_flow || '0') + parseFloat(info?.ul_mon_flow || '0'));
   const natTotalMb = getLimitInMb(info?.nation_limit_size, flowLimitUnit);
   const natFormatted = formatTraffic(natUsedMb.toString());
-  
-  // Convert total to display unit for the Donut component if we were displaying total text,
-  // but here we are using it for calculating percentage inside UsageDonut which uses `value` (in display unit).
-  // The UsageDonut calculates percentage = value / total * 100.
-  // `value` is passed as `natFormatted.val` (e.g., 2.5 GB).
-  // So `total` passed to UsageDonut MUST be converted to the same unit as `value` (GB).
   
   let natTotalConverted = natTotalMb;
   if (natFormatted.unit === 'GB') natTotalConverted = natTotalMb / 1024;
@@ -120,6 +142,7 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
 
 
   return (
+    <>
     <div className="w-full">
       {/* Header Section */}
       <div className="flex justify-between items-start mb-6">
@@ -136,7 +159,7 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
                 {t('settings')}
              </button>
              <button 
-                onClick={() => handleAuthAction(() => console.log('Reset'))}
+                onClick={handleResetClick}
                 className="bg-orange border border-orange px-4 py-2 font-bold text-sm text-black flex items-center hover:bg-orange-dark transition-colors"
              >
                 <RotateCcw size={16} className="me-2 transform -scale-x-100" />
@@ -215,7 +238,7 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
             <div className="bg-[#f2f2f2] border border-gray-200 p-6 flex flex-col items-center text-center h-full min-h-[450px]">
                 
                 <div className="w-full max-w-[200px] mb-8 mt-12 relative">
-                     {/* Placeholder for the illustration - Using a generic tech/robot illustration */}
+                     {/* Placeholder for the illustration */}
                      <img 
                         src="https://cdn-icons-png.flaticon.com/512/4233/4233839.png" 
                         alt="Client Area" 
@@ -240,5 +263,15 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
         </div>
       </div>
     </div>
+
+    <ConfirmModal 
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={handleConfirmReset}
+        isLoading={isResetting}
+        title={t('reset')}
+        message={t('resetCountersConfirm')}
+    />
+    </>
   );
 };

@@ -756,3 +756,11 @@ export const setAutoUpgrade = async (autoValue: '0' | '1'): Promise<ApiResponse>
 export const fetchAccountLevel = async (): Promise<{ account_level: string }> => {
   return apiRequest<{ account_level: string }>(588, 'GET');
 };
+
+/**
+ * Reset Statistics
+ * CMD: 337
+ */
+export const resetStatistics = async (): Promise<ApiResponse> => {
+    return apiRequest(337, 'POST', { statisticsReset: '1', usedFlow: '0' });
+};
