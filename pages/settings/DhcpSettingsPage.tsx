@@ -68,7 +68,7 @@ export const DhcpSettingsPage: React.FC = () => {
             <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
                 <label className="font-bold text-sm text-black">DHCP Server</label>
             </div>
-            <div className="w-full sm:w-2/3">
+            <div className="w-full sm:w-2/3 flex justify-end">
                 <SquareSwitch isOn={dhcpServer} onChange={() => setDhcpServer(!dhcpServer)} />
             </div>
         </div>

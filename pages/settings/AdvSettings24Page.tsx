@@ -51,7 +51,7 @@ export const AdvSettings24Page: React.FC = () => {
             <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
               <label className="font-bold text-sm text-black">DFS</label>
             </div>
-            <div className="w-full sm:w-2/3">
+            <div className="w-full sm:w-2/3 flex justify-end">
                <SquareSwitch isOn={dfs} onChange={() => setDfs(!dfs)} />
             </div>
           </div>

@@ -1,6 +1,4 @@
 
-
-
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Eye, EyeOff, ChevronDown, Loader2 } from 'lucide-react';
@@ -191,7 +189,7 @@ export const EditSsidModal: React.FC<EditSsidModalProps> = ({ isOpen, onClose, n
             {showOptimizationSwitch && (
                 <div className="flex items-center justify-between">
                     <label className="font-bold text-sm text-black w-1/3">{t('optimization5g')}</label>
-                    <div className="flex-1">
+                    <div className="flex-1 flex justify-end">
                         <SquareSwitch isOn={optimization} onChange={() => setOptimization(!optimization)} />
                     </div>
                 </div>
@@ -200,7 +198,7 @@ export const EditSsidModal: React.FC<EditSsidModalProps> = ({ isOpen, onClose, n
             {/* SSID Broadcast */}
             <div className="flex items-center justify-between">
                 <label className="font-bold text-sm text-black w-1/3">{t('ssidBroadcast')}</label>
-                <div className="flex-1">
+                <div className="flex-1 flex justify-end">
                     <SquareSwitch isOn={broadcast} onChange={() => setBroadcast(!broadcast)} />
                 </div>
             </div>

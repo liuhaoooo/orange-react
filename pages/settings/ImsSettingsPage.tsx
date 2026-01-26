@@ -22,7 +22,7 @@ const FormRow = ({ label, children }: { label: string; children: React.ReactNode
     <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
       <label className="font-bold text-sm text-black">{label}</label>
     </div>
-    <div className="w-full sm:w-2/3 flex sm:justify-start items-center">
+    <div className="w-full sm:w-2/3 flex sm:justify-end items-center">
       {children}
     </div>
   </div>

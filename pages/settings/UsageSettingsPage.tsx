@@ -92,7 +92,7 @@ export const UsageSettingsPage: React.FC<{ type: 'national' | 'international' }>
 
       {/* Alert Switch */}
       <FormRow label="Data alert message push">
-          <div className="flex justify-start">
+          <div className="flex justify-end">
             <SquareSwitch isOn={alertEnabled} onChange={() => setAlertEnabled(!alertEnabled)} />
           </div>
       </FormRow>
