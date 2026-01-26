@@ -4,10 +4,10 @@ import { ChevronDown, Save } from 'lucide-react';
 import { SquareSwitch } from '../../components/UIComponents';
 
 const FormRow = ({ label, children, required = false }: { label: string; children: React.ReactNode; required?: boolean }) => (
-  <div className="flex flex-col sm:flex-row sm:items-center py-4 border-b border-gray-100 last:border-0">
-    <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
+  <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100 last:border-0">
+    <div className="w-full sm:w-1/3 mb-1 sm:mb-0">
       <label className="font-bold text-sm text-black">
-        {required && <span className="text-red-500 me-1">*</span>}
+        {required && <span className="text-orange me-1">*</span>}
         {label}
       </label>
     </div>
@@ -18,7 +18,7 @@ const FormRow = ({ label, children, required = false }: { label: string; childre
 );
 
 const SwitchRow = ({ label, isOn, onChange }: { label: string, isOn: boolean, onChange: () => void }) => (
-  <div className="flex items-center justify-between py-4 border-b border-gray-100">
+  <div className="flex items-center justify-between py-3 border-b border-gray-100">
       <label className="font-bold text-sm text-black">{label}</label>
       <SquareSwitch isOn={isOn} onChange={onChange} />
   </div>
@@ -28,7 +28,7 @@ const StyledInput = ({ suffix, ...props }: React.InputHTMLAttributes<HTMLInputEl
   <div className="relative w-full">
       <input 
         {...props}
-        className={`w-full border border-gray-300 px-3 py-2.5 text-sm text-black outline-none focus:border-orange transition-all rounded-[2px] bg-white ${suffix ? 'pe-16' : ''}`}
+        className={`w-full border border-gray-300 px-3 py-2 text-sm text-black outline-none focus:border-orange focus:ring-1 focus:ring-orange transition-all rounded-[2px] bg-white ${suffix ? 'pe-16' : ''}`}
       />
       {suffix && (
           <div className="absolute right-0 top-0 bottom-0 flex items-center justify-center bg-gray-100 border-l border-gray-300 px-3 text-sm text-gray-500 rounded-r-[2px]">
@@ -43,7 +43,7 @@ const StyledSelect = ({ value, onChange, options }: { value: string, onChange: (
     <select 
       value={value} 
       onChange={onChange}
-      className="w-full border border-gray-300 px-3 py-2.5 text-sm text-gray-600 outline-none focus:border-orange transition-all rounded-[2px] appearance-none bg-white cursor-pointer"
+      className="w-full border border-gray-300 px-3 py-2 text-sm text-gray-600 outline-none focus:border-orange focus:ring-1 focus:ring-orange transition-all rounded-[2px] appearance-none bg-white cursor-pointer"
     >
       {options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
     </select>
@@ -75,7 +75,7 @@ export const LinkDetectionPage: React.FC = () => {
 
   return (
     <div className="w-full animate-fade-in py-2">
-      <div className="space-y-1">
+      <div className="space-y-0.5">
           
           <SwitchRow 
             label="Link detection switch" 
@@ -101,7 +101,8 @@ export const LinkDetectionPage: React.FC = () => {
               <StyledInput value={server3} onChange={(e) => setServer3(e.target.value)} />
           </FormRow>
 
-          <div className="py-4"></div>
+          {/* Compact Divider */}
+          <div className="border-b border-gray-100 my-2"></div>
 
           <SwitchRow 
             label="Specify the IPv4 DNS service address" 
@@ -119,7 +120,8 @@ export const LinkDetectionPage: React.FC = () => {
               <StyledInput value={ipv4Dns3} onChange={(e) => setIpv4Dns3(e.target.value)} />
           </FormRow>
 
-          <div className="py-4"></div>
+          {/* Compact Divider */}
+          <div className="border-b border-gray-100 my-2"></div>
 
           <SwitchRow 
             label="Specify the IPv6 DNS service address" 
@@ -137,7 +139,8 @@ export const LinkDetectionPage: React.FC = () => {
               <StyledInput value={ipv6Dns3} onChange={(e) => setIpv6Dns3(e.target.value)} />
           </FormRow>
 
-          <div className="py-4"></div>
+          {/* Compact Divider */}
+          <div className="border-b border-gray-100 my-2"></div>
 
           <FormRow label="Detection interval" required>
               <StyledInput value={interval} onChange={(e) => setInterval(e.target.value)} suffix="Second" />
@@ -151,7 +154,7 @@ export const LinkDetectionPage: React.FC = () => {
               />
           </FormRow>
 
-          <div className="flex justify-end pt-12 mt-4">
+          <div className="flex justify-end pt-8 mt-4">
             <button className="bg-white border-2 border-black text-black hover:bg-black hover:text-white font-bold py-2.5 px-12 text-sm transition-all rounded-[2px] shadow-sm uppercase tracking-wide flex items-center">
                 <Save size={18} className="me-2" />
                 Save
