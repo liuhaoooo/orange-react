@@ -26,6 +26,8 @@ import { WpsSettings24Page } from './settings/WpsSettings24Page';
 import { WpsSettings5Page } from './settings/WpsSettings5Page';
 import { AdvSettings24Page } from './settings/AdvSettings24Page';
 import { AdvSettings5Page } from './settings/AdvSettings5Page';
+import { DhcpSettingsPage } from './settings/DhcpSettingsPage';
+import { MultipleDhcpPage } from './settings/MultipleDhcpPage';
 
 interface SettingsPageProps {
   onOpenLogin: () => void;
@@ -319,6 +321,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <AdvSettings24Page />;
           case 'adv_settings_5':
               return <AdvSettings5Page />;
+          case 'dhcp_settings':
+              return <DhcpSettingsPage />;
+          case 'multiple_dhcp':
+              return <MultipleDhcpPage />;
           
           default:
               // Default Placeholder Layout
