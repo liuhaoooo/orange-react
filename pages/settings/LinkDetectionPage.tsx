@@ -17,6 +17,13 @@ const FormRow = ({ label, children, required = false }: { label: string; childre
   </div>
 );
 
+const SwitchRow = ({ label, isOn, onChange }: { label: string, isOn: boolean, onChange: () => void }) => (
+  <div className="flex items-center justify-between py-4 border-b border-gray-100">
+      <label className="font-bold text-sm text-black">{label}</label>
+      <SquareSwitch isOn={isOn} onChange={onChange} />
+  </div>
+);
+
 const StyledInput = ({ suffix, ...props }: React.InputHTMLAttributes<HTMLInputElement> & { suffix?: string }) => (
   <div className="relative w-full">
       <input 
@@ -70,9 +77,11 @@ export const LinkDetectionPage: React.FC = () => {
     <div className="w-full animate-fade-in py-2">
       <div className="space-y-1">
           
-          <FormRow label="Link detection switch">
-              <SquareSwitch isOn={enableSwitch} onChange={() => setEnableSwitch(!enableSwitch)} />
-          </FormRow>
+          <SwitchRow 
+            label="Link detection switch" 
+            isOn={enableSwitch} 
+            onChange={() => setEnableSwitch(!enableSwitch)} 
+          />
 
           <FormRow label="Link detection method">
               <StyledSelect 
@@ -94,9 +103,11 @@ export const LinkDetectionPage: React.FC = () => {
 
           <div className="py-4"></div>
 
-          <FormRow label="Specify the IPv4 DNS service address">
-              <SquareSwitch isOn={enableIpv4Dns} onChange={() => setEnableIpv4Dns(!enableIpv4Dns)} />
-          </FormRow>
+          <SwitchRow 
+            label="Specify the IPv4 DNS service address" 
+            isOn={enableIpv4Dns} 
+            onChange={() => setEnableIpv4Dns(!enableIpv4Dns)} 
+          />
 
           <FormRow label="IPv4 DNS1">
               <StyledInput value={ipv4Dns1} onChange={(e) => setIpv4Dns1(e.target.value)} />
@@ -110,9 +121,11 @@ export const LinkDetectionPage: React.FC = () => {
 
           <div className="py-4"></div>
 
-          <FormRow label="Specify the IPv6 DNS service address">
-              <SquareSwitch isOn={enableIpv6Dns} onChange={() => setEnableIpv6Dns(!enableIpv6Dns)} />
-          </FormRow>
+          <SwitchRow 
+            label="Specify the IPv6 DNS service address" 
+            isOn={enableIpv6Dns} 
+            onChange={() => setEnableIpv6Dns(!enableIpv6Dns)} 
+          />
 
           <FormRow label="IPv6 DNS1">
               <StyledInput value={ipv6Dns1} onChange={(e) => setIpv6Dns1(e.target.value)} />
