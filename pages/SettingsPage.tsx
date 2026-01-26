@@ -19,6 +19,11 @@ import { SimFunctionPage } from './settings/SimFunctionPage';
 import { SimSwitchingPage } from './settings/SimSwitchingPage';
 import { DisplaySolutionPage } from './settings/DisplaySolutionPage';
 import { UsageSettingsPage } from './settings/UsageSettingsPage';
+import { ImsSettingsPage } from './settings/ImsSettingsPage';
+import { MacFiltering24Page } from './settings/MacFiltering24Page';
+import { MacFiltering5Page } from './settings/MacFiltering5Page';
+import { WpsSettings24Page } from './settings/WpsSettings24Page';
+import { WpsSettings5Page } from './settings/WpsSettings5Page';
 
 interface SettingsPageProps {
   onOpenLogin: () => void;
@@ -298,9 +303,16 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <UsageSettingsPage type="national" />;
           case 'international':
               return <UsageSettingsPage type="international" />;
-          
-          // Future cases can be added here, importing separate components for each page.
-          // case 'wifi': return <WifiSettingsPage />;
+          case 'ims':
+              return <ImsSettingsPage />;
+          case 'mac_filtering_24':
+              return <MacFiltering24Page />;
+          case 'mac_filtering_5':
+              return <MacFiltering5Page />;
+          case 'wps_settings_24':
+              return <WpsSettings24Page />;
+          case 'wps_settings_5':
+              return <WpsSettings5Page />;
           
           default:
               // Default Placeholder Layout
