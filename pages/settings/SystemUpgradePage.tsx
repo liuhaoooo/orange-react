@@ -1,12 +1,17 @@
 
 import React, { useState, useRef } from 'react';
 import { UploadCloud, FileText, Loader2 } from 'lucide-react';
+import { ConfirmModal } from '../../components/ConfirmModal';
+import { useAlert } from '../../utils/AlertContext';
+import { uploadSystemUpdateFile, startSystemUpgrade } from '../../utils/api';
 
 export const SystemUpgradePage: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isUpgrading, setIsUpgrading] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { showAlert } = useAlert();
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -35,20 +40,54 @@ export const SystemUpgradePage: React.FC = () => {
     if (selectedFile.name.toLowerCase().endsWith('.bin')) {
       setFile(selectedFile);
     } else {
-      alert('Only .bin files are allowed for system upgrade.');
+      showAlert('Only .bin files are allowed for system upgrade.', 'error', 'Invalid File');
     }
   };
 
-  const handleUpgrade = () => {
+  const handleUpgradeClick = () => {
       if (!file) return;
+      setIsConfirmOpen(true);
+  };
+
+  const processUpgrade = async () => {
+      if (!file) return;
+      setIsConfirmOpen(false);
       setIsUpgrading(true);
-      
-      // Simulation of upgrade process
-      setTimeout(() => {
+
+      try {
+          // Step 1: Upload
+          const uploadRes = await uploadSystemUpdateFile(file);
+          
+          if (!uploadRes.success) {
+              showAlert(uploadRes.message || 'File upload failed', 'error', 'Upload Failed');
+              setIsUpgrading(false);
+              return;
+          }
+
+          // Step 2: Trigger Upgrade
+          try {
+              const upgradeRes = await startSystemUpgrade(file.name);
+              
+              if (upgradeRes && upgradeRes.success === false) {
+                   showAlert(upgradeRes.message || 'Upgrade failed', 'error', 'Upgrade Failed');
+                   setIsUpgrading(false);
+              } else {
+                   // Success or timeout (device rebooting)
+                   // The device will restart, so we show a success message.
+                   showAlert('Upgrade started. The device will reboot automatically.', 'success', 'Upgrading');
+                   // We don't turn off upgrading state to prevent further interactions
+              }
+          } catch (e) {
+              // Network error likely due to reboot
+              console.log("Upgrade trigger error (likely reboot)", e);
+              showAlert('Upgrade started. The device is rebooting...', 'success', 'Upgrading');
+          }
+
+      } catch (e) {
+          console.error(e);
+          showAlert('An error occurred during the process.', 'error');
           setIsUpgrading(false);
-          alert("Upgrade simulation finished.");
-          setFile(null);
-      }, 3000);
+      }
   };
 
   return (
@@ -81,7 +120,6 @@ export const SystemUpgradePage: React.FC = () => {
         ) : (
           <>
             <div className="mb-6">
-               {/* Cloud Icon styled to match screenshot */}
                <UploadCloud size={80} className="text-[#aab2bd] fill-[#dae1e7]" strokeWidth={1.5} />
             </div>
             <p className="text-[#666666] font-normal text-base text-center px-4">
@@ -94,7 +132,7 @@ export const SystemUpgradePage: React.FC = () => {
       {file && (
         <div className="flex justify-end mt-8 animate-fade-in">
            <button 
-                onClick={(e) => { e.stopPropagation(); handleUpgrade(); }}
+                onClick={(e) => { e.stopPropagation(); handleUpgradeClick(); }}
                 disabled={isUpgrading}
                 className="bg-white border-2 border-black text-black hover:bg-black hover:text-white font-bold py-2.5 px-12 text-sm transition-all rounded-[2px] shadow-sm uppercase tracking-wide flex items-center min-w-[140px] justify-center"
            >
@@ -102,6 +140,14 @@ export const SystemUpgradePage: React.FC = () => {
            </button>
         </div>
       )}
+
+      <ConfirmModal 
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={processUpgrade}
+        title="System Upgrade"
+        message="Are you sure you want to upgrade the system? The device will restart automatically."
+      />
     </div>
   );
 };
