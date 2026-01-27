@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Pencil, Trash2 } from 'lucide-react';
+import { X, Pencil, Trash2, Check, Loader2 } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { SquareSwitch } from './UIComponents';
 import { useGlobalState } from '../utils/GlobalStateContext';
+import { updateDeviceHostname, fetchStatusInfo } from '../utils/api';
 
 interface ConnectedDevicesModalProps {
   isOpen: boolean;
@@ -23,9 +24,14 @@ interface Device {
 
 export const ConnectedDevicesModal: React.FC<ConnectedDevicesModalProps> = ({ isOpen, onClose, filterSsid }) => {
   const { t } = useLanguage();
-  const { globalData } = useGlobalState();
+  const { globalData, updateGlobalData } = useGlobalState();
   const [onlineDevices, setOnlineDevices] = useState<Device[]>([]);
   const [offlineDevices, setOfflineDevices] = useState<Device[]>([]);
+
+  // Editing State
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editHostname, setEditHostname] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   // Effect to filter devices when modal opens or filter changes or data updates
   useEffect(() => {
@@ -62,27 +68,17 @@ export const ConnectedDevicesModal: React.FC<ConnectedDevicesModalProps> = ({ is
         ssid: '', // Offline devices might not have interface info
       }));
 
-      // --- Filtering ---
-      // If filterSsid is provided, we try to filter. However, real API data (interface) 
-      // often doesn't match the display SSID (e.g., 'wlan0' vs 'MyWifi'). 
-      // For now, to ensure data visibility as requested, we will bypass strict filtering 
-      // if the data fields don't seem to match the filter format, or just show all for this requirement.
-      // To strictly follow the instruction "read ... from cmd:586", displaying the data is the priority.
-      
-      // If you needed strict filtering, you would uncomment:
-      // if (filterSsid) {
-      //   setOnlineDevices(mappedOnline.filter(d => d.ssid === filterSsid));
-      //   setOfflineDevices(mappedOffline.filter(d => d.ssid === filterSsid));
-      // } else { ... }
-
       setOnlineDevices(mappedOnline);
       setOfflineDevices(mappedOffline);
+      
+      // Reset editing state on data refresh or open
+      setEditingId(null);
+      setEditHostname('');
     }
   }, [isOpen, filterSsid, globalData.statusInfo, t]);
 
   if (!isOpen) return null;
 
-  // Placeholder functions for interactions
   const toggleOnlineAccess = (id: number) => {
     // Logic to toggle access would go here (likely a separate API call)
     setOnlineDevices(prev => prev.map(d => d.id === id ? { ...d, access: !d.access } : d));
@@ -90,6 +86,42 @@ export const ConnectedDevicesModal: React.FC<ConnectedDevicesModalProps> = ({ is
 
   const toggleOfflineAccess = (id: number) => {
     setOfflineDevices(prev => prev.map(d => d.id === id ? { ...d, access: !d.access } : d));
+  };
+
+  const startEditing = (device: Device) => {
+      setEditingId(device.id);
+      setEditHostname(device.host);
+  };
+
+  const cancelEditing = () => {
+      setEditingId(null);
+      setEditHostname('');
+  };
+
+  const saveHostname = async (device: Device) => {
+      if (!editHostname.trim()) return; // Validation?
+      
+      setIsSaving(true);
+      try {
+          const res = await updateDeviceHostname(device.mac, editHostname);
+          if (res && res.success) {
+              // Optimistic update
+              setOnlineDevices(prev => prev.map(d => d.id === device.id ? { ...d, host: editHostname } : d));
+              setEditingId(null);
+              
+              // Trigger background refresh
+              const statusData = await fetchStatusInfo();
+              if (statusData && statusData.success) {
+                  updateGlobalData('statusInfo', statusData);
+              }
+          } else {
+              console.error("Update failed:", res);
+          }
+      } catch (e) {
+          console.error("Failed to update hostname", e);
+      } finally {
+          setIsSaving(false);
+      }
   };
 
   const renderTableHeader = () => (
@@ -129,22 +161,63 @@ export const ConnectedDevicesModal: React.FC<ConnectedDevicesModalProps> = ({ is
             <table className="w-full text-sm text-left rtl:text-right text-black table-fixed">
               {renderTableHeader()}
               <tbody className="divide-y divide-gray-100">
-                {onlineDevices.map((device, index) => (
-                  <tr key={device.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4">{index + 1}</td>
-                    <td className="px-6 py-4 font-medium truncate" title={device.host}>{device.host}</td>
-                    <td className="px-6 py-4 font-mono text-xs">{device.mac}</td>
-                    <td className="px-6 py-4">{device.ip}</td>
-                    <td className="px-6 py-4">
-                      <SquareSwitch isOn={device.access} onChange={() => toggleOnlineAccess(device.id)} />
-                    </td>
-                    <td className="px-6 py-4 text-end">
-                      <button className="border border-gray-300 p-1.5 hover:bg-gray-100 rounded-sm inline-flex items-center justify-center">
-                        <Pencil size={14} className="text-blue-500" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {onlineDevices.map((device, index) => {
+                  const isEditing = editingId === device.id;
+                  return (
+                    <tr key={device.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4">{index + 1}</td>
+                      <td className="px-6 py-4 font-medium truncate" title={device.host}>
+                          {isEditing ? (
+                              <input 
+                                type="text" 
+                                value={editHostname}
+                                onChange={(e) => setEditHostname(e.target.value)}
+                                className="w-full border border-gray-300 p-1 text-sm outline-none focus:border-orange rounded-sm"
+                                autoFocus
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') saveHostname(device);
+                                    if (e.key === 'Escape') cancelEditing();
+                                }}
+                              />
+                          ) : (
+                              device.host
+                          )}
+                      </td>
+                      <td className="px-6 py-4 font-mono text-xs">{device.mac}</td>
+                      <td className="px-6 py-4">{device.ip}</td>
+                      <td className="px-6 py-4">
+                        <SquareSwitch isOn={device.access} onChange={() => toggleOnlineAccess(device.id)} />
+                      </td>
+                      <td className="px-6 py-4 text-end">
+                        {isEditing ? (
+                            <div className="flex justify-end space-x-2">
+                                <button 
+                                    onClick={() => saveHostname(device)}
+                                    disabled={isSaving}
+                                    className="border border-green-500 bg-green-50 p-1.5 hover:bg-green-100 rounded-sm inline-flex items-center justify-center text-green-600"
+                                >
+                                    {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                                </button>
+                                <button 
+                                    onClick={cancelEditing}
+                                    disabled={isSaving}
+                                    className="border border-red-300 bg-red-50 p-1.5 hover:bg-red-100 rounded-sm inline-flex items-center justify-center text-red-500"
+                                >
+                                    <X size={14} />
+                                </button>
+                            </div>
+                        ) : (
+                            <button 
+                                onClick={() => startEditing(device)}
+                                className="border border-gray-300 p-1.5 hover:bg-gray-100 rounded-sm inline-flex items-center justify-center"
+                            >
+                                <Pencil size={14} className="text-blue-500" />
+                            </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           ) : (
@@ -171,6 +244,7 @@ export const ConnectedDevicesModal: React.FC<ConnectedDevicesModalProps> = ({ is
                       <SquareSwitch isOn={device.access} onChange={() => toggleOfflineAccess(device.id)} />
                     </td>
                     <td className="px-6 py-4 text-end flex justify-end space-x-2 rtl:space-x-reverse">
+                      {/* Offline devices edit logic - keeping placeholder for now as per requirement focusing on online */}
                       <button className="border border-gray-300 p-1.5 hover:bg-gray-100 rounded-sm inline-flex items-center justify-center">
                         <Pencil size={14} className="text-blue-500" />
                       </button>
