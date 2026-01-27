@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Settings, User, QrCode } from 'lucide-react';
 import { useNavigate } from '../utils/GlobalStateContext';
@@ -44,7 +43,8 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
   
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState('');
-  const [loadingIds, setLoadingIds] = useState<Record<string, boolean>>({});
+  // Loading counter
+  const [loadingIds, setLoadingIds] = useState<Record<string, number>>({});
 
   const networks: PageWifiNetwork[] = useMemo(() => {
     const list: PageWifiNetwork[] = [];
@@ -146,7 +146,7 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
     newEnabledState: boolean,
     loadingKey: string
   ) => {
-      setLoadingIds(prev => ({ ...prev, [loadingKey]: true }));
+      setLoadingIds(prev => ({ ...prev, [loadingKey]: (prev[loadingKey] || 0) + 1 }));
       
       const s = globalData.wifiSettings || globalData.connectionSettings || {};
       
@@ -192,7 +192,7 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
       } catch (e) {
           console.error("Failed to update wifi", e);
       } finally {
-          setLoadingIds(prev => ({ ...prev, [loadingKey]: false }));
+          setLoadingIds(prev => ({ ...prev, [loadingKey]: Math.max(0, (prev[loadingKey] || 1) - 1) }));
       }
   };
 
@@ -237,10 +237,10 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
       });
   };
 
-  const FreqCheckbox = ({ label, checked, onChange }: { label: string, checked: boolean, onChange: () => void }) => (
+  const FreqCheckbox = ({ label, checked, onChange, disabled }: { label: string, checked: boolean, onChange: () => void, disabled?: boolean }) => (
       <div 
-        className="flex items-center me-4 cursor-pointer"
-        onClick={onChange}
+        className={`flex items-center me-4 ${!disabled ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}
+        onClick={() => !disabled && onChange()}
       >
           <div className={`w-4 h-4 border flex items-center justify-center me-1.5 ${checked ? 'border-gray-400 bg-gray-100' : 'border-gray-300 bg-white'}`}>
              {checked && <div className="w-2.5 h-2.5 bg-gray-400" style={{ clipPath: 'polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%)', backgroundColor: '#9ca3af' }}></div>}
@@ -264,7 +264,10 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
 
       <div className="bg-white p-6 shadow-sm border border-gray-200">
           <div className="border border-gray-300 max-h-[600px] overflow-y-auto">
-              {networks.map((net, index) => (
+              {networks.map((net, index) => {
+                  const isLoading = (loadingIds[net.id] || 0) > 0;
+                  
+                  return (
                   <div 
                       key={net.id} 
                       className={`flex items-center p-4 min-h-[90px] ${index !== networks.length - 1 ? 'border-b border-gray-200' : ''}`}
@@ -292,11 +295,13 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
                                     label="2.4 GHz" 
                                     checked={!!net.enabled24} 
                                     onChange={() => toggleMergedBand(net, '24')}
+                                    disabled={isLoading}
                                   />
                                   <FreqCheckbox 
                                     label="5 GHz" 
                                     checked={!!net.enabled5} 
                                     onChange={() => toggleMergedBand(net, '5')}
+                                    disabled={isLoading}
                                   />
                               </div>
                           ) : (
@@ -318,11 +323,11 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
                            <SquareSwitch 
                             isOn={net.isMerged ? (!!net.enabled24 || !!net.enabled5) : !!net.enabled} 
                             onChange={() => net.isMerged ? toggleMergedNetwork(net) : toggleSplitNetwork(net)}
-                            isLoading={loadingIds[net.id]} 
+                            isLoading={isLoading} 
                            />
                       </div>
                   </div>
-              ))}
+              )})}
           </div>
       </div>
 

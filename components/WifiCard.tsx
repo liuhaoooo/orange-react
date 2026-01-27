@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardHeader, SquareSwitch } from './UIComponents';
 import { User, QrCode } from 'lucide-react';
@@ -27,7 +26,7 @@ const FreqCheckbox = ({
     disabled?: boolean
 }) => (
   <div 
-    className={`flex items-center me-4 ${!disabled && onChange ? 'cursor-pointer' : ''}`}
+    className={`flex items-center me-4 ${!disabled && onChange ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}
     onClick={() => !disabled && onChange && onChange()}
   >
       <div className={`w-4 h-4 border flex items-center justify-center me-2 ${checked ? 'border-gray-400 bg-gray-100' : 'border-gray-300 bg-white'}`}>
@@ -65,7 +64,8 @@ interface MappedNetwork {
 export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin, onEditSsid }) => {
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState('');
-  const [loadingIds, setLoadingIds] = useState<Record<string, boolean>>({});
+  // Use a counter for loading state to handle concurrent requests (e.g. toggling merged network updates both bands)
+  const [loadingIds, setLoadingIds] = useState<Record<string, number>>({});
   
   const { t } = useLanguage();
   const { isLoggedIn, globalData, updateGlobalData } = useGlobalState();
@@ -175,9 +175,8 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
     newEnabledState: boolean,
     loadingKey: string
   ) => {
-      // NOTE: When called in parallel, this might trigger multiple state updates. 
-      // Using functional state updates for loadingIds helps.
-      setLoadingIds(prev => ({ ...prev, [loadingKey]: true }));
+      // Increment loading counter
+      setLoadingIds(prev => ({ ...prev, [loadingKey]: (prev[loadingKey] || 0) + 1 }));
       
       const s = globalData.wifiSettings || globalData.connectionSettings || {};
       
@@ -224,7 +223,8 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
       } catch (e) {
           console.error("Failed to update wifi config", e);
       } finally {
-          setLoadingIds(prev => ({ ...prev, [loadingKey]: false }));
+          // Decrement loading counter
+          setLoadingIds(prev => ({ ...prev, [loadingKey]: Math.max(0, (prev[loadingKey] || 1) - 1) }));
       }
   };
 
@@ -286,7 +286,10 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
         
         <div className="flex flex-col flex-1 relative">
           <div className="w-full">
-            {networks.map((net) => (
+            {networks.map((net) => {
+              const isLoading = (loadingIds[net.id] || 0) > 0;
+              
+              return (
               <div key={net.id} className="flex items-center p-4 border-b border-gray-200 min-h-[90px]">
                 {/* Icon */}
                 <div className="relative me-4 shrink-0">
@@ -309,11 +312,13 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
                             label="2.4 GHz" 
                             checked={!!net.enabled24} 
                             onChange={() => toggleMergedBand(net, '24')}
+                            disabled={isLoading}
                           />
                           <FreqCheckbox 
                             label="5 GHz" 
                             checked={!!net.enabled5} 
                             onChange={() => toggleMergedBand(net, '5')}
+                            disabled={isLoading}
                           />
                       </div>
                   ) : (
@@ -341,11 +346,11 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
                     // Visual State: ON if either band is enabled
                     isOn={net.isMerged ? (!!net.enabled24 || !!net.enabled5) : !!net.enabled} 
                     onChange={() => net.isMerged ? toggleMergedNetwork(net) : toggleSplitNetwork(net)}
-                    isLoading={loadingIds[net.id]} 
+                    isLoading={isLoading} 
                   />
                 </div>
               </div>
-            ))}
+            )})}
           </div>
 
           <div className="mt-auto p-6">
