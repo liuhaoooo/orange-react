@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Card, CardHeader, SquareSwitch } from './UIComponents';
 import { User, QrCode } from 'lucide-react';
@@ -63,7 +64,7 @@ interface MappedNetwork {
 
 export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin, onEditSsid }) => {
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
-  const [selectedNetwork, setSelectedNetwork] = useState('');
+  const [qrData, setQrData] = useState({ ssid: '', password: '', authType: '3' });
   // Use a counter for loading state to handle concurrent requests (e.g. toggling merged network updates both bands)
   const [loadingIds, setLoadingIds] = useState<Record<string, number>>({});
   
@@ -71,7 +72,6 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
   const { isLoggedIn, globalData, updateGlobalData } = useGlobalState();
   
   // Prefer wifiSettings (CMD 587) as it is more detailed, fallback to connectionSettings (CMD 585)
-  // Both now return flat objects, so accessing properties is consistent.
   const settings = globalData.wifiSettings || globalData.connectionSettings || {};
 
   // Dynamic Data Mapping based on Priority
@@ -165,10 +165,6 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
     }
   };
 
-  /**
-   * Performs the update using the new CMD 2/211 API.
-   * Requires extracting current full state from globalData to send with the update.
-   */
   const performUpdate = async (
     prefix: 'main' | 'guest',
     band: '24g' | '5g',
@@ -180,29 +176,26 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
       
       const s = globalData.wifiSettings || globalData.connectionSettings || {};
       
-      // Determine keys
       const ssidKey = `${prefix}_wifi_ssid_${band}`;
       const passKey = `${prefix}_password_${band}`;
       const authKey = `${prefix}_authenticationType_${band}`;
       const broadcastKey = `${prefix}_wifi_broadcast_${band}`;
-      const priorityKey = `${prefix}_wifiPriority`; // Optimization
+      const priorityKey = `${prefix}_wifiPriority`;
       
-      // Prepare Payload
       const payload = {
           is5g: band === '5g',
           isGuest: prefix === 'guest',
           wifiOpen: newEnabledState ? '1' : '0',
           ssid: s[ssidKey] || '',
           key: s[passKey] || '',
-          authenticationType: s[authKey] || '3', // Default WPA/WPA2
+          authenticationType: s[authKey] || '3',
           broadcast: s[broadcastKey] || '1',
-          wifiSames: s[priorityKey] || '0' // Optimization state
+          wifiSames: s[priorityKey] || '0'
       };
 
       try {
           const res = await updateWifiConfig(payload);
           if (res.success) {
-               // Update local cache optimistically
                const switchKey = `${prefix}_wifi_switch_${band}`;
                const updates = { [switchKey]: newEnabledState ? '1' : '0' };
 
@@ -213,7 +206,6 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
                    updateGlobalData('connectionSettings', { ...globalData.connectionSettings, ...updates });
                }
 
-               // Refresh from server
                fetchWifiSettings().then(data => {
                    if (data && data.success !== false) {
                        updateGlobalData('wifiSettings', data);
@@ -223,35 +215,25 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
       } catch (e) {
           console.error("Failed to update wifi config", e);
       } finally {
-          // Decrement loading counter
           setLoadingIds(prev => ({ ...prev, [loadingKey]: Math.max(0, (prev[loadingKey] || 1) - 1) }));
       }
   };
 
-  // Toggle Single Switch (Split Mode)
   const toggleSplitNetwork = (net: MappedNetwork) => {
     handleInteraction(() => {
-        // Determine prefix/band from ID: e.g. "main_24", "guest_5"
         const parts = net.id.split('_');
         const prefix = parts[0] as 'main' | 'guest';
         const band = parts[1] === '5' ? '5g' : '24g';
-        
         const newState = !net.enabled;
         performUpdate(prefix, band, newState, net.id);
     });
   };
 
-  // Toggle Merged Switch (Controls Both 2.4 and 5 if Optimization ON)
   const toggleMergedNetwork = (net: MappedNetwork) => {
     handleInteraction(async () => {
-       // Logic: If any is ON, turning the switch turns BOTH OFF.
-       // If BOTH are OFF, turning the switch turns BOTH ON.
        const isAnyOn = net.enabled24 || net.enabled5;
        const newState = !isAnyOn;
-       
        const prefix = net.id.startsWith('guest') ? 'guest' : 'main';
-       
-       // Send requests for both bands simultaneously
        await Promise.all([
            performUpdate(prefix, '24g', newState, net.id),
            performUpdate(prefix, '5g', newState, net.id)
@@ -259,22 +241,36 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
     });
   };
 
-  // Toggle Individual Band in Merged Mode
   const toggleMergedBand = (net: MappedNetwork, bandKey: '24' | '5') => {
       handleInteraction(() => {
           const prefix = net.id.startsWith('guest') ? 'guest' : 'main';
           const band = bandKey === '5' ? '5g' : '24g';
-          
           const current = bandKey === '5' ? net.enabled5 : net.enabled24;
           const newState = !current;
-          
           performUpdate(prefix, band, newState, net.id);
       });
   };
 
-  const openQrModal = (name: string) => {
+  const openQrModal = (net: MappedNetwork) => {
     handleInteraction(() => {
-      setSelectedNetwork(name);
+      // Determine correct settings keys based on network type
+      const isGuest = net.id.startsWith('guest');
+      const prefix = isGuest ? 'guest' : 'main';
+      
+      // If merged, usually uses 2.4 settings for SSID/Pass (since they are synced)
+      // If split 5G, uses 5G settings.
+      const is5gOnly = net.id.endsWith('_5') && !net.isMerged;
+      const band = is5gOnly ? '5g' : '24g';
+
+      const ssidKey = `${prefix}_wifi_ssid_${band}`;
+      const passKey = `${prefix}_password_${band}`;
+      const authKey = `${prefix}_authenticationType_${band}`;
+
+      setQrData({
+          ssid: settings[ssidKey] || net.name,
+          password: settings[passKey] || '',
+          authType: settings[authKey] || '3'
+      });
       setIsQrModalOpen(true);
     });
   };
@@ -337,7 +333,7 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
                   {((net.isMerged && (net.enabled24 || net.enabled5)) || (!net.isMerged && net.enabled)) && net.hasQr && (
                       <QrCode 
                           className="w-6 h-6 cursor-pointer text-black hover:text-orange transition-colors" 
-                          onClick={() => openQrModal(net.name)}
+                          onClick={() => openQrModal(net)}
                       />
                   )}
                   
@@ -367,7 +363,9 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
       <QrModal 
         isOpen={isQrModalOpen} 
         onClose={() => setIsQrModalOpen(false)} 
-        networkName={selectedNetwork} 
+        ssid={qrData.ssid}
+        password={qrData.password}
+        authType={qrData.authType}
       />
     </>
   );

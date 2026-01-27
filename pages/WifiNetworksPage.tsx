@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Settings, User, QrCode } from 'lucide-react';
 import { useNavigate } from '../utils/GlobalStateContext';
@@ -38,11 +39,10 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
   const { isLoggedIn, globalData, updateGlobalData } = useGlobalState();
   
   // Prefer wifiSettings (CMD 587) as it is more detailed, fallback to connectionSettings (CMD 585)
-  // Both now return flat objects
   const settings = globalData.wifiSettings || globalData.connectionSettings || {};
   
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
-  const [selectedNetwork, setSelectedNetwork] = useState('');
+  const [qrData, setQrData] = useState({ ssid: '', password: '', authType: '3' });
   // Loading counter
   const [loadingIds, setLoadingIds] = useState<Record<string, number>>({});
 
@@ -130,16 +130,11 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
         onOpenSettings();
         return;
     }
-    // Navigate to Settings -> Wi-Fi -> 2.4GHz Advanced Settings
     navigate('/settings', { 
         state: { sectionId: 'wifi', subTabId: 'adv_settings_24' } 
     });
   };
 
-  /**
-   * Performs the update using the new CMD 2/211 API.
-   * Requires extracting current full state from globalData.
-   */
   const performUpdate = async (
     prefix: 'main' | 'guest',
     band: '24g' | '5g',
@@ -150,14 +145,12 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
       
       const s = globalData.wifiSettings || globalData.connectionSettings || {};
       
-      // Determine keys
       const ssidKey = `${prefix}_wifi_ssid_${band}`;
       const passKey = `${prefix}_password_${band}`;
       const authKey = `${prefix}_authenticationType_${band}`;
       const broadcastKey = `${prefix}_wifi_broadcast_${band}`;
-      const priorityKey = `${prefix}_wifiPriority`; // Optimization
+      const priorityKey = `${prefix}_wifiPriority`; 
       
-      // Prepare Payload
       const payload = {
           is5g: band === '5g',
           isGuest: prefix === 'guest',
@@ -182,7 +175,6 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
                    updateGlobalData('connectionSettings', { ...globalData.connectionSettings, ...updates });
                }
                
-               // Refresh Data from Server (CMD 587)
                fetchWifiSettings().then(res => {
                    if (res && res.success !== false) {
                        updateGlobalData('wifiSettings', res);
@@ -211,8 +203,6 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
          const isAnyOn = net.enabled24 || net.enabled5;
          const newState = !isAnyOn;
          const prefix = net.id.startsWith('guest') ? 'guest' : 'main';
-         
-         // Send requests for both bands simultaneously
          await Promise.all([
              performUpdate(prefix, '24g', newState, net.id),
              performUpdate(prefix, '5g', newState, net.id)
@@ -230,9 +220,23 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
     });
   };
 
-  const openQr = (name: string) => {
+  const openQr = (net: PageWifiNetwork) => {
       handleInteraction(() => {
-          setSelectedNetwork(name);
+          const isGuest = net.id.startsWith('guest');
+          const prefix = isGuest ? 'guest' : 'main';
+          
+          const is5gOnly = net.id.endsWith('_5') && !net.isMerged;
+          const band = is5gOnly ? '5g' : '24g';
+
+          const ssidKey = `${prefix}_wifi_ssid_${band}`;
+          const passKey = `${prefix}_password_${band}`;
+          const authKey = `${prefix}_authenticationType_${band}`;
+
+          setQrData({
+              ssid: settings[ssidKey] || net.name,
+              password: settings[passKey] || '',
+              authType: settings[authKey] || '3'
+          });
           setIsQrModalOpen(true);
       });
   };
@@ -317,7 +321,7 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
                            {((net.isMerged && (net.enabled24 || net.enabled5)) || (!net.isMerged && net.enabled)) && (
                             <QrCode 
                               className="w-6 h-6 cursor-pointer text-black hover:text-orange transition-colors"
-                              onClick={() => openQr(net.name)}
+                              onClick={() => openQr(net)}
                             />
                            )}
                            <SquareSwitch 
@@ -334,7 +338,9 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
       <QrModal 
         isOpen={isQrModalOpen} 
         onClose={() => setIsQrModalOpen(false)} 
-        networkName={selectedNetwork} 
+        ssid={qrData.ssid}
+        password={qrData.password}
+        authType={qrData.authType}
       />
     </div>
   );
