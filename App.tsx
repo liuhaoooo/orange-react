@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from './utils/GlobalStateContext';
 import { Header } from './components/Header';
 import { Dashboard } from './pages/Dashboard';
 import { ConnectionPage } from './pages/ConnectionPage';

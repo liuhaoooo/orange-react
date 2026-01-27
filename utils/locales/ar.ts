@@ -27,6 +27,7 @@ export const ar = {
     dataUsage: "استخدام البيانات",
     network: "الشبكة",
     battery: "البطارية",
+    noBattery: "لا توجد بطارية",
     manageDevices: "إدارة الأجهزة المتصلة",
     usage: "الاستخدام",
     myUsage: "استخدامي",

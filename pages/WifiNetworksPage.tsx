@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Settings, User, QrCode } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '../utils/GlobalStateContext';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { SquareSwitch } from '../components/UIComponents';

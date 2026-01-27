@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardHeader } from './UIComponents';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
-import { Link } from 'react-router-dom';
+import { Link } from '../utils/GlobalStateContext';
 
 const DonutChart = ({ value, label, unit, percentage }: { value: number, label: string, unit: string, percentage: number }) => {
   return (

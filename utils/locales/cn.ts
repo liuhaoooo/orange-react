@@ -27,6 +27,7 @@ export const cn = {
     dataUsage: "数据使用量",
     network: "网络",
     battery: "电池",
+    noBattery: "无电池",
     manageDevices: "管理设备",
     usage: "使用情况",
     myUsage: "我的使用情况",

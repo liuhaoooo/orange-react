@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Settings, Plus, CornerUpRight, Search, AlertTriangle, MessageSquare, User, Trash2, Reply } from 'lucide-react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from '../utils/GlobalStateContext';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { fetchSmsList, parseSmsList, SmsMessage, markSmsAsRead, deleteSms } from '../utils/api';

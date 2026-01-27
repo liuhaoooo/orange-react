@@ -2,6 +2,142 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { getSessionId, checkAuthStatus, clearSessionId, fetchStatusInfo, fetchConnectionSettings, fetchWifiSettings, fetchAccountLevel } from './api';
 
+// --- Custom Router Implementation ---
+interface LocationState {
+  pathname: string;
+  state: any;
+}
+
+const RouterContext = createContext<{ 
+    path: string; 
+    navigate: (to: string | number, options?: any) => void;
+    location: LocationState;
+} | undefined>(undefined);
+
+export const BrowserRouter: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [path, setPath] = useState(window.location.hash.slice(1) || '/');
+    const [state, setState] = useState<any>(window.history.state);
+
+    useEffect(() => {
+        const onLocationChange = () => {
+            setPath(window.location.hash.slice(1) || '/');
+            setState(window.history.state);
+        };
+        window.addEventListener('hashchange', onLocationChange);
+        window.addEventListener('popstate', onLocationChange);
+        return () => {
+            window.removeEventListener('hashchange', onLocationChange);
+            window.removeEventListener('popstate', onLocationChange);
+        };
+    }, []);
+
+    const navigate = useCallback((to: string | number, options?: { state?: any, replace?: boolean }) => {
+        if (typeof to === 'number') {
+            window.history.go(to);
+            return;
+        }
+        
+        const url = '#' + to;
+        const newState = options?.state || null;
+        
+        if (options?.replace) {
+            window.history.replaceState(newState, '', url);
+        } else {
+            window.history.pushState(newState, '', url);
+        }
+        
+        // Manually update state since pushState doesn't trigger listeners
+        setPath(to);
+        setState(newState);
+        
+        // Dispatch a custom event or hashchange so others know (optional but good practice)
+        window.dispatchEvent(new Event('hashchange'));
+    }, []);
+
+    const location = { pathname: path, state };
+
+    return <RouterContext.Provider value={{ path, navigate, location }}>{children}</RouterContext.Provider>;
+};
+
+export const Routes: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const ctx = useContext(RouterContext);
+    const path = ctx ? ctx.path : '/';
+    let foundElement: React.ReactNode = null;
+    
+    React.Children.forEach(children, (child) => {
+        if (!React.isValidElement(child)) return;
+        if (foundElement) return; // Already found a match
+        
+        const { path: routePath, element } = child.props as { path: string; element: React.ReactNode };
+        
+        // Simple exact match or * wildcard
+        if (routePath === '*' || routePath === path) {
+            foundElement = element;
+        }
+    });
+    
+    return <>{foundElement}</>;
+};
+
+export const Route: React.FC<{ path: string; element: React.ReactNode }> = () => null;
+
+export const Link: React.FC<{ to: string; children: React.ReactNode; className?: string; onClick?: (e: React.MouseEvent) => void }> = ({ to, children, className, onClick }) => {
+    const ctx = useContext(RouterContext);
+    const handleClick = (e: React.MouseEvent) => {
+        if (onClick) onClick(e);
+        if (!e.defaultPrevented && ctx) {
+            e.preventDefault();
+            ctx.navigate(to);
+        }
+    };
+    return (
+        <a href={`#${to}`} className={className} onClick={handleClick}>
+            {children}
+        </a>
+    );
+};
+
+export const NavLink: React.FC<{ to: string; children: React.ReactNode; className: (props: { isActive: boolean }) => string; end?: boolean }> = ({ to, children, className, end }) => {
+    const ctx = useContext(RouterContext);
+    const currentPath = ctx ? ctx.path : '/';
+    const isActive = end ? currentPath === to : currentPath.startsWith(to);
+    
+    const handleClick = (e: React.MouseEvent) => {
+        if (ctx) {
+            e.preventDefault();
+            ctx.navigate(to);
+        }
+    };
+
+    return (
+        <a href={`#${to}`} className={className({ isActive })} onClick={handleClick}>
+            {children}
+        </a>
+    );
+};
+
+export const useNavigate = () => {
+    const ctx = useContext(RouterContext);
+    if (!ctx) return () => {};
+    return ctx.navigate;
+};
+
+export const useLocation = () => {
+    const ctx = useContext(RouterContext);
+    if (!ctx) return { pathname: '/', state: null };
+    return ctx.location;
+};
+
+export const Navigate: React.FC<{ to: string; replace?: boolean }> = ({ to, replace }) => {
+    const navigate = useNavigate();
+    useEffect(() => {
+        navigate(to, { replace });
+    }, [to, replace, navigate]);
+    return null;
+};
+
+// --- End Router Implementation ---
+
 interface GlobalStateContextType {
   isLoggedIn: boolean;
   setIsLoggedIn: (status: boolean) => void;

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Delete, Cpu, Smartphone, Tablet, Signal } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
-import { Link } from 'react-router-dom';
+import { Link } from '../utils/GlobalStateContext';
 
 interface ServicesPageProps {
   onOpenSettings: () => void;

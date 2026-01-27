@@ -27,6 +27,7 @@ export const en = {
     dataUsage: "Data Usage",
     network: "Network",
     battery: "Battery",
+    noBattery: "No Battery",
     manageDevices: "Manage Devices",
     usage: "Usage",
     myUsage: "My Usage",

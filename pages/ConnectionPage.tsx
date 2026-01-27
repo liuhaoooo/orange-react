@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Settings, Timer, ArrowUpDown, TabletSmartphone, Link as LinkIcon, Globe, Monitor, Smartphone } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '../utils/GlobalStateContext';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { SquareSwitch, Card, SignalStrengthIcon, BatteryStatusIcon } from '../components/UIComponents';

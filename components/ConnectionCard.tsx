@@ -4,7 +4,7 @@ import { Card, CardHeader, SquareSwitch, SignalStrengthIcon, BatteryStatusIcon }
 import { Timer, ArrowUpDown, TabletSmartphone } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
-import { Link } from 'react-router-dom';
+import { Link } from '../utils/GlobalStateContext';
 import { setDialMode, setRoamingEnable, fetchConnectionSettings } from '../utils/api';
 
 interface ConnectionCardProps {
@@ -213,10 +213,10 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
 
   const signalLevel = parseInt(statusInfo?.signal_lvl || '0', 10);
 
-  // Battery Display Value logic: If status != 1 (No Battery), show --
+  // Battery Display Value logic: If status != 1 (No Battery), show No Battery text
   const getBatteryValue = () => {
     if (!statusInfo) return "0 %";
-    if (statusInfo.battery_status !== '1') return "--";
+    if (statusInfo.battery_status !== '1') return t('noBattery');
     return `${statusInfo.battery_level} %`;
   };
 
@@ -237,7 +237,7 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
             value={formatDataUsage()} 
           />
           <StatItem 
-            icon={<SignalStrengthIcon level={signalLevel} className="h-full w-14" />} 
+            icon={<SignalStrengthIcon level={signalLevel} className="h-8 w-12 sm:h-10 sm:w-14" />} 
             label={t('network')} 
             value={statusInfo?.network_type_str || t('noNetwork')} 
           />

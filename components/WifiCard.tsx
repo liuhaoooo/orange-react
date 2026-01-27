@@ -1,13 +1,11 @@
 
-
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardHeader, SquareSwitch } from './UIComponents';
 import { User, QrCode } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { QrModal } from './QrModal';
 import { useGlobalState } from '../utils/GlobalStateContext';
-import { Link } from 'react-router-dom';
+import { Link } from '../utils/GlobalStateContext';
 import { updateWifiConfig, fetchWifiSettings, WifiSettingsResponse } from '../utils/api';
 
 interface WifiCardProps {

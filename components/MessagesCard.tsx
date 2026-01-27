@@ -4,7 +4,7 @@ import { Card, CardHeader } from './UIComponents';
 import { MessageSquare, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from '../utils/GlobalStateContext';
 import { fetchSmsList, parseSmsList, SmsMessage } from '../utils/api';
 
 interface MessagesCardProps {

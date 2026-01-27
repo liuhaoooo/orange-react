@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { User, ChevronDown, HelpCircle, Settings, LogOut, LogIn } from 'lucide-react';
 import { useLanguage, languageAllList } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from '../utils/GlobalStateContext';
 
 interface HeaderProps {
   onLogout: () => void;

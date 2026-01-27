@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Settings, RotateCcw, ArrowUp, ArrowDown } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '../utils/GlobalStateContext';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { ConfirmModal } from '../components/ConfirmModal';

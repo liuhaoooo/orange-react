@@ -27,6 +27,7 @@ export const el = {
     dataUsage: "Uso de datos",
     network: "Red",
     battery: "Batería",
+    noBattery: "Sin batería",
     manageDevices: "Gestionar dispositivos",
     usage: "Uso",
     myUsage: "Mi uso",
