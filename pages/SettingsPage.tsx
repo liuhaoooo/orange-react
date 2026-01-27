@@ -28,6 +28,7 @@ import { AdvSettings24Page } from './settings/AdvSettings24Page';
 import { AdvSettings5Page } from './settings/AdvSettings5Page';
 import { DhcpSettingsPage } from './settings/DhcpSettingsPage';
 import { MultipleDhcpPage } from './settings/MultipleDhcpPage';
+import { SystemUpgradePage } from './settings/SystemUpgradePage';
 
 interface SettingsPageProps {
   onOpenLogin: () => void;
@@ -325,6 +326,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <DhcpSettingsPage />;
           case 'multiple_dhcp':
               return <MultipleDhcpPage />;
+          case 'system_upgrade':
+              return <SystemUpgradePage />;
           
           default:
               // Default Placeholder Layout
