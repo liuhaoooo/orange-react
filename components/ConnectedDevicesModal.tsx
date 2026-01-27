@@ -28,12 +28,20 @@ export const ConnectedDevicesModal: React.FC<ConnectedDevicesModalProps> = ({ is
   const [onlineDevices, setOnlineDevices] = useState<Device[]>([]);
   const [offlineDevices, setOfflineDevices] = useState<Device[]>([]);
 
-  // Editing State
-  const [editingId, setEditingId] = useState<number | null>(null);
+  // Editing State - Using MAC address for stability across list updates
+  const [editingMac, setEditingMac] = useState<string | null>(null);
   const [editHostname, setEditHostname] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
-  // Effect to filter devices when modal opens or filter changes or data updates
+  // Effect 1: Reset editing state only when modal opens fresh
+  useEffect(() => {
+    if (isOpen) {
+      setEditingMac(null);
+      setEditHostname('');
+    }
+  }, [isOpen]);
+
+  // Effect 2: Update lists when data updates, preserving editing state
   useEffect(() => {
     if (isOpen) {
       const statusInfo = globalData.statusInfo || {};
@@ -70,10 +78,6 @@ export const ConnectedDevicesModal: React.FC<ConnectedDevicesModalProps> = ({ is
 
       setOnlineDevices(mappedOnline);
       setOfflineDevices(mappedOffline);
-      
-      // Reset editing state on data refresh or open
-      setEditingId(null);
-      setEditHostname('');
     }
   }, [isOpen, filterSsid, globalData.statusInfo, t]);
 
@@ -89,12 +93,12 @@ export const ConnectedDevicesModal: React.FC<ConnectedDevicesModalProps> = ({ is
   };
 
   const startEditing = (device: Device) => {
-      setEditingId(device.id);
+      setEditingMac(device.mac);
       setEditHostname(device.host);
   };
 
   const cancelEditing = () => {
-      setEditingId(null);
+      setEditingMac(null);
       setEditHostname('');
   };
 
@@ -107,7 +111,7 @@ export const ConnectedDevicesModal: React.FC<ConnectedDevicesModalProps> = ({ is
           if (res && res.success) {
               // Optimistic update
               setOnlineDevices(prev => prev.map(d => d.id === device.id ? { ...d, host: editHostname } : d));
-              setEditingId(null);
+              setEditingMac(null);
               
               // Trigger background refresh
               const statusData = await fetchStatusInfo();
@@ -162,7 +166,7 @@ export const ConnectedDevicesModal: React.FC<ConnectedDevicesModalProps> = ({ is
               {renderTableHeader()}
               <tbody className="divide-y divide-gray-100">
                 {onlineDevices.map((device, index) => {
-                  const isEditing = editingId === device.id;
+                  const isEditing = editingMac === device.mac;
                   return (
                     <tr key={device.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4">{index + 1}</td>
