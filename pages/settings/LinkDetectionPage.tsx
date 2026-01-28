@@ -1,7 +1,9 @@
 
-import React, { useState } from 'react';
-import { ChevronDown, Save } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronDown, Save, Loader2 } from 'lucide-react';
 import { SquareSwitch } from '../../components/UIComponents';
+import { fetchLinkDetectionSettings, saveLinkDetectionSettings } from '../../utils/api';
+import { useAlert } from '../../utils/AlertContext';
 
 const FormRow = ({ label, children, required = false }: { label: string; children: React.ReactNode; required?: boolean }) => (
   <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100 last:border-0">
@@ -54,24 +56,122 @@ const StyledSelect = ({ value, onChange, options }: { value: string, onChange: (
 );
 
 export const LinkDetectionPage: React.FC = () => {
-  const [enableSwitch, setEnableSwitch] = useState(true);
-  const [method, setMethod] = useState('auto');
-  const [server1, setServer1] = useState('8.8.8.8');
-  const [server2, setServer2] = useState('114.114.114.114');
-  const [server3, setServer3] = useState('www.qq.com');
+  const { showAlert } = useAlert();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  // State Variables
+  const [enableSwitch, setEnableSwitch] = useState(false);
+  const [method, setMethod] = useState('F');
+  const [server1, setServer1] = useState('');
+  const [server2, setServer2] = useState('');
+  const [server3, setServer3] = useState('');
   
-  const [enableIpv4Dns, setEnableIpv4Dns] = useState(true);
-  const [ipv4Dns1, setIpv4Dns1] = useState('223.5.5.5');
-  const [ipv4Dns2, setIpv4Dns2] = useState('119.29.29.29');
-  const [ipv4Dns3, setIpv4Dns3] = useState('180.76.76.76');
+  const [enableIpv4Dns, setEnableIpv4Dns] = useState(false);
+  const [ipv4Dns1, setIpv4Dns1] = useState('');
+  const [ipv4Dns2, setIpv4Dns2] = useState('');
+  const [ipv4Dns3, setIpv4Dns3] = useState('');
 
-  const [enableIpv6Dns, setEnableIpv6Dns] = useState(true);
-  const [ipv6Dns1, setIpv6Dns1] = useState('2001:dc7:1000::1');
-  const [ipv6Dns2, setIpv6Dns2] = useState('2400:3200::1');
-  const [ipv6Dns3, setIpv6Dns3] = useState('2001:4860:4860::8888');
+  const [enableIpv6Dns, setEnableIpv6Dns] = useState(false);
+  const [ipv6Dns1, setIpv6Dns1] = useState('');
+  const [ipv6Dns2, setIpv6Dns2] = useState('');
+  const [ipv6Dns3, setIpv6Dns3] = useState('');
 
-  const [interval, setInterval] = useState('10');
-  const [action, setAction] = useState('no_action');
+  const [interval, setInterval] = useState('');
+  const [action, setAction] = useState('0');
+  const [restartTime, setRestartTime] = useState('');
+
+  // Dropdown Options
+  const methodOptions = [
+    { label: 'DNS', value: '3' },
+    { label: 'NTP', value: '2' },
+    { label: 'PING', value: '0' },
+    { label: 'Auto', value: 'F' },
+  ];
+
+  const actionOptions = [
+    { label: "No action", value: '0' },
+    { label: "Restart the whole machine", value: '1' },
+  ];
+
+  useEffect(() => {
+    const fetchData = async () => {
+        try {
+            const res = await fetchLinkDetectionSettings();
+            if (res && res.success) {
+                setEnableSwitch(res.wanLinkDetectSwitch === '1');
+                setMethod(res.checkWanLinkDetectMode || 'F');
+                setServer1(res.wanLinkDetectIP1 || '');
+                setServer2(res.wanLinkDetectIP2 || '');
+                setServer3(res.wanLinkDetectIP3 || '');
+                
+                setEnableIpv4Dns(res.dnsv4_server_sw === '1');
+                setIpv4Dns1(res.dnsv4_server1 || '');
+                setIpv4Dns2(res.dnsv4_server2 || '');
+                setIpv4Dns3(res.dnsv4_server3 || '');
+
+                setEnableIpv6Dns(res.dnsv6_server_sw === '1');
+                setIpv6Dns1(res.dnsv6_server1 || '');
+                setIpv6Dns2(res.dnsv6_server2 || '');
+                setIpv6Dns3(res.dnsv6_server3 || '');
+
+                setInterval(res.wanLinkDetectCheckTime || '');
+                setAction(res.LinkDetectAction || '0');
+                setRestartTime(res.reboot_wait_time || '');
+            }
+        } catch (e) {
+            console.error("Failed to fetch link detection settings", e);
+            showAlert("Failed to load settings.", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+    fetchData();
+  }, [showAlert]);
+
+  const handleSave = async () => {
+      setSaving(true);
+      const payload = {
+          wanLinkDetectSwitch: enableSwitch ? '1' : '0',
+          checkWanLinkDetectMode: method,
+          wanLinkDetectIP1: server1,
+          wanLinkDetectIP2: server2,
+          wanLinkDetectIP3: server3,
+          wanLinkDetectCheckTime: interval,
+          LinkDetectAction: action,
+          reboot_wait_time: restartTime,
+          dnsv4_server_sw: enableIpv4Dns ? '1' : '0',
+          dnsv4_server1: ipv4Dns1,
+          dnsv4_server2: ipv4Dns2,
+          dnsv4_server3: ipv4Dns3,
+          dnsv6_server_sw: enableIpv6Dns ? '1' : '0',
+          dnsv6_server1: ipv6Dns1,
+          dnsv6_server2: ipv6Dns2,
+          dnsv6_server3: ipv6Dns3,
+      };
+
+      try {
+          const res = await saveLinkDetectionSettings(payload);
+          if (res && res.success) {
+              showAlert("Settings saved successfully.", "success");
+          } else {
+              showAlert("Failed to save settings.", "error");
+          }
+      } catch (e) {
+          console.error("Failed to save link detection settings", e);
+          showAlert("An error occurred.", "error");
+      } finally {
+          setSaving(false);
+      }
+  };
+
+  if (loading) {
+      return (
+          <div className="w-full h-64 flex items-center justify-center">
+              <Loader2 className="animate-spin text-orange" size={40} />
+          </div>
+      );
+  }
 
   return (
     <div className="w-full animate-fade-in py-2">
@@ -87,7 +187,7 @@ export const LinkDetectionPage: React.FC = () => {
               <StyledSelect 
                 value={method} 
                 onChange={(e) => setMethod(e.target.value)} 
-                options={[{label: 'Auto', value: 'auto'}]} 
+                options={methodOptions} 
               />
           </FormRow>
 
@@ -150,13 +250,21 @@ export const LinkDetectionPage: React.FC = () => {
               <StyledSelect 
                 value={action} 
                 onChange={(e) => setAction(e.target.value)} 
-                options={[{label: 'No action', value: 'no_action'}]} 
+                options={actionOptions} 
               />
           </FormRow>
 
+          <FormRow label="Restart time" required>
+              <StyledInput value={restartTime} onChange={(e) => setRestartTime(e.target.value)} suffix="Second" />
+          </FormRow>
+
           <div className="flex justify-end pt-8 mt-4">
-            <button className="bg-white border-2 border-black text-black hover:bg-black hover:text-white font-bold py-2.5 px-12 text-sm transition-all rounded-[2px] shadow-sm uppercase tracking-wide flex items-center">
-                <Save size={18} className="me-2" />
+            <button 
+                onClick={handleSave}
+                disabled={saving}
+                className="bg-white border-2 border-black text-black hover:bg-black hover:text-white font-bold py-2.5 px-12 text-sm transition-all rounded-[2px] shadow-sm uppercase tracking-wide flex items-center"
+            >
+                {saving ? <Loader2 className="animate-spin w-4 h-4 me-2" /> : <Save size={18} className="me-2" />}
                 Save
             </button>
           </div>

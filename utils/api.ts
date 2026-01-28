@@ -1,3 +1,4 @@
+
 // API Configuration
 const API_BASE_URL = '/cgi-bin/http.cgi'; 
 
@@ -164,6 +165,27 @@ export interface NetworkModeResponse {
     networkMode: string;
     display_mode: string;
     modeCapacity: string;
+    [key: string]: any;
+}
+
+export interface LinkDetectionSettings {
+    wanLinkDetectSwitch: string;
+    checkWanLinkDetectMode: string;
+    wanLinkDetectIP1: string;
+    wanLinkDetectIP2: string;
+    wanLinkDetectIP3: string;
+    wanLinkDetectCheckTime: string;
+    LinkDetectAction: string;
+    reboot_wait_time: string;
+    dial_wait_time?: string;
+    dnsv4_server_sw: string;
+    dnsv6_server_sw: string;
+    dnsv4_server1: string;
+    dnsv4_server2: string;
+    dnsv4_server3: string;
+    dnsv6_server1: string;
+    dnsv6_server2: string;
+    dnsv6_server3: string;
     [key: string]: any;
 }
 
@@ -477,3 +499,7 @@ export const setNetworkMode = async (networkMode: string) => apiRequest(256, 'PO
 export const fetchNetworkConfigInfo = async () => apiRequest<{ flightMode: string; success: boolean }>(218, 'GET');
 export const setFlightMode = async (flightMode: '0' | '1') => apiRequest(226, 'POST', { flightMode });
 export const searchNetwork = async () => apiRequest(288, 'POST');
+
+// Link Detection
+export const fetchLinkDetectionSettings = async () => apiRequest<LinkDetectionSettings>(336, 'GET');
+export const saveLinkDetectionSettings = async (data: Partial<LinkDetectionSettings>) => apiRequest(336, 'POST', data);
