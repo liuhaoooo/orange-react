@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, AlertTriangle, Plus, Edit2, Trash2, Save, Loader2 } from 'lucide-react';
 import { fetchApnSettings, fetchApnList, ApnProfile } from '../../utils/api';
+import { ApnAddModal } from '../../components/ApnAddModal';
 
 // Reusable Form Components
 const SectionRow = ({ label, children, required = false }: { label: string; children: React.ReactNode; required?: boolean }) => (
@@ -71,6 +72,10 @@ export const ApnSettingsPage: React.FC = () => {
   const [mtu, setMtu] = useState('1500');
   const [apnMode, setApnMode] = useState<'auto' | 'manual'>('auto');
 
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProfile, setEditingProfile] = useState<ApnProfile | null>(null);
+
   useEffect(() => {
     const initData = async () => {
         try {
@@ -120,7 +125,9 @@ export const ApnSettingsPage: React.FC = () => {
           if (available.length > 0) {
               setSelectedProfile(available[0]);
           } else {
-              setSelectedProfile(null); // Should not happen ideally
+              // If no profile available for this mode, maybe clear or keep previous (UI logic choice)
+              // Here we unset to avoid showing incompatible data
+              setSelectedProfile(null); 
           }
       }
   };
@@ -130,6 +137,37 @@ export const ApnSettingsPage: React.FC = () => {
       const profile = apnList.find(p => p.name === name);
       if (profile) {
           setSelectedProfile(profile);
+      }
+  };
+
+  const handleAddApnClick = () => {
+      setEditingProfile(null);
+      setIsModalOpen(true);
+  };
+
+  const handleEditApnClick = () => {
+      if (selectedProfile) {
+          setEditingProfile(selectedProfile);
+          setIsModalOpen(true);
+      }
+  };
+
+  const handleSaveModal = (newApn: ApnProfile) => {
+      if (editingProfile) {
+          // Edit Mode: Update existing entry in list
+          const updatedList = apnList.map(p => p === editingProfile ? newApn : p);
+          setApnList(updatedList);
+          // Update selected profile if we just edited it (which is typically the case)
+          setSelectedProfile(newApn);
+      } else {
+          // Add Mode: Append to list
+          const updatedList = [...apnList, newApn];
+          setApnList(updatedList);
+          
+          // Ensure we are in manual mode to see the new APN (since edit_flag=1)
+          if (apnMode !== 'manual') {
+              setApnMode('manual');
+          }
       }
   };
 
@@ -146,8 +184,7 @@ export const ApnSettingsPage: React.FC = () => {
   };
 
   const isManualMode = apnMode === 'manual';
-  const isEditable = selectedProfile && selectedProfile.edit_flag === '1';
-
+  
   if (loading) {
       return (
           <div className="w-full h-64 flex items-center justify-center">
@@ -157,6 +194,7 @@ export const ApnSettingsPage: React.FC = () => {
   }
 
   return (
+    <>
     <div className="w-full max-w-4xl animate-fade-in">
       {/* Warning Banner */}
       <div className="bg-orange/10 border-l-4 border-orange p-3 mb-6 flex items-start">
@@ -211,6 +249,7 @@ export const ApnSettingsPage: React.FC = () => {
         {/* Action Buttons Toolbar */}
         <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 pt-4 pb-6 border-b border-gray-200">
             <button 
+                onClick={handleAddApnClick}
                 disabled={!isManualMode}
                 className={`flex items-center justify-center font-bold text-sm py-2 px-6 rounded-[2px] shadow-sm border border-transparent transition-colors ${!isManualMode ? 'bg-[#f2f2f2] text-gray-400 cursor-not-allowed' : 'bg-[#f2f2f2] text-black hover:bg-gray-200'}`}
             >
@@ -218,8 +257,9 @@ export const ApnSettingsPage: React.FC = () => {
                 Add APN
             </button>
             <button 
-                disabled={!isManualMode}
-                className={`flex items-center justify-center font-bold text-sm py-2 px-6 rounded-[2px] shadow-sm border border-transparent transition-colors ${!isManualMode ? 'bg-[#f2f2f2] text-gray-400 cursor-not-allowed' : 'bg-[#f2f2f2] text-black hover:bg-gray-200'}`}
+                onClick={handleEditApnClick}
+                disabled={!isManualMode || !selectedProfile}
+                className={`flex items-center justify-center font-bold text-sm py-2 px-6 rounded-[2px] shadow-sm border border-transparent transition-colors ${(!isManualMode || !selectedProfile) ? 'bg-[#f2f2f2] text-gray-400 cursor-not-allowed' : 'bg-[#f2f2f2] text-black hover:bg-gray-200'}`}
             >
                 <Edit2 size={16} className="me-2" />
                 Edit APN
@@ -259,5 +299,13 @@ export const ApnSettingsPage: React.FC = () => {
 
       </div>
     </div>
+
+    <ApnAddModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSaveModal}
+        initialData={editingProfile}
+    />
+    </>
   );
 };
