@@ -159,6 +159,15 @@ export interface ApnListResponse {
     [key: string]: any;
 }
 
+export interface NetworkModeResponse {
+    success: boolean;
+    cmd: number;
+    networkMode: string;
+    display_mode: string;
+    modeCapacity: string;
+    [key: string]: any;
+}
+
 // Session Management
 export const setSessionId = (sid: string) => {
   if (sid) {
@@ -460,3 +469,7 @@ export const saveApnConfig = async (data: { apnNatName: string; apnMTU: string; 
 
 export const saveApnList = async (apn_list: ApnProfile[]) =>
   apiRequest(248, 'POST', { apn_list });
+
+// Network Mode
+export const fetchNetworkMode = async () => apiRequest<NetworkModeResponse>(256, 'GET');
+export const setNetworkMode = async (networkMode: string) => apiRequest(256, 'POST', { networkMode });
