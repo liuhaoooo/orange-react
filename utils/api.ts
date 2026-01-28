@@ -128,6 +128,37 @@ export interface SmsListResponse {
     [key: string]: any;
 }
 
+// APN Interfaces
+export interface ApnConfigResponse {
+    success: boolean;
+    cmd: number;
+    apnNatName: string; // "0" | "1"
+    apnMTU: string;
+    selectType: string;
+    clatMode: string;
+    clatPrefix: string;
+    esm_flag: string;
+    [key: string]: any;
+}
+
+export interface ApnProfile {
+    default_flag: string; // "0" | "1"
+    edit_flag: string; // "0" (Auto/Predefined) | "1" (Manual/Custom)
+    name: string;
+    apnName: string;
+    ipVersion: string;
+    selectAuthtication: string;
+    apnUserName?: string;
+    apnUserPassword?: string;
+}
+
+export interface ApnListResponse {
+    success: boolean;
+    cmd: number;
+    apn_list: ApnProfile[];
+    [key: string]: any;
+}
+
 // Session Management
 export const setSessionId = (sid: string) => {
   if (sid) {
@@ -419,3 +450,7 @@ export const startSystemUpgrade = async (fileName: string) => {
         fileName: fileName
     });
 };
+
+// APN Settings
+export const fetchApnSettings = async () => apiRequest<ApnConfigResponse>(213, 'GET', { subcmd: 3 });
+export const fetchApnList = async () => apiRequest<ApnListResponse>(248, 'GET', { subcmd: 3 });

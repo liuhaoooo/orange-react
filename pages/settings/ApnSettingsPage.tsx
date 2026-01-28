@@ -1,8 +1,9 @@
 
-import React, { useState } from 'react';
-import { ChevronDown, AlertTriangle, Plus, Edit2, Trash2, Save } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronDown, AlertTriangle, Plus, Edit2, Trash2, Save, Loader2 } from 'lucide-react';
+import { fetchApnSettings, fetchApnList, ApnProfile } from '../../utils/api';
 
-// Reusable Form Components for consistent style across Settings
+// Reusable Form Components
 const SectionRow = ({ label, children, required = false }: { label: string; children: React.ReactNode; required?: boolean }) => (
   <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100 last:border-0">
     <div className="w-full sm:w-1/3 mb-1 sm:mb-0">
@@ -24,14 +25,14 @@ const StyledInput = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
   />
 );
 
-const StyledSelect = ({ value, onChange, options }: { value: string, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void, options: string[] }) => (
+const StyledSelect = ({ value, onChange, options }: { value: string, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void, options: {label: string, value: string}[] }) => (
   <div className="relative w-full">
     <select 
       value={value} 
       onChange={onChange}
       className="w-full border border-black px-3 py-2 text-sm text-black outline-none focus:border-orange focus:ring-1 focus:ring-orange transition-all rounded-[2px] appearance-none bg-white cursor-pointer font-medium"
     >
-      {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+      {options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
     </select>
     <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-black">
         <ChevronDown size={16} strokeWidth={3} />
@@ -59,10 +60,101 @@ const RadioGroup = ({ options, value, onChange }: { options: { label: string; va
 );
 
 export const ApnSettingsPage: React.FC = () => {
-  const [natEnabled, setNatEnabled] = useState(true);
-  const [apnMode, setApnMode] = useState<'auto' | 'manual'>('auto');
+  const [loading, setLoading] = useState(true);
+  
+  // Data State
+  const [apnList, setApnList] = useState<ApnProfile[]>([]);
+  const [selectedProfile, setSelectedProfile] = useState<ApnProfile | null>(null);
+
+  // Form State
+  const [natEnabled, setNatEnabled] = useState(false);
   const [mtu, setMtu] = useState('1500');
-  const [profile, setProfile] = useState('Orange IPv6');
+  const [apnMode, setApnMode] = useState<'auto' | 'manual'>('auto');
+
+  useEffect(() => {
+    const initData = async () => {
+        try {
+            // Fetch Config (CMD 213)
+            const configRes = await fetchApnSettings();
+            if (configRes && configRes.success) {
+                setNatEnabled(configRes.apnNatName === '1');
+                setMtu(configRes.apnMTU || '1500');
+            }
+
+            // Fetch List (CMD 248)
+            const listRes = await fetchApnList();
+            if (listRes && listRes.success && listRes.apn_list) {
+                setApnList(listRes.apn_list);
+                
+                // Find default selected profile (default_flag === '1')
+                const def = listRes.apn_list.find(p => p.default_flag === '1');
+                if (def) {
+                    setSelectedProfile(def);
+                    // Set mode based on profile type
+                    // edit_flag: '0' -> Auto, '1' -> Manual
+                    setApnMode(def.edit_flag === '0' ? 'auto' : 'manual');
+                } else if (listRes.apn_list.length > 0) {
+                    // Fallback if no default
+                    setSelectedProfile(listRes.apn_list[0]);
+                    setApnMode(listRes.apn_list[0].edit_flag === '0' ? 'auto' : 'manual');
+                }
+            }
+        } catch (e) {
+            console.error("Failed to fetch APN data", e);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    initData();
+  }, []);
+
+  const handleModeChange = (mode: 'auto' | 'manual') => {
+      setApnMode(mode);
+      // Logic: Filter available profiles by mode
+      const targetFlag = mode === 'auto' ? '0' : '1';
+      const available = apnList.filter(p => p.edit_flag === targetFlag);
+      
+      // If current profile doesn't match new mode, switch to first available
+      if (selectedProfile && selectedProfile.edit_flag !== targetFlag) {
+          if (available.length > 0) {
+              setSelectedProfile(available[0]);
+          } else {
+              setSelectedProfile(null); // Should not happen ideally
+          }
+      }
+  };
+
+  const handleProfileChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const name = e.target.value;
+      const profile = apnList.find(p => p.name === name);
+      if (profile) {
+          setSelectedProfile(profile);
+      }
+  };
+
+  const getFilteredProfiles = () => {
+      const targetFlag = apnMode === 'auto' ? '0' : '1';
+      return apnList.filter(p => p.edit_flag === targetFlag);
+  };
+
+  const mapAuthType = (val: string) => {
+      if (val === '0') return 'NONE';
+      if (val === '1') return 'PAP';
+      if (val === '2') return 'CHAP';
+      return val || 'NONE';
+  };
+
+  const isManualMode = apnMode === 'manual';
+  const isEditable = selectedProfile && selectedProfile.edit_flag === '1';
+
+  if (loading) {
+      return (
+          <div className="w-full h-64 flex items-center justify-center">
+              <Loader2 className="animate-spin text-orange" size={40} />
+          </div>
+      );
+  }
 
   return (
     <div className="w-full max-w-4xl animate-fade-in">
@@ -91,7 +183,7 @@ export const ApnSettingsPage: React.FC = () => {
         <SectionRow label="APN Mode">
             <RadioGroup 
                 value={apnMode} 
-                onChange={setApnMode}
+                onChange={handleModeChange}
                 options={[
                     { label: 'Auto', value: 'auto' },
                     { label: 'Manual', value: 'manual' }
@@ -110,23 +202,32 @@ export const ApnSettingsPage: React.FC = () => {
         {/* Profile Name */}
         <SectionRow label="Profile Name">
             <StyledSelect 
-                value={profile} 
-                onChange={(e) => setProfile(e.target.value)} 
-                options={['Orange IPv6', 'Orange IPv4']}
+                value={selectedProfile?.name || ''} 
+                onChange={handleProfileChange} 
+                options={getFilteredProfiles().map(p => ({ label: p.name, value: p.name }))}
             />
         </SectionRow>
 
         {/* Action Buttons Toolbar */}
         <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 pt-4 pb-6 border-b border-gray-200">
-            <button className="flex items-center justify-center bg-[#f2f2f2] text-gray-400 font-bold text-sm py-2 px-6 rounded-[2px] cursor-not-allowed shadow-sm border border-transparent">
+            <button 
+                disabled={!isManualMode}
+                className={`flex items-center justify-center font-bold text-sm py-2 px-6 rounded-[2px] shadow-sm border border-transparent transition-colors ${!isManualMode ? 'bg-[#f2f2f2] text-gray-400 cursor-not-allowed' : 'bg-[#f2f2f2] text-black hover:bg-gray-200'}`}
+            >
                 <Plus size={16} className="me-2" />
                 Add APN
             </button>
-            <button className="flex items-center justify-center bg-[#f2f2f2] text-gray-400 font-bold text-sm py-2 px-6 rounded-[2px] cursor-not-allowed shadow-sm border border-transparent">
+            <button 
+                disabled={!isManualMode}
+                className={`flex items-center justify-center font-bold text-sm py-2 px-6 rounded-[2px] shadow-sm border border-transparent transition-colors ${!isManualMode ? 'bg-[#f2f2f2] text-gray-400 cursor-not-allowed' : 'bg-[#f2f2f2] text-black hover:bg-gray-200'}`}
+            >
                 <Edit2 size={16} className="me-2" />
                 Edit APN
             </button>
-            <button className="flex items-center justify-center bg-[#f2f2f2] text-gray-400 font-bold text-sm py-2 px-6 rounded-[2px] cursor-not-allowed shadow-sm border border-transparent">
+            <button 
+                disabled={!isManualMode}
+                className={`flex items-center justify-center font-bold text-sm py-2 px-6 rounded-[2px] shadow-sm border border-transparent transition-colors ${!isManualMode ? 'bg-[#f2f2f2] text-gray-400 cursor-not-allowed' : 'bg-[#f2f2f2] text-black hover:bg-gray-200'}`}
+            >
                 <Trash2 size={16} className="me-2" />
                 Delete APN
             </button>
@@ -136,15 +237,15 @@ export const ApnSettingsPage: React.FC = () => {
         <div className="pt-6 space-y-0">
             <div className="flex justify-between items-center py-2 border-b border-gray-100 border-dashed">
                 <span className="font-bold text-gray-600 text-sm">PDP Type</span>
-                <span className="text-black text-sm font-bold">IPv6</span>
+                <span className="text-black text-sm font-bold">{selectedProfile?.ipVersion || '-'}</span>
             </div>
             <div className="flex justify-between items-center py-2 border-b border-gray-100 border-dashed">
                 <span className="font-bold text-gray-600 text-sm">APN</span>
-                <span className="text-black text-sm font-bold">orange</span>
+                <span className="text-black text-sm font-bold">{selectedProfile?.apnName || '-'}</span>
             </div>
             <div className="flex justify-between items-center py-2 border-b border-gray-100 border-dashed">
                 <span className="font-bold text-gray-600 text-sm">Authentication</span>
-                <span className="text-black text-sm uppercase font-bold">NONE</span>
+                <span className="text-black text-sm uppercase font-bold">{mapAuthType(selectedProfile?.selectAuthtication || '0')}</span>
             </div>
         </div>
 
