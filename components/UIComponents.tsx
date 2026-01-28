@@ -15,9 +15,10 @@ interface SquareSwitchProps {
   isOn: boolean;
   onChange?: () => void;
   isLoading?: boolean;
+  disabled?: boolean;
 }
 
-export const SquareSwitch: React.FC<SquareSwitchProps> = ({ isOn, onChange, isLoading }) => {
+export const SquareSwitch: React.FC<SquareSwitchProps> = ({ isOn, onChange, isLoading, disabled = false }) => {
   if (isLoading) {
     return (
       <div className="flex border border-gray-300 w-16 h-8 items-center justify-center bg-gray-50 select-none">
@@ -28,8 +29,8 @@ export const SquareSwitch: React.FC<SquareSwitchProps> = ({ isOn, onChange, isLo
 
   return (
     <div 
-      className={`flex border w-16 h-8 cursor-pointer select-none transition-colors ${isOn ? 'border-orange' : 'border-black'}`}
-      onClick={onChange}
+      className={`flex border w-16 h-8 select-none transition-colors ${isOn ? 'border-orange' : 'border-black'} ${disabled ? 'opacity-40 cursor-not-allowed grayscale' : 'cursor-pointer'}`}
+      onClick={!disabled ? onChange : undefined}
     >
       <div className={`flex-1 flex items-center justify-center transition-colors ${isOn ? 'bg-orange text-black' : 'bg-white'}`}>
         {isOn && <Check size={20} strokeWidth={3} />}

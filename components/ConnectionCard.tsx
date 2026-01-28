@@ -49,7 +49,12 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
   const isConnected = connectionSettings?.dialMode === '1';
   const isRoaming = connectionSettings?.roamingEnable === '1';
 
+  // Check disabling conditions: Flight Mode ON or SIM Status NOT '1' (Ready)
+  const isSwitchDisabled = statusInfo?.flightMode === '1' || statusInfo?.sim_status !== '1';
+
   const handleConnectionToggle = async () => {
+    if (isSwitchDisabled) return;
+
     // 0. Check Login First
     if (!isLoggedIn) {
       onOpenSettings();
@@ -96,6 +101,8 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
   };
 
   const handleRoamingToggle = async () => {
+    if (isSwitchDisabled) return;
+
     // 0. Check Login First
     if (!isLoggedIn) {
       onOpenSettings();
@@ -277,6 +284,7 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
                 isOn={isConnected} 
                 onChange={handleConnectionToggle} 
                 isLoading={isConnLoading}
+                disabled={isSwitchDisabled}
             />
           </div>
         </div>
@@ -292,6 +300,7 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
                 isOn={isRoaming} 
                 onChange={handleRoamingToggle}
                 isLoading={isRoamLoading} 
+                disabled={isSwitchDisabled}
             />
           </div>
         </div>
