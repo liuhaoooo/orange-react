@@ -1,5 +1,5 @@
 {
-  "name": "Orange网页",
+  "name": "Orange WebUI",
   "description": "A responsive dashboard for managing 5G indoor router settings, recreating a specific ISP interface.",
   "requestFramePermissions": []
 }
