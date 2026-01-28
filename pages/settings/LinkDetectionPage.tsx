@@ -183,80 +183,94 @@ export const LinkDetectionPage: React.FC = () => {
             onChange={() => setEnableSwitch(!enableSwitch)} 
           />
 
-          <FormRow label="Link detection method">
-              <StyledSelect 
-                value={method} 
-                onChange={(e) => setMethod(e.target.value)} 
-                options={methodOptions} 
+          {enableSwitch && (
+            <>
+              <FormRow label="Link detection method">
+                  <StyledSelect 
+                    value={method} 
+                    onChange={(e) => setMethod(e.target.value)} 
+                    options={methodOptions} 
+                  />
+              </FormRow>
+
+              <FormRow label="Detection server IP1">
+                  <StyledInput value={server1} onChange={(e) => setServer1(e.target.value)} />
+              </FormRow>
+              <FormRow label="Detect server IP2">
+                  <StyledInput value={server2} onChange={(e) => setServer2(e.target.value)} />
+              </FormRow>
+              <FormRow label="Detect server IP3">
+                  <StyledInput value={server3} onChange={(e) => setServer3(e.target.value)} />
+              </FormRow>
+
+              {/* Compact Divider */}
+              <div className="border-b border-gray-100 my-2"></div>
+
+              <SwitchRow 
+                label="Specify the IPv4 DNS service address" 
+                isOn={enableIpv4Dns} 
+                onChange={() => setEnableIpv4Dns(!enableIpv4Dns)} 
               />
-          </FormRow>
 
-          <FormRow label="Detection server IP1">
-              <StyledInput value={server1} onChange={(e) => setServer1(e.target.value)} />
-          </FormRow>
-          <FormRow label="Detect server IP2">
-              <StyledInput value={server2} onChange={(e) => setServer2(e.target.value)} />
-          </FormRow>
-          <FormRow label="Detect server IP3">
-              <StyledInput value={server3} onChange={(e) => setServer3(e.target.value)} />
-          </FormRow>
+              {enableIpv4Dns && (
+                <>
+                  <FormRow label="IPv4 DNS1">
+                      <StyledInput value={ipv4Dns1} onChange={(e) => setIpv4Dns1(e.target.value)} />
+                  </FormRow>
+                  <FormRow label="IPv4 DNS2">
+                      <StyledInput value={ipv4Dns2} onChange={(e) => setIpv4Dns2(e.target.value)} />
+                  </FormRow>
+                  <FormRow label="IPv4 DNS3">
+                      <StyledInput value={ipv4Dns3} onChange={(e) => setIpv4Dns3(e.target.value)} />
+                  </FormRow>
+                </>
+              )}
 
-          {/* Compact Divider */}
-          <div className="border-b border-gray-100 my-2"></div>
+              {/* Compact Divider */}
+              <div className="border-b border-gray-100 my-2"></div>
 
-          <SwitchRow 
-            label="Specify the IPv4 DNS service address" 
-            isOn={enableIpv4Dns} 
-            onChange={() => setEnableIpv4Dns(!enableIpv4Dns)} 
-          />
-
-          <FormRow label="IPv4 DNS1">
-              <StyledInput value={ipv4Dns1} onChange={(e) => setIpv4Dns1(e.target.value)} />
-          </FormRow>
-          <FormRow label="IPv4 DNS2">
-              <StyledInput value={ipv4Dns2} onChange={(e) => setIpv4Dns2(e.target.value)} />
-          </FormRow>
-          <FormRow label="IPv4 DNS3">
-              <StyledInput value={ipv4Dns3} onChange={(e) => setIpv4Dns3(e.target.value)} />
-          </FormRow>
-
-          {/* Compact Divider */}
-          <div className="border-b border-gray-100 my-2"></div>
-
-          <SwitchRow 
-            label="Specify the IPv6 DNS service address" 
-            isOn={enableIpv6Dns} 
-            onChange={() => setEnableIpv6Dns(!enableIpv6Dns)} 
-          />
-
-          <FormRow label="IPv6 DNS1">
-              <StyledInput value={ipv6Dns1} onChange={(e) => setIpv6Dns1(e.target.value)} />
-          </FormRow>
-          <FormRow label="IPv6 DNS2">
-              <StyledInput value={ipv6Dns2} onChange={(e) => setIpv6Dns2(e.target.value)} />
-          </FormRow>
-          <FormRow label="IPv6 DNS3">
-              <StyledInput value={ipv6Dns3} onChange={(e) => setIpv6Dns3(e.target.value)} />
-          </FormRow>
-
-          {/* Compact Divider */}
-          <div className="border-b border-gray-100 my-2"></div>
-
-          <FormRow label="Detection interval" required>
-              <StyledInput value={interval} onChange={(e) => setInterval(e.target.value)} suffix="Second" />
-          </FormRow>
-
-          <FormRow label="Link detection response action">
-              <StyledSelect 
-                value={action} 
-                onChange={(e) => setAction(e.target.value)} 
-                options={actionOptions} 
+              <SwitchRow 
+                label="Specify the IPv6 DNS service address" 
+                isOn={enableIpv6Dns} 
+                onChange={() => setEnableIpv6Dns(!enableIpv6Dns)} 
               />
-          </FormRow>
 
-          <FormRow label="Restart time" required>
-              <StyledInput value={restartTime} onChange={(e) => setRestartTime(e.target.value)} suffix="Second" />
-          </FormRow>
+              {enableIpv6Dns && (
+                <>
+                  <FormRow label="IPv6 DNS1">
+                      <StyledInput value={ipv6Dns1} onChange={(e) => setIpv6Dns1(e.target.value)} />
+                  </FormRow>
+                  <FormRow label="IPv6 DNS2">
+                      <StyledInput value={ipv6Dns2} onChange={(e) => setIpv6Dns2(e.target.value)} />
+                  </FormRow>
+                  <FormRow label="IPv6 DNS3">
+                      <StyledInput value={ipv6Dns3} onChange={(e) => setIpv6Dns3(e.target.value)} />
+                  </FormRow>
+                </>
+              )}
+
+              {/* Compact Divider */}
+              <div className="border-b border-gray-100 my-2"></div>
+
+              <FormRow label="Detection interval" required>
+                  <StyledInput value={interval} onChange={(e) => setInterval(e.target.value)} suffix="Second" />
+              </FormRow>
+
+              <FormRow label="Link detection response action">
+                  <StyledSelect 
+                    value={action} 
+                    onChange={(e) => setAction(e.target.value)} 
+                    options={actionOptions} 
+                  />
+              </FormRow>
+
+              {action === '1' && (
+                <FormRow label="Restart time" required>
+                    <StyledInput value={restartTime} onChange={(e) => setRestartTime(e.target.value)} suffix="Second" />
+                </FormRow>
+              )}
+            </>
+          )}
 
           <div className="flex justify-end pt-8 mt-4">
             <button 
