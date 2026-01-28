@@ -190,7 +190,8 @@ export const ApnAddModal: React.FC<ApnAddModalProps> = ({ isOpen, onClose, onSav
              </div>
           </div>
 
-          {/* Username */}
+          {/* Username - Hidden if Auth is NONE */}
+          {authType !== '0' && (
           <div className="mb-6 flex flex-col sm:flex-row sm:items-center">
              <label className="font-bold text-sm text-black w-1/3 mb-2 sm:mb-0">Username</label>
              <div className="w-full sm:w-2/3">
@@ -202,8 +203,10 @@ export const ApnAddModal: React.FC<ApnAddModalProps> = ({ isOpen, onClose, onSav
                 />
              </div>
           </div>
+          )}
 
-          {/* Password */}
+          {/* Password - Hidden if Auth is NONE */}
+          {authType !== '0' && (
           <div className="mb-10 flex flex-col sm:flex-row sm:items-center">
              <label className="font-bold text-sm text-black w-1/3 mb-2 sm:mb-0">Password</label>
              <div className="w-full sm:w-2/3 relative">
@@ -222,6 +225,7 @@ export const ApnAddModal: React.FC<ApnAddModalProps> = ({ isOpen, onClose, onSav
                 </button>
              </div>
           </div>
+          )}
 
           {/* Buttons */}
           <div className="flex justify-end space-x-4">
