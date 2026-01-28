@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { ChevronDown, AlertTriangle, Plus, Edit2, Trash2, Save, Loader2 } from 'lucide-react';
 import { fetchApnSettings, fetchApnList, ApnProfile } from '../../utils/api';
 import { ApnAddModal } from '../../components/ApnAddModal';
+import { ConfirmModal } from '../../components/ConfirmModal';
+import { useLanguage } from '../../utils/i18nContext';
 
 // Reusable Form Components
 const SectionRow = ({ label, children, required = false }: { label: string; children: React.ReactNode; required?: boolean }) => (
@@ -61,6 +63,7 @@ const RadioGroup = ({ options, value, onChange }: { options: { label: string; va
 );
 
 export const ApnSettingsPage: React.FC = () => {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   
   // Data State
@@ -75,6 +78,9 @@ export const ApnSettingsPage: React.FC = () => {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProfile, setEditingProfile] = useState<ApnProfile | null>(null);
+  
+  // Delete Modal State
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
   useEffect(() => {
     const initData = async () => {
@@ -125,8 +131,7 @@ export const ApnSettingsPage: React.FC = () => {
           if (available.length > 0) {
               setSelectedProfile(available[0]);
           } else {
-              // If no profile available for this mode, maybe clear or keep previous (UI logic choice)
-              // Here we unset to avoid showing incompatible data
+              // If no profile available for this mode
               setSelectedProfile(null); 
           }
       }
@@ -152,21 +157,58 @@ export const ApnSettingsPage: React.FC = () => {
       }
   };
 
+  const handleDeleteApnClick = () => {
+      if (selectedProfile) {
+          setIsDeleteConfirmOpen(true);
+      }
+  };
+
+  const handleConfirmDelete = () => {
+      if (!selectedProfile) return;
+
+      // Filter out the deleted profile
+      const updatedList = apnList.filter(p => p !== selectedProfile);
+      setApnList(updatedList);
+      setIsDeleteConfirmOpen(false);
+
+      // Determine next selection
+      const targetFlag = apnMode === 'auto' ? '0' : '1';
+      const available = updatedList.filter(p => p.edit_flag === targetFlag);
+      
+      if (available.length > 0) {
+          setSelectedProfile(available[0]);
+      } else {
+          setSelectedProfile(null);
+      }
+  };
+
   const handleSaveModal = (newApn: ApnProfile) => {
       if (editingProfile) {
           // Edit Mode: Update existing entry in list
           const updatedList = apnList.map(p => p === editingProfile ? newApn : p);
           setApnList(updatedList);
-          // Update selected profile if we just edited it (which is typically the case)
           setSelectedProfile(newApn);
       } else {
-          // Add Mode: Append to list
-          const updatedList = [...apnList, newApn];
+          // Add Mode
+          // Logic: If there are NO editable profiles (edit_flag: "1"), this new one becomes default (default_flag: "1")
+          const hasManualProfiles = apnList.some(p => p.edit_flag === '1');
+          
+          const profileToAdd: ApnProfile = {
+              ...newApn,
+              default_flag: hasManualProfiles ? '0' : '1'
+          };
+
+          const updatedList = [...apnList, profileToAdd];
           setApnList(updatedList);
           
-          // Ensure we are in manual mode to see the new APN (since edit_flag=1)
+          // Ensure we are in manual mode to see the new APN
           if (apnMode !== 'manual') {
               setApnMode('manual');
+          }
+
+          // If this became the default (first one), select it
+          if (!hasManualProfiles) {
+              setSelectedProfile(profileToAdd);
           }
       }
   };
@@ -265,8 +307,9 @@ export const ApnSettingsPage: React.FC = () => {
                 Edit APN
             </button>
             <button 
-                disabled={!isManualMode}
-                className={`flex items-center justify-center font-bold text-sm py-2 px-6 rounded-[2px] shadow-sm border border-transparent transition-colors ${!isManualMode ? 'bg-[#f2f2f2] text-gray-400 cursor-not-allowed' : 'bg-[#f2f2f2] text-black hover:bg-gray-200'}`}
+                onClick={handleDeleteApnClick}
+                disabled={!isManualMode || !selectedProfile}
+                className={`flex items-center justify-center font-bold text-sm py-2 px-6 rounded-[2px] shadow-sm border border-transparent transition-colors ${(!isManualMode || !selectedProfile) ? 'bg-[#f2f2f2] text-gray-400 cursor-not-allowed' : 'bg-[#f2f2f2] text-black hover:bg-gray-200'}`}
             >
                 <Trash2 size={16} className="me-2" />
                 Delete APN
@@ -305,6 +348,14 @@ export const ApnSettingsPage: React.FC = () => {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveModal}
         initialData={editingProfile}
+    />
+
+    <ConfirmModal 
+        isOpen={isDeleteConfirmOpen}
+        onClose={() => setIsDeleteConfirmOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete APN"
+        message="Are you sure you want to delete this APN profile?"
     />
     </>
   );
