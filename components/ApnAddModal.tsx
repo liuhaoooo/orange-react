@@ -10,9 +10,10 @@ interface ApnAddModalProps {
   onClose: () => void;
   onSave: (newApn: ApnProfile) => void;
   initialData?: ApnProfile | null;
+  existingApns?: ApnProfile[];
 }
 
-export const ApnAddModal: React.FC<ApnAddModalProps> = ({ isOpen, onClose, onSave, initialData }) => {
+export const ApnAddModal: React.FC<ApnAddModalProps> = ({ isOpen, onClose, onSave, initialData, existingApns = [] }) => {
   const { t } = useLanguage();
   
   // Form State
@@ -24,8 +25,8 @@ export const ApnAddModal: React.FC<ApnAddModalProps> = ({ isOpen, onClose, onSav
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  // Validation State
-  const [errors, setErrors] = useState<{ profileName?: boolean; apn?: boolean }>({});
+  // Validation State - Changed to string for custom messages
+  const [errors, setErrors] = useState<{ profileName?: string; apn?: string }>({});
 
   const PDP_OPTIONS = [
     { value: 'IP', name: 'IPv4' },
@@ -64,16 +65,31 @@ export const ApnAddModal: React.FC<ApnAddModalProps> = ({ isOpen, onClose, onSav
   }, [isOpen, initialData]);
 
   const validate = () => {
-    const newErrors: { profileName?: boolean; apn?: boolean } = {};
+    const newErrors: { profileName?: string; apn?: string } = {};
     let isValid = true;
 
     if (!profileName.trim()) {
-      newErrors.profileName = true;
+      newErrors.profileName = 'can not be empty.';
       isValid = false;
+    } else {
+      // Check duplicate Profile Name
+      const isNameDup = existingApns.some(item => item.name === profileName && item !== initialData);
+      if (isNameDup) {
+        newErrors.profileName = 'Profile Name already exists.';
+        isValid = false;
+      }
     }
+
     if (!apn.trim()) {
-      newErrors.apn = true;
+      newErrors.apn = 'can not be empty.';
       isValid = false;
+    } else {
+      // Check duplicate APN Name
+      const isApnDup = existingApns.some(item => item.apnName === apn && item !== initialData);
+      if (isApnDup) {
+        newErrors.apn = 'APN already exists.';
+        isValid = false;
+      }
     }
 
     setErrors(newErrors);
@@ -142,12 +158,12 @@ export const ApnAddModal: React.FC<ApnAddModalProps> = ({ isOpen, onClose, onSav
                     value={profileName}
                     onChange={(e) => {
                         setProfileName(e.target.value);
-                        if(errors.profileName) setErrors({...errors, profileName: false});
+                        if(errors.profileName) setErrors({...errors, profileName: undefined});
                     }}
                     className={`w-full border px-3 py-2 text-sm text-black outline-none transition-all rounded-[2px] bg-white ${errors.profileName ? 'border-red-500' : 'border-gray-300 focus:border-orange'}`}
                 />
                 {errors.profileName && (
-                    <p className="text-red-500 text-sm mt-1">can not be empty.</p>
+                    <p className="text-red-500 text-sm mt-1">{errors.profileName}</p>
                 )}
              </div>
           </div>
@@ -163,12 +179,12 @@ export const ApnAddModal: React.FC<ApnAddModalProps> = ({ isOpen, onClose, onSav
                     value={apn}
                     onChange={(e) => {
                         setApn(e.target.value);
-                        if(errors.apn) setErrors({...errors, apn: false});
+                        if(errors.apn) setErrors({...errors, apn: undefined});
                     }}
                     className={`w-full border px-3 py-2 text-sm text-black outline-none transition-all rounded-[2px] bg-white ${errors.apn ? 'border-red-500' : 'border-gray-300 focus:border-orange'}`}
                 />
                 {errors.apn && (
-                    <p className="text-red-500 text-sm mt-1">can not be empty.</p>
+                    <p className="text-red-500 text-sm mt-1">{errors.apn}</p>
                 )}
              </div>
           </div>

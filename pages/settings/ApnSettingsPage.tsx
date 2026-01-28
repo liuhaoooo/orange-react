@@ -410,6 +410,7 @@ export const ApnSettingsPage: React.FC = () => {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveModal}
         initialData={editingProfile}
+        existingApns={apnList}
     />
 
     <ConfirmModal 
