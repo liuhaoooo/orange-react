@@ -105,7 +105,7 @@ export const ApnSettingsPage: React.FC = () => {
                     // edit_flag: '0' -> Auto, '1' -> Manual
                     setApnMode(def.edit_flag === '0' ? 'auto' : 'manual');
                 } else if (listRes.apn_list.length > 0) {
-                    // Fallback if no default
+                    // Fallback if no default, pick first
                     setSelectedProfile(listRes.apn_list[0]);
                     setApnMode(listRes.apn_list[0].edit_flag === '0' ? 'auto' : 'manual');
                 }
@@ -126,14 +126,16 @@ export const ApnSettingsPage: React.FC = () => {
       const targetFlag = mode === 'auto' ? '0' : '1';
       const available = apnList.filter(p => p.edit_flag === targetFlag);
       
-      // If current profile doesn't match new mode, switch to first available
-      if (selectedProfile && selectedProfile.edit_flag !== targetFlag) {
-          if (available.length > 0) {
-              setSelectedProfile(available[0]);
-          } else {
-              // If no profile available for this mode
-              setSelectedProfile(null); 
-          }
+      // Try to find default profile for this mode (default_flag === '1')
+      const def = available.find(p => p.default_flag === '1');
+      
+      if (def) {
+          setSelectedProfile(def);
+      } else if (available.length > 0) {
+          setSelectedProfile(available[0]);
+      } else {
+          // No profile available for this mode
+          setSelectedProfile(null); 
       }
   };
 
@@ -171,11 +173,15 @@ export const ApnSettingsPage: React.FC = () => {
       setApnList(updatedList);
       setIsDeleteConfirmOpen(false);
 
-      // Determine next selection
+      // Determine next selection based on default_flag or availability
       const targetFlag = apnMode === 'auto' ? '0' : '1';
       const available = updatedList.filter(p => p.edit_flag === targetFlag);
       
-      if (available.length > 0) {
+      const def = available.find(p => p.default_flag === '1');
+      
+      if (def) {
+          setSelectedProfile(def);
+      } else if (available.length > 0) {
           setSelectedProfile(available[0]);
       } else {
           setSelectedProfile(null);
@@ -190,12 +196,14 @@ export const ApnSettingsPage: React.FC = () => {
           setSelectedProfile(newApn);
       } else {
           // Add Mode
-          // Logic: If there are NO editable profiles (edit_flag: "1"), this new one becomes default (default_flag: "1")
-          const hasManualProfiles = apnList.some(p => p.edit_flag === '1');
+          // Check if we already have manual profiles
+          const existingManual = apnList.filter(p => p.edit_flag === '1');
+          const isFirstManual = existingManual.length === 0;
           
+          // If it's the first manual APN, it must be the default (default_flag: "1")
           const profileToAdd: ApnProfile = {
               ...newApn,
-              default_flag: hasManualProfiles ? '0' : '1'
+              default_flag: isFirstManual ? '1' : '0'
           };
 
           const updatedList = [...apnList, profileToAdd];
@@ -206,10 +214,8 @@ export const ApnSettingsPage: React.FC = () => {
               setApnMode('manual');
           }
 
-          // If this became the default (first one), select it
-          if (!hasManualProfiles) {
-              setSelectedProfile(profileToAdd);
-          }
+          // Select the new profile (especially if it's the first one, satisfying the default_flag='1' rule)
+          setSelectedProfile(profileToAdd);
       }
   };
 
@@ -226,6 +232,9 @@ export const ApnSettingsPage: React.FC = () => {
   };
 
   const isManualMode = apnMode === 'manual';
+  
+  // Disable Delete if not in manual mode OR if no profile is selected
+  const isDeleteDisabled = !isManualMode || !selectedProfile;
   
   if (loading) {
       return (
@@ -308,8 +317,8 @@ export const ApnSettingsPage: React.FC = () => {
             </button>
             <button 
                 onClick={handleDeleteApnClick}
-                disabled={!isManualMode || !selectedProfile}
-                className={`flex items-center justify-center font-bold text-sm py-2 px-6 rounded-[2px] shadow-sm border border-transparent transition-colors ${(!isManualMode || !selectedProfile) ? 'bg-[#f2f2f2] text-gray-400 cursor-not-allowed' : 'bg-[#f2f2f2] text-black hover:bg-gray-200'}`}
+                disabled={isDeleteDisabled}
+                className={`flex items-center justify-center font-bold text-sm py-2 px-6 rounded-[2px] shadow-sm border border-transparent transition-colors ${isDeleteDisabled ? 'bg-[#f2f2f2] text-gray-400 cursor-not-allowed' : 'bg-[#f2f2f2] text-black hover:bg-gray-200'}`}
             >
                 <Trash2 size={16} className="me-2" />
                 Delete APN
