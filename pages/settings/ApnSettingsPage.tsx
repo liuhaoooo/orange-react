@@ -307,26 +307,30 @@ export const ApnSettingsPage: React.FC = () => {
         
         {/* NAT */}
         <SectionRow label="NAT">
-            <RadioGroup 
-                value={natEnabled} 
-                onChange={setNatEnabled}
-                options={[
-                    { label: 'Enabled', value: true },
-                    { label: 'Disabled', value: false }
-                ]}
-            />
+            <div className="flex justify-end">
+                <RadioGroup 
+                    value={natEnabled} 
+                    onChange={setNatEnabled}
+                    options={[
+                        { label: 'Enabled', value: true },
+                        { label: 'Disabled', value: false }
+                    ]}
+                />
+            </div>
         </SectionRow>
 
         {/* APN Mode */}
         <SectionRow label="APN Mode">
-            <RadioGroup 
-                value={apnMode} 
-                onChange={handleModeChange}
-                options={[
-                    { label: 'Auto', value: 'auto' },
-                    { label: 'Manual', value: 'manual' }
-                ]}
-            />
+            <div className="flex justify-end">
+                <RadioGroup 
+                    value={apnMode} 
+                    onChange={handleModeChange}
+                    options={[
+                        { label: 'Auto', value: 'auto' },
+                        { label: 'Manual', value: 'manual' }
+                    ]}
+                />
+            </div>
         </SectionRow>
 
         {/* MTU */}
