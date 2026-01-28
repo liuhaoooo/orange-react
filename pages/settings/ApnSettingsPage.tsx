@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, AlertTriangle, Plus, Edit2, Trash2, Save, Loader2 } from 'lucide-react';
-import { fetchApnSettings, fetchApnList, ApnProfile } from '../../utils/api';
+import { fetchApnSettings, fetchApnList, ApnProfile, saveApnConfig, saveApnList, ApnConfigResponse } from '../../utils/api';
 import { ApnAddModal } from '../../components/ApnAddModal';
 import { ConfirmModal } from '../../components/ConfirmModal';
 import { useLanguage } from '../../utils/i18nContext';
+import { useAlert } from '../../utils/AlertContext';
 
 // Reusable Form Components
 const SectionRow = ({ label, children, required = false }: { label: string; children: React.ReactNode; required?: boolean }) => (
@@ -64,11 +65,14 @@ const RadioGroup = ({ options, value, onChange }: { options: { label: string; va
 
 export const ApnSettingsPage: React.FC = () => {
   const { t } = useLanguage();
+  const { showAlert } = useAlert();
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   
   // Data State
   const [apnList, setApnList] = useState<ApnProfile[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<ApnProfile | null>(null);
+  const [initialConfig, setInitialConfig] = useState<ApnConfigResponse | null>(null);
 
   // Form State
   const [natEnabled, setNatEnabled] = useState(false);
@@ -90,6 +94,7 @@ export const ApnSettingsPage: React.FC = () => {
             if (configRes && configRes.success) {
                 setNatEnabled(configRes.apnNatName === '1');
                 setMtu(configRes.apnMTU || '1500');
+                setInitialConfig(configRes);
             }
 
             // Fetch List (CMD 248)
@@ -219,6 +224,50 @@ export const ApnSettingsPage: React.FC = () => {
       }
   };
 
+  const handleSave = async () => {
+      if (!selectedProfile) {
+          showAlert(t('emptyError') + ' (Profile Name)', 'warning');
+          return;
+      }
+
+      setSaving(true);
+
+      // 1. Prepare APN List payload (CMD 248)
+      // Set default_flag to "1" for the selected APN, "0" for others
+      const listPayload = apnList.map(p => ({
+          ...p,
+          default_flag: p.name === selectedProfile.name ? '1' : '0'
+      }));
+
+      // 2. Prepare APN Config payload (CMD 213)
+      // selectType is current active APN ipVersion or fallback to previous
+      const selectType = selectedProfile.ipVersion || initialConfig?.selectType || 'IPV4';
+      
+      const configPayload = {
+          apnNatName: natEnabled ? '1' : '0',
+          apnMTU: mtu,
+          selectType: selectType
+      };
+
+      try {
+          const [configRes, listRes] = await Promise.all([
+              saveApnConfig(configPayload),
+              saveApnList(listPayload)
+          ]);
+
+          if ((configRes.success || configRes.success === undefined) && (listRes.success || listRes.success === undefined)) {
+              showAlert('Settings saved successfully.', 'success');
+          } else {
+              showAlert('Failed to save some settings.', 'error');
+          }
+      } catch (e) {
+          console.error(e);
+          showAlert('An error occurred while saving settings.', 'error');
+      } finally {
+          setSaving(false);
+      }
+  };
+
   const getFilteredProfiles = () => {
       const targetFlag = apnMode === 'auto' ? '0' : '1';
       return apnList.filter(p => p.edit_flag === targetFlag);
@@ -343,8 +392,12 @@ export const ApnSettingsPage: React.FC = () => {
 
         {/* Footer Actions */}
         <div className="flex justify-end pt-8">
-            <button className="bg-white border-2 border-black text-black hover:bg-black hover:text-white font-bold py-2.5 px-12 text-sm transition-all rounded-[2px] shadow-sm uppercase tracking-wide flex items-center">
-                <Save size={18} className="me-2" />
+            <button 
+                onClick={handleSave}
+                disabled={saving}
+                className="bg-white border-2 border-black text-black hover:bg-black hover:text-white font-bold py-2.5 px-12 text-sm transition-all rounded-[2px] shadow-sm uppercase tracking-wide flex items-center"
+            >
+                {saving ? <Loader2 className="animate-spin w-4 h-4 me-2" /> : <Save size={18} className="me-2" />}
                 Save
             </button>
         </div>

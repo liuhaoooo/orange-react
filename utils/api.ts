@@ -454,3 +454,9 @@ export const startSystemUpgrade = async (fileName: string) => {
 // APN Settings
 export const fetchApnSettings = async () => apiRequest<ApnConfigResponse>(213, 'GET', { subcmd: 3 });
 export const fetchApnList = async () => apiRequest<ApnListResponse>(248, 'GET', { subcmd: 3 });
+
+export const saveApnConfig = async (data: { apnNatName: string; apnMTU: string; selectType: string }) =>
+  apiRequest(213, 'POST', { subcmd: 3, ...data });
+
+export const saveApnList = async (apn_list: ApnProfile[]) =>
+  apiRequest(248, 'POST', { apn_list });
