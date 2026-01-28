@@ -16,10 +16,10 @@ export const ApnAddModal: React.FC<ApnAddModalProps> = ({ isOpen, onClose, onSav
   const { t } = useLanguage();
   
   // Form State
-  const [pdpType, setPdpType] = useState('IPV4');
+  const [pdpType, setPdpType] = useState('IP');
   const [profileName, setProfileName] = useState('');
   const [apn, setApn] = useState('');
-  const [authType, setAuthType] = useState('1'); // Default to PAP ('1') based on design
+  const [authType, setAuthType] = useState('0'); 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -27,11 +27,23 @@ export const ApnAddModal: React.FC<ApnAddModalProps> = ({ isOpen, onClose, onSav
   // Validation State
   const [errors, setErrors] = useState<{ profileName?: boolean; apn?: boolean }>({});
 
+  const PDP_OPTIONS = [
+    { value: 'IP', name: 'IPv4' },
+    { value: 'IPV6', name: 'IPv6' },
+    { value: 'IPV4V6', name: 'IPv4&v6' },
+  ];
+
+  const AUTH_OPTIONS = [
+    { value: '0', name: 'NONE' }, // Matches requirement: this.$t('DOC_tzapn_none') -> NONE
+    { value: '1', name: 'PAP' },
+    { value: '2', name: 'CHAP' },
+  ];
+
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
         // Edit Mode: Pre-fill data
-        setPdpType(initialData.ipVersion || 'IPV4');
+        setPdpType(initialData.ipVersion || 'IP');
         setProfileName(initialData.name || '');
         setApn(initialData.apnName || '');
         setAuthType(initialData.selectAuthtication || '0');
@@ -39,10 +51,10 @@ export const ApnAddModal: React.FC<ApnAddModalProps> = ({ isOpen, onClose, onSav
         setPassword(initialData.apnUserPassword || '');
       } else {
         // Add Mode: Reset form
-        setPdpType('IPV4');
+        setPdpType('IP');
         setProfileName('');
         setApn('');
-        setAuthType('1'); // 1 = PAP
+        setAuthType('0');
         setUsername('');
         setPassword('');
       }
@@ -111,9 +123,9 @@ export const ApnAddModal: React.FC<ApnAddModalProps> = ({ isOpen, onClose, onSav
                     onChange={(e) => setPdpType(e.target.value)}
                     className="w-full border border-gray-200 px-3 py-2 text-sm text-gray-600 outline-none focus:border-orange transition-all rounded-[2px] appearance-none bg-white cursor-pointer"
                 >
-                    <option value="IPV4">IPV4</option>
-                    <option value="IPV6">IPV6</option>
-                    <option value="IPV4&IPV6">IPV4 & IPv6</option>
+                    {PDP_OPTIONS.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.name}</option>
+                    ))}
                 </select>
                 <ChevronDown size={16} className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400" />
              </div>
@@ -170,9 +182,9 @@ export const ApnAddModal: React.FC<ApnAddModalProps> = ({ isOpen, onClose, onSav
                     onChange={(e) => setAuthType(e.target.value)}
                     className="w-full border border-gray-200 px-3 py-2 text-sm text-gray-600 outline-none focus:border-orange transition-all rounded-[2px] appearance-none bg-white cursor-pointer"
                 >
-                    <option value="0">NONE</option>
-                    <option value="1">PAP</option>
-                    <option value="2">CHAP</option>
+                    {AUTH_OPTIONS.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.name}</option>
+                    ))}
                 </select>
                 <ChevronDown size={16} className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400" />
              </div>
