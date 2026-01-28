@@ -72,11 +72,11 @@ export const NetworkModePage: React.FC = () => {
   }
 
   return (
-    <div className="w-full animate-fade-in">
+    <div className="w-full animate-fade-in py-2">
       {/* Form Section */}
-      <div className="py-6">
+      <div className="space-y-0.5">
           <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100 last:border-0">
-             <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
+             <div className="w-full sm:w-1/3 mb-1 sm:mb-0">
                 <label className="font-bold text-sm text-black">Network Mode</label>
              </div>
              <div className="w-full sm:w-2/3">
@@ -99,7 +99,7 @@ export const NetworkModePage: React.FC = () => {
        </div>
 
        {/* Footer Actions */}
-       <div className="flex justify-end pt-12">
+       <div className="flex justify-end pt-8">
             <button 
                 onClick={handleSave}
                 disabled={saving}

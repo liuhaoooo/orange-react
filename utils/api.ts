@@ -1,4 +1,3 @@
-
 // API Configuration
 const API_BASE_URL = '/cgi-bin/http.cgi'; 
 
@@ -473,3 +472,8 @@ export const saveApnList = async (apn_list: ApnProfile[]) =>
 // Network Mode
 export const fetchNetworkMode = async () => apiRequest<NetworkModeResponse>(256, 'GET');
 export const setNetworkMode = async (networkMode: string) => apiRequest(256, 'POST', { networkMode });
+
+// Network Configuration
+export const fetchNetworkConfigInfo = async () => apiRequest<{ flightMode: string; success: boolean }>(218, 'GET');
+export const setFlightMode = async (flightMode: '0' | '1') => apiRequest(226, 'POST', { flightMode });
+export const searchNetwork = async () => apiRequest(288, 'POST');
