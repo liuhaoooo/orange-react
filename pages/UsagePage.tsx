@@ -6,6 +6,7 @@ import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { resetStatistics, fetchStatusInfo } from '../utils/api';
+import clientAreaSvg from '../assets/client-area.svg';
 
 interface UsagePageProps {
   onOpenSettings: () => void;
@@ -238,11 +239,10 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
             <div className="bg-[#f2f2f2] border border-gray-200 p-6 flex flex-col items-center text-center h-full min-h-[450px]">
                 
                 <div className="w-full max-w-[200px] mb-8 mt-12 relative">
-                     {/* Placeholder for the illustration */}
                      <img 
-                        src="https://cdn-icons-png.flaticon.com/512/4233/4233839.png" 
+                        src={clientAreaSvg} 
                         alt="Client Area" 
-                        className="w-full h-auto opacity-90 grayscale"
+                        className="w-full h-auto"
                      />
                      <div className="absolute -top-4 -right-4 bg-orange text-white p-2 rounded-full">
                         <div className="w-2 h-2 bg-white rounded-full"></div>
