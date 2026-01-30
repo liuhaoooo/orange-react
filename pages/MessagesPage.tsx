@@ -10,6 +10,7 @@ import { NewMessageModal } from '../components/NewMessageModal';
 import { RedirectWarningModal, RedirectConfigModal } from '../components/RedirectMessagesModals';
 import { MessageSettingsModal } from '../components/MessageSettingsModal';
 import { useAlert } from '../utils/AlertContext';
+import messagesBgSvg from '../assets/messages-bg.svg';
 
 interface MessagesPageProps {
   onOpenSettings: () => void;
@@ -375,16 +376,26 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
 
   if (!isLoggedIn) {
       return (
-          <div className="w-full h-[500px] flex items-center justify-center bg-white border border-gray-200 shadow-sm">
-             <div className="text-center p-8">
-                 <p className="mb-4 font-bold text-lg">{t('loginAsAdminMsg')}</p>
-                 <button 
-                    onClick={onOpenSettings}
-                    className="bg-orange hover:bg-orange-dark text-black font-bold py-2 px-6 transition-colors"
-                 >
-                    {t('loginAsAdminBtn')}
-                 </button>
-             </div>
+          <div className="w-full">
+            <h1 className="text-3xl font-bold text-black mb-6">{t('messages')}</h1>
+            <div className="w-full h-[500px] flex items-center justify-center bg-white border border-gray-200 shadow-sm flex-col">
+               <div className="text-center p-8 flex flex-col items-center">
+                   <div className="w-full max-w-[280px] mb-6 relative">
+                         <img 
+                            src={messagesBgSvg} 
+                            alt="Messages" 
+                            className="w-full h-auto"
+                         />
+                   </div>
+                   <p className="mb-8 font-bold text-lg text-black">{t('loginAsAdminMsg')}</p>
+                   <button 
+                      onClick={onOpenSettings}
+                      className="bg-orange hover:bg-orange-dark text-black font-bold py-2 px-8 transition-colors w-full max-w-[200px]"
+                   >
+                      {t('loginAsAdminBtn')}
+                   </button>
+               </div>
+            </div>
           </div>
       )
   }
