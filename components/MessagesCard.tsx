@@ -6,6 +6,7 @@ import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { Link, useNavigate } from '../utils/GlobalStateContext';
 import { fetchSmsList, parseSmsList, SmsMessage } from '../utils/api';
+import messagesBgSvg from '../assets/messages-bg.svg';
 
 interface MessagesCardProps {
   onOpenLogin: () => void;
@@ -86,28 +87,14 @@ export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
     return (
       <Card className="h-full">
         <CardHeader title={t('messages')} />
-        <div className="flex-1 flex flex-col items-center justify-center p-6 space-y-10">
-           {/* Graphics: Two Bubbles */}
-           <div className="relative w-full h-32 flex justify-center items-center">
-             {/* Black bubble on left */}
-             <div className="absolute left-1/4 sm:left-1/3 top-0 transform translate-y-4">
-               <MessageSquare 
-                  className="w-24 h-24 text-black fill-black transform -scale-x-100" 
-                  strokeWidth={1}
-                />
-                <div className="absolute top-[30%] left-[20%] w-[60%] h-[10%] bg-white/30 rounded-full"></div>
-                <div className="absolute top-[55%] left-[20%] w-[40%] h-[10%] bg-white/30 rounded-full"></div>
-             </div>
-             
-             {/* Orange bubble on right */}
-             <div className="absolute right-1/4 sm:right-1/3 bottom-0 transform -translate-y-2">
-                <MessageSquare 
-                  className="w-24 h-24 text-orange fill-orange" 
-                  strokeWidth={1}
-                />
-                <div className="absolute top-[30%] left-[20%] w-[60%] h-[10%] bg-white/30 rounded-full"></div>
-                <div className="absolute top-[55%] left-[20%] w-[40%] h-[10%] bg-white/30 rounded-full"></div>
-             </div>
+        <div className="flex-1 flex flex-col items-center justify-center p-6 space-y-10 relative">
+           
+           <div className="w-full max-w-[280px] mb-6 relative">
+                 <img 
+                    src={messagesBgSvg} 
+                    alt="Messages" 
+                    className="w-full h-auto"
+                 />
            </div>
 
            <div className="text-center w-full px-4 mt-8">
