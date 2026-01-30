@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
-import { Delete, Cpu, Smartphone, Tablet, Signal } from 'lucide-react';
+import { Delete } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
-import { Link } from '../utils/GlobalStateContext';
+import servicesBgSvg from '../assets/services-bg.svg';
 
 interface ServicesPageProps {
   onOpenSettings: () => void;
@@ -68,54 +68,20 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenSettings, onSh
     { id: 'google', label: t('googleSearch') },
   ];
 
-  // Illustration for Lock/Login State
-  const LockStateIllustration = () => (
-    <div className="relative w-full h-40 flex justify-center items-center mb-8">
-        {/* SIM Card (Top Center) */}
-        <div className="absolute top-0 transform -translate-y-2 flex flex-col items-center z-10">
-            <Signal className="w-12 h-12 text-orange mb-1 rotate-180 transform opacity-50" strokeWidth={3} />
-            <div className="w-20 h-14 bg-black rounded-md flex items-center justify-center border-2 border-white shadow-md relative">
-                 <Cpu className="text-white w-10 h-10" />
-                 {/* Lock overlay if locked */}
-                 <div className="absolute -bottom-2 -right-2 bg-orange p-1 rounded-sm border border-white">
-                     <div className="w-3 h-4 border-2 border-white rounded-t-lg bg-transparent mx-auto mb-0.5"></div>
-                     <div className="w-4 h-3 bg-white rounded-sm"></div>
-                 </div>
-            </div>
-            {/* Signal rays downwards */}
-            <div className="flex space-x-6 mt-2">
-                 <div className="w-1 h-1 bg-orange rounded-full animate-ping"></div>
-                 <div className="w-1 h-1 bg-orange rounded-full animate-ping delay-75"></div>
-                 <div className="w-1 h-1 bg-orange rounded-full animate-ping delay-150"></div>
-            </div>
-        </div>
-        
-        {/* Devices (Bottom) */}
-        <div className="absolute bottom-0 flex justify-between w-64 items-end px-2">
-             <div className="flex flex-col items-center transform -rotate-6">
-                <Smartphone className="w-14 h-24 text-[#e8ae79] fill-[#e8ae79]" strokeWidth={1} />
-                <div className="w-6 h-16 bg-[#e8ae79] opacity-30 absolute bottom-0 -z-10 transform skew-x-12"></div>
-             </div>
-             
-             <div className="flex flex-col items-center z-20">
-                <Smartphone className="w-12 h-20 text-black fill-white border-2 border-black rounded-lg" strokeWidth={2} />
-             </div>
-
-             <div className="flex flex-col items-center transform rotate-6">
-                <Tablet className="w-20 h-16 text-[#8a6d55] fill-[#8a6d55]" strokeWidth={1} />
-             </div>
-        </div>
-    </div>
-  );
-
   // Locked State View (Priority over USSD)
   if (isLoggedIn && (isPukLocked || isPinLocked)) {
     return (
         <div className="w-full">
              <h1 className="text-3xl font-bold text-black mb-6">{t('services')}</h1>
              <div className="w-full min-h-[500px] flex items-center justify-center bg-white border border-gray-200 shadow-sm flex-col">
-                 <div className="text-center p-8 max-w-md w-full">
-                     <LockStateIllustration />
+                 <div className="text-center p-8 max-w-md w-full flex flex-col items-center">
+                     <div className="w-full max-w-[280px] mb-8 relative">
+                         <img 
+                            src={servicesBgSvg} 
+                            alt="Services Locked" 
+                            className="w-full h-auto"
+                         />
+                     </div>
                      
                      <p className="mb-8 text-black text-base leading-tight">
                          {t('ussdLoginMsg')}
@@ -138,12 +104,20 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenSettings, onSh
       return (
           <div className="w-full">
              <h1 className="text-3xl font-bold text-black mb-6">{t('services')}</h1>
-             <div className="w-full min-h-[500px] flex items-center justify-center bg-white border border-gray-200 shadow-sm">
-                 <div className="text-center p-8">
-                     <p className="mb-4 font-bold text-lg">{t('ussdLoginMsg')}</p>
+             <div className="w-full min-h-[500px] flex items-center justify-center bg-white border border-gray-200 shadow-sm flex-col">
+                 <div className="text-center p-8 max-w-md w-full flex flex-col items-center">
+                     <div className="w-full max-w-[280px] mb-8 relative">
+                         <img 
+                            src={servicesBgSvg} 
+                            alt="Services Login" 
+                            className="w-full h-auto"
+                         />
+                     </div>
+
+                     <p className="mb-8 font-bold text-lg">{t('ussdLoginMsg')}</p>
                      <button 
                         onClick={onOpenSettings}
-                        className="bg-orange hover:bg-orange-dark text-black font-bold py-2 px-6 transition-colors"
+                        className="bg-orange hover:bg-orange-dark text-black font-bold py-2 px-8 transition-colors w-full max-w-[200px]"
                      >
                         {t('loginAsAdminBtn')}
                      </button>

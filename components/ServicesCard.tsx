@@ -4,7 +4,7 @@ import { Card, CardHeader } from './UIComponents';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { Link } from '../utils/GlobalStateContext';
-import { Cpu, Smartphone, Tablet, Signal } from 'lucide-react';
+import servicesBgSvg from '../assets/services-bg.svg';
 
 interface ServicesCardProps {
   onOpenLogin?: () => void;
@@ -35,52 +35,20 @@ export const ServicesCard: React.FC<ServicesCardProps> = ({
     { id: 'google', label: t('googleSearch') },
   ];
 
-  // Illustration reused from ServicesPage
-  const LockStateIllustration = () => (
-    <div className="relative w-full h-32 flex justify-center items-center mb-6">
-        {/* SIM Card (Top Center) */}
-        <div className="absolute top-0 transform -translate-y-2 flex flex-col items-center z-10">
-            <Signal className="w-10 h-10 text-orange mb-1 rotate-180 transform opacity-50" strokeWidth={3} />
-            <div className="w-16 h-12 bg-black rounded-md flex items-center justify-center border-2 border-white shadow-md relative">
-                 <Cpu className="text-white w-8 h-8" />
-                 {/* Lock overlay if locked */}
-                 <div className="absolute -bottom-2 -right-2 bg-orange p-0.5 rounded-sm border border-white">
-                     <div className="w-2.5 h-3.5 border-2 border-white rounded-t-lg bg-transparent mx-auto mb-0.5"></div>
-                     <div className="w-3.5 h-2.5 bg-white rounded-sm"></div>
-                 </div>
-            </div>
-            {/* Signal rays downwards */}
-            <div className="flex space-x-4 mt-2">
-                 <div className="w-1 h-1 bg-orange rounded-full animate-ping"></div>
-                 <div className="w-1 h-1 bg-orange rounded-full animate-ping delay-75"></div>
-                 <div className="w-1 h-1 bg-orange rounded-full animate-ping delay-150"></div>
-            </div>
-        </div>
-        
-        {/* Devices (Bottom) */}
-        <div className="absolute bottom-0 flex justify-between w-56 items-end px-2">
-             <div className="flex flex-col items-center transform -rotate-6">
-                <Smartphone className="w-12 h-20 text-[#e8ae79] fill-[#e8ae79]" strokeWidth={1} />
-                <div className="w-5 h-14 bg-[#e8ae79] opacity-30 absolute bottom-0 -z-10 transform skew-x-12"></div>
-             </div>
-             
-             <div className="flex flex-col items-center z-20">
-                <Smartphone className="w-10 h-16 text-black fill-white border-2 border-black rounded-lg" strokeWidth={2} />
-             </div>
-
-             <div className="flex flex-col items-center transform rotate-6">
-                <Tablet className="w-16 h-12 text-[#8a6d55] fill-[#8a6d55]" strokeWidth={1} />
-             </div>
-        </div>
-    </div>
-  );
-
   // State: Not Logged In
   if (!isLoggedIn) {
     return (
       <Card className={`overflow-hidden flex flex-col ${className}`}>
         <CardHeader title={t('services')} />
         <div className="flex-1 bg-white flex flex-col items-center p-6 text-center justify-center">
+             <div className="w-full max-w-[200px] mb-6 relative">
+                 <img 
+                    src={servicesBgSvg} 
+                    alt="Services" 
+                    className="w-full h-auto"
+                 />
+             </div>
+             
              <p className="text-black mb-8 text-base leading-tight px-2">
                {t('ussdLoginMsg')}
              </p>
@@ -110,7 +78,13 @@ export const ServicesCard: React.FC<ServicesCardProps> = ({
         <Card className={`overflow-hidden flex flex-col ${className}`}>
             <CardHeader title={t('services')} />
             <div className="flex-1 bg-white flex flex-col items-center p-6 text-center justify-center">
-                 <LockStateIllustration />
+                 <div className="w-full max-w-[200px] mb-6 relative">
+                     <img 
+                        src={servicesBgSvg} 
+                        alt="Services Locked" 
+                        className="w-full h-auto"
+                     />
+                 </div>
                  <p className="text-black mb-6 text-base leading-tight px-2">
                    {t('ussdLoginMsg')}
                  </p>
