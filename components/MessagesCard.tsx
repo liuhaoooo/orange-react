@@ -6,7 +6,7 @@ import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { Link, useNavigate } from '../utils/GlobalStateContext';
 import { fetchSmsList, parseSmsList, SmsMessage } from '../utils/api';
-import messagesBgSvg from '../assets/messages-bg.svg';
+// import messagesBgSvg from '../assets/messages-bg.svg';
 
 interface MessagesCardProps {
   onOpenLogin: () => void;
@@ -91,7 +91,7 @@ export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
            
            <div className="w-full max-w-[280px] mb-6 relative">
                  <img 
-                    src={messagesBgSvg} 
+                    src={null} 
                     alt="Messages" 
                     className="w-full h-auto"
                  />

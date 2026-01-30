@@ -6,7 +6,7 @@ import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { resetStatistics, fetchStatusInfo } from '../utils/api';
-import clientAreaSvg from '../assets/client-area.svg';
+// import clientAreaSvg from '../assets/client-area.svg';
 
 interface UsagePageProps {
   onOpenSettings: () => void;
@@ -240,7 +240,7 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
                 
                 <div className="w-full max-w-[200px] mb-8 mt-12 relative">
                      <img 
-                        src={clientAreaSvg} 
+                        src={null} 
                         alt="Client Area" 
                         className="w-full h-auto"
                      />

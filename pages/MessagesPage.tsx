@@ -10,7 +10,7 @@ import { NewMessageModal } from '../components/NewMessageModal';
 import { RedirectWarningModal, RedirectConfigModal } from '../components/RedirectMessagesModals';
 import { MessageSettingsModal } from '../components/MessageSettingsModal';
 import { useAlert } from '../utils/AlertContext';
-import messagesBgSvg from '../assets/messages-bg.svg';
+// import messagesBgSvg from '../assets/messages-bg.svg';
 
 interface MessagesPageProps {
   onOpenSettings: () => void;
@@ -382,7 +382,7 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
                <div className="text-center p-8 flex flex-col items-center">
                    <div className="w-full max-w-[280px] mb-6 relative">
                          <img 
-                            src={messagesBgSvg} 
+                            src={null} 
                             alt="Messages" 
                             className="w-full h-auto"
                          />
