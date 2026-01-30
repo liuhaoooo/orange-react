@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Delete } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
@@ -108,7 +107,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenSettings, onSh
                  <div className="text-center p-8 max-w-md w-full flex flex-col items-center">
                      <div className="w-full max-w-[280px] mb-8 relative">
                          <img 
-                            src={servicesBgSvg} 
+                            src={null} 
                             alt="Services Login" 
                             className="w-full h-auto"
                          />
