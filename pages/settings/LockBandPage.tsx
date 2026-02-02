@@ -1,9 +1,10 @@
-
-import React, { useState } from 'react';
-import { Save, Check } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Save, Check, Loader2 } from 'lucide-react';
 import { SquareSwitch } from '../../components/UIComponents';
+import { fetchLockBandSettings, saveLockBandSettings, LockBandSettings } from '../../utils/api';
+import { useAlert } from '../../utils/AlertContext';
 
-// Custom Checkbox to match the screenshot (Black filled with white check)
+// Custom Checkbox
 const BandCheckbox = ({ label, checked, onChange }: { label: string; checked: boolean; onChange: () => void }) => (
   <div 
     className="flex items-center cursor-pointer select-none group"
@@ -17,20 +18,96 @@ const BandCheckbox = ({ label, checked, onChange }: { label: string; checked: bo
 );
 
 export const LockBandPage: React.FC = () => {
-  // Switch States
-  const [lock3g, setLock3g] = useState(true);
-  const [lock4g, setLock4g] = useState(true);
-  const [lock5g, setLock5g] = useState(true);
+  const { showAlert } = useAlert();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  // Band Selection States (Using simple arrays for this UI demo)
-  const [bands3g, setBands3g] = useState<string[]>(['Band1']);
-  const [bands4g, setBands4g] = useState<string[]>(['Band1', 'Band7', 'Band8', 'Band28', 'Band38', 'Band41', 'Band43']);
-  const [bands5g, setBands5g] = useState<string[]>(['Band1', 'Band3', 'Band7', 'Band40', 'Band78']);
+  // Available Bands (derived from all_band_X)
+  const [all3g, setAll3g] = useState<string[]>([]);
+  const [all4g, setAll4g] = useState<string[]>([]);
+  const [all5g, setAll5g] = useState<string[]>([]);
 
-  // Data Definitions
-  const list3g = ['Band1', 'Band8'];
-  const list4g = ['Band1', 'Band3', 'Band7', 'Band8', 'Band20', 'Band28', 'Band38', 'Band41', 'Band42', 'Band43'];
-  const list5g = ['Band1', 'Band3', 'Band7', 'Band20', 'Band28', 'Band38', 'Band40', 'Band41', 'Band75', 'Band77', 'Band78'];
+  // Selected Bands (names of checked bands)
+  const [sel3g, setSel3g] = useState<string[]>([]);
+  const [sel4g, setSel4g] = useState<string[]>([]);
+  const [sel5g, setSel5g] = useState<string[]>([]);
+
+  // Switches
+  const [sw3g, setSw3g] = useState(false);
+  const [sw4g, setSw4g] = useState(false);
+  const [sw5g, setSw5g] = useState(false);
+
+  // Helper: Convert Hex String to Band Array
+  // Logic: "Read from back (right), 1st bit=1 -> Band1, 2nd bit=1 -> Band2..."
+  const hexToBands = (hex?: string): string[] => {
+    if (!hex || hex === '0') return [];
+    try {
+        let n = BigInt('0x' + hex);
+        const bands: string[] = [];
+        let index = 1;
+        while (n > 0n) {
+            if ((n & 1n) === 1n) {
+                bands.push(`Band${index}`);
+            }
+            n >>= 1n;
+            index++;
+        }
+        // Sort numerically
+        return bands.sort((a, b) => {
+            const numA = parseInt(a.replace('Band', ''));
+            const numB = parseInt(b.replace('Band', ''));
+            return numA - numB;
+        });
+    } catch (e) {
+        console.error("Hex parse error for", hex, e);
+        return [];
+    }
+  };
+
+  // Helper: Convert Band Array to Hex String
+  const bandsToHex = (bands: string[]): string => {
+    if (bands.length === 0) return "0";
+    let n = 0n;
+    bands.forEach(band => {
+        const num = parseInt(band.replace('Band', ''), 10);
+        if (!isNaN(num) && num > 0) {
+            n |= (1n << BigInt(num - 1));
+        }
+    });
+    return n.toString(16).toUpperCase();
+  };
+
+  useEffect(() => {
+    const init = async () => {
+        try {
+            const res = await fetchLockBandSettings();
+            if (res && (res.success || res.success === undefined)) {
+                // Parse Available Bands
+                setAll3g(hexToBands(res.all_band_3g));
+                setAll4g(hexToBands(res.all_band_4g));
+                setAll5g(hexToBands(res.all_band_5g));
+
+                // Parse Selected Bands
+                // If lock_band_X is present, it defines selection. If missing/empty but switch is off, usually implies default or all.
+                // We use hexToBands on lock_band_X
+                setSel3g(hexToBands(res.lock_band_3g || res.all_band_3g));
+                setSel4g(hexToBands(res.lock_band_4g || res.all_band_4g));
+                setSel5g(hexToBands(res.lock_band_5g || res.all_band_5g));
+
+                // Parse Switches
+                setSw3g(res.band_3g_switch === '1');
+                setSw4g(res.band_4g_switch === '1');
+                setSw5g(res.band_5g_switch === '1');
+            }
+        } catch (e) {
+            console.error("Failed to fetch lock band settings", e);
+            showAlert("Failed to load settings", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+    init();
+  }, [showAlert]);
 
   const toggleBand = (band: string, currentList: string[], setter: React.Dispatch<React.SetStateAction<string[]>>) => {
     if (currentList.includes(band)) {
@@ -40,85 +117,131 @@ export const LockBandPage: React.FC = () => {
     }
   };
 
+  const handleSave = async () => {
+      setSaving(true);
+      
+      const payload: Partial<LockBandSettings> = {
+          band_3g_switch: sw3g ? '1' : '0',
+          band_4g_switch: sw4g ? '1' : '0',
+          band_5g_switch: sw5g ? '1' : '0',
+          
+          lock_band_3g: bandsToHex(sel3g),
+          lock_band_4g: bandsToHex(sel4g),
+          lock_band_5g: bandsToHex(sel5g)
+      };
+
+      try {
+          const res = await saveLockBandSettings(payload);
+          if (res && (res.success || res.result === 'success')) {
+              showAlert('Settings saved successfully.', 'success');
+          } else {
+              showAlert('Failed to save settings.', 'error');
+          }
+      } catch (e) {
+          console.error("Failed to save lock band", e);
+          showAlert('An error occurred.', 'error');
+      } finally {
+          setSaving(false);
+      }
+  };
+
+  if (loading) {
+      return (
+          <div className="w-full h-64 flex items-center justify-center">
+              <Loader2 className="animate-spin text-orange" size={40} />
+          </div>
+      );
+  }
+
   return (
     <div className="w-full animate-fade-in py-2">
       
       {/* 3G Section */}
+      {all3g.length > 0 && (
       <div className="mb-10">
           <div className="flex items-center justify-between mb-8">
              <label className="font-bold text-sm text-black">3G lock band switch</label>
-             <SquareSwitch isOn={lock3g} onChange={() => setLock3g(!lock3g)} />
+             <SquareSwitch isOn={sw3g} onChange={() => setSw3g(!sw3g)} />
           </div>
           
-          {lock3g && (
+          {sw3g && (
               <div className="animate-fade-in">
                 <h3 className="font-bold text-sm text-black mb-6">3G band</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-y-6 gap-x-4">
-                    {list3g.map(band => (
+                    {all3g.map(band => (
                         <BandCheckbox 
                             key={band} 
                             label={band} 
-                            checked={bands3g.includes(band)} 
-                            onChange={() => toggleBand(band, bands3g, setBands3g)} 
+                            checked={sel3g.includes(band)} 
+                            onChange={() => toggleBand(band, sel3g, setSel3g)} 
                         />
                     ))}
                 </div>
               </div>
           )}
       </div>
+      )}
 
       {/* 4G Section */}
+      {all4g.length > 0 && (
       <div className="mb-10">
           <div className="flex items-center justify-between mb-8">
              <label className="font-bold text-sm text-black">4G lock band switch</label>
-             <SquareSwitch isOn={lock4g} onChange={() => setLock4g(!lock4g)} />
+             <SquareSwitch isOn={sw4g} onChange={() => setSw4g(!sw4g)} />
           </div>
           
-          {lock4g && (
+          {sw4g && (
               <div className="animate-fade-in">
                 <h3 className="font-bold text-sm text-black mb-6">4G frequency band</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-y-6 gap-x-4">
-                    {list4g.map(band => (
+                    {all4g.map(band => (
                         <BandCheckbox 
                             key={band} 
                             label={band} 
-                            checked={bands4g.includes(band)} 
-                            onChange={() => toggleBand(band, bands4g, setBands4g)} 
+                            checked={sel4g.includes(band)} 
+                            onChange={() => toggleBand(band, sel4g, setSel4g)} 
                         />
                     ))}
                 </div>
               </div>
           )}
       </div>
+      )}
 
       {/* 5G Section */}
+      {all5g.length > 0 && (
       <div className="mb-10">
           <div className="flex items-center justify-between mb-8">
              <label className="font-bold text-sm text-black">5G lock band switch</label>
-             <SquareSwitch isOn={lock5g} onChange={() => setLock5g(!lock5g)} />
+             <SquareSwitch isOn={sw5g} onChange={() => setSw5g(!sw5g)} />
           </div>
           
-          {lock5g && (
+          {sw5g && (
               <div className="animate-fade-in">
                 <h3 className="font-bold text-sm text-black mb-6">5G frequency band</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-y-6 gap-x-4">
-                    {list5g.map(band => (
+                    {all5g.map(band => (
                         <BandCheckbox 
                             key={band} 
                             label={band} 
-                            checked={bands5g.includes(band)} 
-                            onChange={() => toggleBand(band, bands5g, setBands5g)} 
+                            checked={sel5g.includes(band)} 
+                            onChange={() => toggleBand(band, sel5g, setSel5g)} 
                         />
                     ))}
                 </div>
               </div>
           )}
       </div>
+      )}
 
       {/* Footer Actions */}
       <div className="flex justify-end pt-12 mt-4">
-            <button className="bg-white border-2 border-black text-black hover:bg-black hover:text-white font-bold py-2.5 px-12 text-sm transition-all rounded-[2px] shadow-sm uppercase tracking-wide flex items-center">
-                <Save size={18} className="me-2" />
+            <button 
+                onClick={handleSave}
+                disabled={saving}
+                className="bg-white border-2 border-black text-black hover:bg-black hover:text-white font-bold py-2.5 px-12 text-sm transition-all rounded-[2px] shadow-sm uppercase tracking-wide flex items-center"
+            >
+                {saving ? <Loader2 className="animate-spin w-4 h-4 me-2" /> : <Save size={18} className="me-2" />}
                 Save
             </button>
       </div>

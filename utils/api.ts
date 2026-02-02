@@ -307,6 +307,19 @@ export interface LinkDetectionSettings {
     [key: string]: any;
 }
 
+export interface LockBandSettings {
+    all_band_5g?: string;
+    lock_band_5g?: string;
+    all_band_4g?: string;
+    lock_band_4g?: string;
+    all_band_3g?: string;
+    lock_band_3g?: string;
+    band_5g_switch?: string;
+    band_4g_switch?: string;
+    band_3g_switch?: string;
+    [key: string]: any;
+}
+
 // Session Management
 export const setSessionId = (sid: string) => {
   if (sid) {
@@ -699,3 +712,7 @@ export const searchNetwork = async () => apiRequest(288, 'POST');
 // Link Detection
 export const fetchLinkDetectionSettings = async () => apiRequest<LinkDetectionSettings>(336, 'GET');
 export const saveLinkDetectionSettings = async (data: Partial<LinkDetectionSettings>) => apiRequest(336, 'POST', data);
+
+// Lock Band (CMD 161)
+export const fetchLockBandSettings = async () => apiRequest<LockBandSettings>(161, 'GET');
+export const saveLockBandSettings = async (data: Partial<LockBandSettings>) => apiRequest(161, 'POST', data);
