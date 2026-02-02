@@ -29,6 +29,7 @@ const InfoRow = ({ label, value }: { label: string, value: string }) => (
 export const DeviceInfoPage: React.FC = () => {
   const [data, setData] = useState<DeviceInfoResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [uptimeSeconds, setUptimeSeconds] = useState<number>(0);
 
   useEffect(() => {
     const loadData = async () => {
@@ -36,6 +37,13 @@ export const DeviceInfoPage: React.FC = () => {
         const res = await fetchDeviceInfo();
         if (res && (res.success || res.success === undefined)) {
              setData(res);
+             // Initialize uptime counter
+             if (res.uptime) {
+                 const sec = parseInt(res.uptime, 10);
+                 if (!isNaN(sec)) {
+                     setUptimeSeconds(sec);
+                 }
+             }
         }
       } catch (e) {
         console.error("Failed to fetch device info", e);
@@ -46,18 +54,25 @@ export const DeviceInfoPage: React.FC = () => {
     loadData();
   }, []);
 
-  // Helper to format time DD:HH:MM
-  const formatUptime = (secondsStr: string | undefined) => {
-      if (!secondsStr) return "00:00:00";
-      const totalSeconds = parseInt(secondsStr, 10);
-      if (isNaN(totalSeconds)) return "00:00:00";
+  // Auto-increment uptime every second
+  useEffect(() => {
+      const timer = setInterval(() => {
+          setUptimeSeconds(prev => prev + 1);
+      }, 1000);
+      return () => clearInterval(timer);
+  }, []);
+
+  // Helper to format time DD:HH:MM:SS
+  const formatUptime = (totalSeconds: number) => {
+      if (isNaN(totalSeconds)) return "00:00:00:00";
 
       const days = Math.floor(totalSeconds / 86400);
       const hours = Math.floor((totalSeconds % 86400) / 3600);
       const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
       
       const pad = (num: number) => num.toString().padStart(2, '0');
-      return `${pad(days)}:${pad(hours)}:${pad(minutes)}`;
+      return `${pad(days)}:${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
   };
 
   if (loading) {
@@ -76,8 +91,9 @@ export const DeviceInfoPage: React.FC = () => {
       <InfoSection title="Device & Version Information">
         <InfoRow label="Type" value={info.board_type || '-'} />
         <InfoRow label="Software Version" value={info.version || '-'} />
-        <InfoRow label="Running Time" value={formatUptime(info.uptime)} />
+        <InfoRow label="Running Time" value={formatUptime(uptimeSeconds)} />
         <InfoRow label="Hardware Version" value={info.hwversion || '-'} />
+        <InfoRow label="Average Load" value={info.cpuload || '-'} />
       </InfoSection>
 
       <InfoSection title="Modem Information">

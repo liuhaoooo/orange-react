@@ -56,6 +56,7 @@ export interface DeviceInfoResponse {
   version?: string;
   uptime?: string;
   hwversion?: string;
+  cpuload?: string;
   module_imei?: string;
   IMSI?: string;
   ICCID?: string;
@@ -63,6 +64,74 @@ export interface DeviceInfoResponse {
   module_softver?: string;
   module_hardver?: string;
   [key: string]: any;
+}
+
+export interface NetworkInfoResponse {
+    network_type_str?: string;
+    network_operator?: string;
+    PCI?: string;
+    PCI_5G?: string;
+    FREQ?: string;
+    FREQ_5G?: string;
+    ENODEBID?: string;
+    ENODEBID_5G?: string;
+    CELL_ID?: string;
+    CELL_ID_5G?: string;
+    CQI?: string;
+    CQI_5G?: string;
+    ul_mcs?: string;
+    ul_mcs_5g?: string;
+    dl_mcs?: string;
+    dl_mcs_5g?: string;
+    bandwidth?: string;
+    bandwidth_5g?: string;
+    PLMN?: string;
+    currentband?: string;
+    currentband_5g?: string;
+    rank_4g?: string;
+    rank_5g?: string;
+    bler_4g?: string;
+    bler_5g?: string;
+    RSRP?: string;
+    RSRP_5G?: string;
+    RSSI?: string;
+    RSSI_5G?: string;
+    RSRQ?: string;
+    RSRQ_5G?: string;
+    SINR?: string;
+    SINR_5G?: string;
+    ul64qam_support?: string;
+    dl256qam_support?: string;
+    max_ul_qam?: string;
+    max_ul_qam_5g?: string;
+    max_dl_qam?: string;
+    max_dl_qam_5g?: string;
+    signal_lvl?: string;
+    
+    // 3G Specific
+    RSCP?: string;
+    RSSI_3G?: string;
+    ECIO?: string;
+    CELL_ID_3G?: string;
+    uarfcn?: string;
+    PSC?: string;
+    currentband_3g?: string;
+    bandwidth3G?: string;
+
+    // APN Info
+    apn_name?: string;
+    wan_ip?: string;
+    wan_dns?: string;
+    wan_dns2?: string;
+    wan_ipv6_ip?: string;
+    wan_ipv6_dns?: string;
+    wan_ipv6_dns2?: string;
+    wan_rx_packets?: string;
+    wan_tx_packets?: string;
+    wan_rx_bytes?: string;
+    wan_tx_bytes?: string;
+    
+    [key: string]: any;
 }
 
 export interface ConnectionSettingsResponse {
@@ -528,6 +597,7 @@ export const saveMessageSettings = async (smsSw: string, dmCsca: string, maxSize
 export const setAutoUpgrade = async (autoValue: '0' | '1') => apiRequest(240, 'POST', { autoValue });
 export const fetchAccountLevel = async () => apiRequest<{ account_level: string }>(588, 'GET');
 export const fetchDeviceInfo = async () => apiRequest<DeviceInfoResponse>(1001, 'GET');
+export const fetchNetworkInfo = async () => apiRequest<NetworkInfoResponse>(1002, 'GET');
 
 // Requested Functions
 export const resetStatistics = async () => apiRequest(337, 'POST', { statisticsReset: '1', usedFlow: '0' });
