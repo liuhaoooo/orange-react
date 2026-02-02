@@ -317,6 +317,9 @@ export interface LockBandSettings {
     band_5g_switch?: string;
     band_4g_switch?: string;
     band_3g_switch?: string;
+    band_5g_mask?: string;
+    band_4g_mask?: string;
+    band_3g_mask?: string;
     [key: string]: any;
 }
 

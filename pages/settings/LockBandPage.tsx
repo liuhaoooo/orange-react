@@ -82,19 +82,17 @@ export const LockBandPage: React.FC = () => {
         try {
             const res = await fetchLockBandSettings();
             if (res && (res.success || res.success === undefined)) {
-                // Parse Available Bands
+                // Parse Available Bands using `all_band_X` as per instructions
                 setAll3g(hexToBands(res.all_band_3g));
                 setAll4g(hexToBands(res.all_band_4g));
                 setAll5g(hexToBands(res.all_band_5g));
 
-                // Parse Selected Bands
-                // If lock_band_X is present, it defines selection. If missing/empty but switch is off, usually implies default or all.
-                // We use hexToBands on lock_band_X
-                setSel3g(hexToBands(res.lock_band_3g || res.all_band_3g));
-                setSel4g(hexToBands(res.lock_band_4g || res.all_band_4g));
-                setSel5g(hexToBands(res.lock_band_5g || res.all_band_5g));
+                // Parse Selected Bands using `band_X_mask` as per instructions
+                setSel3g(hexToBands(res.band_3g_mask));
+                setSel4g(hexToBands(res.band_4g_mask));
+                setSel5g(hexToBands(res.band_5g_mask));
 
-                // Parse Switches
+                // Parse Switches using `band_X_switch` as per instructions
                 setSw3g(res.band_3g_switch === '1');
                 setSw4g(res.band_4g_switch === '1');
                 setSw5g(res.band_5g_switch === '1');
@@ -125,6 +123,7 @@ export const LockBandPage: React.FC = () => {
           band_4g_switch: sw4g ? '1' : '0',
           band_5g_switch: sw5g ? '1' : '0',
           
+          // Use lock_band_X for setting the lock, derived from current selection
           lock_band_3g: bandsToHex(sel3g),
           lock_band_4g: bandsToHex(sel4g),
           lock_band_5g: bandsToHex(sel5g)
