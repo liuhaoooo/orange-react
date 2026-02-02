@@ -308,6 +308,7 @@ export interface LinkDetectionSettings {
 }
 
 export interface LockBandSettings {
+    // Response keys (snake_case)
     all_band_5g?: string;
     lock_band_5g?: string;
     all_band_4g?: string;
@@ -320,6 +321,15 @@ export interface LockBandSettings {
     band_5g_mask?: string;
     band_4g_mask?: string;
     band_3g_mask?: string;
+    
+    // Payload keys (camelCase)
+    band5gRadio?: string;
+    lock5gBand?: string;
+    band4gRadio?: string;
+    lock4gBand?: string;
+    band3gRadio?: string;
+    lock3gBand?: string;
+    
     [key: string]: any;
 }
 

@@ -116,17 +116,32 @@ export const LockBandPage: React.FC = () => {
   };
 
   const handleSave = async () => {
+      // Validation: If a switch is ON, its bands must NOT be empty.
+      // "3G、4G、5G其中一个没有勾选时，不能点击保存" -> If switch enabled but no band selected for it.
+      
+      let errorMsg = '';
+      if (sw3g && sel3g.length === 0) errorMsg = 'Please select at least one 3G Band.';
+      else if (sw4g && sel4g.length === 0) errorMsg = 'Please select at least one 4G Band.';
+      else if (sw5g && sel5g.length === 0) errorMsg = 'Please select at least one 5G Band.';
+
+      if (errorMsg) {
+          showAlert(errorMsg, 'warning');
+          return;
+      }
+
       setSaving(true);
       
+      // Construct specific payload structure: 
+      // {"cmd":161,"band5gRadio":"1","lock5gBand":"41","band4gRadio":"1","lock4gBand":"45","band3gRadio":"1","lock3gBand":"81","method":"POST",...}
       const payload: Partial<LockBandSettings> = {
-          band_3g_switch: sw3g ? '1' : '0',
-          band_4g_switch: sw4g ? '1' : '0',
-          band_5g_switch: sw5g ? '1' : '0',
+          // New keys as per requirement
+          band3gRadio: sw3g ? '1' : '0',
+          band4gRadio: sw4g ? '1' : '0',
+          band5gRadio: sw5g ? '1' : '0',
           
-          // Use lock_band_X for setting the lock, derived from current selection
-          lock_band_3g: bandsToHex(sel3g),
-          lock_band_4g: bandsToHex(sel4g),
-          lock_band_5g: bandsToHex(sel5g)
+          lock3gBand: bandsToHex(sel3g),
+          lock4gBand: bandsToHex(sel4g),
+          lock5gBand: bandsToHex(sel5g)
       };
 
       try {
