@@ -8,6 +8,7 @@ interface MultipleApnEditModalProps {
   onClose: () => void;
   onSave: (data: any) => void;
   initialData: any;
+  existingNames?: string[];
 }
 
 const BlackSquareSwitch = ({ isOn, onChange }: { isOn: boolean; onChange: () => void }) => (
@@ -24,7 +25,7 @@ const BlackSquareSwitch = ({ isOn, onChange }: { isOn: boolean; onChange: () => 
   </div>
 );
 
-export const MultipleApnEditModal: React.FC<MultipleApnEditModalProps> = ({ isOpen, onClose, onSave, initialData }) => {
+export const MultipleApnEditModal: React.FC<MultipleApnEditModalProps> = ({ isOpen, onClose, onSave, initialData, existingNames = [] }) => {
   const { t } = useLanguage();
   
   const [configName, setConfigName] = useState('');
@@ -37,7 +38,8 @@ export const MultipleApnEditModal: React.FC<MultipleApnEditModalProps> = ({ isOp
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const [errors, setErrors] = useState<{ configName?: boolean; mtu?: boolean }>({});
+  // Changed configName error type to string to support messages
+  const [errors, setErrors] = useState<{ configName?: string; mtu?: boolean }>({});
 
   useEffect(() => {
     if (isOpen && initialData) {
@@ -69,13 +71,17 @@ export const MultipleApnEditModal: React.FC<MultipleApnEditModalProps> = ({ isOp
   ];
 
   const handleSave = () => {
-    const newErrors: { configName?: boolean; mtu?: boolean } = {};
+    const newErrors: { configName?: string; mtu?: boolean } = {};
     let isValid = true;
 
     if (!configName.trim()) {
-      newErrors.configName = true;
+      newErrors.configName = 'Configuration name cannot be empty';
+      isValid = false;
+    } else if (existingNames.includes(configName) && configName !== initialData?.apnProfileName) {
+      newErrors.configName = 'Configuration name already exists';
       isValid = false;
     }
+
     if (!mtu.trim()) {
       newErrors.mtu = true;
       isValid = false;
@@ -115,17 +121,23 @@ export const MultipleApnEditModal: React.FC<MultipleApnEditModalProps> = ({ isOp
         <div className="px-8 pb-8 pt-2">
           
           {/* Configuration Name */}
-          <div className="mb-6 flex flex-col sm:flex-row sm:items-center">
-             <label className="font-bold text-sm text-black w-1/3 mb-2 sm:mb-0">
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-start">
+             <label className="font-bold text-sm text-black w-1/3 mb-2 sm:mb-0 pt-2">
                 <span className="text-red-500 me-1">*</span>Configuration name
              </label>
              <div className="w-full sm:w-2/3">
                 <input 
                     type="text" 
                     value={configName}
-                    onChange={(e) => setConfigName(e.target.value)}
+                    onChange={(e) => {
+                        setConfigName(e.target.value);
+                        if (errors.configName) setErrors({ ...errors, configName: undefined });
+                    }}
                     className={`w-full border px-3 py-2 text-sm text-black outline-none transition-all rounded-[2px] bg-white ${errors.configName ? 'border-red-500' : 'border-gray-300 focus:border-orange'}`}
                 />
+                {errors.configName && (
+                    <p className="text-red-500 text-xs mt-1">{errors.configName}</p>
+                )}
              </div>
           </div>
 

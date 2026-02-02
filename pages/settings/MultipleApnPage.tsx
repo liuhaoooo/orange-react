@@ -96,7 +96,7 @@ export const MultipleApnPage: React.FC = () => {
       setIsEditOpen(true);
   };
 
-  const handleModalSave = async (updatedFields: any) => {
+  const handleModalSave = (updatedFields: any) => {
       if (!rawData || !editingRowId) return;
       
       // Merge updates into rawData locally first
@@ -125,39 +125,8 @@ export const MultipleApnPage: React.FC = () => {
           return row;
       }));
 
-      // Update rawData state
+      // Update rawData state so global save picks up these changes
       setRawData(updatedRaw);
-
-      // Save to server
-      setSaving(true);
-      try {
-          // Prepare full payload including current switches
-          const payload: Record<string, any> = { ...updatedRaw };
-          data.forEach(row => {
-              // Ensure switches are up to date if they changed since rawData update
-              if (row.id !== editingRowId) { // editingRowId handled above via rawData, but switches are separate in 'data'
-                 // Actually rawData switches might be stale if user toggled switches but didn't save yet. 
-                 // We should sync switch state to payload.
-                 payload[`apnSwitch${row.id}`] = row.isActive ? '1' : '0';
-              } else {
-                 // For the edited row, sync switch too
-                 const rowInState = data.find(r => r.id === editingRowId);
-                 if (rowInState) payload[`apnSwitch${row.id}`] = rowInState.isActive ? '1' : '0';
-              }
-          });
-
-          const res = await saveMultipleApnSettings(payload);
-          if (res && (res.success || res.result === 'success')) {
-              showAlert('Rule updated successfully', 'success');
-          } else {
-              showAlert('Failed to update rule', 'error');
-          }
-      } catch (e) {
-          console.error(e);
-          showAlert('Error saving settings', 'error');
-      } finally {
-          setSaving(false);
-      }
   };
 
   const handleGlobalSave = async () => {
@@ -251,6 +220,7 @@ export const MultipleApnPage: React.FC = () => {
         onClose={() => setIsEditOpen(false)}
         onSave={handleModalSave}
         initialData={editInitialData}
+        existingNames={data.map(d => d.configName)}
       />
     </div>
   );
