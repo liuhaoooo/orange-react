@@ -177,6 +177,8 @@ const MultipleApnTable = ({ apnList }: { apnList: ApnInfoItem[] }) => {
 export const NetworkInfoPage: React.FC = () => {
   const [data, setData] = useState<NetworkInfoResponse | null>(null);
   const [apnList, setApnList] = useState<ApnInfoItem[]>([]);
+  const [cell4gData, setCell4gData] = useState<string[][]>([]);
+  const [cell5gData, setCell5gData] = useState<string[][]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -188,10 +190,21 @@ export const NetworkInfoPage: React.FC = () => {
                 setData(res);
             }
 
-            // Fetch Multiple APN Info (CMD 1004)
+            // Fetch Multiple APN Info & Cell Info (CMD 1004)
             const statusRes = await fetchNetworkStatus();
             if (statusRes && statusRes.success) {
                 setApnList(statusRes.apn_list || []);
+                
+                // Helper to parse cell info strings (format: "row1col1,row1col2;row2col1,row2col2")
+                const parseCellInfo = (infoStr?: string) => {
+                    if (!infoStr) return [];
+                    return infoStr.split(';')
+                        .filter(s => s && s.trim().length > 0)
+                        .map(row => row.split(','));
+                };
+
+                setCell4gData(parseCellInfo(statusRes.lte_info));
+                setCell5gData(parseCellInfo(statusRes.nr_info));
             }
         } catch (e) {
             console.error("Failed to fetch network info", e);
@@ -211,18 +224,6 @@ export const NetworkInfoPage: React.FC = () => {
   }
 
   const info = data || {};
-
-  // Mock Data for Cell Info to match screenshot as API data for tables is not fully mapped in requirements
-  const cell4gData = [
-      ['1300', '169', '-99', '-12', '1'],
-      ['1300', '170', '-110', '-19', '-6']
-  ];
-
-  const cell5gData = [
-      ['152650', '395', '-107', '-15', '-3'],
-      ['152650', '484', '-98', '-12', '3'],
-      ['152650', '340', '-113', '-16', '-5']
-  ];
 
   // Helper for dual 4G/5G string construction
   const combine = (v1?: string, v2?: string, suffix: string = '') => {
