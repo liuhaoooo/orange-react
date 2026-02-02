@@ -270,6 +270,13 @@ export interface ApnListResponse {
     [key: string]: any;
 }
 
+export interface MultipleApnResponse {
+    success: boolean;
+    cmd: number;
+    multiApnNum: string;
+    [key: string]: any;
+}
+
 export interface NetworkModeResponse {
     success: boolean;
     cmd: number;
@@ -675,6 +682,10 @@ export const saveApnConfig = async (data: { apnNatName: string; apnMTU: string; 
 
 export const saveApnList = async (apn_list: ApnProfile[]) =>
   apiRequest(248, 'POST', { apn_list });
+
+// Multiple APN Settings (CMD 130)
+export const fetchMultipleApnSettings = async () => apiRequest<MultipleApnResponse>(130, 'GET');
+export const saveMultipleApnSettings = async (data: Record<string, any>) => apiRequest(130, 'POST', data);
 
 // Network Mode
 export const fetchNetworkMode = async () => apiRequest<NetworkModeResponse>(256, 'GET');

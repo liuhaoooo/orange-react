@@ -1,6 +1,7 @@
-
-import React, { useState } from 'react';
-import { Edit2, Save, Check, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Edit2, Save, Check, X, Loader2 } from 'lucide-react';
+import { fetchMultipleApnSettings, saveMultipleApnSettings, MultipleApnResponse } from '../../utils/api';
+import { useAlert } from '../../utils/AlertContext';
 
 // Custom switch to match the specific black/white style in the provided design
 const BlackSquareSwitch = ({ isOn, onChange }: { isOn: boolean; onChange: () => void }) => (
@@ -26,16 +27,83 @@ interface ApnRow {
 }
 
 export const MultipleApnPage: React.FC = () => {
-  // Mock data based on the screenshot provided
-  const [data, setData] = useState<ApnRow[]>([
-    { id: '1', isActive: false, apn: '1', configName: '111', profileName: '222' },
-    { id: '2', isActive: true, apn: '2', configName: 'aaaa', profileName: 'bb' },
-    { id: '3', isActive: false, apn: '3', configName: '123', profileName: '4566' },
-  ]);
+  const { showAlert } = useAlert();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [data, setData] = useState<ApnRow[]>([]);
+  // Keep raw response to merge back on save to preserve hidden fields
+  const [rawData, setRawData] = useState<MultipleApnResponse | null>(null);
+
+  useEffect(() => {
+    const load = async () => {
+        try {
+            const res = await fetchMultipleApnSettings();
+            if (res && (res.success || res.success === undefined)) {
+                setRawData(res);
+                const count = parseInt(res.multiApnNum || '0', 10);
+                const rows: ApnRow[] = [];
+                
+                for (let i = 1; i <= count; i++) {
+                    rows.push({
+                        id: i.toString(),
+                        isActive: res[`apnSwitch${i}`] === '1',
+                        apn: i.toString(), // "APN为行的序号" -> APN is the row index
+                        configName: res[`apnProfileName${i}`] || '',
+                        profileName: res[`apnName${i}`] || ''
+                    });
+                }
+                setData(rows);
+            } else {
+                showAlert('Failed to load data', 'error');
+            }
+        } catch (e) {
+            console.error(e);
+            showAlert('Error loading APN settings', 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+    load();
+  }, [showAlert]);
 
   const toggleSwitch = (id: string) => {
     setData(prev => prev.map(item => item.id === id ? { ...item, isActive: !item.isActive } : item));
   };
+
+  const handleSave = async () => {
+      setSaving(true);
+      try {
+          const payload: Record<string, any> = { ...rawData };
+          
+          // Update switches in payload based on current UI state
+          data.forEach(row => {
+              const idx = row.id;
+              payload[`apnSwitch${idx}`] = row.isActive ? '1' : '0';
+              // Note: configName and profileName are displayed but typically managed via Edit logic.
+              // Assuming for "display & save" we mostly persist the switch state here.
+          });
+
+          const res = await saveMultipleApnSettings(payload);
+          if (res && (res.success || res.result === 'success')) {
+              showAlert('Settings saved successfully', 'success');
+          } else {
+              showAlert('Failed to save settings', 'error');
+          }
+      } catch (e) {
+          console.error(e);
+          showAlert('Error saving settings', 'error');
+      } finally {
+          setSaving(false);
+      }
+  };
+
+  if (loading) {
+      return (
+          <div className="w-full h-64 flex items-center justify-center">
+              <Loader2 className="animate-spin text-orange" size={40} />
+          </div>
+      );
+  }
 
   return (
     <div className="w-full animate-fade-in">
@@ -51,7 +119,7 @@ export const MultipleApnPage: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {data.map((row) => (
+            {data.length > 0 ? data.map((row) => (
               <tr key={row.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                 <td className="py-3 pe-4">
                   <BlackSquareSwitch isOn={row.isActive} onChange={() => toggleSwitch(row.id)} />
@@ -65,15 +133,23 @@ export const MultipleApnPage: React.FC = () => {
                   </button>
                 </td>
               </tr>
-            ))}
+            )) : (
+              <tr>
+                  <td colSpan={5} className="py-8 text-center text-gray-400 italic">No Data Available</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
       {/* Footer Actions */}
       <div className="flex justify-end pt-8 mt-4 border-t border-gray-200">
-          <button className="bg-white border-2 border-black text-black hover:bg-black hover:text-white font-bold py-2.5 px-12 text-sm transition-all rounded-[2px] shadow-sm uppercase tracking-wide flex items-center">
-              <Save size={18} className="me-2" />
+          <button 
+            onClick={handleSave}
+            disabled={saving}
+            className="bg-white border-2 border-black text-black hover:bg-black hover:text-white font-bold py-2.5 px-12 text-sm transition-all rounded-[2px] shadow-sm uppercase tracking-wide flex items-center"
+          >
+              {saving ? <Loader2 className="animate-spin w-4 h-4 me-2" /> : <Save size={18} className="me-2" />}
               Save
           </button>
       </div>
