@@ -134,6 +134,35 @@ export interface NetworkInfoResponse {
     [key: string]: any;
 }
 
+export interface ApnInfoItem {
+    interfaceName: string;
+    wanMac: string;
+    wanIp: string;
+    wanNetmask: string;
+    wanGateway: string;
+    wanDns: string;
+    wanDnsSecond: string;
+    wanIpv6: string;
+    wanIpv6Gateway: string;
+    wanIpv6Dns: string;
+    wanIpv6DnsSecond: string;
+    wanRxPackets: string;
+    wanTxPackets: string;
+    wanRxBytes: string;
+    wanTxBytes: string;
+    wanType: string;
+    apnName: string;
+}
+
+export interface NetworkStatusResponse {
+    success: boolean;
+    cmd: number;
+    lte_info: string;
+    nr_info: string;
+    apn_list: ApnInfoItem[];
+    [key: string]: any;
+}
+
 export interface ConnectionSettingsResponse {
     networkMode: string;
     dialMode: string;
@@ -598,6 +627,7 @@ export const setAutoUpgrade = async (autoValue: '0' | '1') => apiRequest(240, 'P
 export const fetchAccountLevel = async () => apiRequest<{ account_level: string }>(588, 'GET');
 export const fetchDeviceInfo = async () => apiRequest<DeviceInfoResponse>(1001, 'GET');
 export const fetchNetworkInfo = async () => apiRequest<NetworkInfoResponse>(1002, 'GET');
+export const fetchNetworkStatus = async () => apiRequest<NetworkStatusResponse>(1004, 'GET');
 
 // Requested Functions
 export const resetStatistics = async () => apiRequest(337, 'POST', { statisticsReset: '1', usedFlow: '0' });

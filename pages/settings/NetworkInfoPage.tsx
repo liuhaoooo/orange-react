@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { fetchNetworkInfo, NetworkInfoResponse } from '../../utils/api';
+import { fetchNetworkInfo, fetchNetworkStatus, NetworkInfoResponse, ApnInfoItem } from '../../utils/api';
 import { SignalStrengthIcon } from '../../components/UIComponents';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 
 // --- Shared Components ---
 
@@ -57,16 +57,141 @@ const DataTable = ({ headers, rows }: { headers: string[], rows: (string|number)
     </div>
 );
 
+const MultipleApnTable = ({ apnList }: { apnList: ApnInfoItem[] }) => {
+    const [expandedIndices, setExpandedIndices] = useState<number[]>([]);
+
+    const toggleRow = (index: number) => {
+        setExpandedIndices(prev => 
+            prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index]
+        );
+    };
+
+    if (!apnList || apnList.length === 0) {
+        return (
+            <div className="border-t border-gray-200 mb-8">
+                <div className="w-full overflow-x-auto">
+                    <table className="w-full text-left text-sm min-w-[600px]">
+                        <thead>
+                            <tr className="border-b border-gray-100 bg-white">
+                                <th className="py-4 px-6 font-bold text-black">APN</th>
+                                <th className="py-4 px-6 font-bold text-black">Profile Name</th>
+                                <th className="py-4 px-6 font-bold text-black">IP</th>
+                                <th className="py-4 px-6 font-bold text-black">Subnet Mask</th>
+                                <th className="py-4 px-6 font-bold text-black">IPv6</th>
+                                <th className="py-4 px-6 w-10"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colSpan={6} className="py-8 text-center text-gray-400 italic bg-white">No Data</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="border-t border-gray-200 mb-8">
+            <div className="w-full overflow-x-auto">
+                <table className="w-full text-left text-sm min-w-[600px]">
+                    <thead>
+                        <tr className="border-b border-gray-100 bg-white">
+                            <th className="py-4 px-6 font-bold text-black">APN</th>
+                            <th className="py-4 px-6 font-bold text-black">Profile Name</th>
+                            <th className="py-4 px-6 font-bold text-black">IP</th>
+                            <th className="py-4 px-6 font-bold text-black">Subnet Mask</th>
+                            <th className="py-4 px-6 font-bold text-black">IPv6</th>
+                            <th className="py-4 px-6 w-10"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {apnList.map((item, index) => {
+                            const isExpanded = expandedIndices.includes(index);
+                            return (
+                                <React.Fragment key={index}>
+                                    <tr 
+                                        className={`border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer ${isExpanded ? 'bg-gray-50' : ''}`}
+                                        onClick={() => toggleRow(index)}
+                                    >
+                                        <td className="py-4 px-6 text-black font-medium">{item.wanType}</td>
+                                        <td className="py-4 px-6 text-black font-medium">{item.apnName}</td>
+                                        <td className="py-4 px-6 text-black font-medium">{item.wanIp}</td>
+                                        <td className="py-4 px-6 text-black font-medium">{item.wanNetmask}</td>
+                                        <td className="py-4 px-6 text-black font-medium">{item.wanIpv6}</td>
+                                        <td className="py-4 px-6 text-black font-medium">
+                                            {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                        </td>
+                                    </tr>
+                                    {isExpanded && (
+                                        <tr className="bg-gray-50/50">
+                                            <td colSpan={6} className="p-0">
+                                                <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm border-b border-gray-100">
+                                                    <div className="flex justify-between border-b border-gray-200 py-2">
+                                                        <span className="text-gray-600">Primary DNS</span>
+                                                        <span className="font-bold text-black">{item.wanDns}</span>
+                                                    </div>
+                                                    <div className="flex justify-between border-b border-gray-200 py-2">
+                                                        <span className="text-gray-600">Secondary DNS</span>
+                                                        <span className="font-bold text-black">{item.wanDnsSecond}</span>
+                                                    </div>
+                                                    <div className="flex justify-between border-b border-gray-200 py-2">
+                                                        <span className="text-gray-600">Primary IPv6 DNS</span>
+                                                        <span className="font-bold text-black">{item.wanIpv6Dns}</span>
+                                                    </div>
+                                                    <div className="flex justify-between border-b border-gray-200 py-2">
+                                                        <span className="text-gray-600">Secondary IPv6 DNS</span>
+                                                        <span className="font-bold text-black">{item.wanIpv6DnsSecond}</span>
+                                                    </div>
+                                                    <div className="flex justify-between border-b border-gray-200 py-2">
+                                                        <span className="text-gray-600">Packets Received</span>
+                                                        <span className="font-bold text-black">{item.wanRxPackets}</span>
+                                                    </div>
+                                                    <div className="flex justify-between border-b border-gray-200 py-2">
+                                                        <span className="text-gray-600">Packets Sent</span>
+                                                        <span className="font-bold text-black">{item.wanTxPackets}</span>
+                                                    </div>
+                                                    <div className="flex justify-between border-b border-gray-200 py-2">
+                                                        <span className="text-gray-600">Bytes Received</span>
+                                                        <span className="font-bold text-black">{item.wanRxBytes}</span>
+                                                    </div>
+                                                    <div className="flex justify-between border-b border-gray-200 py-2">
+                                                        <span className="text-gray-600">Bytes Sent</span>
+                                                        <span className="font-bold text-black">{item.wanTxBytes}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </React.Fragment>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+};
+
 export const NetworkInfoPage: React.FC = () => {
   const [data, setData] = useState<NetworkInfoResponse | null>(null);
+  const [apnList, setApnList] = useState<ApnInfoItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
         try {
+            // Fetch Network Info (CMD 1002)
             const res = await fetchNetworkInfo();
             if (res && (res.success || res.success === undefined)) {
                 setData(res);
+            }
+
+            // Fetch Multiple APN Info (CMD 1004)
+            const statusRes = await fetchNetworkStatus();
+            if (statusRes && statusRes.success) {
+                setApnList(statusRes.apn_list || []);
             }
         } catch (e) {
             console.error("Failed to fetch network info", e);
@@ -183,10 +308,7 @@ export const NetworkInfoPage: React.FC = () => {
 
       {/* 3. Multiple APN Information */}
       <SectionTitle title="Multiple APN Information" />
-      <DataTable 
-        headers={['APN', 'Profile Name', 'IP', 'Subnet Mask', 'IPv6']} 
-        rows={[]} // Empty array to show "No Data" as per screenshot and lack of API list data
-      />
+      <MultipleApnTable apnList={apnList} />
 
       {/* 4. 4G Cell Information */}
       <SectionTitle title="4G Cell Information" />
