@@ -1,4 +1,3 @@
-
 // API Configuration
 const API_BASE_URL = '/cgi-bin/http.cgi'; 
 
@@ -49,6 +48,20 @@ export interface StatusInfoResponse {
   nation_limit_size?: string;
   internation_limit_size?: string;
   flow_limit_unit?: string;
+  [key: string]: any;
+}
+
+export interface DeviceInfoResponse {
+  board_type?: string;
+  version?: string;
+  uptime?: string;
+  hwversion?: string;
+  module_imei?: string;
+  IMSI?: string;
+  ICCID?: string;
+  module_type?: string;
+  module_softver?: string;
+  module_hardver?: string;
   [key: string]: any;
 }
 
@@ -514,6 +527,7 @@ export const saveMessageSettings = async (smsSw: string, dmCsca: string, maxSize
 
 export const setAutoUpgrade = async (autoValue: '0' | '1') => apiRequest(240, 'POST', { autoValue });
 export const fetchAccountLevel = async () => apiRequest<{ account_level: string }>(588, 'GET');
+export const fetchDeviceInfo = async () => apiRequest<DeviceInfoResponse>(1001, 'GET');
 
 // Requested Functions
 export const resetStatistics = async () => apiRequest(337, 'POST', { statisticsReset: '1', usedFlow: '0' });
