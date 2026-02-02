@@ -20,8 +20,9 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, onLogin }) => {
 
   const currentLang = languageAllList.find(l => l.value === language) || languageAllList.find(l => l.value === 'en');
   
-  // Check if current page is settings
+  // Check if current page is settings or help
   const isSettingsPage = location.pathname === '/settings';
+  const isHelpPage = location.pathname === '/help';
 
   // Handle scroll effect
   useEffect(() => {
@@ -121,14 +122,18 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, onLogin }) => {
               <>
                 <div className="fixed inset-0 z-40 cursor-default" onClick={() => setIsMenuOpen(false)} />
                 <div className="absolute right-0 top-full mt-3 w-48 bg-white text-black shadow-xl border border-gray-200 py-2 z-50 rounded-sm animate-fade-in">
-                  <Link 
-                    to="/help"
-                    className="flex items-center w-full px-4 py-2.5 text-sm hover:bg-gray-100 hover:text-orange transition-colors text-black"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <HelpCircle size={16} className="me-3" />
-                    {t('help')}
-                  </Link>
+                  
+                  {/* Only show Help if NOT on help page */}
+                  {!isHelpPage && (
+                    <Link 
+                      to="/help"
+                      className="flex items-center w-full px-4 py-2.5 text-sm hover:bg-gray-100 hover:text-orange transition-colors text-black"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <HelpCircle size={16} className="me-3" />
+                      {t('help')}
+                    </Link>
+                  )}
                   
                   {/* Only show Settings if NOT on settings page */}
                   {!isSettingsPage && (
