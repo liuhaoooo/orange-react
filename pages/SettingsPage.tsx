@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from '../utils/GlobalStateContext';
 import { ChevronLeft, ChevronRight, Menu, ChevronUp, ChevronDown } from 'lucide-react';
@@ -189,32 +188,61 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
 
   const activeSection = menuItems.find(item => item.id === activeSectionId) || menuItems[0];
   
-  // Initialize navigation state from location.state or default
+  // URL Persistence Logic
+  // 1. On Mount/URL Change: Parse Query Params and update state
   useEffect(() => {
+    // Check URL params first
+    const params = new URLSearchParams(location.search);
+    const sectionParam = params.get('section');
+    const subParam = params.get('sub');
+
+    // Check location state (from direct navigation within app)
     const state = location.state as { sectionId?: string; subTabId?: string } | null;
-    
-    if (state?.sectionId) {
+
+    if (sectionParam) {
+        // Priority 1: URL Query Params (supports refresh)
+        setActiveSectionId(sectionParam);
+        
+        // Ensure subTab matches the section
+        const sectionItem = menuItems.find(i => i.id === sectionParam);
+        if (subParam) {
+            setActiveSubTabId(subParam);
+        } else if (sectionItem?.subTabs?.length) {
+            // Default to first subtab if section has tabs but none specified
+            setActiveSubTabId(sectionItem.subTabs[0].id);
+        } else {
+            setActiveSubTabId('');
+        }
+    } else if (state?.sectionId) {
+        // Priority 2: Navigation State (legacy/internal links)
+        // We should probably sync this to URL immediately
         setActiveSectionId(state.sectionId);
         
         if (state.subTabId) {
             setActiveSubTabId(state.subTabId);
+            // Update URL to match
+            navigate(`/settings?section=${state.sectionId}&sub=${state.subTabId}`, { replace: true });
         } else {
-             // If no specific subtab requested, default to the first one of the section
              const item = menuItems.find(i => i.id === state.sectionId);
              if (item?.subTabs?.length) {
-                 setActiveSubTabId(item.subTabs[0].id);
+                 const defSub = item.subTabs[0].id;
+                 setActiveSubTabId(defSub);
+                 navigate(`/settings?section=${state.sectionId}&sub=${defSub}`, { replace: true });
              } else {
                  setActiveSubTabId('');
+                 navigate(`/settings?section=${state.sectionId}`, { replace: true });
              }
         }
     } else {
-        // Default initialization if no state provided
+        // Priority 3: Default (Network -> APN)
         if (activeSectionId === 'network' && !activeSubTabId) {
             setActiveSubTabId('apn_settings');
+            // Sync URL
+            navigate(`/settings?section=network&sub=apn_settings`, { replace: true });
         }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.state]); 
+  }, [location.search, location.state]); 
 
   // Check scroll possibilities
   const checkScrollButtons = () => {
@@ -250,16 +278,19 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
     }
   };
 
-  // Handle Section Click
+  // Handle Section Click - Updates URL, which triggers Effect to update state
   const handleSectionClick = (id: string) => {
-    setActiveSectionId(id);
     // Reset subtab to first one if available
     const item = menuItems.find(i => i.id === id);
+    let subId = '';
     if (item && item.subTabs && item.subTabs.length > 0) {
-      setActiveSubTabId(item.subTabs[0].id);
-    } else {
-      setActiveSubTabId('');
-    }
+      subId = item.subTabs[0].id;
+    } 
+    
+    // Navigate updates the URL, triggering the useEffect
+    const url = subId ? `/settings?section=${id}&sub=${subId}` : `/settings?section=${id}`;
+    navigate(url);
+
     // Close mobile menu
     setIsMobileMenuOpen(false);
 
@@ -269,6 +300,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
     }
     // Scroll page to top
     window.scrollTo(0, 0);
+  };
+
+  const handleSubTabClick = (subId: string) => {
+      navigate(`/settings?section=${activeSectionId}&sub=${subId}`);
   };
 
   const renderContent = () => {
@@ -457,7 +492,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
                          {activeSection.subTabs.map(tab => (
                              <button
                                 key={tab.id}
-                                onClick={() => setActiveSubTabId(tab.id)}
+                                onClick={() => handleSubTabClick(tab.id)}
                                 className={`px-6 py-2.5 font-bold text-sm rounded-[6px] border-2 transition-all whitespace-nowrap shrink-0 ${
                                     activeSubTabId === tab.id
                                     ? 'bg-black text-white border-black shadow-md'

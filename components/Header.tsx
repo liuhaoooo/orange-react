@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { User, ChevronDown, HelpCircle, Settings, LogOut, LogIn } from 'lucide-react';
 import { useLanguage, languageAllList } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
-import { Link, NavLink, useNavigate } from '../utils/GlobalStateContext';
+import { Link, NavLink, useNavigate, useLocation } from '../utils/GlobalStateContext';
 
 interface HeaderProps {
   onLogout: () => void;
@@ -17,8 +16,12 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, onLogin }) => {
   const { language, setLanguage, t } = useLanguage();
   const { isLoggedIn } = useGlobalState();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const currentLang = languageAllList.find(l => l.value === language) || languageAllList.find(l => l.value === 'en');
+  
+  // Check if current page is settings
+  const isSettingsPage = location.pathname === '/settings';
 
   // Handle scroll effect
   useEffect(() => {
@@ -126,21 +129,26 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, onLogin }) => {
                     <HelpCircle size={16} className="me-3" />
                     {t('help')}
                   </Link>
-                  <button 
-                    className="flex items-center w-full px-4 py-2.5 text-sm hover:bg-gray-100 hover:text-orange transition-colors text-black"
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      // If not logged in, prompt login first, otherwise navigate to settings
-                      if (!isLoggedIn) {
-                        onLogin();
-                      } else {
-                        navigate('/settings');
-                      }
-                    }}
-                  >
-                    <Settings size={16} className="me-3" />
-                    {t('settings')}
-                  </button>
+                  
+                  {/* Only show Settings if NOT on settings page */}
+                  {!isSettingsPage && (
+                    <button 
+                      className="flex items-center w-full px-4 py-2.5 text-sm hover:bg-gray-100 hover:text-orange transition-colors text-black"
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                        // If not logged in, prompt login first, otherwise navigate to settings
+                        if (!isLoggedIn) {
+                          onLogin();
+                        } else {
+                          navigate('/settings');
+                        }
+                      }}
+                    >
+                      <Settings size={16} className="me-3" />
+                      {t('settings')}
+                    </button>
+                  )}
+
                   <div className="border-t border-gray-100 my-1"></div>
                   <button 
                     className={`flex items-center w-full px-4 py-2.5 text-sm hover:bg-gray-100 hover:text-orange transition-colors font-bold ${isLoggedIn ? 'text-red-600' : 'text-black'}`}

@@ -1,10 +1,10 @@
-
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { getSessionId, checkAuthStatus, clearSessionId, fetchStatusInfo, fetchConnectionSettings, fetchWifiSettings, fetchAccountLevel } from './api';
 
 // --- Custom Router Implementation ---
 interface LocationState {
   pathname: string;
+  search: string;
   state: any;
 }
 
@@ -15,12 +15,12 @@ const RouterContext = createContext<{
 } | undefined>(undefined);
 
 export const BrowserRouter: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [path, setPath] = useState(window.location.hash.slice(1) || '/');
+    const [fullPath, setFullPath] = useState(window.location.hash.slice(1) || '/');
     const [state, setState] = useState<any>(window.history.state);
 
     useEffect(() => {
         const onLocationChange = () => {
-            setPath(window.location.hash.slice(1) || '/');
+            setFullPath(window.location.hash.slice(1) || '/');
             setState(window.history.state);
         };
         window.addEventListener('hashchange', onLocationChange);
@@ -47,21 +47,25 @@ export const BrowserRouter: React.FC<{ children: React.ReactNode }> = ({ childre
         }
         
         // Manually update state since pushState doesn't trigger listeners
-        setPath(to);
+        setFullPath(to);
         setState(newState);
         
         // Dispatch a custom event or hashchange so others know (optional but good practice)
         window.dispatchEvent(new Event('hashchange'));
     }, []);
 
-    const location = { pathname: path, state };
+    // Split fullPath (e.g. "/settings?section=network") into pathname and search
+    const [pathname, ...searchParts] = fullPath.split('?');
+    const search = searchParts.length > 0 ? `?${searchParts.join('?')}` : '';
 
-    return <RouterContext.Provider value={{ path, navigate, location }}>{children}</RouterContext.Provider>;
+    const location = { pathname: pathname || '/', search, state };
+
+    return <RouterContext.Provider value={{ path: pathname, navigate, location }}>{children}</RouterContext.Provider>;
 };
 
 export const Routes: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const ctx = useContext(RouterContext);
-    const path = ctx ? ctx.path : '/';
+    const path = ctx ? ctx.location.pathname : '/';
     let foundElement: React.ReactNode = null;
     
     React.Children.forEach(children, (child) => {
@@ -99,7 +103,7 @@ export const Link: React.FC<{ to: string; children: React.ReactNode; className?:
 
 export const NavLink: React.FC<{ to: string; children: React.ReactNode; className: (props: { isActive: boolean }) => string; end?: boolean }> = ({ to, children, className, end }) => {
     const ctx = useContext(RouterContext);
-    const currentPath = ctx ? ctx.path : '/';
+    const currentPath = ctx ? ctx.location.pathname : '/';
     const isActive = end ? currentPath === to : currentPath.startsWith(to);
     
     const handleClick = (e: React.MouseEvent) => {
@@ -124,7 +128,7 @@ export const useNavigate = () => {
 
 export const useLocation = () => {
     const ctx = useContext(RouterContext);
-    if (!ctx) return { pathname: '/', state: null };
+    if (!ctx) return { pathname: '/', search: '', state: null };
     return ctx.location;
 };
 
