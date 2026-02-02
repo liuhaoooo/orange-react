@@ -62,17 +62,22 @@ export const DeviceInfoPage: React.FC = () => {
       return () => clearInterval(timer);
   }, []);
 
-  // Helper to format time DD:HH:MM:SS
+  // Helper to format time to "X Day(s) X Hour(s) X Minute(s) X Second(s)"
   const formatUptime = (totalSeconds: number) => {
-      if (isNaN(totalSeconds)) return "00:00:00:00";
+      if (isNaN(totalSeconds) || totalSeconds < 0) return "0 Second(s)";
 
       const days = Math.floor(totalSeconds / 86400);
       const hours = Math.floor((totalSeconds % 86400) / 3600);
       const minutes = Math.floor((totalSeconds % 3600) / 60);
       const seconds = totalSeconds % 60;
       
-      const pad = (num: number) => num.toString().padStart(2, '0');
-      return `${pad(days)}:${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+      let parts = [];
+      if (days > 0) parts.push(`${days} Day(s)`);
+      if (hours > 0) parts.push(`${hours} Hour(s)`);
+      if (minutes > 0) parts.push(`${minutes} Minute(s)`);
+      parts.push(`${seconds} Second(s)`);
+      
+      return parts.join(' ');
   };
 
   if (loading) {
