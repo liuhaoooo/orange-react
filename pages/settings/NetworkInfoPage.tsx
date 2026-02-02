@@ -123,16 +123,6 @@ export const NetworkInfoPage: React.FC = () => {
       {/* 1. Mobile Network */}
       <SectionTitle title="Mobile Network" />
       <InfoTable>
-          <InfoRow 
-            label="Signal Strength" 
-            renderValue={
-                <SignalStrengthIcon 
-                    level={parseInt(info.signal_lvl || '0', 10)} 
-                    className="h-5 w-8" 
-                    barWidth="w-1" 
-                />
-            } 
-          />
           <InfoRow label="Network Mode" value={info.network_type_str || '-'} />
           <InfoRow label="Operator" value={info.network_operator || '-'} />
           
