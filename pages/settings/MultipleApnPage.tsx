@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Edit2, Save, Check, X, Loader2 } from 'lucide-react';
 import { fetchMultipleApnSettings, saveMultipleApnSettings, MultipleApnResponse } from '../../utils/api';
 import { useAlert } from '../../utils/AlertContext';
+import { MultipleApnEditModal } from '../../components/MultipleApnEditModal';
 
 // Custom switch to match the specific black/white style in the provided design
 const BlackSquareSwitch = ({ isOn, onChange }: { isOn: boolean; onChange: () => void }) => (
@@ -33,6 +34,11 @@ export const MultipleApnPage: React.FC = () => {
   const [data, setData] = useState<ApnRow[]>([]);
   // Keep raw response to merge back on save to preserve hidden fields
   const [rawData, setRawData] = useState<MultipleApnResponse | null>(null);
+
+  // Edit Modal State
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editingRowId, setEditingRowId] = useState<string | null>(null);
+  const [editInitialData, setEditInitialData] = useState<any>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -70,7 +76,91 @@ export const MultipleApnPage: React.FC = () => {
     setData(prev => prev.map(item => item.id === id ? { ...item, isActive: !item.isActive } : item));
   };
 
-  const handleSave = async () => {
+  const handleEditClick = (id: string) => {
+      if (!rawData) return;
+      
+      const idx = id;
+      const initialData = {
+          apnProfileName: rawData[`apnProfileName${idx}`],
+          apnNat: rawData[`apnNat${idx}`],
+          apnName: rawData[`apnName${idx}`],
+          apnMTU: rawData[`apnMTU${idx}`],
+          pppType: rawData[`pppType${idx}`],
+          authType: rawData[`authType${idx}`],
+          pppUsername: rawData[`pppUsername${idx}`],
+          pppPasswd: rawData[`pppPasswd${idx}`]
+      };
+
+      setEditingRowId(id);
+      setEditInitialData(initialData);
+      setIsEditOpen(true);
+  };
+
+  const handleModalSave = async (updatedFields: any) => {
+      if (!rawData || !editingRowId) return;
+      
+      // Merge updates into rawData locally first
+      const idx = editingRowId;
+      const updatedRaw = { ...rawData };
+      
+      // Update specific fields with index suffix
+      updatedRaw[`apnProfileName${idx}`] = updatedFields.apnProfileName;
+      updatedRaw[`apnNat${idx}`] = updatedFields.apnNat;
+      updatedRaw[`apnName${idx}`] = updatedFields.apnName;
+      updatedRaw[`apnMTU${idx}`] = updatedFields.apnMTU;
+      updatedRaw[`pppType${idx}`] = updatedFields.pppType;
+      updatedRaw[`authType${idx}`] = updatedFields.authType;
+      updatedRaw[`pppUsername${idx}`] = updatedFields.pppUsername;
+      updatedRaw[`pppPasswd${idx}`] = updatedFields.pppPasswd;
+
+      // Update the main data table view as well
+      setData(prev => prev.map(row => {
+          if (row.id === editingRowId) {
+              return {
+                  ...row,
+                  configName: updatedFields.apnProfileName,
+                  profileName: updatedFields.apnName
+              };
+          }
+          return row;
+      }));
+
+      // Update rawData state
+      setRawData(updatedRaw);
+
+      // Save to server
+      setSaving(true);
+      try {
+          // Prepare full payload including current switches
+          const payload: Record<string, any> = { ...updatedRaw };
+          data.forEach(row => {
+              // Ensure switches are up to date if they changed since rawData update
+              if (row.id !== editingRowId) { // editingRowId handled above via rawData, but switches are separate in 'data'
+                 // Actually rawData switches might be stale if user toggled switches but didn't save yet. 
+                 // We should sync switch state to payload.
+                 payload[`apnSwitch${row.id}`] = row.isActive ? '1' : '0';
+              } else {
+                 // For the edited row, sync switch too
+                 const rowInState = data.find(r => r.id === editingRowId);
+                 if (rowInState) payload[`apnSwitch${row.id}`] = rowInState.isActive ? '1' : '0';
+              }
+          });
+
+          const res = await saveMultipleApnSettings(payload);
+          if (res && (res.success || res.result === 'success')) {
+              showAlert('Rule updated successfully', 'success');
+          } else {
+              showAlert('Failed to update rule', 'error');
+          }
+      } catch (e) {
+          console.error(e);
+          showAlert('Error saving settings', 'error');
+      } finally {
+          setSaving(false);
+      }
+  };
+
+  const handleGlobalSave = async () => {
       setSaving(true);
       try {
           const payload: Record<string, any> = { ...rawData };
@@ -79,8 +169,6 @@ export const MultipleApnPage: React.FC = () => {
           data.forEach(row => {
               const idx = row.id;
               payload[`apnSwitch${idx}`] = row.isActive ? '1' : '0';
-              // Note: configName and profileName are displayed but typically managed via Edit logic.
-              // Assuming for "display & save" we mostly persist the switch state here.
           });
 
           const res = await saveMultipleApnSettings(payload);
@@ -128,7 +216,11 @@ export const MultipleApnPage: React.FC = () => {
                 <td className="py-3 px-4 text-sm text-black font-medium">{row.configName}</td>
                 <td className="py-3 px-4 text-sm text-black font-medium">{row.profileName}</td>
                 <td className="py-3 ps-4 text-end">
-                  <button className="text-gray-500 hover:text-black transition-colors p-1" title="Edit">
+                  <button 
+                    className="text-gray-500 hover:text-black transition-colors p-1" 
+                    title="Edit"
+                    onClick={() => handleEditClick(row.id)}
+                  >
                     <Edit2 size={16} />
                   </button>
                 </td>
@@ -145,7 +237,7 @@ export const MultipleApnPage: React.FC = () => {
       {/* Footer Actions */}
       <div className="flex justify-end pt-8 mt-4 border-t border-gray-200">
           <button 
-            onClick={handleSave}
+            onClick={handleGlobalSave}
             disabled={saving}
             className="bg-white border-2 border-black text-black hover:bg-black hover:text-white font-bold py-2.5 px-12 text-sm transition-all rounded-[2px] shadow-sm uppercase tracking-wide flex items-center"
           >
@@ -153,6 +245,13 @@ export const MultipleApnPage: React.FC = () => {
               Save
           </button>
       </div>
+
+      <MultipleApnEditModal 
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        onSave={handleModalSave}
+        initialData={editInitialData}
+      />
     </div>
   );
 };
