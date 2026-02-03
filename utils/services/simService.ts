@@ -11,3 +11,7 @@ export const setSimLockSwitch = async (enable: '0' | '1', pin: string) => apiReq
 export const modifySimPin = async (currentPin: string, newPin: string) => apiRequest(51, 'POST', { enable: '2', pin: currentPin, pinPasswordChange: newPin, subcmd: '4' });
 // cmd 134 for getting PIN lock status
 export const fetchSimLockStatus = async () => apiRequest(134, 'GET');
+
+// cmd 246 for SIM card switching
+export const fetchSimCardType = async () => apiRequest(246, 'GET');
+export const setSimCardType = async (type: string) => apiRequest(246, 'POST', { current_card_type: type });
