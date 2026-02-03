@@ -181,25 +181,34 @@ export const UsageSettingsPage: React.FC<{ type: 'national' | 'international' }>
 
       setSaving(true);
       
-      // Construct Payload
-      const payload: any = { ...rawData };
-      
-      payload[keys.limitSize] = totalData;
-      payload.flow_limit_unit = unit; 
-      payload[keys.warnPercent] = threshold;
-      payload[keys.smsSwitch] = alertEnabled ? '1' : '0';
-      payload[keys.noticeNumber] = mobileNumber;
-      payload[keys.noticeText] = messageContent;
+      // Construct Explicit Payload for CMD 337
+      // Using values from state for current type, and rawData fallbacks for other type
+      const payload = {
+          // National Settings
+          national_flow_sms_notice_sw: isNational ? (alertEnabled ? '1' : '0') : (rawData?.national_flow_sms_notice_sw || '0'),
+          nation_flow_notice_number: isNational ? mobileNumber : (rawData?.nation_flow_notice_number || ''),
+          nation_flow_notice_text: isNational ? messageContent : (rawData?.nation_flow_notice_text || ''),
+          nation_limit_size: isNational ? totalData : (rawData?.nation_limit_size || '0'),
+          nation_warn_percentage: isNational ? threshold : (rawData?.nation_warn_percentage || '50'),
 
-      // Ensure required keys for CMD 337 exist
-      if (payload.internation_limit_size === undefined) payload.internation_limit_size = '0';
-      if (payload.nation_limit_size === undefined) payload.nation_limit_size = '0';
+          // International Settings
+          international_flow_sms_notice_sw: !isNational ? (alertEnabled ? '1' : '0') : (rawData?.international_flow_sms_notice_sw || '0'),
+          internation_flow_notice_number: !isNational ? mobileNumber : (rawData?.internation_flow_notice_number || ''),
+          internation_flow_notice_text: !isNational ? messageContent : (rawData?.internation_flow_notice_text || ''),
+          internation_limit_size: !isNational ? totalData : (rawData?.internation_limit_size || '0'),
+          internation_warn_percentage: !isNational ? threshold : (rawData?.internation_warn_percentage || '50'),
+
+          // Common
+          flow_limit_unit: unit,
+      };
       
       try {
           const res = await saveUsageSettings(payload);
           if (res && (res.success || res.result === 'success')) {
               showAlert('Settings saved successfully.', 'success');
-              setRawData(payload);
+              // Update local rawData to match what we sent so toggling tabs works correctly without refetch
+              setRawData(prev => ({...prev, ...payload} as UsageSettingsResponse));
+              
               // Update applied values to reflect saved changes in calculation
               setAppliedTotalData(totalData);
               setAppliedUnit(unit);
