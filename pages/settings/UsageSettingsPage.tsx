@@ -47,7 +47,7 @@ export const UsageSettingsPage: React.FC<{ type: 'national' | 'international' }>
   const [saving, setSaving] = useState(false);
   const [rawData, setRawData] = useState<UsageSettingsResponse | null>(null);
 
-  // Form State
+  // Form State (Input values)
   const [totalData, setTotalData] = useState('0');
   const [unit, setUnit] = useState('1'); // Default GB ('1')
   const [threshold, setThreshold] = useState('50');
@@ -55,7 +55,7 @@ export const UsageSettingsPage: React.FC<{ type: 'national' | 'international' }>
   const [mobileNumber, setMobileNumber] = useState('');
   const [messageContent, setMessageContent] = useState('');
 
-  // Applied State (for remaining calculation, updated only on fetch or successful save)
+  // Applied State (Currently active values for calculation)
   const [appliedTotalData, setAppliedTotalData] = useState('0');
   const [appliedUnit, setAppliedUnit] = useState('1');
 
@@ -95,7 +95,7 @@ export const UsageSettingsPage: React.FC<{ type: 'national' | 'international' }>
       return dl + ul;
   }, [rawData, keys]);
 
-  // Calculate Remaining Data (Based on APPLIED values)
+  // Calculate Remaining Data (Using APPLIED values, not input values)
   const remainingDataStr = useMemo(() => {
       const tVal = parseFloat(appliedTotalData);
       const tUnit = appliedUnit;
@@ -119,7 +119,7 @@ export const UsageSettingsPage: React.FC<{ type: 'national' | 'international' }>
             const limit = res[keys.limitSize] || '0';
             const u = res.flow_limit_unit || '1';
 
-            // Map values to form state
+            // Set Form State
             setTotalData(limit);
             setUnit(u); 
             setThreshold(res[keys.warnPercent] || '50');
@@ -127,9 +127,12 @@ export const UsageSettingsPage: React.FC<{ type: 'national' | 'international' }>
             setMobileNumber(res[keys.noticeNumber] || '');
             setMessageContent(res[keys.noticeText] || '');
 
-            // Set applied state
+            // Set Applied State
             setAppliedTotalData(limit);
             setAppliedUnit(u);
+            
+            // Clear errors on refresh/tab switch
+            setErrors({});
         }
       } catch (e) {
         console.error("Failed to fetch usage settings", e);
@@ -153,6 +156,7 @@ export const UsageSettingsPage: React.FC<{ type: 'national' | 'international' }>
           newErrors.totalData = 'Invalid Total Data value.';
           hasError = true;
       } else if (unit === '2' && totalNum > 999) {
+          // Additional check for TB limits if realistic, optional
           newErrors.totalData = 'Total Data cannot exceed 999 TB.';
           hasError = true;
       }
@@ -164,11 +168,11 @@ export const UsageSettingsPage: React.FC<{ type: 'national' | 'international' }>
       }
 
       if (alertEnabled) {
-          if (!mobileNumber) {
+          if (!mobileNumber.trim()) {
               newErrors.mobileNumber = 'Mobile Number is required.';
               hasError = true;
           }
-          if (!messageContent) {
+          if (!messageContent.trim()) {
               newErrors.messageContent = 'Message Content is required.';
               hasError = true;
           }
@@ -181,35 +185,27 @@ export const UsageSettingsPage: React.FC<{ type: 'national' | 'international' }>
 
       setSaving(true);
       
-      // Construct Explicit Payload for CMD 337
-      // Using values from state for current type, and rawData fallbacks for other type
-      const payload = {
-          // National Settings
-          national_flow_sms_notice_sw: isNational ? (alertEnabled ? '1' : '0') : (rawData?.national_flow_sms_notice_sw || '0'),
-          nation_flow_notice_number: isNational ? mobileNumber : (rawData?.nation_flow_notice_number || ''),
-          nation_flow_notice_text: isNational ? messageContent : (rawData?.nation_flow_notice_text || ''),
-          nation_limit_size: isNational ? totalData : (rawData?.nation_limit_size || '0'),
-          nation_warn_percentage: isNational ? threshold : (rawData?.nation_warn_percentage || '50'),
+      // Construct Payload
+      const payload: any = { ...rawData };
+      
+      payload[keys.limitSize] = totalData;
+      payload.flow_limit_unit = unit; 
+      payload[keys.warnPercent] = threshold;
+      payload[keys.smsSwitch] = alertEnabled ? '1' : '0';
+      payload[keys.noticeNumber] = mobileNumber;
+      payload[keys.noticeText] = messageContent;
 
-          // International Settings
-          international_flow_sms_notice_sw: !isNational ? (alertEnabled ? '1' : '0') : (rawData?.international_flow_sms_notice_sw || '0'),
-          internation_flow_notice_number: !isNational ? mobileNumber : (rawData?.internation_flow_notice_number || ''),
-          internation_flow_notice_text: !isNational ? messageContent : (rawData?.internation_flow_notice_text || ''),
-          internation_limit_size: !isNational ? totalData : (rawData?.internation_limit_size || '0'),
-          internation_warn_percentage: !isNational ? threshold : (rawData?.internation_warn_percentage || '50'),
-
-          // Common
-          flow_limit_unit: unit,
-      };
+      // Ensure required keys for CMD 337 exist (fallback)
+      if (payload.internation_limit_size === undefined) payload.internation_limit_size = '0';
+      if (payload.nation_limit_size === undefined) payload.nation_limit_size = '0';
       
       try {
           const res = await saveUsageSettings(payload);
           if (res && (res.success || res.result === 'success')) {
               showAlert('Settings saved successfully.', 'success');
-              // Update local rawData to match what we sent so toggling tabs works correctly without refetch
-              setRawData(prev => ({...prev, ...payload} as UsageSettingsResponse));
+              setRawData(payload);
               
-              // Update applied values to reflect saved changes in calculation
+              // Update Applied values only after successful save
               setAppliedTotalData(totalData);
               setAppliedUnit(unit);
           } else {
@@ -253,6 +249,7 @@ export const UsageSettingsPage: React.FC<{ type: 'national' | 'international' }>
                             value={totalData} 
                             onChange={(e) => {
                                 const val = e.target.value;
+                                // Allow decimals
                                 if (/^\d*\.?\d*$/.test(val)) setTotalData(val);
                                 if (errors.totalData) setErrors(prev => ({...prev, totalData: undefined}));
                             }} 

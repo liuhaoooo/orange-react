@@ -43,8 +43,7 @@ export const ImsSettingsPage: React.FC = () => {
 
           {/* IMS Register Status */}
           <FormRow label="IMS Register Status">
-              {/* Using w-full to allow text to align appropriately if needed, mostly left aligned in standard forms but screenshot shows right aligned relative to label area in some contexts, here standard left align usually looks better or flex-grow */}
-              <div className="w-full flex justify-end sm:justify-start">
+              <div className="w-full flex justify-end">
                 <span className="text-black text-sm font-medium">The system is initializing</span>
               </div>
           </FormRow>
