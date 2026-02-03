@@ -12,6 +12,17 @@ interface PlmnItem {
     network: string;
 }
 
+const ERROR_MESSAGES: Record<string, string> = {
+    "500": "General error",
+    "501": "The current state does not support the operation",
+    "502": "AT command returns error",
+    "503": "No sim card",
+    "504": "SIM card is locked",
+    "505": "Illegal PIN/PUK code",
+    "506": "Illegal parameter",
+    "507": "Operation timeout"
+};
+
 export const PlmnScanPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [selectionLoading, setSelectionLoading] = useState(false);
@@ -93,7 +104,9 @@ export const PlmnScanPage: React.FC = () => {
                   showAlert('No networks found', 'info');
               }
           } else {
-              showAlert('Scan failed', 'error');
+              const msgCode = res?.message || '';
+              const errorText = ERROR_MESSAGES[msgCode] || 'Scan failed';
+              showAlert(errorText, 'error');
           }
       } catch (e) {
           console.error("Scan error", e);
