@@ -1,46 +1,33 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from '../utils/GlobalStateContext';
 import { ChevronLeft, ChevronRight, Menu, ChevronUp, ChevronDown } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
-
-// Network
-import { ApnSettingsPage } from './settings/network/ApnSettingsPage';
-import { MultipleApnPage } from './settings/network/MultipleApnPage';
-import { NetworkModePage } from './settings/network/NetworkModePage';
-import { NetworkConfigPage } from './settings/network/NetworkConfigPage';
-import { PlmnScanPage } from './settings/network/PlmnScanPage';
-import { LockBandPage } from './settings/network/LockBandPage';
-import { CellLockingPage } from './settings/network/CellLockingPage';
-import { LinkDetectionPage } from './settings/network/LinkDetectionPage';
-import { VlanPage } from './settings/network/VlanPage';
-import { NetworkInfoPage } from './settings/network/NetworkInfoPage';
-import { ImsSettingsPage } from './settings/network/ImsSettingsPage';
-import { DisplaySolutionPage } from './settings/network/DisplaySolutionPage';
-
-// SIM
-import { SimFunctionPage } from './settings/sim/SimFunctionPage';
-import { SimSwitchingPage } from './settings/sim/SimSwitchingPage';
-
-// Wi-Fi
-import { MacFiltering24Page } from './settings/wifi/MacFiltering24Page';
-import { WpsSettings24Page } from './settings/wifi/WpsSettings24Page';
-import { AdvSettings24Page } from './settings/wifi/AdvSettings24Page';
-import { MacFiltering5Page } from './settings/wifi/MacFiltering5Page';
-import { WpsSettings5Page } from './settings/wifi/WpsSettings5Page';
-import { AdvSettings5Page } from './settings/wifi/AdvSettings5Page';
-
-// DHCP
-import { DhcpSettingsPage } from './settings/dhcp/DhcpSettingsPage';
-import { MultipleDhcpPage } from './settings/dhcp/MultipleDhcpPage';
-
-// System
-import { DeviceInfoPage } from './settings/system/DeviceInfoPage';
-import { SystemUpgradePage } from './settings/system/SystemUpgradePage';
-
-// Usage
-import { UsageSettingsPage } from './settings/usage/UsageSettingsPage';
+import { ApnSettingsPage } from './settings/ApnSettingsPage';
+import { MultipleApnPage } from './settings/MultipleApnPage';
+import { NetworkModePage } from './settings/NetworkModePage';
+import { NetworkConfigPage } from './settings/NetworkConfigPage';
+import { PlmnScanPage } from './settings/PlmnScanPage';
+import { LockBandPage } from './settings/LockBandPage';
+import { CellLockingPage } from './settings/CellLockingPage';
+import { LinkDetectionPage } from './settings/LinkDetectionPage';
+import { VlanPage } from './settings/VlanPage';
+import { DeviceInfoPage } from './settings/DeviceInfoPage';
+import { NetworkInfoPage } from './settings/NetworkInfoPage';
+import { SimFunctionPage } from './settings/SimFunctionPage';
+import { SimSwitchingPage } from './settings/SimSwitchingPage';
+import { DisplaySolutionPage } from './settings/DisplaySolutionPage';
+import { UsageSettingsPage } from './settings/UsageSettingsPage';
+import { ImsSettingsPage } from './settings/ImsSettingsPage';
+import { MacFiltering24Page } from './settings/MacFiltering24Page';
+import { MacFiltering5Page } from './settings/MacFiltering5Page';
+import { WpsSettings24Page } from './settings/WpsSettings24Page';
+import { WpsSettings5Page } from './settings/WpsSettings5Page';
+import { AdvSettings24Page } from './settings/AdvSettings24Page';
+import { AdvSettings5Page } from './settings/AdvSettings5Page';
+import { DhcpSettingsPage } from './settings/DhcpSettingsPage';
+import { MultipleDhcpPage } from './settings/MultipleDhcpPage';
+import { SystemUpgradePage } from './settings/SystemUpgradePage';
 
 interface SettingsPageProps {
   onOpenLogin: () => void;
@@ -52,7 +39,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
   const location = useLocation();
   const { isLoggedIn } = useGlobalState();
   
-  // Menu Configuration - Optimized Structure
+  // Menu Configuration
   const menuItems = [
     { 
       id: 'network', 
@@ -65,24 +52,12 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
           { id: 'plmn_scan', label: t('plmnScan') },
           { id: 'lock_band', label: t('lockBand') },
           { id: 'cell_locking', label: t('cellLocking') },
-          { id: 'ims', label: t('imsSetting') },
-          { id: 'display_solution', label: t('displaySolution') },
           { id: 'link_detection', label: t('linkDetection') },
           { id: 'vlan', label: t('vlan') },
       ]
     },
-    { 
-      id: 'wifi', 
-      label: t('wifi'),
-      subTabs: [
-          { id: 'wps_settings_24', label: t('wpsSettings24') },
-          { id: 'mac_filtering_24', label: t('macFiltering24') },
-          { id: 'adv_settings_24', label: t('advSettings24') },
-          { id: 'wps_settings_5', label: t('wpsSettings5') },
-          { id: 'mac_filtering_5', label: t('macFiltering5') },
-          { id: 'adv_settings_5', label: t('advSettings5') }
-      ]
-    },
+    { id: 'device_info', label: t('deviceInfo') },
+    { id: 'network_info', label: t('networkInfo') },
     { 
       id: 'sim', 
       label: t('simFunction'),
@@ -91,26 +66,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
           { id: 'sim_switching', label: t('simCardSwitching') }
       ]
     },
-    { 
-      id: 'lan', 
-      label: 'LAN',
-      subTabs: [
-          { id: 'dhcp_settings', label: t('dhcp') },
-          { id: 'multiple_dhcp', label: t('multipleDhcp') }
-      ]
-    },
-    { 
-      id: 'system', 
-      label: t('systemSettings'),
-      subTabs: [
-          { id: 'device_info', label: t('deviceInfo') },
-          { id: 'network_info', label: t('networkInfo') },
-          { id: 'system_upgrade', label: t('systemUpgrade') },
-          { id: 'change_password', label: t('changePassword') },
-          { id: 'time_settings', label: t('timeSettings') },
-          { id: 'log_settings', label: t('logSettings') },
-      ]
-    },
+    { id: 'display_solution', label: t('displaySolution') },
     { 
       id: 'usage', 
       label: t('usage'), 
@@ -119,14 +75,112 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
         { id: 'international', label: t('international') }
       ] 
     },
-    { id: 'firewall', label: t('firewall') }, // Placeholder for now
-    { id: 'vpn', label: t('vpn') }, // Placeholder for now
+    { id: 'ims', label: t('imsSetting') },
+    { 
+      id: 'wifi', 
+      label: t('wifi'),
+      subTabs: [
+          { id: 'mac_filtering_24', label: t('macFiltering24') },
+          { id: 'wps_settings_24', label: t('wpsSettings24') },
+          { id: 'adv_settings_24', label: t('advSettings24') },
+          { id: 'mac_filtering_5', label: t('macFiltering5') },
+          { id: 'wps_settings_5', label: t('wpsSettings5') },
+          { id: 'adv_settings_5', label: t('advSettings5') }
+      ]
+    },
+    { 
+      id: 'dhcp', 
+      label: t('dhcp'),
+      subTabs: [
+          { id: 'dhcp_settings', label: t('dhcp') },
+          { id: 'multiple_dhcp', label: t('multipleDhcp') }
+      ]
+    },
+    { id: 'routing', label: t('routingConfiguration') },
+    { 
+      id: 'mesh', 
+      label: t('meshNetworking'),
+      subTabs: [
+          { id: 'basic_config', label: t('basicConfig') },
+          { id: 'topology_diagram', label: t('topologyDiagram') }
+      ]
+    },
+    { 
+      id: 'vpn', 
+      label: t('vpnSettings'),
+      subTabs: [
+          { id: 'vpn_main', label: t('vpn') },
+          { id: 'gre_settings', label: t('greSettings') },
+          { id: 'ipsec_vpn', label: t('ipsecVpn') },
+          { id: 'ipsec_status', label: t('ipsecStatus') }
+      ]
+    },
+    { id: 'sipalg', label: t('sipAlg') },
+    { id: 'voice', label: t('voice') },
+    { 
+      id: 'ip_passthrough', 
+      label: t('ipPassthrough'),
+      subTabs: [
+          { id: 'ip_passthrough_main', label: t('ipPassthrough') },
+          { id: 'multiple_ip_passthrough', label: t('multipleIpPassthrough') }
+      ]
+    },
+    { id: 'tr069', label: t('tr069') },
+    { 
+      id: 'parental', 
+      label: t('parentalControl'),
+      subTabs: [
+          { id: 'parental_mode', label: t('parentalMode') },
+          { id: 'url_limit', label: t('urlLimit') },
+          { id: 'time_limit', label: t('timeLimit') }
+      ]
+    },
+    { 
+      id: 'firewall', 
+      label: t('firewall'),
+      subTabs: [
+          { id: 'url_filter', label: t('urlFilter') },
+          { id: 'dmz', label: t('dmz') },
+          { id: 'port_forwarding', label: t('portForwarding') },
+          { id: 'upnp', label: t('upnp') },
+          { id: 'mac_filtering', label: t('macFiltering') },
+          { id: 'port_filtering', label: t('portFiltering') },
+          { id: 'ddos_protection', label: t('ddosProtection') }
+      ]
+    },
+    { id: 'access_control', label: t('accessControl') },
+    { 
+      id: 'diagnosis', 
+      label: t('diagnosis'),
+      subTabs: [
+          { id: 'ping', label: t('ping') },
+          { id: 'trace', label: t('trace') }
+      ]
+    },
+    { 
+      id: 'system', 
+      label: t('systemSettings'),
+      subTabs: [
+          { id: 'system_settings_main', label: t('systemSettings') },
+          { id: 'change_password', label: t('changePassword') },
+          { id: 'change_username', label: t('changeUsername') },
+          { id: 'time_settings', label: t('timeSettings') },
+          { id: 'system_upgrade', label: t('systemUpgrade') },
+          { id: 'system_auto_upgrade', label: t('systemAutoUpgrade') },
+          { id: 'fota_upgrade', label: t('fotaUpgrade') },
+          { id: 'log_settings', label: t('logSettings') },
+          { id: 'web_setting', label: t('webSetting') }
+      ]
+    },
+    { id: 'clat', label: t('clat') },
   ];
 
+  // State for Navigation - Default to 'network' as it is the first item
   const [activeSectionId, setActiveSectionId] = useState('network'); 
   const [activeSubTabId, setActiveSubTabId] = useState(''); 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
+  // Scroll Logic State
   const tabsContainerRef = useRef<HTMLDivElement>(null);
   const [hasOverflow, setHasOverflow] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -134,26 +188,39 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
 
   const activeSection = menuItems.find(item => item.id === activeSectionId) || menuItems[0];
   
+  // URL Persistence Logic
+  // 1. On Mount/URL Change: Parse Query Params and update state
   useEffect(() => {
+    // Check URL params first
     const params = new URLSearchParams(location.search);
     const sectionParam = params.get('section');
     const subParam = params.get('sub');
+
+    // Check location state (from direct navigation within app)
     const state = location.state as { sectionId?: string; subTabId?: string } | null;
 
     if (sectionParam) {
+        // Priority 1: URL Query Params (supports refresh)
         setActiveSectionId(sectionParam);
+        
+        // Ensure subTab matches the section
         const sectionItem = menuItems.find(i => i.id === sectionParam);
         if (subParam) {
             setActiveSubTabId(subParam);
         } else if (sectionItem?.subTabs?.length) {
+            // Default to first subtab if section has tabs but none specified
             setActiveSubTabId(sectionItem.subTabs[0].id);
         } else {
             setActiveSubTabId('');
         }
     } else if (state?.sectionId) {
+        // Priority 2: Navigation State (legacy/internal links)
+        // We should probably sync this to URL immediately
         setActiveSectionId(state.sectionId);
+        
         if (state.subTabId) {
             setActiveSubTabId(state.subTabId);
+            // Update URL to match
             navigate(`/settings?section=${state.sectionId}&sub=${state.subTabId}`, { replace: true });
         } else {
              const item = menuItems.find(i => i.id === state.sectionId);
@@ -167,24 +234,30 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
              }
         }
     } else {
+        // Priority 3: Default (Network -> APN)
         if (activeSectionId === 'network' && !activeSubTabId) {
             setActiveSubTabId('apn_settings');
+            // Sync URL
             navigate(`/settings?section=network&sub=apn_settings`, { replace: true });
         }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.search, location.state]); 
 
+  // Check scroll possibilities
   const checkScrollButtons = () => {
     if (tabsContainerRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = tabsContainerRef.current;
       setHasOverflow(scrollWidth > clientWidth);
       setCanScrollLeft(scrollLeft > 0);
+      // Use a small tolerance of 1px for floating point issues
       setCanScrollRight(Math.ceil(scrollLeft + clientWidth) < scrollWidth);
     }
   };
 
+  // Re-check scroll state when tabs change
   useEffect(() => {
+    // Small timeout to allow DOM to update
     const timer = setTimeout(() => {
         checkScrollButtons();
     }, 0);
@@ -205,18 +278,27 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
     }
   };
 
+  // Handle Section Click - Updates URL, which triggers Effect to update state
   const handleSectionClick = (id: string) => {
+    // Reset subtab to first one if available
     const item = menuItems.find(i => i.id === id);
     let subId = '';
     if (item && item.subTabs && item.subTabs.length > 0) {
       subId = item.subTabs[0].id;
     } 
+    
+    // Navigate updates the URL, triggering the useEffect
     const url = subId ? `/settings?section=${id}&sub=${subId}` : `/settings?section=${id}`;
     navigate(url);
+
+    // Close mobile menu
     setIsMobileMenuOpen(false);
+
+    // Reset scroll position of the tabs
     if (tabsContainerRef.current) {
         tabsContainerRef.current.scrollTo({ left: 0 });
     }
+    // Scroll page to top
     window.scrollTo(0, 0);
   };
 
@@ -225,48 +307,65 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
   };
 
   const renderContent = () => {
+      // Dispatch based on active tab ID or section ID
       const targetId = activeSubTabId || activeSectionId;
 
       switch (targetId) {
-          // Network
-          case 'apn_settings': return <ApnSettingsPage />;
-          case 'multiple_apn': return <MultipleApnPage />;
-          case 'network_mode': return <NetworkModePage />;
-          case 'network_config': return <NetworkConfigPage />;
-          case 'plmn_scan': return <PlmnScanPage />;
-          case 'lock_band': return <LockBandPage />;
-          case 'cell_locking': return <CellLockingPage />;
-          case 'ims': return <ImsSettingsPage />;
-          case 'display_solution': return <DisplaySolutionPage />;
-          case 'link_detection': return <LinkDetectionPage />;
-          case 'vlan': return <VlanPage />;
-          
-          // Wi-Fi
-          case 'wps_settings_24': return <WpsSettings24Page />;
-          case 'mac_filtering_24': return <MacFiltering24Page />;
-          case 'adv_settings_24': return <AdvSettings24Page />;
-          case 'wps_settings_5': return <WpsSettings5Page />;
-          case 'mac_filtering_5': return <MacFiltering5Page />;
-          case 'adv_settings_5': return <AdvSettings5Page />;
-          
-          // SIM
-          case 'sim_function': return <SimFunctionPage />;
-          case 'sim_switching': return <SimSwitchingPage />;
-          
-          // LAN/DHCP
-          case 'dhcp_settings': return <DhcpSettingsPage />;
-          case 'multiple_dhcp': return <MultipleDhcpPage />;
-          
-          // System
-          case 'device_info': return <DeviceInfoPage />;
-          case 'network_info': return <NetworkInfoPage />;
-          case 'system_upgrade': return <SystemUpgradePage />;
-          
-          // Usage
-          case 'national': return <UsageSettingsPage type="national" />;
-          case 'international': return <UsageSettingsPage type="international" />;
+          case 'apn_settings':
+              return <ApnSettingsPage />;
+          case 'multiple_apn':
+              return <MultipleApnPage />;
+          case 'network_mode':
+              return <NetworkModePage />;
+          case 'network_config':
+              return <NetworkConfigPage />;
+          case 'plmn_scan':
+              return <PlmnScanPage />;
+          case 'lock_band':
+              return <LockBandPage />;
+          case 'cell_locking':
+              return <CellLockingPage />;
+          case 'link_detection':
+              return <LinkDetectionPage />;
+          case 'vlan':
+              return <VlanPage />;
+          case 'device_info':
+              return <DeviceInfoPage />;
+          case 'network_info':
+              return <NetworkInfoPage />;
+          case 'sim_function':
+              return <SimFunctionPage />;
+          case 'sim_switching':
+              return <SimSwitchingPage />;
+          case 'display_solution':
+              return <DisplaySolutionPage />;
+          case 'national':
+              return <UsageSettingsPage type="national" />;
+          case 'international':
+              return <UsageSettingsPage type="international" />;
+          case 'ims':
+              return <ImsSettingsPage />;
+          case 'mac_filtering_24':
+              return <MacFiltering24Page />;
+          case 'mac_filtering_5':
+              return <MacFiltering5Page />;
+          case 'wps_settings_24':
+              return <WpsSettings24Page />;
+          case 'wps_settings_5':
+              return <WpsSettings5Page />;
+          case 'adv_settings_24':
+              return <AdvSettings24Page />;
+          case 'adv_settings_5':
+              return <AdvSettings5Page />;
+          case 'dhcp_settings':
+              return <DhcpSettingsPage />;
+          case 'multiple_dhcp':
+              return <MultipleDhcpPage />;
+          case 'system_upgrade':
+              return <SystemUpgradePage />;
           
           default:
+              // Default Placeholder Layout
               return (
                 <div className="flex flex-col items-center justify-center h-[400px] text-gray-400 border-2 border-dashed border-gray-100 rounded-[6px] bg-gray-50/50">
                     <p className="italic mb-3">Configuration panel for:</p>
@@ -335,7 +434,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
                 </div>
              </button>
 
-             {/* Menu List */}
+             {/* Menu List - Hidden on mobile unless open */}
              <div className={`
                 flex-col gap-2 
                 ${isMobileMenuOpen ? 'flex' : 'hidden'} 
@@ -354,7 +453,9 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
                         `}
                     >
                         <span>{item.label}</span>
+                        {/* Desktop Arrow */}
                         {activeSectionId === item.id && <ChevronRight size={18} className="animate-fade-in hidden lg:block" />}
+                        {/* Mobile Active Indicator */}
                         {activeSectionId === item.id && <ChevronDown size={18} className="animate-fade-in lg:hidden" />}
                     </button>
                 ))}
@@ -363,9 +464,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
 
           {/* Content Area */}
           <div className="flex-1 min-w-0 w-full">
-             {/* Sub Tabs */}
+             {/* Sub Tabs (if any) */}
              {activeSection.subTabs && (
                  <div className="flex items-start mb-2 gap-2 group/tabs">
+                     {/* Left Arrow */}
                      {hasOverflow && (
                          <button 
                             onClick={() => scrollTabs('left')}
@@ -381,6 +483,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
                          </button>
                      )}
 
+                     {/* Scroll Container */}
                      <div 
                         ref={tabsContainerRef}
                         onScroll={checkScrollButtons}
@@ -401,6 +504,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
                          ))}
                      </div>
 
+                     {/* Right Arrow */}
                      {hasOverflow && (
                          <button 
                             onClick={() => scrollTabs('right')}
@@ -418,8 +522,11 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
                  </div>
              )}
 
+             {/* Main Content Box */}
              <div className="bg-white border border-gray-200 p-4 md:p-8 min-h-[500px] md:min-h-[600px] shadow-sm rounded-[6px] relative overflow-hidden transition-all hover:shadow-md">
+                 {/* Decorative background element */}
                  <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-gray-50 to-transparent rounded-bl-full opacity-60 pointer-events-none"></div>
+                 
                  <div className="relative z-10">
                     <h2 className="text-xl md:text-2xl font-bold mb-6 md:mb-8 text-black pb-4 border-b border-gray-100">
                         {activeSection.label}
@@ -429,6 +536,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
                             </span>
                         )}
                     </h2>
+
                     {renderContent()}
                  </div>
              </div>
