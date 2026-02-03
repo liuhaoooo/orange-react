@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
-import { scanPlmnNetwork, getPlmnList, selectPlmn } from '../../utils/api';
+import { scanPlmnNetwork, getPlmnList } from '../../utils/api';
 import { useAlert } from '../../utils/AlertContext';
 import { useGlobalState } from '../../utils/GlobalStateContext';
 
@@ -14,7 +14,6 @@ interface PlmnItem {
 
 export const PlmnScanPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
-  const [selectionLoading, setSelectionLoading] = useState(false);
   const [list, setList] = useState<PlmnItem[]>([]);
   const { showAlert } = useAlert();
   const { globalData } = useGlobalState();
@@ -103,37 +102,6 @@ export const PlmnScanPage: React.FC = () => {
       }
   };
 
-  const handleSelect = async (row: PlmnItem) => {
-      // Prevent selection if loading, already selected, or unavailable
-      if (loading || selectionLoading || row.status === '2' || row.status === '0' || row.status === '3') return;
-
-      setSelectionLoading(true);
-      try {
-          // Payload: {"cmd":228,"plmn_select_cmd":"4","plmn":"46011","act":"7", ...}
-          const res = await selectPlmn(row.plmn, row.network);
-          if (res && res.success) {
-              showAlert('Network registered successfully', 'success');
-              // Optimistically update the list
-              setList(prev => prev.map(item => {
-                  if (item.plmn === row.plmn) {
-                      return { ...item, status: '2' }; // Set new current
-                  }
-                  if (item.status === '2') {
-                      return { ...item, status: '1' }; // Demote old current to available
-                  }
-                  return item;
-              }));
-          } else {
-              showAlert('Failed to register network', 'error');
-          }
-      } catch (e) {
-          console.error("Select PLMN error", e);
-          showAlert('Error registering network', 'error');
-      } finally {
-          setSelectionLoading(false);
-      }
-  };
-
   return (
     <div className="w-full animate-fade-in">
       <div className="overflow-x-auto mb-12 min-h-[200px]">
@@ -164,8 +132,6 @@ export const PlmnScanPage: React.FC = () => {
             ) : list.length > 0 ? (
                 list.map((row, index) => {
                     const isSelected = row.status === '2';
-                    const isDisabled = row.status === '0' || row.status === '3' || loading || selectionLoading;
-                    
                     return (
                         <tr key={index} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                             <td className="py-6 font-medium text-black">{statusFormatter(row.status)}</td>
@@ -174,18 +140,13 @@ export const PlmnScanPage: React.FC = () => {
                             <td className="py-6 font-medium text-black">{row.plmn}</td>
                             <td className="py-6 font-medium text-black">{netFormatter(row.network)}</td>
                             <td className="py-6 text-end pe-4">
-                                <div className="flex justify-end items-center h-full">
-                                    {selectionLoading && isSelected ? (
-                                        <Loader2 className="animate-spin text-orange w-4 h-4" />
-                                    ) : (
-                                        <input 
-                                            type="radio" 
-                                            checked={isSelected}
-                                            disabled={isDisabled}
-                                            onChange={() => handleSelect(row)}
-                                            className={`w-4 h-4 text-orange focus:ring-orange border-gray-300 ${isDisabled ? 'cursor-not-allowed opacity-50 bg-gray-100' : 'cursor-pointer'}`}
-                                        />
-                                    )}
+                                <div className="flex justify-end">
+                                    <input 
+                                        type="radio" 
+                                        checked={isSelected}
+                                        readOnly
+                                        className="w-4 h-4 text-orange focus:ring-orange border-gray-300"
+                                    />
                                 </div>
                             </td>
                         </tr>
@@ -206,10 +167,10 @@ export const PlmnScanPage: React.FC = () => {
       <div className="flex justify-end pt-4 border-t border-gray-200 mt-4">
           <button 
             onClick={handleScan}
-            disabled={loading || selectionLoading}
+            disabled={loading}
             className={`
                 border-2 border-black font-bold py-2 px-8 text-sm transition-all rounded-[2px] shadow-sm flex items-center
-                ${(loading || selectionLoading)
+                ${loading 
                     ? 'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed' 
                     : 'bg-[#eeeeee] text-black hover:bg-black hover:text-white'
                 }
