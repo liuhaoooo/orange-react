@@ -2,9 +2,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { SquareSwitch } from '../../components/UIComponents';
 import { SimPinConfigModal } from '../../components/SimPinConfigModal';
+import { SimPinModifyModal } from '../../components/SimPinModifyModal';
 import { PukRequiredModal } from '../../components/PukRequiredModal';
 import { useGlobalState } from '../../utils/GlobalStateContext';
-import { setSimLockSwitch, fetchSimLockStatus } from '../../utils/services/simService';
+import { setSimLockSwitch, fetchSimLockStatus, modifySimPin } from '../../utils/services/simService';
 import { fetchConnectionSettings } from '../../utils/api'; // Fallback refresh
 import { useAlert } from '../../utils/AlertContext';
 import { Loader2 } from 'lucide-react';
@@ -17,6 +18,7 @@ export const SimFunctionPage: React.FC = () => {
   const [simStatus, setSimStatus] = useState<any>(null);
 
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
+  const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
   const [isPukModalOpen, setIsPukModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -103,6 +105,42 @@ export const SimFunctionPage: React.FC = () => {
       }
   };
 
+  const handleModifyClick = () => {
+      if (!isEnabled) return;
+      setIsModifyModalOpen(true);
+  };
+
+  const handleModifyConfirm = async (oldPin: string, newPin: string) => {
+      setIsSubmitting(true);
+      try {
+          const res = await modifySimPin(oldPin, newPin);
+          
+          if (res && res.success && res.message === '0') {
+              showAlert('PIN code modified successfully.', 'success');
+              setIsModifyModalOpen(false);
+              await loadSimStatus();
+          } else {
+              if (res.message === 'PUK_LOCKED' || (res.pin_left_times && parseInt(res.pin_left_times) === 0)) {
+                  setIsModifyModalOpen(false);
+                  setIsPukModalOpen(true);
+                  setSimStatus((prev: any) => ({ ...prev, pin_left_times: '0' }));
+              } else {
+                  showAlert('Incorrect old PIN code.', 'error');
+                  if (res.pin_left_times) {
+                      setSimStatus((prev: any) => ({ ...prev, pin_left_times: res.pin_left_times }));
+                  } else {
+                      loadSimStatus();
+                  }
+              }
+          }
+      } catch (e) {
+          console.error(e);
+          showAlert('An error occurred.', 'error');
+      } finally {
+          setIsSubmitting(false);
+      }
+  };
+
   const handlePukSuccess = () => {
       setIsPukModalOpen(false);
       loadSimStatus();
@@ -125,11 +163,17 @@ export const SimFunctionPage: React.FC = () => {
           <SquareSwitch isOn={isEnabled} onChange={handleSwitchClick} />
       </div>
 
-      {/* Modify PIN Button - Only show if enabled usually, or always show but disable if PIN lock off? 
-          Requirement image doesn't specify logic, but "Modify PIN" usually requires PIN lock to be ON. 
-          Standard behavior: visible. */}
+      {/* Modify PIN Button - Only enabled if PIN Verification is ON */}
       <div className="flex justify-end pt-8">
-          <button className="bg-[#cccccc] text-black font-bold py-2.5 px-8 text-sm transition-all rounded-[2px] shadow-sm hover:bg-[#b3b3b3]">
+          <button 
+            onClick={handleModifyClick}
+            disabled={!isEnabled}
+            className={`font-bold py-2.5 px-8 text-sm transition-all rounded-[2px] shadow-sm 
+                ${isEnabled 
+                    ? 'bg-[#eeeeee] border-2 border-transparent hover:border-gray-400 text-black cursor-pointer' 
+                    : 'bg-[#f5f5f5] text-gray-400 cursor-not-allowed border-2 border-transparent'
+                }`}
+          >
               Modify PIN
           </button>
       </div>
@@ -138,6 +182,14 @@ export const SimFunctionPage: React.FC = () => {
         isOpen={isPinModalOpen}
         onClose={() => setIsPinModalOpen(false)}
         onConfirm={handlePinConfirm}
+        remainingAttempts={remainingAttempts}
+        isLoading={isSubmitting}
+      />
+
+      <SimPinModifyModal 
+        isOpen={isModifyModalOpen}
+        onClose={() => setIsModifyModalOpen(false)}
+        onConfirm={handleModifyConfirm}
         remainingAttempts={remainingAttempts}
         isLoading={isSubmitting}
       />
