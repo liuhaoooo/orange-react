@@ -333,6 +333,13 @@ export interface LockBandSettings {
     [key: string]: any;
 }
 
+export interface PlmnScanResponse {
+    success: boolean;
+    cmd: number;
+    sccan_plmn_list: string;
+    [key: string]: any;
+}
+
 // Session Management
 export const setSessionId = (sid: string) => {
   if (sid) {
@@ -729,3 +736,6 @@ export const saveLinkDetectionSettings = async (data: Partial<LinkDetectionSetti
 // Lock Band (CMD 161)
 export const fetchLockBandSettings = async () => apiRequest<LockBandSettings>(161, 'GET');
 export const saveLockBandSettings = async (data: Partial<LockBandSettings>) => apiRequest(161, 'POST', data);
+
+// PLMN Scan (CMD 228)
+export const scanPlmnNetwork = async () => apiRequest<PlmnScanResponse>(228, 'POST', { sccan_plmn: '1' });
