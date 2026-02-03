@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { fetchDeviceInfo, DeviceInfoResponse } from '../../utils/api';
 import { Loader2 } from 'lucide-react';
@@ -189,7 +190,8 @@ export const DeviceInfoPage: React.FC = () => {
         <InfoRow label="Software Version" value={info.version || '-'} />
         <InfoRow label="Running Time" value={formatUptime(uptimeSeconds)} />
         <InfoRow label="Hardware Version" value={info.hwversion || '-'} />
-        <InfoRow label="Indoor Unit Hardware Version" value={info.idu_firmware_version || '-'} />
+        <InfoRow label="Indoor Unit Software Version" value={info.idu_firmware_version || '-'} />
+        <InfoRow label="Indoor Unit Hardware Version" value={info.idu_hardware_version || '-'} />
         <InfoRow label="Indoor Unit SN" value={info.idu_device_sn || '-'} />
         <InfoRow label="Average Load" value={info.cpuload || '-'} />
       </InfoSection>
