@@ -95,9 +95,12 @@ export const DeviceInfoPage: React.FC = () => {
       
       <InfoSection title="Device & Version Information">
         <InfoRow label="Type" value={info.board_type || '-'} />
+        <InfoRow label="SN" value={info.device_sn || '-'} />
         <InfoRow label="Software Version" value={info.version || '-'} />
         <InfoRow label="Running Time" value={formatUptime(uptimeSeconds)} />
         <InfoRow label="Hardware Version" value={info.hwversion || '-'} />
+        <InfoRow label="Indoor Unit Hardware Version" value={info.idu_firmware_version || '-'} />
+        <InfoRow label="Indoor Unit SN" value={info.idu_device_sn || '-'} />
         <InfoRow label="Average Load" value={info.cpuload || '-'} />
       </InfoSection>
 

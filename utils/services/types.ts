@@ -59,6 +59,9 @@ export interface DeviceInfoResponse {
   module_type?: string;
   module_softver?: string;
   module_hardver?: string;
+  device_sn?: string;
+  idu_firmware_version?: string;
+  idu_device_sn?: string;
   [key: string]: any;
 }
 
