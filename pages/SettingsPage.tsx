@@ -52,7 +52,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
   const location = useLocation();
   const { isLoggedIn } = useGlobalState();
   
-  // Menu Configuration
+  // Menu Configuration - Optimized Structure
   const menuItems = [
     { 
       id: 'network', 
@@ -65,12 +65,24 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
           { id: 'plmn_scan', label: t('plmnScan') },
           { id: 'lock_band', label: t('lockBand') },
           { id: 'cell_locking', label: t('cellLocking') },
+          { id: 'ims', label: t('imsSetting') },
+          { id: 'display_solution', label: t('displaySolution') },
           { id: 'link_detection', label: t('linkDetection') },
           { id: 'vlan', label: t('vlan') },
       ]
     },
-    { id: 'device_info', label: t('deviceInfo') },
-    { id: 'network_info', label: t('networkInfo') },
+    { 
+      id: 'wifi', 
+      label: t('wifi'),
+      subTabs: [
+          { id: 'wps_settings_24', label: t('wpsSettings24') },
+          { id: 'mac_filtering_24', label: t('macFiltering24') },
+          { id: 'adv_settings_24', label: t('advSettings24') },
+          { id: 'wps_settings_5', label: t('wpsSettings5') },
+          { id: 'mac_filtering_5', label: t('macFiltering5') },
+          { id: 'adv_settings_5', label: t('advSettings5') }
+      ]
+    },
     { 
       id: 'sim', 
       label: t('simFunction'),
@@ -79,7 +91,26 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
           { id: 'sim_switching', label: t('simCardSwitching') }
       ]
     },
-    { id: 'display_solution', label: t('displaySolution') },
+    { 
+      id: 'lan', 
+      label: 'LAN',
+      subTabs: [
+          { id: 'dhcp_settings', label: t('dhcp') },
+          { id: 'multiple_dhcp', label: t('multipleDhcp') }
+      ]
+    },
+    { 
+      id: 'system', 
+      label: t('systemSettings'),
+      subTabs: [
+          { id: 'device_info', label: t('deviceInfo') },
+          { id: 'network_info', label: t('networkInfo') },
+          { id: 'system_upgrade', label: t('systemUpgrade') },
+          { id: 'change_password', label: t('changePassword') },
+          { id: 'time_settings', label: t('timeSettings') },
+          { id: 'log_settings', label: t('logSettings') },
+      ]
+    },
     { 
       id: 'usage', 
       label: t('usage'), 
@@ -88,104 +119,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
         { id: 'international', label: t('international') }
       ] 
     },
-    { id: 'ims', label: t('imsSetting') },
-    { 
-      id: 'wifi', 
-      label: t('wifi'),
-      subTabs: [
-          { id: 'mac_filtering_24', label: t('macFiltering24') },
-          { id: 'wps_settings_24', label: t('wpsSettings24') },
-          { id: 'adv_settings_24', label: t('advSettings24') },
-          { id: 'mac_filtering_5', label: t('macFiltering5') },
-          { id: 'wps_settings_5', label: t('wpsSettings5') },
-          { id: 'adv_settings_5', label: t('advSettings5') }
-      ]
-    },
-    { 
-      id: 'dhcp', 
-      label: t('dhcp'),
-      subTabs: [
-          { id: 'dhcp_settings', label: t('dhcp') },
-          { id: 'multiple_dhcp', label: t('multipleDhcp') }
-      ]
-    },
-    { id: 'routing', label: t('routingConfiguration') },
-    { 
-      id: 'mesh', 
-      label: t('meshNetworking'),
-      subTabs: [
-          { id: 'basic_config', label: t('basicConfig') },
-          { id: 'topology_diagram', label: t('topologyDiagram') }
-      ]
-    },
-    { 
-      id: 'vpn', 
-      label: t('vpnSettings'),
-      subTabs: [
-          { id: 'vpn_main', label: t('vpn') },
-          { id: 'gre_settings', label: t('greSettings') },
-          { id: 'ipsec_vpn', label: t('ipsecVpn') },
-          { id: 'ipsec_status', label: t('ipsecStatus') }
-      ]
-    },
-    { id: 'sipalg', label: t('sipAlg') },
-    { id: 'voice', label: t('voice') },
-    { 
-      id: 'ip_passthrough', 
-      label: t('ipPassthrough'),
-      subTabs: [
-          { id: 'ip_passthrough_main', label: t('ipPassthrough') },
-          { id: 'multiple_ip_passthrough', label: t('multipleIpPassthrough') }
-      ]
-    },
-    { id: 'tr069', label: t('tr069') },
-    { 
-      id: 'parental', 
-      label: t('parentalControl'),
-      subTabs: [
-          { id: 'parental_mode', label: t('parentalMode') },
-          { id: 'url_limit', label: t('urlLimit') },
-          { id: 'time_limit', label: t('timeLimit') }
-      ]
-    },
-    { 
-      id: 'firewall', 
-      label: t('firewall'),
-      subTabs: [
-          { id: 'url_filter', label: t('urlFilter') },
-          { id: 'dmz', label: t('dmz') },
-          { id: 'port_forwarding', label: t('portForwarding') },
-          { id: 'upnp', label: t('upnp') },
-          { id: 'mac_filtering', label: t('macFiltering') },
-          { id: 'port_filtering', label: t('portFiltering') },
-          { id: 'ddos_protection', label: t('ddosProtection') }
-      ]
-    },
-    { id: 'access_control', label: t('accessControl') },
-    { 
-      id: 'diagnosis', 
-      label: t('diagnosis'),
-      subTabs: [
-          { id: 'ping', label: t('ping') },
-          { id: 'trace', label: t('trace') }
-      ]
-    },
-    { 
-      id: 'system', 
-      label: t('systemSettings'),
-      subTabs: [
-          { id: 'system_settings_main', label: t('systemSettings') },
-          { id: 'change_password', label: t('changePassword') },
-          { id: 'change_username', label: t('changeUsername') },
-          { id: 'time_settings', label: t('timeSettings') },
-          { id: 'system_upgrade', label: t('systemUpgrade') },
-          { id: 'system_auto_upgrade', label: t('systemAutoUpgrade') },
-          { id: 'fota_upgrade', label: t('fotaUpgrade') },
-          { id: 'log_settings', label: t('logSettings') },
-          { id: 'web_setting', label: t('webSetting') }
-      ]
-    },
-    { id: 'clat', label: t('clat') },
+    { id: 'firewall', label: t('firewall') }, // Placeholder for now
+    { id: 'vpn', label: t('vpn') }, // Placeholder for now
   ];
 
   const [activeSectionId, setActiveSectionId] = useState('network'); 
@@ -293,58 +228,43 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
       const targetId = activeSubTabId || activeSectionId;
 
       switch (targetId) {
-          case 'apn_settings':
-              return <ApnSettingsPage />;
-          case 'multiple_apn':
-              return <MultipleApnPage />;
-          case 'network_mode':
-              return <NetworkModePage />;
-          case 'network_config':
-              return <NetworkConfigPage />;
-          case 'plmn_scan':
-              return <PlmnScanPage />;
-          case 'lock_band':
-              return <LockBandPage />;
-          case 'cell_locking':
-              return <CellLockingPage />;
-          case 'link_detection':
-              return <LinkDetectionPage />;
-          case 'vlan':
-              return <VlanPage />;
-          case 'device_info':
-              return <DeviceInfoPage />;
-          case 'network_info':
-              return <NetworkInfoPage />;
-          case 'sim_function':
-              return <SimFunctionPage />;
-          case 'sim_switching':
-              return <SimSwitchingPage />;
-          case 'display_solution':
-              return <DisplaySolutionPage />;
-          case 'national':
-              return <UsageSettingsPage type="national" />;
-          case 'international':
-              return <UsageSettingsPage type="international" />;
-          case 'ims':
-              return <ImsSettingsPage />;
-          case 'mac_filtering_24':
-              return <MacFiltering24Page />;
-          case 'mac_filtering_5':
-              return <MacFiltering5Page />;
-          case 'wps_settings_24':
-              return <WpsSettings24Page />;
-          case 'wps_settings_5':
-              return <WpsSettings5Page />;
-          case 'adv_settings_24':
-              return <AdvSettings24Page />;
-          case 'adv_settings_5':
-              return <AdvSettings5Page />;
-          case 'dhcp_settings':
-              return <DhcpSettingsPage />;
-          case 'multiple_dhcp':
-              return <MultipleDhcpPage />;
-          case 'system_upgrade':
-              return <SystemUpgradePage />;
+          // Network
+          case 'apn_settings': return <ApnSettingsPage />;
+          case 'multiple_apn': return <MultipleApnPage />;
+          case 'network_mode': return <NetworkModePage />;
+          case 'network_config': return <NetworkConfigPage />;
+          case 'plmn_scan': return <PlmnScanPage />;
+          case 'lock_band': return <LockBandPage />;
+          case 'cell_locking': return <CellLockingPage />;
+          case 'ims': return <ImsSettingsPage />;
+          case 'display_solution': return <DisplaySolutionPage />;
+          case 'link_detection': return <LinkDetectionPage />;
+          case 'vlan': return <VlanPage />;
+          
+          // Wi-Fi
+          case 'wps_settings_24': return <WpsSettings24Page />;
+          case 'mac_filtering_24': return <MacFiltering24Page />;
+          case 'adv_settings_24': return <AdvSettings24Page />;
+          case 'wps_settings_5': return <WpsSettings5Page />;
+          case 'mac_filtering_5': return <MacFiltering5Page />;
+          case 'adv_settings_5': return <AdvSettings5Page />;
+          
+          // SIM
+          case 'sim_function': return <SimFunctionPage />;
+          case 'sim_switching': return <SimSwitchingPage />;
+          
+          // LAN/DHCP
+          case 'dhcp_settings': return <DhcpSettingsPage />;
+          case 'multiple_dhcp': return <MultipleDhcpPage />;
+          
+          // System
+          case 'device_info': return <DeviceInfoPage />;
+          case 'network_info': return <NetworkInfoPage />;
+          case 'system_upgrade': return <SystemUpgradePage />;
+          
+          // Usage
+          case 'national': return <UsageSettingsPage type="national" />;
+          case 'international': return <UsageSettingsPage type="international" />;
           
           default:
               return (
