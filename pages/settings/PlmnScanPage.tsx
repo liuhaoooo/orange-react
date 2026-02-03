@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
-import { scanPlmnNetwork } from '../../utils/api';
+import { scanPlmnNetwork, getPlmnList } from '../../utils/api';
 import { useAlert } from '../../utils/AlertContext';
+import { useGlobalState } from '../../utils/GlobalStateContext';
 
 interface PlmnItem {
     status: string;
@@ -15,6 +16,7 @@ export const PlmnScanPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [list, setList] = useState<PlmnItem[]>([]);
   const { showAlert } = useAlert();
+  const { globalData } = useGlobalState();
 
   const netFormatter = (network: string): string => {
       const net = parseInt(network, 10);
@@ -37,7 +39,45 @@ export const PlmnScanPage: React.FC = () => {
       return status;
   };
 
+  // Helper to parse response string
+  const parseList = (rawString: string): PlmnItem[] => {
+      if (!rawString) return [];
+      // Format: "1,CHN-TELECOM,CTCC,46011,7|3,CHINA BROADNET,CBN,46015,7"
+      const rows = rawString.split('|');
+      return rows.map(row => {
+          const cols = row.split(',');
+          return {
+              status: cols[0] || '',
+              operator: cols[1] || '',
+              shortName: cols[2] || '',
+              plmn: cols[3] || '',
+              network: cols[4] || ''
+          };
+      }).filter(item => item.plmn); // Filter out empty lines if any
+  };
+
+  useEffect(() => {
+      const fetchCache = async () => {
+          try {
+              const res = await getPlmnList();
+              if (res && res.success && res.sccan_plmn_list) {
+                  setList(parseList(res.sccan_plmn_list));
+              }
+          } catch(e) {
+              console.error("Failed to fetch PLMN cache", e);
+          }
+      };
+      fetchCache();
+  }, []);
+
   const handleScan = async () => {
+      // Check SIM Status
+      const simStatus = globalData.statusInfo?.sim_status;
+      if (simStatus !== '1') {
+          showAlert('SIM card is not ready. Cannot scan.', 'warning');
+          return;
+      }
+
       setLoading(true);
       setList([]);
       
@@ -46,19 +86,7 @@ export const PlmnScanPage: React.FC = () => {
           if (res && res.success) {
               const rawString = res.sccan_plmn_list || '';
               if (rawString) {
-                  // Format: "1,CHN-TELECOM,CTCC,46011,7|3,CHINA BROADNET,CBN,46015,7"
-                  const rows = rawString.split('|');
-                  const parsedList: PlmnItem[] = rows.map(row => {
-                      const cols = row.split(',');
-                      return {
-                          status: cols[0] || '',
-                          operator: cols[1] || '',
-                          shortName: cols[2] || '',
-                          plmn: cols[3] || '',
-                          network: cols[4] || ''
-                      };
-                  });
-                  setList(parsedList);
+                  setList(parseList(rawString));
                   showAlert('Scan completed successfully', 'success');
               } else {
                   showAlert('No networks found', 'info');
@@ -89,7 +117,19 @@ export const PlmnScanPage: React.FC = () => {
             </tr>
           </thead>
           <tbody className="text-sm">
-            {list.length > 0 ? (
+            {loading ? (
+                <tr>
+                    <td colSpan={6} className="py-12 text-center bg-gray-50">
+                        <div className="flex flex-col items-center justify-center p-4">
+                            <Loader2 className="animate-spin text-orange mb-4" size={40} />
+                            <p className="text-black font-bold text-base mb-2">Scanning Network...</p>
+                            <p className="text-gray-600 text-sm max-w-lg leading-relaxed text-center">
+                                The search operation may take some time. This process will not exceed 4 minutes. Please do not refresh the page, operate the page, disconnect the power, etc. while waiting.
+                            </p>
+                        </div>
+                    </td>
+                </tr>
+            ) : list.length > 0 ? (
                 list.map((row, index) => {
                     const isSelected = row.status === '2';
                     return (
@@ -115,7 +155,7 @@ export const PlmnScanPage: React.FC = () => {
             ) : (
                 <tr>
                     <td colSpan={6} className="py-8 text-center text-gray-400 italic">
-                        {loading ? 'Scanning...' : 'No Data'}
+                        No Data
                     </td>
                 </tr>
             )}

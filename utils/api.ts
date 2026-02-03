@@ -739,3 +739,4 @@ export const saveLockBandSettings = async (data: Partial<LockBandSettings>) => a
 
 // PLMN Scan (CMD 228)
 export const scanPlmnNetwork = async () => apiRequest<PlmnScanResponse>(228, 'POST', { sccan_plmn: '1' });
+export const getPlmnList = async () => apiRequest<PlmnScanResponse>(228, 'GET');
