@@ -65,4 +65,4 @@ export const setDisplaySolution = async (value: string) => apiRequest(235, 'POST
 
 // Usage Settings
 export const fetchUsageSettings = async () => apiRequest<UsageSettingsResponse>(1021, 'GET');
-export const saveUsageSettings = async (data: any) => apiRequest(1021, 'POST', data);
+export const saveUsageSettings = async (data: any) => apiRequest(337, 'POST', data);

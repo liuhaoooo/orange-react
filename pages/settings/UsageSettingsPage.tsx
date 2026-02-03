@@ -47,7 +47,7 @@ export const UsageSettingsPage: React.FC<{ type: 'national' | 'international' }>
 
   // Form State
   const [totalData, setTotalData] = useState('0');
-  const [unit, setUnit] = useState('1'); // Default GB ('1') based on typical usage
+  const [unit, setUnit] = useState('1'); // Default GB ('1')
   const [threshold, setThreshold] = useState('50');
   const [alertEnabled, setAlertEnabled] = useState(false);
   const [mobileNumber, setMobileNumber] = useState('');
@@ -79,10 +79,12 @@ export const UsageSettingsPage: React.FC<{ type: 'national' | 'international' }>
 
   const calculate = (res: UsageSettingsResponse, newTotal?: string, newUnit?: string) => {
       // 1. Used Data (MB)
-      const used = parseFloat(res[keys.dlFlow] || '0') + parseFloat(res[keys.ulFlow] || '0');
+      const dl = parseFloat(res[keys.dlFlow] || '0');
+      const ul = parseFloat(res[keys.ulFlow] || '0');
+      const used = dl + ul;
       setDataUsage(formatBytes(used));
 
-      // 2. Total Limit (converted to MB)
+      // 2. Total Limit (converted to MB for calculation)
       const tVal = parseFloat(newTotal !== undefined ? newTotal : (res[keys.limitSize] || '0'));
       const tUnit = newUnit !== undefined ? newUnit : (res.flow_limit_unit || '1');
       
@@ -100,12 +102,12 @@ export const UsageSettingsPage: React.FC<{ type: 'national' | 'international' }>
     const init = async () => {
       try {
         const res = await fetchUsageSettings();
-        if (res && res.success) {
+        if (res && (res.success || res.cmd === 1021)) {
             setRawData(res);
             
             // Map values to state
             setTotalData(res[keys.limitSize] || '0');
-            setUnit(res.flow_limit_unit || '1'); // Assuming unit is global for both, typically per router logic
+            setUnit(res.flow_limit_unit || '1'); 
             setThreshold(res[keys.warnPercent] || '50');
             setAlertEnabled(res[keys.smsSwitch] === '1');
             setMobileNumber(res[keys.noticeNumber] || '');
@@ -123,7 +125,7 @@ export const UsageSettingsPage: React.FC<{ type: 'national' | 'international' }>
     init();
   }, [type, showAlert, keys.limitSize, keys.warnPercent, keys.smsSwitch, keys.noticeNumber, keys.noticeText, keys.dlFlow, keys.ulFlow]);
 
-  // Recalculate remaining when inputs change
+  // Recalculate remaining when inputs change locally
   useEffect(() => {
       if (rawData) {
           calculate(rawData, totalData, unit);
@@ -139,8 +141,6 @@ export const UsageSettingsPage: React.FC<{ type: 'national' | 'international' }>
       }
       
       // Max check (999 TB approx)
-      // 999 TB = 999 * 1024 GB = 1,022,976 MB
-      // If Unit is TB, limit input to 999
       if (unit === '2' && totalNum > 999) {
           showAlert('Total Data cannot exceed 999 TB.', 'error');
           return;
@@ -154,22 +154,27 @@ export const UsageSettingsPage: React.FC<{ type: 'national' | 'international' }>
 
       setSaving(true);
       
-      // Construct Payload
-      // Merge with existing rawData to preserve other fields not on this screen
+      // Construct Payload using existing rawData to fill in other keys
+      // The payload must include everything for CMD 337
       const payload: any = { ...rawData };
       
+      // Update fields for CURRENT TYPE
       payload[keys.limitSize] = totalData;
-      payload.flow_limit_unit = unit; // Updating global unit based on this page's selection
+      payload.flow_limit_unit = unit; // Global unit
       payload[keys.warnPercent] = threshold;
       payload[keys.smsSwitch] = alertEnabled ? '1' : '0';
       payload[keys.noticeNumber] = mobileNumber;
       payload[keys.noticeText] = messageContent;
 
+      // Ensure keys required by CMD 337 exist (in case rawData missed some or has nulls)
+      if (payload.internation_limit_size === undefined) payload.internation_limit_size = '0';
+      if (payload.nation_limit_size === undefined) payload.nation_limit_size = '0';
+      
       try {
           const res = await saveUsageSettings(payload);
           if (res && (res.success || res.result === 'success')) {
               showAlert('Settings saved successfully.', 'success');
-              // Update raw data locally to reflect save
+              // Update local raw data to reflect save
               setRawData(payload);
           } else {
               showAlert('Failed to save settings.', 'error');

@@ -332,24 +332,32 @@ export interface PlmnScanResponse {
 
 export interface UsageSettingsResponse {
     success: boolean;
+    cmd: number;
     limitSwitch: string;
     limitSize: string;
     startDate: string;
     nation_limit_size: string;
     internation_limit_size: string;
     nation_warn_percentage: string;
+    warn_percentage: string;
     internation_warn_percentage: string;
     flow_sms_notice_sw: string;
     national_flow_sms_notice_sw: string;
     international_flow_sms_notice_sw: string;
     flow_limit_unit: string;
+    flow_notice_number: string;
     nation_flow_notice_number: string;
     internation_flow_notice_number: string;
     nation_flow_notice_text: string;
     internation_flow_notice_text: string;
-    dl_mon_flow: string;
-    ul_mon_flow: string;
+    flow_notice_text: string;
+    dialMode: string;
+    roamingEnable: string;
+    reset_traffic_lastTime: string;
+    mon_download_flow: string;
     roam_dl_mon_flow: string;
     roam_ul_mon_flow: string;
+    dl_mon_flow: string;
+    ul_mon_flow: string;
     [key: string]: any;
 }
