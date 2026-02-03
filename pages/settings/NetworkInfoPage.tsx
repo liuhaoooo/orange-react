@@ -212,7 +212,15 @@ export const NetworkInfoPage: React.FC = () => {
             setLoading(false);
         }
     };
+
+    // Initial load
     loadData();
+
+    // Poll every 10 seconds
+    const intervalId = setInterval(loadData, 10000);
+
+    // Cleanup on unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   if (loading) {
