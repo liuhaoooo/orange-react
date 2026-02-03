@@ -57,3 +57,7 @@ export const saveLockBandSettings = async (data: Partial<LockBandSettings>) => a
 export const scanPlmnNetwork = async () => apiRequest<PlmnScanResponse>(228, 'POST', { sccan_plmn: '1' });
 export const getPlmnList = async () => apiRequest<PlmnScanResponse>(228, 'GET');
 export const selectPlmn = async (plmn: string, act: string) => apiRequest(228, 'POST', { plmn_select_cmd: '4', plmn, act });
+
+// Display Solution
+export const fetchDisplaySolution = async () => apiRequest<{ buffer: string; success?: boolean }>(235, 'GET');
+export const setDisplaySolution = async (value: string) => apiRequest(235, 'POST', { value });

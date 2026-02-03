@@ -1,6 +1,8 @@
 
-import React, { useState } from 'react';
-import { ChevronDown, Save, ChevronUp } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronDown, Save, ChevronUp, Loader2 } from 'lucide-react';
+import { fetchDisplaySolution, setDisplaySolution } from '../../utils/api';
+import { useAlert } from '../../utils/AlertContext';
 
 const FormRow = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100 last:border-0">
@@ -29,8 +31,47 @@ const StyledSelect = ({ value, onChange, options }: { value: string, onChange: (
 );
 
 export const DisplaySolutionPage: React.FC = () => {
+  const { showAlert } = useAlert();
   const [solution, setSolution] = useState('D');
   const [isExplanationOpen, setIsExplanationOpen] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        const res = await fetchDisplaySolution();
+        if (res && (res.success || res.success === undefined)) {
+          if (res.buffer) {
+            setSolution(res.buffer);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch display solution", e);
+        showAlert('Failed to load settings.', 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+    init();
+  }, [showAlert]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const res = await setDisplaySolution(solution);
+      if (res && (res.success || res.message === 'success' || res.result === 'success')) {
+        showAlert('Settings saved successfully.', 'success');
+      } else {
+        showAlert('Failed to save settings.', 'error');
+      }
+    } catch (e) {
+      console.error("Failed to set display solution", e);
+      showAlert('An error occurred.', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const tableData = [
     {
@@ -65,6 +106,14 @@ export const DisplaySolutionPage: React.FC = () => {
       return "bg-white text-black";
   };
 
+  if (loading) {
+      return (
+          <div className="w-full h-64 flex items-center justify-center">
+              <Loader2 className="animate-spin text-orange" size={40} />
+          </div>
+      );
+  }
+
   return (
     <div className="w-full animate-fade-in py-2">
       <FormRow label="4/5G display solution">
@@ -76,8 +125,12 @@ export const DisplaySolutionPage: React.FC = () => {
       </FormRow>
 
       <div className="flex justify-end pt-12 pb-12">
-        <button className="bg-white border-2 border-black text-black hover:bg-black hover:text-white font-bold py-2.5 px-12 text-sm transition-all rounded-[2px] shadow-sm uppercase tracking-wide flex items-center">
-            <Save size={18} className="me-2" />
+        <button 
+            onClick={handleSave}
+            disabled={saving}
+            className="bg-white border-2 border-black text-black hover:bg-black hover:text-white font-bold py-2.5 px-12 text-sm transition-all rounded-[2px] shadow-sm uppercase tracking-wide flex items-center"
+        >
+            {saving ? <Loader2 className="animate-spin w-4 h-4 me-2" /> : <Save size={18} className="me-2" />}
             Save
         </button>
       </div>
