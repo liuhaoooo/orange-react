@@ -62,6 +62,7 @@ export interface DeviceInfoResponse {
   device_sn?: string;
   idu_firmware_version?: string;
   idu_device_sn?: string;
+  memory?: string;
   [key: string]: any;
 }
 

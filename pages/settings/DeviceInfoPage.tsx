@@ -26,6 +26,85 @@ const InfoRow = ({ label, value }: { label: string, value: string }) => (
   </tr>
 );
 
+// Format KB to proper unit string
+const formatSize = (kb: number) => {
+    if (kb >= 1048576) {
+        return `${(kb / 1048576).toFixed(2)} GB`;
+    } else if (kb >= 1024) {
+        return `${(kb / 1024).toFixed(2)} MB`;
+    }
+    return `${kb} KB`;
+};
+
+const MemoryChart = ({ memoryStr }: { memoryStr?: string }) => {
+    if (!memoryStr) return null;
+
+    // Parse memory string: "1456112 kB, 1107140 kB, 61048 kB, 1121316 kB"
+    // Order: [Total, Free, Cache, Available]
+    const parts = memoryStr.split(',').map(s => parseInt(s.replace(/[^0-9]/g, ''), 10));
+    
+    if (parts.length < 3 || parts.some(p => isNaN(p))) return null;
+
+    const total = parts[0];
+    const free = parts[1];
+    const cache = parts[2];
+    const used = total - free - cache;
+
+    const usedPct = (used / total) * 100;
+    const cachePct = (cache / total) * 100;
+    const freePct = (free / total) * 100;
+
+    // Calculate conic gradient stops
+    // Used: 0% -> usedPct%
+    // Cache: usedPct% -> (usedPct + cachePct)%
+    // Free: (usedPct + cachePct)% -> 100%
+    const stop1 = usedPct;
+    const stop2 = usedPct + cachePct;
+
+    const items = [
+        { label: 'Used Memory', value: used, pct: usedPct, color: '#ff7900' }, // Orange
+        { label: 'Memory Cache', value: cache, pct: cachePct, color: '#000000' }, // Black
+        { label: 'Memory Free', value: free, pct: freePct, color: '#e5e5e5' }, // Gray
+    ];
+
+    return (
+        <div className="bg-white border border-gray-200 rounded-[2px] p-6 mb-8 flex flex-col md:flex-row items-center justify-around">
+            {/* Donut Chart */}
+            <div className="relative w-48 h-48 rounded-full flex items-center justify-center shrink-0 mb-6 md:mb-0"
+                 style={{
+                     background: `conic-gradient(
+                        #ff7900 0% ${stop1}%, 
+                        #000000 ${stop1}% ${stop2}%, 
+                        #e5e5e5 ${stop2}% 100%
+                     )`
+                 }}
+            >
+                {/* Inner Circle */}
+                <div className="absolute w-36 h-36 bg-white rounded-full flex flex-col items-center justify-center text-center">
+                    <span className="text-gray-500 text-xs font-bold uppercase mb-1">Total Memory</span>
+                    <span className="text-black text-lg font-bold">{formatSize(total)}</span>
+                </div>
+            </div>
+
+            {/* Legend */}
+            <div className="flex flex-col space-y-4 w-full md:w-auto min-w-[200px]">
+                {items.map((item, idx) => (
+                    <div key={idx} className="flex items-center justify-between w-full">
+                        <div className="flex items-center">
+                            <div className="w-3 h-3 rounded-full me-3" style={{ backgroundColor: item.color }}></div>
+                            <div className="flex flex-col">
+                                <span className="text-sm font-bold text-black">{item.label}</span>
+                                <span className="text-xs text-gray-500">{formatSize(item.value)}</span>
+                            </div>
+                        </div>
+                        <span className="font-bold text-sm text-black ms-4">{item.pct.toFixed(1)}%</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
 export const DeviceInfoPage: React.FC = () => {
   const [data, setData] = useState<DeviceInfoResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -93,6 +172,9 @@ export const DeviceInfoPage: React.FC = () => {
   return (
     <div className="w-full animate-fade-in py-2">
       
+      {/* Memory Chart Section */}
+      {info.memory && <MemoryChart memoryStr={info.memory} />}
+
       <InfoSection title="Device & Version Information">
         <InfoRow label="Type" value={info.board_type || '-'} />
         <InfoRow label="SN" value={info.device_sn || '-'} />
