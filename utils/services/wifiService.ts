@@ -1,0 +1,23 @@
+
+import { apiRequest } from './core';
+import { WifiSettingsResponse } from './types';
+
+export const fetchWifiSettings = async () => apiRequest<WifiSettingsResponse>(587, 'GET');
+
+export const updateWifiConfig = async (params: any) => {
+    const cmd = params.is5g ? 211 : 2;
+    const subcmd = params.isGuest ? 1 : 0;
+    // encodeURIComponent handles special chars before btoa
+    const encodedSsid = btoa(unescape(encodeURIComponent(params.ssid)));
+    const payload: any = {
+        subcmd,
+        wifiOpen: params.wifiOpen,
+        broadcast: params.broadcast,
+        ssid: encodedSsid,
+        key: params.key,
+        authenticationType: params.authenticationType
+    };
+    // wifiSames is usually only for 2.4G calls to sync settings or priority
+    if (!params.is5g && params.wifiSames !== undefined) payload.wifiSames = params.wifiSames;
+    return apiRequest(cmd, 'POST', payload);
+};

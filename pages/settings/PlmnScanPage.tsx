@@ -25,7 +25,7 @@ const ERROR_MESSAGES: Record<string, string> = {
 
 export const PlmnScanPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
-  const [selectionLoading, setSelectionLoading] = useState(false);
+  const [processingKey, setProcessingKey] = useState<string | null>(null);
   const [list, setList] = useState<PlmnItem[]>([]);
   const { showAlert } = useAlert();
   const { globalData } = useGlobalState();
@@ -118,11 +118,14 @@ export const PlmnScanPage: React.FC = () => {
 
   const handleSelect = async (row: PlmnItem) => {
       // Prevent selection if loading, already selected, or unavailable
-      if (loading || selectionLoading || row.status === '2' || row.status === '0' || row.status === '3') return;
+      if (loading || processingKey || row.status === '2' || row.status === '0' || row.status === '3') return;
 
-      setSelectionLoading(true);
+      const key = `${row.plmn}_${row.network}`;
+      setProcessingKey(key);
+
       try {
           // Payload: {"cmd":228,"plmn_select_cmd":"4","plmn":"46011","act":"7", ...}
+          // Using apiRequest directly as requested to avoid changing api.ts
           const res = await apiRequest(228, 'POST', { 
               plmn_select_cmd: '4', 
               plmn: row.plmn, 
@@ -143,13 +146,15 @@ export const PlmnScanPage: React.FC = () => {
                   return item;
               }));
           } else {
-              showAlert('Failed to register network', 'error');
+              const msgCode = res?.message || '';
+              const errorText = ERROR_MESSAGES[msgCode] || 'Failed to register network';
+              showAlert(errorText, 'error');
           }
       } catch (e) {
           console.error("Select PLMN error", e);
           showAlert('Error registering network', 'error');
       } finally {
-          setSelectionLoading(false);
+          setProcessingKey(null);
       }
   };
 
@@ -183,7 +188,8 @@ export const PlmnScanPage: React.FC = () => {
             ) : list.length > 0 ? (
                 list.map((row, index) => {
                     const isSelected = row.status === '2';
-                    const isDisabled = row.status === '0' || row.status === '3' || loading || selectionLoading;
+                    const isDisabled = row.status === '0' || row.status === '3' || loading || !!processingKey;
+                    const isProcessing = processingKey === `${row.plmn}_${row.network}`;
                     
                     return (
                         <tr key={index} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
@@ -194,7 +200,7 @@ export const PlmnScanPage: React.FC = () => {
                             <td className="py-6 font-medium text-black">{netFormatter(row.network)}</td>
                             <td className="py-6 text-end pe-4">
                                 <div className="flex justify-end items-center h-full">
-                                    {selectionLoading && isSelected ? (
+                                    {isProcessing ? (
                                         <Loader2 className="animate-spin text-orange w-4 h-4" />
                                     ) : (
                                         <input 
@@ -225,10 +231,10 @@ export const PlmnScanPage: React.FC = () => {
       <div className="flex justify-end pt-4 border-t border-gray-200 mt-4">
           <button 
             onClick={handleScan}
-            disabled={loading || selectionLoading}
+            disabled={loading || !!processingKey}
             className={`
                 border-2 border-black font-bold py-2 px-8 text-sm transition-all rounded-[2px] shadow-sm flex items-center
-                ${(loading || selectionLoading)
+                ${(loading || !!processingKey)
                     ? 'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed' 
                     : 'bg-[#eeeeee] text-black hover:bg-black hover:text-white'
                 }
