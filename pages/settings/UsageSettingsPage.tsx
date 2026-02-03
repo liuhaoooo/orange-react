@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ChevronDown, Save, Loader2 } from 'lucide-react';
 import { SquareSwitch } from '../../components/UIComponents';
 import { fetchUsageSettings, saveUsageSettings, UsageSettingsResponse } from '../../utils/api';
@@ -13,16 +13,18 @@ const FormRow = ({ label, children, required = false, alignTop = false }: { labe
         {label}
       </label>
     </div>
-    <div className={`w-full sm:w-2/3 flex ${alignTop ? 'items-start' : 'items-center'} justify-start sm:justify-end`}>
-      {children}
+    <div className={`w-full sm:w-2/3 flex flex-col ${alignTop ? 'justify-start' : 'justify-center'} items-end`}>
+      <div className={`w-full flex ${alignTop ? 'items-start' : 'items-center'} justify-start sm:justify-end`}>
+        {children}
+      </div>
     </div>
   </div>
 );
 
-const StyledInput = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
+const StyledInput = ({ hasError, ...props }: React.InputHTMLAttributes<HTMLInputElement> & { hasError?: boolean }) => (
   <input 
     {...props}
-    className="w-full border border-gray-300 px-3 py-2 text-sm text-black outline-none focus:border-orange focus:ring-1 focus:ring-orange transition-all rounded-[2px] bg-white placeholder-gray-400 h-10"
+    className={`w-full border px-3 py-2 text-sm text-black outline-none transition-all rounded-[2px] bg-white placeholder-gray-400 h-10 ${hasError ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange focus:ring-1 focus:ring-orange'}`}
   />
 );
 
@@ -53,13 +55,21 @@ export const UsageSettingsPage: React.FC<{ type: 'national' | 'international' }>
   const [mobileNumber, setMobileNumber] = useState('');
   const [messageContent, setMessageContent] = useState('');
 
-  // Calculated State
-  const [dataUsage, setDataUsage] = useState('0.00 MB');
-  const [remainingData, setRemainingData] = useState('0.00 MB');
+  // Applied State (for remaining calculation, updated only on fetch or successful save)
+  const [appliedTotalData, setAppliedTotalData] = useState('0');
+  const [appliedUnit, setAppliedUnit] = useState('1');
+
+  // Validation Errors
+  const [errors, setErrors] = useState<{
+      totalData?: string;
+      threshold?: string;
+      mobileNumber?: string;
+      messageContent?: string;
+  }>({});
 
   // Key Mapping based on type
   const isNational = type === 'national';
-  const keys = {
+  const keys = useMemo(() => ({
       limitSize: isNational ? 'nation_limit_size' : 'internation_limit_size',
       warnPercent: isNational ? 'nation_warn_percentage' : 'internation_warn_percentage',
       smsSwitch: isNational ? 'national_flow_sms_notice_sw' : 'international_flow_sms_notice_sw',
@@ -68,7 +78,7 @@ export const UsageSettingsPage: React.FC<{ type: 'national' | 'international' }>
       // For usage calculation
       dlFlow: isNational ? 'dl_mon_flow' : 'roam_dl_mon_flow',
       ulFlow: isNational ? 'ul_mon_flow' : 'roam_ul_mon_flow',
-  };
+  }), [isNational]);
 
   // Helper: Format MB into appropriate unit string
   const formatBytes = (mb: number) => {
@@ -77,26 +87,27 @@ export const UsageSettingsPage: React.FC<{ type: 'national' | 'international' }>
       return `${mb.toFixed(2)} MB`;
   };
 
-  const calculate = (res: UsageSettingsResponse, newTotal?: string, newUnit?: string) => {
-      // 1. Used Data (MB)
-      const dl = parseFloat(res[keys.dlFlow] || '0');
-      const ul = parseFloat(res[keys.ulFlow] || '0');
-      const used = dl + ul;
-      setDataUsage(formatBytes(used));
+  // Calculate Data Usage
+  const usedDataMB = useMemo(() => {
+      if (!rawData) return 0;
+      const dl = parseFloat(rawData[keys.dlFlow] || '0');
+      const ul = parseFloat(rawData[keys.ulFlow] || '0');
+      return dl + ul;
+  }, [rawData, keys]);
 
-      // 2. Total Limit (converted to MB for calculation)
-      const tVal = parseFloat(newTotal !== undefined ? newTotal : (res[keys.limitSize] || '0'));
-      const tUnit = newUnit !== undefined ? newUnit : (res.flow_limit_unit || '1');
+  // Calculate Remaining Data (Based on APPLIED values)
+  const remainingDataStr = useMemo(() => {
+      const tVal = parseFloat(appliedTotalData);
+      const tUnit = appliedUnit;
       
       let limitMB = 0;
       if (tUnit === '0') limitMB = tVal; // MB
       else if (tUnit === '1') limitMB = tVal * 1024; // GB
       else if (tUnit === '2') limitMB = tVal * 1024 * 1024; // TB
 
-      // 3. Remaining (MB)
-      const remain = Math.max(0, limitMB - used);
-      setRemainingData(formatBytes(remain));
-  };
+      const remain = Math.max(0, limitMB - usedDataMB);
+      return formatBytes(remain);
+  }, [appliedTotalData, appliedUnit, usedDataMB]);
 
   useEffect(() => {
     const init = async () => {
@@ -105,15 +116,20 @@ export const UsageSettingsPage: React.FC<{ type: 'national' | 'international' }>
         if (res && (res.success || res.cmd === 1021)) {
             setRawData(res);
             
-            // Map values to state
-            setTotalData(res[keys.limitSize] || '0');
-            setUnit(res.flow_limit_unit || '1'); 
+            const limit = res[keys.limitSize] || '0';
+            const u = res.flow_limit_unit || '1';
+
+            // Map values to form state
+            setTotalData(limit);
+            setUnit(u); 
             setThreshold(res[keys.warnPercent] || '50');
             setAlertEnabled(res[keys.smsSwitch] === '1');
             setMobileNumber(res[keys.noticeNumber] || '');
             setMessageContent(res[keys.noticeText] || '');
 
-            calculate(res, res[keys.limitSize], res.flow_limit_unit);
+            // Set applied state
+            setAppliedTotalData(limit);
+            setAppliedUnit(u);
         }
       } catch (e) {
         console.error("Failed to fetch usage settings", e);
@@ -123,50 +139,59 @@ export const UsageSettingsPage: React.FC<{ type: 'national' | 'international' }>
       }
     };
     init();
-  }, [type, showAlert, keys.limitSize, keys.warnPercent, keys.smsSwitch, keys.noticeNumber, keys.noticeText, keys.dlFlow, keys.ulFlow]);
-
-  // Recalculate remaining when inputs change locally
-  useEffect(() => {
-      if (rawData) {
-          calculate(rawData, totalData, unit);
-      }
-  }, [totalData, unit, rawData]);
+  }, [type, showAlert, keys]);
 
   const handleSave = async () => {
+      // Clear previous errors
+      setErrors({});
+      const newErrors: typeof errors = {};
+      let hasError = false;
+
       // Validation
       const totalNum = parseFloat(totalData);
-      if (isNaN(totalNum)) {
-          showAlert('Invalid Total Data value.', 'error');
-          return;
-      }
-      
-      // Max check (999 TB approx)
-      if (unit === '2' && totalNum > 999) {
-          showAlert('Total Data cannot exceed 999 TB.', 'error');
-          return;
+      if (isNaN(totalNum) || totalNum < 0) {
+          newErrors.totalData = 'Invalid Total Data value.';
+          hasError = true;
+      } else if (unit === '2' && totalNum > 999) {
+          newErrors.totalData = 'Total Data cannot exceed 999 TB.';
+          hasError = true;
       }
 
       const threshNum = parseInt(threshold, 10);
       if (isNaN(threshNum) || threshNum < 1 || threshNum > 100) {
-          showAlert('Threshold must be between 1 and 100.', 'error');
+          newErrors.threshold = 'Threshold must be between 1 and 100.';
+          hasError = true;
+      }
+
+      if (alertEnabled) {
+          if (!mobileNumber) {
+              newErrors.mobileNumber = 'Mobile Number is required.';
+              hasError = true;
+          }
+          if (!messageContent) {
+              newErrors.messageContent = 'Message Content is required.';
+              hasError = true;
+          }
+      }
+
+      if (hasError) {
+          setErrors(newErrors);
           return;
       }
 
       setSaving(true);
       
-      // Construct Payload using existing rawData to fill in other keys
-      // The payload must include everything for CMD 337
+      // Construct Payload
       const payload: any = { ...rawData };
       
-      // Update fields for CURRENT TYPE
       payload[keys.limitSize] = totalData;
-      payload.flow_limit_unit = unit; // Global unit
+      payload.flow_limit_unit = unit; 
       payload[keys.warnPercent] = threshold;
       payload[keys.smsSwitch] = alertEnabled ? '1' : '0';
       payload[keys.noticeNumber] = mobileNumber;
       payload[keys.noticeText] = messageContent;
 
-      // Ensure keys required by CMD 337 exist (in case rawData missed some or has nulls)
+      // Ensure required keys for CMD 337 exist
       if (payload.internation_limit_size === undefined) payload.internation_limit_size = '0';
       if (payload.nation_limit_size === undefined) payload.nation_limit_size = '0';
       
@@ -174,8 +199,10 @@ export const UsageSettingsPage: React.FC<{ type: 'national' | 'international' }>
           const res = await saveUsageSettings(payload);
           if (res && (res.success || res.result === 'success')) {
               showAlert('Settings saved successfully.', 'success');
-              // Update local raw data to reflect save
               setRawData(payload);
+              // Update applied values to reflect saved changes in calculation
+              setAppliedTotalData(totalData);
+              setAppliedUnit(unit);
           } else {
               showAlert('Failed to save settings.', 'error');
           }
@@ -200,56 +227,65 @@ export const UsageSettingsPage: React.FC<{ type: 'national' | 'international' }>
       <div className="max-w-4xl">
         {/* Read Only Stats */}
         <FormRow label="Data usage">
-            <span className="text-black text-sm font-bold">{dataUsage}</span>
+            <span className="text-black text-sm font-bold">{formatBytes(usedDataMB)}</span>
         </FormRow>
 
         <FormRow label="Remaining Data">
-            <span className="text-black text-sm font-bold">{remainingData}</span>
+            <span className="text-black text-sm font-bold">{remainingDataStr}</span>
         </FormRow>
 
         {/* Total Data Input */}
         <FormRow label="Total Data" required>
-            <div className="flex w-full sm:max-w-xs">
-                <div className="flex-1">
-                    <input 
-                        type="text"
-                        value={totalData} 
-                        onChange={(e) => {
-                            const val = e.target.value;
-                            if (/^\d*\.?\d*$/.test(val)) setTotalData(val);
-                        }} 
-                        className="w-full border border-gray-300 px-3 py-2 text-sm text-black outline-none focus:border-orange focus:ring-1 focus:ring-orange transition-all rounded-l-[2px] bg-white border-r-0 h-10"
-                    />
+            <div className="flex flex-col items-end w-full sm:max-w-xs">
+                <div className="flex w-full">
+                    <div className="flex-1">
+                        <input 
+                            type="text"
+                            value={totalData} 
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                if (/^\d*\.?\d*$/.test(val)) setTotalData(val);
+                                if (errors.totalData) setErrors(prev => ({...prev, totalData: undefined}));
+                            }} 
+                            className={`w-full border px-3 py-2 text-sm text-black outline-none transition-all rounded-l-[2px] bg-white border-r-0 h-10 ${errors.totalData ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange focus:ring-1 focus:ring-orange'}`}
+                        />
+                    </div>
+                    <div className="w-24 relative">
+                        <select 
+                            value={unit} 
+                            onChange={(e) => setUnit(e.target.value)}
+                            className={`w-full border px-3 py-2 text-sm text-gray-600 outline-none transition-all rounded-r-[2px] appearance-none bg-[#f3f4f6] cursor-pointer font-bold h-10 ${errors.totalData ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange focus:ring-1 focus:ring-orange'}`}
+                        >
+                            {UNIT_OPTIONS.map(opt => (
+                                <option key={opt.value} value={opt.value}>{opt.name}</option>
+                            ))}
+                        </select>
+                        <ChevronDown size={16} className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400" />
+                    </div>
                 </div>
-                <div className="w-24 relative">
-                    <select 
-                        value={unit} 
-                        onChange={(e) => setUnit(e.target.value)}
-                        className="w-full border border-gray-300 px-3 py-2 text-sm text-gray-600 outline-none focus:border-orange focus:ring-1 focus:ring-orange transition-all rounded-r-[2px] appearance-none bg-[#f3f4f6] cursor-pointer font-bold h-10"
-                    >
-                        {UNIT_OPTIONS.map(opt => (
-                            <option key={opt.value} value={opt.value}>{opt.name}</option>
-                        ))}
-                    </select>
-                    <ChevronDown size={16} className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400" />
-                </div>
+                {errors.totalData && <span className="text-red-500 text-xs mt-1 text-right w-full">{errors.totalData}</span>}
             </div>
         </FormRow>
 
         {/* Threshold */}
         <FormRow label="When reached" required>
-            <div className="flex items-center">
-                <div className="w-32 me-3">
-                    <StyledInput 
-                        value={threshold} 
-                        onChange={(e) => {
-                            const val = e.target.value;
-                            if (/^\d*$/.test(val)) setThreshold(val);
-                        }} 
-                        maxLength={3}
-                    />
+            <div className="flex flex-col items-start w-full sm:w-auto">
+                <div className="flex items-center">
+                    <div className="w-32 me-3">
+                        <StyledInput 
+                            value={threshold} 
+                            hasError={!!errors.threshold}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                if (/^\d*$/.test(val)) setThreshold(val);
+                                if (errors.threshold) setErrors(prev => ({...prev, threshold: undefined}));
+                            }} 
+                            maxLength={3}
+                        />
+                    </div>
+                    <span className="text-black text-sm font-medium whitespace-nowrap">% to remind me</span>
                 </div>
-                <span className="text-black text-sm font-medium whitespace-nowrap">% to remind me</span>
+                {errors.threshold && <span className="text-red-500 text-xs mt-1 w-full">{errors.threshold}</span>}
             </div>
         </FormRow>
 
@@ -262,14 +298,23 @@ export const UsageSettingsPage: React.FC<{ type: 'national' | 'international' }>
         {alertEnabled && (
             <>
                 <FormRow label="Mobile Number" required>
-                    <div className="w-full sm:max-w-xs">
-                        <StyledInput value={mobileNumber} onChange={(e) => setMobileNumber(e.target.value)} />
+                    <div className="w-full sm:max-w-xs flex flex-col">
+                        <StyledInput 
+                            value={mobileNumber} 
+                            hasError={!!errors.mobileNumber}
+                            onChange={(e) => {
+                                setMobileNumber(e.target.value);
+                                if (errors.mobileNumber) setErrors(prev => ({...prev, mobileNumber: undefined}));
+                            }} 
+                        />
+                        {errors.mobileNumber && <span className="text-red-500 text-xs mt-1 text-right">{errors.mobileNumber}</span>}
                     </div>
                 </FormRow>
 
                 <FormRow label="Message Content" required alignTop>
-                    <div className="w-full sm:max-w-md">
+                    <div className="w-full sm:max-w-md flex flex-col">
                         <StyledTextarea value={messageContent} onChange={(e) => setMessageContent(e.target.value)} />
+                        {errors.messageContent && <span className="text-red-500 text-xs mt-1 text-right">{errors.messageContent}</span>}
                     </div>
                 </FormRow>
             </>
