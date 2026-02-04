@@ -57,6 +57,9 @@ export const WifiAdvancedPanel: React.FC<WifiAdvancedPanelProps> = ({ cmd, is5g 
     const [bandWidth, setBandWidth] = useState('2'); // bandWidth
     const [maxNum, setMaxNum] = useState('32'); // maxNum (Max Station)
     const [wifiPMF, setWifiPMF] = useState('0'); // wifiPMF (PMF)
+    
+    // Validation Limits
+    const [limitMaxNum, setLimitMaxNum] = useState(32);
 
     // Store raw data to preserve other fields if necessary
     const [rawData, setRawData] = useState<any>({});
@@ -80,6 +83,16 @@ export const WifiAdvancedPanel: React.FC<WifiAdvancedPanelProps> = ({ cmd, is5g 
                 setMaxNum(res.maxNum || '32');
                 setWifiPMF(res.wifiPMF || '0');
                 
+                // Determine Max Station Limit
+                // 2.4G (cmd 230) uses maxNum24Limit, 5G (cmd 231) uses maxNumLimit
+                let limitStr = '32';
+                if (is5g) {
+                    limitStr = res.maxNumLimit || '32';
+                } else {
+                    limitStr = res.maxNum24Limit || '32';
+                }
+                setLimitMaxNum(parseInt(limitStr, 10));
+                
                 // DFS only available in 5G (cmd 231 usually returns dfsSwitch)
                 if (is5g && res.dfsSwitch) {
                     setDfsSwitch(res.dfsSwitch === '1');
@@ -96,6 +109,14 @@ export const WifiAdvancedPanel: React.FC<WifiAdvancedPanelProps> = ({ cmd, is5g 
     const handleSave = async () => {
         setSaving(true);
         try {
+            // Validation: Max Station
+            const currentMax = parseInt(maxNum, 10);
+            if (isNaN(currentMax) || currentMax < 1 || currentMax > limitMaxNum) {
+                showAlert(`Max Station must be between 1 and ${limitMaxNum}.`, 'warning');
+                setSaving(false);
+                return;
+            }
+
             // 1. Check Wifi Status (CMD 417)
             const statusRes = await checkWifiStatus();
             // If wifiStatus is NOT '1', it means restarting or busy
