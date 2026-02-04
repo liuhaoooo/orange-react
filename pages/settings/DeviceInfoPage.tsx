@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { fetchDeviceInfo, DeviceInfoResponse } from '../../utils/api';
 import { Loader2 } from 'lucide-react';
