@@ -4,7 +4,7 @@ import { ChevronDown, Save, ChevronUp, Loader2 } from 'lucide-react';
 import { fetchDisplaySolution, setDisplaySolution } from '../../utils/api';
 import { useAlert } from '../../utils/AlertContext';
 
-const FormRow = ({ label, children }: { label: string; children: React.ReactNode }) => (
+const FormRow = ({ label, children }: { label: string; children?: React.ReactNode }) => (
   <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100 last:border-0">
     <div className="w-full sm:w-1/3 mb-1 sm:mb-0">
       <label className="font-bold text-sm text-black">{label}</label>

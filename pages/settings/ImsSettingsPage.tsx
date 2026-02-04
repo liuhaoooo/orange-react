@@ -17,7 +17,7 @@ const ImsSwitch = ({ isOn, onChange }: { isOn: boolean; onChange: () => void }) 
   </div>
 );
 
-const FormRow = ({ label, children }: { label: string; children: React.ReactNode }) => (
+const FormRow = ({ label, children }: { label: string; children?: React.ReactNode }) => (
   <div className="flex flex-col sm:flex-row sm:items-center py-4 border-b border-gray-100 last:border-0">
     <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
       <label className="font-bold text-sm text-black">{label}</label>

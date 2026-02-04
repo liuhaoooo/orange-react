@@ -5,7 +5,7 @@ import { SquareSwitch } from '../../components/UIComponents';
 import { fetchLinkDetectionSettings, saveLinkDetectionSettings } from '../../utils/api';
 import { useAlert } from '../../utils/AlertContext';
 
-const FormRow = ({ label, children, required = false }: { label: string; children: React.ReactNode; required?: boolean }) => (
+const FormRow = ({ label, children, required = false }: { label: string; children?: React.ReactNode; required?: boolean }) => (
   <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100 last:border-0">
     <div className="w-full sm:w-1/3 mb-1 sm:mb-0">
       <label className="font-bold text-sm text-black">
@@ -59,231 +59,94 @@ export const LinkDetectionPage: React.FC = () => {
   const { showAlert } = useAlert();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
-  // State Variables
-  const [enableSwitch, setEnableSwitch] = useState(false);
-  const [method, setMethod] = useState('F');
-  const [server1, setServer1] = useState('');
-  const [server2, setServer2] = useState('');
-  const [server3, setServer3] = useState('');
-  
-  const [enableIpv4Dns, setEnableIpv4Dns] = useState(false);
-  const [ipv4Dns1, setIpv4Dns1] = useState('');
-  const [ipv4Dns2, setIpv4Dns2] = useState('');
-  const [ipv4Dns3, setIpv4Dns3] = useState('');
-
-  const [enableIpv6Dns, setEnableIpv6Dns] = useState(false);
-  const [ipv6Dns1, setIpv6Dns1] = useState('');
-  const [ipv6Dns2, setIpv6Dns2] = useState('');
-  const [ipv6Dns3, setIpv6Dns3] = useState('');
-
-  const [interval, setInterval] = useState('');
-  const [action, setAction] = useState('0');
-  const [restartTime, setRestartTime] = useState('');
-
-  // Dropdown Options
-  const methodOptions = [
-    { label: 'DNS', value: '3' },
-    { label: 'NTP', value: '2' },
-    { label: 'PING', value: '0' },
-    { label: 'Auto', value: 'F' },
-  ];
-
-  const actionOptions = [
-    { label: "No action", value: '0' },
-    { label: "Restart the whole machine", value: '1' },
-  ];
+  const [settings, setSettings] = useState<any>({});
 
   useEffect(() => {
-    const fetchData = async () => {
+    const load = async () => {
         try {
             const res = await fetchLinkDetectionSettings();
-            if (res && res.success) {
-                setEnableSwitch(res.wanLinkDetectSwitch === '1');
-                setMethod(res.checkWanLinkDetectMode || 'F');
-                setServer1(res.wanLinkDetectIP1 || '');
-                setServer2(res.wanLinkDetectIP2 || '');
-                setServer3(res.wanLinkDetectIP3 || '');
-                
-                setEnableIpv4Dns(res.dnsv4_server_sw === '1');
-                setIpv4Dns1(res.dnsv4_server1 || '');
-                setIpv4Dns2(res.dnsv4_server2 || '');
-                setIpv4Dns3(res.dnsv4_server3 || '');
-
-                setEnableIpv6Dns(res.dnsv6_server_sw === '1');
-                setIpv6Dns1(res.dnsv6_server1 || '');
-                setIpv6Dns2(res.dnsv6_server2 || '');
-                setIpv6Dns3(res.dnsv6_server3 || '');
-
-                setInterval(res.wanLinkDetectCheckTime || '');
-                setAction(res.LinkDetectAction || '0');
-                setRestartTime(res.reboot_wait_time || '');
+            if (res && (res.success || res.success === undefined)) {
+                setSettings(res);
             }
-        } catch (e) {
-            console.error("Failed to fetch link detection settings", e);
-            showAlert("Failed to load settings.", "error");
+        } catch(e) {
+            console.error(e);
         } finally {
             setLoading(false);
         }
     };
-    fetchData();
-  }, [showAlert]);
+    load();
+  }, []);
+
+  const handleChange = (key: string, value: any) => {
+      setSettings((prev: any) => ({ ...prev, [key]: value }));
+  };
 
   const handleSave = async () => {
       setSaving(true);
-      const payload = {
-          wanLinkDetectSwitch: enableSwitch ? '1' : '0',
-          checkWanLinkDetectMode: method,
-          wanLinkDetectIP1: server1,
-          wanLinkDetectIP2: server2,
-          wanLinkDetectIP3: server3,
-          wanLinkDetectCheckTime: interval,
-          LinkDetectAction: action,
-          reboot_wait_time: restartTime,
-          dnsv4_server_sw: enableIpv4Dns ? '1' : '0',
-          dnsv4_server1: ipv4Dns1,
-          dnsv4_server2: ipv4Dns2,
-          dnsv4_server3: ipv4Dns3,
-          dnsv6_server_sw: enableIpv6Dns ? '1' : '0',
-          dnsv6_server1: ipv6Dns1,
-          dnsv6_server2: ipv6Dns2,
-          dnsv6_server3: ipv6Dns3,
-      };
-
       try {
-          const res = await saveLinkDetectionSettings(payload);
-          if (res && res.success) {
-              showAlert("Settings saved successfully.", "success");
+          const res = await saveLinkDetectionSettings(settings);
+          if (res && (res.success || res.result === 'success')) {
+              showAlert('Settings saved successfully.', 'success');
           } else {
-              showAlert("Failed to save settings.", "error");
+              showAlert('Failed to save settings.', 'error');
           }
-      } catch (e) {
-          console.error("Failed to save link detection settings", e);
-          showAlert("An error occurred.", "error");
+      } catch(e) {
+          console.error(e);
+          showAlert('An error occurred.', 'error');
       } finally {
           setSaving(false);
       }
   };
 
-  if (loading) {
-      return (
-          <div className="w-full h-64 flex items-center justify-center">
-              <Loader2 className="animate-spin text-orange" size={40} />
-          </div>
-      );
-  }
+  if (loading) return <div className="h-64 flex items-center justify-center"><Loader2 className="animate-spin text-orange" size={40} /></div>;
 
   return (
     <div className="w-full animate-fade-in py-2">
-      <div className="space-y-0.5">
-          
-          <SwitchRow 
-            label="Link detection switch" 
-            isOn={enableSwitch} 
-            onChange={() => setEnableSwitch(!enableSwitch)} 
-          />
+        <SwitchRow label="Link Detection Switch" isOn={settings.wanLinkDetectSwitch === '1'} onChange={() => handleChange('wanLinkDetectSwitch', settings.wanLinkDetectSwitch === '1' ? '0' : '1')} />
 
-          {enableSwitch && (
+        {settings.wanLinkDetectSwitch === '1' && (
             <>
-              <FormRow label="Link detection method">
-                  <StyledSelect 
-                    value={method} 
-                    onChange={(e) => setMethod(e.target.value)} 
-                    options={methodOptions} 
-                  />
-              </FormRow>
-
-              <FormRow label="Detection server IP1">
-                  <StyledInput value={server1} onChange={(e) => setServer1(e.target.value)} />
-              </FormRow>
-              <FormRow label="Detect server IP2">
-                  <StyledInput value={server2} onChange={(e) => setServer2(e.target.value)} />
-              </FormRow>
-              <FormRow label="Detect server IP3">
-                  <StyledInput value={server3} onChange={(e) => setServer3(e.target.value)} />
-              </FormRow>
-
-              {/* Compact Divider */}
-              <div className="border-b border-gray-100 my-2"></div>
-
-              <SwitchRow 
-                label="Specify the IPv4 DNS service address" 
-                isOn={enableIpv4Dns} 
-                onChange={() => setEnableIpv4Dns(!enableIpv4Dns)} 
-              />
-
-              {enableIpv4Dns && (
-                <>
-                  <FormRow label="IPv4 DNS1">
-                      <StyledInput value={ipv4Dns1} onChange={(e) => setIpv4Dns1(e.target.value)} />
-                  </FormRow>
-                  <FormRow label="IPv4 DNS2">
-                      <StyledInput value={ipv4Dns2} onChange={(e) => setIpv4Dns2(e.target.value)} />
-                  </FormRow>
-                  <FormRow label="IPv4 DNS3">
-                      <StyledInput value={ipv4Dns3} onChange={(e) => setIpv4Dns3(e.target.value)} />
-                  </FormRow>
-                </>
-              )}
-
-              {/* Compact Divider */}
-              <div className="border-b border-gray-100 my-2"></div>
-
-              <SwitchRow 
-                label="Specify the IPv6 DNS service address" 
-                isOn={enableIpv6Dns} 
-                onChange={() => setEnableIpv6Dns(!enableIpv6Dns)} 
-              />
-
-              {enableIpv6Dns && (
-                <>
-                  <FormRow label="IPv6 DNS1">
-                      <StyledInput value={ipv6Dns1} onChange={(e) => setIpv6Dns1(e.target.value)} />
-                  </FormRow>
-                  <FormRow label="IPv6 DNS2">
-                      <StyledInput value={ipv6Dns2} onChange={(e) => setIpv6Dns2(e.target.value)} />
-                  </FormRow>
-                  <FormRow label="IPv6 DNS3">
-                      <StyledInput value={ipv6Dns3} onChange={(e) => setIpv6Dns3(e.target.value)} />
-                  </FormRow>
-                </>
-              )}
-
-              {/* Compact Divider */}
-              <div className="border-b border-gray-100 my-2"></div>
-
-              <FormRow label="Detection interval" required>
-                  <StyledInput value={interval} onChange={(e) => setInterval(e.target.value)} suffix="Second" />
-              </FormRow>
-
-              <FormRow label="Link detection response action">
-                  <StyledSelect 
-                    value={action} 
-                    onChange={(e) => setAction(e.target.value)} 
-                    options={actionOptions} 
-                  />
-              </FormRow>
-
-              {action === '1' && (
-                <FormRow label="Restart time" required>
-                    <StyledInput value={restartTime} onChange={(e) => setRestartTime(e.target.value)} suffix="Second" />
+                <FormRow label="Detection Mode">
+                    <StyledSelect 
+                        value={settings.checkWanLinkDetectMode || '0'} 
+                        onChange={(e) => handleChange('checkWanLinkDetectMode', e.target.value)} 
+                        options={[
+                            { label: 'Ping', value: '0' },
+                            { label: 'DNS', value: '1' }
+                        ]}
+                    />
                 </FormRow>
-              )}
+                <FormRow label="Detection IP 1">
+                    <StyledInput value={settings.wanLinkDetectIP1 || ''} onChange={(e) => handleChange('wanLinkDetectIP1', e.target.value)} />
+                </FormRow>
+                <FormRow label="Detection IP 2">
+                    <StyledInput value={settings.wanLinkDetectIP2 || ''} onChange={(e) => handleChange('wanLinkDetectIP2', e.target.value)} />
+                </FormRow>
+                <FormRow label="Detection IP 3">
+                    <StyledInput value={settings.wanLinkDetectIP3 || ''} onChange={(e) => handleChange('wanLinkDetectIP3', e.target.value)} />
+                </FormRow>
+                <FormRow label="Check Time">
+                    <StyledInput value={settings.wanLinkDetectCheckTime || ''} onChange={(e) => handleChange('wanLinkDetectCheckTime', e.target.value)} suffix="s" />
+                </FormRow>
+                <FormRow label="Action">
+                    <StyledSelect 
+                        value={settings.LinkDetectAction || '0'} 
+                        onChange={(e) => handleChange('LinkDetectAction', e.target.value)} 
+                        options={[
+                            { label: 'Reboot', value: '0' },
+                            { label: 'Reconnect', value: '1' }
+                        ]}
+                    />
+                </FormRow>
             </>
-          )}
+        )}
 
-          <div className="flex justify-end pt-8 mt-4">
-            <button 
-                onClick={handleSave}
-                disabled={saving}
-                className="bg-white border-2 border-black text-black hover:bg-black hover:text-white font-bold py-2.5 px-12 text-sm transition-all rounded-[2px] shadow-sm uppercase tracking-wide flex items-center"
-            >
+        <div className="flex justify-end pt-8">
+            <button onClick={handleSave} disabled={saving} className="bg-white border-2 border-black text-black hover:bg-black hover:text-white font-bold py-2.5 px-12 text-sm transition-all rounded-[2px] shadow-sm uppercase tracking-wide flex items-center">
                 {saving ? <Loader2 className="animate-spin w-4 h-4 me-2" /> : <Save size={18} className="me-2" />}
                 Save
             </button>
-          </div>
-
-      </div>
+        </div>
     </div>
   );
 };

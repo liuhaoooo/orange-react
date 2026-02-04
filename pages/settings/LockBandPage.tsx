@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Save, Check, Loader2 } from 'lucide-react';
 import { SquareSwitch } from '../../components/UIComponents';
@@ -5,7 +6,7 @@ import { fetchLockBandSettings, saveLockBandSettings, LockBandSettings } from '.
 import { useAlert } from '../../utils/AlertContext';
 
 // Custom Checkbox
-const BandCheckbox = ({ label, checked, onChange }: { label: string; checked: boolean; onChange: () => void }) => (
+const BandCheckbox: React.FC<{ label: string; checked: boolean; onChange: () => void }> = ({ label, checked, onChange }) => (
   <div 
     className="flex items-center cursor-pointer select-none group"
     onClick={onChange}

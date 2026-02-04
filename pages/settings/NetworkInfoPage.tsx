@@ -9,7 +9,7 @@ const SectionTitle = ({ title }: { title: string }) => (
   <h3 className="font-bold text-base text-black mb-4 mt-2">{title}</h3>
 );
 
-const InfoTable = ({ children }: { children: React.ReactNode }) => (
+const InfoTable = ({ children }: { children?: React.ReactNode }) => (
   <div className="border border-gray-200 rounded-[2px] overflow-hidden mb-8">
     <table className="w-full text-left text-sm border-collapse">
       <tbody>{children}</tbody>

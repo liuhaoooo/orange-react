@@ -5,7 +5,7 @@ import { SquareSwitch } from '../../components/UIComponents';
 import { fetchUsageSettings, saveUsageSettings, UsageSettingsResponse } from '../../utils/api';
 import { useAlert } from '../../utils/AlertContext';
 
-const FormRow = ({ label, children, required = false, alignTop = false }: { label: string; children: React.ReactNode; required?: boolean, alignTop?: boolean }) => (
+const FormRow = ({ label, children, required = false, alignTop = false }: { label: string; children?: React.ReactNode; required?: boolean, alignTop?: boolean }) => (
   <div className={`flex flex-col sm:flex-row ${alignTop ? 'items-start' : 'sm:items-center'} py-4 border-b border-gray-100 last:border-0`}>
     <div className={`w-full sm:w-1/3 mb-2 sm:mb-0 ${alignTop ? 'pt-2' : ''}`}>
       <label className="font-bold text-sm text-black">
@@ -185,25 +185,31 @@ export const UsageSettingsPage: React.FC<{ type: 'national' | 'international' }>
 
       setSaving(true);
       
-      // Construct Payload
+      // Use rawData as base to preserve all fields (including those not in this form)
       const payload: any = { ...rawData };
       
+      // IMPORTANT: Remove 'cmd' and 'success' from rawData (CMD 1021) 
+      // so they don't conflict with the save request (CMD 337).
+      delete payload.cmd;
+      delete payload.success;
+
+      // Shared config
+      payload.flow_limit_unit = unit;
+      
+      // Update values for the *current* tab using the form state
       payload[keys.limitSize] = totalData;
-      payload.flow_limit_unit = unit; 
       payload[keys.warnPercent] = threshold;
       payload[keys.smsSwitch] = alertEnabled ? '1' : '0';
       payload[keys.noticeNumber] = mobileNumber;
       payload[keys.noticeText] = messageContent;
-
-      // Ensure required keys for CMD 337 exist (fallback)
-      if (payload.internation_limit_size === undefined) payload.internation_limit_size = '0';
-      if (payload.nation_limit_size === undefined) payload.nation_limit_size = '0';
       
       try {
           const res = await saveUsageSettings(payload);
           if (res && (res.success || res.result === 'success')) {
               showAlert('Settings saved successfully.', 'success');
-              setRawData(payload);
+              
+              // Update local rawData with the new values we just saved to keep UI consistent without refetching
+              setRawData(prev => ({ ...prev, ...payload }));
               
               // Update Applied values only after successful save
               setAppliedTotalData(totalData);

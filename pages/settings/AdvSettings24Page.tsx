@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { ChevronDown, Save } from 'lucide-react';
 import { SquareSwitch } from '../../components/UIComponents';
 
-const FormRow = ({ label, children, required = false }: { label: string; children: React.ReactNode; required?: boolean }) => (
+const FormRow = ({ label, children, required = false }: { label: string; children?: React.ReactNode; required?: boolean }) => (
   <div className="flex flex-col sm:flex-row sm:items-center py-4 border-b border-gray-100 last:border-0">
     <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
       <label className="font-bold text-sm text-black">
