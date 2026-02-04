@@ -387,3 +387,15 @@ export interface MacFilterResponse {
     };
     [key: string]: any;
 }
+
+export interface DhcpSettingsResponse {
+    lanIp: string;
+    netMask: string;
+    dhcpServer: string;
+    main_dns: string;
+    vice_dns: string;
+    ipBegin: string;
+    ipEnd: string;
+    expireTime: string;
+    [key: string]: any;
+}

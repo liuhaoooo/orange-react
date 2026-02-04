@@ -14,7 +14,8 @@ import {
     PlmnScanResponse,
     ApnProfile,
     UsageSettingsResponse,
-    ImsSettingsResponse
+    ImsSettingsResponse,
+    DhcpSettingsResponse
 } from './types';
 
 // Status & Connection
@@ -71,3 +72,7 @@ export const saveUsageSettings = async (data: any) => apiRequest(337, 'POST', da
 // IMS Settings
 export const fetchImsSettings = async () => apiRequest<ImsSettingsResponse>(1023, 'GET');
 export const saveImsSettings = async (data: { volteSw: string; pdpType: string; ims: string }) => apiRequest(1023, 'POST', data);
+
+// DHCP Settings
+export const fetchDhcpSettings = async () => apiRequest<DhcpSettingsResponse>(3, 'GET');
+export const saveDhcpSettings = async (data: any) => apiRequest(3, 'POST', data);
