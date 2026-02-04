@@ -44,3 +44,5 @@ export const saveWpsSettings = async (subcmd: number, enabled: boolean) => {
         [key]: enabled ? '1' : '0'
     });
 };
+
+export const startWpsPbc = async (subcmd: number) => apiRequest(243, 'POST', { subcmd });

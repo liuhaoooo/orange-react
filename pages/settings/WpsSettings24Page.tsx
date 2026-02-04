@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { SquareSwitch } from '../../components/UIComponents';
-import { fetchWpsSettings, saveWpsSettings } from '../../utils/api';
+import { fetchWpsSettings, saveWpsSettings, startWpsPbc } from '../../utils/api';
 import { useAlert } from '../../utils/AlertContext';
 import { Loader2 } from 'lucide-react';
 
@@ -51,6 +51,23 @@ export const WpsSettingsPanel: React.FC<WpsSettingsPanelProps> = ({ subcmd }) =>
             showAlert('Error saving settings', 'error');
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handleStartPbc = async () => {
+        // subcmd 0 (2.4G) -> send 2
+        // subcmd 1 (5G) -> send 3
+        const pbcSubcmd = subcmd === 0 ? 2 : 3;
+        try {
+            const res = await startWpsPbc(pbcSubcmd);
+            if (res && (res.success || res.result === 'success')) {
+                showAlert('PBC started successfully', 'success');
+            } else {
+                showAlert('Failed to start PBC', 'error');
+            }
+        } catch (e) {
+            console.error(e);
+            showAlert('Error starting PBC', 'error');
         }
     };
 
@@ -114,7 +131,10 @@ export const WpsSettingsPanel: React.FC<WpsSettingsPanelProps> = ({ subcmd }) =>
                     {/* PBC Section */}
                     <div className="flex items-center justify-between mt-4">
                         <label className="font-bold text-sm text-black">Start PBC</label>
-                        <button className="bg-[#eeeeee] border-2 border-black text-black hover:bg-white font-bold py-1.5 px-8 text-sm transition-all rounded-[2px] shadow-sm min-w-[120px]">
+                        <button 
+                            onClick={handleStartPbc}
+                            className="bg-[#eeeeee] border-2 border-black text-black hover:bg-white font-bold py-1.5 px-8 text-sm transition-all rounded-[2px] shadow-sm min-w-[120px]"
+                        >
                             Start PBC
                         </button>
                     </div>
