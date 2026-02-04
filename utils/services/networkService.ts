@@ -15,7 +15,9 @@ import {
     ApnProfile,
     UsageSettingsResponse,
     ImsSettingsResponse,
-    DhcpSettingsResponse
+    DhcpSettingsResponse,
+    IpReservationResponse,
+    IpReservationRule
 } from './types';
 
 // Status & Connection
@@ -76,3 +78,7 @@ export const saveImsSettings = async (data: { volteSw: string; pdpType: string; 
 // DHCP Settings
 export const fetchDhcpSettings = async () => apiRequest<DhcpSettingsResponse>(3, 'GET');
 export const saveDhcpSettings = async (data: any) => apiRequest(3, 'POST', data);
+
+// IP Address Reservation
+export const fetchIpReservation = async () => apiRequest<IpReservationResponse>(115, 'GET');
+export const saveIpReservation = async (datas: IpReservationRule[]) => apiRequest(115, 'POST', { datas });

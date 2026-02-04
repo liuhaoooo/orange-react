@@ -1,18 +1,89 @@
 
-import React, { useState } from 'react';
-import { ChevronDown, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
-
-interface ReservationRule {
-  id: string;
-  ip: string;
-  mac: string;
-}
+import React, { useState, useEffect } from 'react';
+import { ChevronDown, Pencil, Trash2, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { IpReservationRule, fetchIpReservation, saveIpReservation } from '../../utils/api';
+import { IpReservationEditModal } from '../../components/IpReservationEditModal';
+import { useAlert } from '../../utils/AlertContext';
 
 export const IpAddressReservationPage: React.FC = () => {
-  // Static Reservation State
-  const [reservations, setReservations] = useState<ReservationRule[]>([
-    { id: '1', ip: '1.1.1.1', mac: 'AA:AA:AA:AA:AA:AA' }
-  ]);
+  const { showAlert } = useAlert();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [rules, setRules] = useState<IpReservationRule[]>([]);
+  
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+      const load = async () => {
+          try {
+              const res = await fetchIpReservation();
+              if (res && (res.success || res.cmd === 115)) {
+                  setRules(res.datas || []);
+              }
+          } catch (e) {
+              console.error("Failed to load IP reservations", e);
+              showAlert('Failed to load rules', 'error');
+          } finally {
+              setLoading(false);
+          }
+      };
+      load();
+  }, [showAlert]);
+
+  const handleAddClick = () => {
+      setEditingIndex(null);
+      setIsModalOpen(true);
+  };
+
+  const handleEditClick = (index: number) => {
+      setEditingIndex(index);
+      setIsModalOpen(true);
+  };
+
+  const handleDeleteClick = (index: number) => {
+      setRules(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleClearAll = () => {
+      setRules([]);
+  };
+
+  const handleModalSave = (rule: IpReservationRule) => {
+      if (editingIndex !== null) {
+          // Edit
+          setRules(prev => prev.map((r, i) => i === editingIndex ? rule : r));
+      } else {
+          // Add
+          setRules(prev => [...prev, rule]);
+      }
+  };
+
+  const handleGlobalSave = async () => {
+      setSaving(true);
+      try {
+          const res = await saveIpReservation(rules);
+          if (res && (res.success || res.result === 'success')) {
+              showAlert('Settings saved successfully', 'success');
+          } else {
+              showAlert('Failed to save settings', 'error');
+          }
+      } catch (e) {
+          console.error(e);
+          showAlert('An error occurred', 'error');
+      } finally {
+          setSaving(false);
+      }
+  };
+
+  if (loading) {
+      return (
+          <div className="w-full h-64 flex items-center justify-center">
+              <Loader2 className="animate-spin text-orange" size={40} />
+          </div>
+      );
+  }
 
   return (
     <div className="w-full animate-fade-in py-6">
@@ -29,21 +100,26 @@ export const IpAddressReservationPage: React.FC = () => {
           </div>
 
           {/* Rows */}
-          {reservations.map((item) => (
-              <div key={item.id} className="grid grid-cols-12 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors items-center">
+          {rules.length > 0 ? rules.map((item, index) => (
+              <div key={index} className="grid grid-cols-12 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors items-center">
                   <div className="col-span-5 ps-4 text-sm text-black font-medium">{item.ip}</div>
                   <div className="col-span-5 text-sm text-black font-medium uppercase">{item.mac}</div>
                   <div className="col-span-2 flex justify-end pe-4 space-x-3">
-                        <button className="text-gray-500 hover:text-black transition-colors">
+                        <button 
+                            onClick={() => handleEditClick(index)}
+                            className="text-gray-500 hover:text-black transition-colors"
+                        >
                             <Pencil size={16} />
                         </button>
-                        <button className="text-gray-500 hover:text-black transition-colors">
+                        <button 
+                            onClick={() => handleDeleteClick(index)}
+                            className="text-gray-500 hover:text-black transition-colors"
+                        >
                             <Trash2 size={16} />
                         </button>
                   </div>
               </div>
-          ))}
-          {reservations.length === 0 && (
+          )) : (
               <div className="py-8 text-center text-gray-400 italic">No rules defined</div>
           )}
       </div>
@@ -73,16 +149,34 @@ export const IpAddressReservationPage: React.FC = () => {
 
       {/* Bottom Buttons */}
       <div className="flex justify-end mt-12 space-x-4">
-            <button className="bg-[#eeeeee] border-2 border-black text-black hover:bg-white font-bold py-1.5 px-8 text-sm transition-all rounded-[2px] shadow-sm min-w-[120px]">
+            <button 
+                onClick={handleAddClick}
+                className="bg-[#eeeeee] border-2 border-black text-black hover:bg-white font-bold py-1.5 px-8 text-sm transition-all rounded-[2px] shadow-sm min-w-[120px]"
+            >
                 Add Rule
             </button>
-            <button className="bg-[#eeeeee] border-2 border-black text-black hover:bg-white font-bold py-1.5 px-8 text-sm transition-all rounded-[2px] shadow-sm min-w-[120px]">
+            <button 
+                onClick={handleClearAll}
+                className="bg-[#eeeeee] border-2 border-black text-black hover:bg-white font-bold py-1.5 px-8 text-sm transition-all rounded-[2px] shadow-sm min-w-[120px]"
+            >
                 Clear All
             </button>
-            <button className="bg-[#eeeeee] border-2 border-black text-black hover:bg-white font-bold py-1.5 px-8 text-sm transition-all rounded-[2px] shadow-sm min-w-[120px]">
-                Save
+            <button 
+                onClick={handleGlobalSave}
+                disabled={saving}
+                className="bg-[#eeeeee] border-2 border-black text-black hover:bg-white font-bold py-1.5 px-8 text-sm transition-all rounded-[2px] shadow-sm min-w-[120px] flex items-center justify-center"
+            >
+                {saving ? <Loader2 className="animate-spin w-4 h-4" /> : 'Save'}
             </button>
       </div>
+
+      <IpReservationEditModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleModalSave}
+        initialData={editingIndex !== null ? rules[editingIndex] : null}
+        existingRules={rules}
+      />
     </div>
   );
 };

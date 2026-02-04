@@ -399,3 +399,15 @@ export interface DhcpSettingsResponse {
     expireTime: string;
     [key: string]: any;
 }
+
+export interface IpReservationRule {
+    mac: string;
+    ip: string;
+}
+
+export interface IpReservationResponse {
+    success: boolean;
+    cmd: number;
+    datas: IpReservationRule[];
+    [key: string]: any;
+}
