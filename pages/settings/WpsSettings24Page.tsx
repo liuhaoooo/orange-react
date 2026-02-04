@@ -159,39 +159,39 @@ export const WpsSettingsPanel: React.FC<WpsSettingsPanelProps> = ({ subcmd }) =>
             {activeEnabled && (
                 <div className="animate-fade-in">
                     {/* PIN Section */}
-                    <div className="flex flex-col sm:flex-row sm:items-start mb-6">
+                    <div className="flex flex-col sm:flex-row sm:items-start mb-12">
                         <div className="w-full sm:w-1/3 mb-2 sm:mb-0 pt-2">
                             <label className="font-bold text-sm text-black">
                                 <span className="text-red-500 me-1">*</span>WPSPIN
                             </label>
                         </div>
                         <div className="w-full sm:w-2/3">
-                            <input 
-                                type="text" 
-                                value={pin}
-                                onChange={(e) => {
-                                    setPin(e.target.value);
-                                    if(pinError) setPinError('');
-                                }}
-                                maxLength={8}
-                                placeholder="8 digits"
-                                className={`w-full border px-3 py-2 text-sm text-black outline-none transition-all rounded-[2px] bg-white ${pinError ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange'}`}
-                            />
-                            {pinError && (
-                                <p className="text-red-500 text-xs mt-1 font-bold">{pinError}</p>
-                            )}
+                            <div className="flex gap-4">
+                                <div className="flex-1">
+                                    <input 
+                                        type="text" 
+                                        value={pin}
+                                        onChange={(e) => {
+                                            setPin(e.target.value);
+                                            if(pinError) setPinError('');
+                                        }}
+                                        maxLength={8}
+                                        placeholder="8 digits"
+                                        className={`w-full border px-3 py-2 text-sm text-black outline-none transition-all rounded-[2px] bg-white ${pinError ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange'}`}
+                                    />
+                                    {pinError && (
+                                        <p className="text-red-500 text-xs mt-1 font-bold">{pinError}</p>
+                                    )}
+                                </div>
+                                <button 
+                                    onClick={handleApplyPin}
+                                    disabled={applyingPin}
+                                    className="bg-[#eeeeee] border-2 border-black text-black hover:bg-white font-bold px-6 text-sm transition-all rounded-[2px] shadow-sm flex items-center justify-center h-[38px] whitespace-nowrap"
+                                >
+                                    {applyingPin ? <Loader2 className="animate-spin w-4 h-4" /> : 'Application'}
+                                </button>
+                            </div>
                         </div>
-                    </div>
-
-                    {/* Application Button for PIN */}
-                    <div className="flex justify-end mb-12">
-                        <button 
-                            onClick={handleApplyPin}
-                            disabled={applyingPin}
-                            className="bg-[#eeeeee] border-2 border-black text-black hover:bg-white font-bold py-1.5 px-8 text-sm transition-all rounded-[2px] shadow-sm min-w-[120px] flex items-center justify-center"
-                        >
-                            {applyingPin ? <Loader2 className="animate-spin w-4 h-4" /> : 'Application'}
-                        </button>
                     </div>
 
                     {/* PBC Section */}
