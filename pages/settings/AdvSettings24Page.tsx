@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, Save, Loader2 } from 'lucide-react';
+import { ChevronDown, Loader2 } from 'lucide-react';
 import { SquareSwitch } from '../../components/UIComponents';
-import { fetchWifiAdvanced, saveWifiAdvanced } from '../../utils/api';
+import { fetchWifiAdvanced, saveWifiAdvanced, checkWifiStatus } from '../../utils/api';
 import { useAlert } from '../../utils/AlertContext';
 
 const FormRow = ({ label, children, required = false }: { label: string; children?: React.ReactNode; required?: boolean }) => (
@@ -92,6 +92,16 @@ export const WifiAdvancedPanel: React.FC<WifiAdvancedPanelProps> = ({ cmd, is5g 
     const handleSave = async () => {
         setSaving(true);
         try {
+            // 1. Check Wifi Status (CMD 417)
+            const statusRes = await checkWifiStatus();
+            // If wifiStatus is NOT '1', it means restarting or busy
+            if (statusRes && statusRes.wifiStatus !== '1') {
+                showAlert('Wi-Fi is restarting, please try again later.', 'warning');
+                setSaving(false);
+                return;
+            }
+
+            // 2. Prepare Payload
             const payload: any = {
                 // Merge critical fields
                 txPower,
@@ -107,6 +117,7 @@ export const WifiAdvancedPanel: React.FC<WifiAdvancedPanelProps> = ({ cmd, is5g 
                 apIsolateSw: rawData.apIsolateSw || '0',
             };
 
+            // Only add DFS switch for 5G
             if (is5g) {
                 payload.dfsSwitch = dfsSwitch ? '1' : '0';
             }

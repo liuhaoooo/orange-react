@@ -49,7 +49,6 @@ export const startWpsPbc = async (subcmd: number) => apiRequest(243, 'POST', { s
 
 export const setWpsPin = async (subcmd: number, wpsPin: string) => apiRequest(243, 'POST', { subcmd, wpsPin });
 
-// Advanced Settings (2.4G: 230, 5G: 231)
 export const fetchWifiAdvanced = async (cmd: number) => apiRequest(cmd, 'GET');
 
 export const saveWifiAdvanced = async (cmd: number, data: any) => apiRequest(cmd, 'POST', data);
