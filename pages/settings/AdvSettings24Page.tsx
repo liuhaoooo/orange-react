@@ -1,9 +1,10 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ChevronDown, Loader2 } from 'lucide-react';
 import { SquareSwitch } from '../../components/UIComponents';
 import { fetchWifiAdvanced, saveWifiAdvanced, checkWifiStatus } from '../../utils/api';
 import { useAlert } from '../../utils/AlertContext';
+import { useGlobalState } from '../../utils/GlobalStateContext';
 
 const FormRow = ({ label, children, required = false }: { label: string; children?: React.ReactNode; required?: boolean }) => (
   <div className="flex flex-col sm:flex-row sm:items-center py-4 border-b border-gray-100 last:border-0">
@@ -41,6 +42,9 @@ interface WifiAdvancedPanelProps {
 
 export const WifiAdvancedPanel: React.FC<WifiAdvancedPanelProps> = ({ cmd, is5g }) => {
     const { showAlert } = useAlert();
+    const { globalData } = useGlobalState();
+    const globalConfig = globalData.globalConfig || {};
+
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     
@@ -136,6 +140,79 @@ export const WifiAdvancedPanel: React.FC<WifiAdvancedPanelProps> = ({ cmd, is5g 
         }
     };
 
+    // --- Dynamic Options Computation from 1017 ---
+
+    // 1. Country Codes
+    const countryOptions = useMemo(() => {
+        if (Array.isArray(globalConfig.countryCode)) {
+            return globalConfig.countryCode.map((c: any) => ({ label: c.name, value: c.value }));
+        }
+        return [{ label: 'FRANCE', value: 'FR' }]; // Fallback
+    }, [globalConfig.countryCode]);
+
+    // 2. Channels (Dependent on Country Code)
+    const channelOptions = useMemo(() => {
+        // If config not loaded yet, fallback
+        if (!globalConfig.countryCode) return [{ label: 'Auto', value: 'auto' }];
+
+        // Find selected country object
+        const selectedCountryObj = globalConfig.countryCode.find((c: any) => c.value === countryCode);
+        
+        if (!selectedCountryObj) return [{ label: 'Auto', value: 'auto' }];
+
+        // Get key based on band (channel_2g or channel_5g from country object)
+        const key = is5g ? selectedCountryObj.channel_5g : selectedCountryObj.channel_2g;
+        
+        // Retrieve list from globalConfig root using the key
+        const list = globalConfig[key];
+        if (Array.isArray(list)) {
+            return list.map((c: any) => ({ label: c.name, value: c.value }));
+        }
+        
+        return [{ label: 'Auto', value: 'auto' }];
+    }, [globalConfig, countryCode, is5g]);
+
+    // Ensure selected channel is valid when options change
+    useEffect(() => {
+        if (!loading && channelOptions.length > 0) {
+            const exists = channelOptions.find(opt => opt.value === channel);
+            if (!exists) {
+                setChannel('auto');
+            }
+        }
+    }, [channelOptions, channel, loading]);
+
+    // 3. Wi-Fi Mode, Bandwidth, TX Power
+    const configSection = is5g ? globalConfig.wlan_5g : globalConfig.wlan_2g;
+
+    const modeOptions = useMemo(() => {
+        if (configSection && Array.isArray(configSection.wifiWorkMode)) {
+            return configSection.wifiWorkMode.map((i: any) => ({ label: i.name, value: i.value }));
+        }
+        return [];
+    }, [configSection]);
+
+    const bandwidthOptions = useMemo(() => {
+        if (configSection && Array.isArray(configSection.bandWidth)) {
+            return configSection.bandWidth.map((i: any) => ({ label: i.name, value: i.value }));
+        }
+        return [];
+    }, [configSection]);
+
+    const txOptions = useMemo(() => {
+        if (configSection && Array.isArray(configSection.txOption)) {
+            return configSection.txOption.map((i: any) => ({ label: i.name, value: i.value }));
+        }
+        return [];
+    }, [configSection]);
+
+    // 6. PMF Options (Fixed)
+    const pmfOptions = [
+        { label: 'Disable', value: '0' },
+        { label: 'Capable', value: '1' },
+        { label: 'Required', value: '2' },
+    ];
+
     if (loading) {
         return (
             <div className="w-full h-64 flex items-center justify-center">
@@ -143,56 +220,6 @@ export const WifiAdvancedPanel: React.FC<WifiAdvancedPanelProps> = ({ cmd, is5g 
             </div>
         );
     }
-
-    // --- Options Configuration ---
-    
-    // Country Codes
-    const countryOptions = [
-        { label: 'FRANCE', value: 'FR' },
-        { label: 'CHINA', value: 'CN' },
-        { label: 'USA', value: 'US' },
-        { label: 'GERMANY', value: 'DE' },
-        { label: 'UK', value: 'GB' },
-    ];
-
-    // Channels
-    const channelOptions24 = [
-        { label: 'Auto', value: 'auto' },
-        ...Array.from({length: 13}, (_, i) => ({ label: `${i + 1}`, value: `${i + 1}` }))
-    ];
-    const channelOptions5 = [
-        { label: 'Auto', value: 'auto' },
-        { label: '36', value: '36' }, { label: '40', value: '40' }, 
-        { label: '44', value: '44' }, { label: '48', value: '48' },
-        { label: '149', value: '149' }, { label: '153', value: '153' }, 
-        { label: '157', value: '157' }, { label: '161', value: '161' }
-    ];
-
-    // Work Mode
-    const modeOptions24 = [
-        { label: '11b/g/n/ax', value: '16' },
-        { label: '11b/g/n', value: '7' },
-        { label: '11b/g', value: '5' },
-        { label: '11b', value: '1' },
-    ];
-    const modeOptions5 = [
-        { label: '11n/ac/ax', value: '16' },
-        { label: '11ac/ax', value: '128' }, // Assuming arbitrary value, usually backend handles
-        { label: '11n/ac', value: '32' },
-    ];
-
-    // Bandwidth
-    const bandwidthOptions24 = [
-        { label: '20MHz', value: '0' },
-        { label: '40MHz', value: '1' },
-        { label: '20/40MHz', value: '2' },
-    ];
-    const bandwidthOptions5 = [
-        { label: '20MHz', value: '0' },
-        { label: '40MHz', value: '1' },
-        { label: '80MHz', value: '2' },
-        { label: '160MHz', value: '3' },
-    ];
 
     return (
         <div className="w-full animate-fade-in py-2">
@@ -210,16 +237,12 @@ export const WifiAdvancedPanel: React.FC<WifiAdvancedPanelProps> = ({ cmd, is5g 
                     </div>
                 )}
 
-                <FormRow label="TX Power:">
+                {/* Removed colons from labels as requested */}
+                <FormRow label="TX Power">
                     <StyledSelect 
                         value={txPower} 
                         onChange={(e) => setTxPower(e.target.value)} 
-                        options={[
-                            { label: '100%', value: '100' },
-                            { label: '75%', value: '75' },
-                            { label: '50%', value: '50' },
-                            { label: '25%', value: '25' },
-                        ]} 
+                        options={txOptions.length > 0 ? txOptions : [{ label: '100%', value: '100' }]} 
                     />
                 </FormRow>
 
@@ -231,19 +254,19 @@ export const WifiAdvancedPanel: React.FC<WifiAdvancedPanelProps> = ({ cmd, is5g 
                     />
                 </FormRow>
 
-                <FormRow label="Channel:">
+                <FormRow label="Channel">
                     <StyledSelect 
                         value={channel} 
                         onChange={(e) => setChannel(e.target.value)} 
-                        options={is5g ? channelOptions5 : channelOptions24} 
+                        options={channelOptions} 
                     />
                 </FormRow>
 
-                <FormRow label="Wi-Fi Mode:">
+                <FormRow label="Wi-Fi Mode">
                     <StyledSelect 
                         value={wifiWorkMode} 
                         onChange={(e) => setWifiWorkMode(e.target.value)} 
-                        options={is5g ? modeOptions5 : modeOptions24} 
+                        options={modeOptions.length > 0 ? modeOptions : [{ label: '11b/g/n/ax', value: '16' }]} 
                     />
                 </FormRow>
 
@@ -251,7 +274,7 @@ export const WifiAdvancedPanel: React.FC<WifiAdvancedPanelProps> = ({ cmd, is5g 
                     <StyledSelect 
                         value={bandWidth} 
                         onChange={(e) => setBandWidth(e.target.value)} 
-                        options={is5g ? bandwidthOptions5 : bandwidthOptions24} 
+                        options={bandwidthOptions.length > 0 ? bandwidthOptions : [{ label: '20MHz', value: '0' }]} 
                     />
                 </FormRow>
 
@@ -272,11 +295,7 @@ export const WifiAdvancedPanel: React.FC<WifiAdvancedPanelProps> = ({ cmd, is5g 
                     <StyledSelect 
                         value={wifiPMF} 
                         onChange={(e) => setWifiPMF(e.target.value)} 
-                        options={[
-                            { label: 'Disable', value: '0' },
-                            { label: 'Optional', value: '1' },
-                            { label: 'Required', value: '2' },
-                        ]} 
+                        options={pmfOptions} 
                     />
                 </FormRow>
 

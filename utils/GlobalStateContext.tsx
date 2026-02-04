@@ -1,5 +1,6 @@
+
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { getSessionId, checkAuthStatus, clearSessionId, fetchStatusInfo, fetchConnectionSettings, fetchWifiSettings, fetchAccountLevel } from './api';
+import { getSessionId, checkAuthStatus, clearSessionId, fetchStatusInfo, fetchConnectionSettings, fetchWifiSettings, fetchAccountLevel, fetchGlobalConfig } from './api';
 
 // --- Custom Router Implementation ---
 interface LocationState {
@@ -198,8 +199,8 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
     return true;
   }, [isLoggedIn]);
 
-  // Effect 1: Fetch Settings (CMD 585 & 587 & 588)
-  // CMD 585 can be fetched without login. CMD 587 and 588 require login.
+  // Effect 1: Fetch Settings (CMD 585 & 587 & 588 & 1017)
+  // CMD 585 can be fetched without login. CMD 587, 588, 1017 require login.
   useEffect(() => {
     const fetchSettings = async () => {
       try {
@@ -225,6 +226,16 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
                 }
             } catch (e) {
                 console.error("Failed to fetch account level", e);
+            }
+
+            // Fetch Global Config (CMD 1017) - Added for dropdown data
+            try {
+                const globalConfRes = await fetchGlobalConfig();
+                if (globalConfRes && (globalConfRes.success || globalConfRes.success === undefined)) {
+                    updateGlobalData('globalConfig', globalConfRes);
+                }
+            } catch (e) {
+                console.error("Failed to fetch global config (1017)", e);
             }
         }
 

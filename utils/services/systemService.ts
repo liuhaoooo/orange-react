@@ -7,6 +7,7 @@ export const setLanguageSelection = async (languageSelect: string) => apiRequest
 export const setAutoUpgrade = async (autoValue: '0' | '1') => apiRequest(240, 'POST', { autoValue });
 export const resetStatistics = async () => apiRequest(337, 'POST', { statisticsReset: '1', usedFlow: '0' });
 export const updateDeviceHostname = async (mac: string, hostname: string) => apiRequest(562, 'POST', { subcmd: 1, mac, hostname });
+export const fetchGlobalConfig = async () => apiRequest(1017, 'GET');
 
 export const uploadSystemUpdateFile = async (file: File) => {
   const sessionId = getSessionId();
