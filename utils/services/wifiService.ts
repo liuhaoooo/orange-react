@@ -1,6 +1,6 @@
 
 import { apiRequest } from './core';
-import { WifiSettingsResponse } from './types';
+import { WifiSettingsResponse, MacFilterResponse, MacFilterRule } from './types';
 
 export const fetchWifiSettings = async () => apiRequest<WifiSettingsResponse>(587, 'GET');
 
@@ -21,3 +21,14 @@ export const updateWifiConfig = async (params: any) => {
     if (!params.is5g && params.wifiSames !== undefined) payload.wifiSames = params.wifiSames;
     return apiRequest(cmd, 'POST', payload);
 };
+
+export const fetchMacFilter = async (subcmd: string) => apiRequest<MacFilterResponse>(278, 'GET', { subcmd });
+
+export const saveMacFilter = async (subcmd: string, macfilter: string, maclist: MacFilterRule[]) => 
+    apiRequest(278, 'POST', { 
+        subcmd, 
+        datas: {
+            macfilter,
+            maclist
+        }
+    });

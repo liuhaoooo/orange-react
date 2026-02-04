@@ -372,3 +372,18 @@ export interface ImsSettingsResponse {
     pdpType: string;
     [key: string]: any;
 }
+
+export interface MacFilterRule {
+    remarks: string;
+    mac: string;
+}
+
+export interface MacFilterResponse {
+    success: boolean;
+    cmd: number;
+    datas: {
+        macfilter: string;
+        maclist: MacFilterRule[];
+    };
+    [key: string]: any;
+}
