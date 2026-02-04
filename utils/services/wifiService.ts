@@ -46,3 +46,5 @@ export const saveWpsSettings = async (subcmd: number, enabled: boolean) => {
 };
 
 export const startWpsPbc = async (subcmd: number) => apiRequest(243, 'POST', { subcmd });
+
+export const setWpsPin = async (subcmd: number, wpsPin: string) => apiRequest(243, 'POST', { subcmd, wpsPin });

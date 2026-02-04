@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { SquareSwitch } from '../../components/UIComponents';
-import { fetchWpsSettings, saveWpsSettings, startWpsPbc } from '../../utils/api';
+import { fetchWpsSettings, saveWpsSettings, startWpsPbc, setWpsPin, checkWifiStatus } from '../../utils/api';
 import { useAlert } from '../../utils/AlertContext';
 import { Loader2 } from 'lucide-react';
 
@@ -13,7 +13,14 @@ export const WpsSettingsPanel: React.FC<WpsSettingsPanelProps> = ({ subcmd }) =>
     const { showAlert } = useAlert();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [wpsEnabled, setWpsEnabled] = useState(false);
+    const [applyingPin, setApplyingPin] = useState(false);
+    
+    // Split state: 
+    // draftEnabled controls the Switch UI immediately.
+    // activeEnabled controls the visibility of the bottom section (updated only after save).
+    const [draftEnabled, setDraftEnabled] = useState(false);
+    const [activeEnabled, setActiveEnabled] = useState(false);
+    
     const [pin, setPin] = useState('');
 
     useEffect(() => {
@@ -27,7 +34,9 @@ export const WpsSettingsPanel: React.FC<WpsSettingsPanelProps> = ({ subcmd }) =>
             if (res && (res.success || res.cmd === 132)) {
                 // Dynamically select key based on band
                 const key = subcmd === 0 ? 'wlan2g_wps_switch' : 'wlan5g_wps_switch';
-                setWpsEnabled(res[key] === '1');
+                const isEnabled = res[key] === '1';
+                setDraftEnabled(isEnabled);
+                setActiveEnabled(isEnabled);
             }
         } catch (e) {
             console.error("Failed to load WPS settings", e);
@@ -40,9 +49,20 @@ export const WpsSettingsPanel: React.FC<WpsSettingsPanelProps> = ({ subcmd }) =>
     const handleSave = async () => {
         setSaving(true);
         try {
-            const res = await saveWpsSettings(subcmd, wpsEnabled);
+            // 1. Check Wifi Status
+            const statusRes = await checkWifiStatus();
+            if (statusRes && statusRes.wifiStatus !== '1') {
+                showAlert('Wi-Fi is restarting, please try again later.', 'warning');
+                setSaving(false);
+                return;
+            }
+
+            // 2. Save Setting
+            const res = await saveWpsSettings(subcmd, draftEnabled);
             if (res && (res.success || res.result === 'success')) {
                 showAlert('Settings saved successfully', 'success');
+                // 3. Update active state to reflect visibility changes
+                setActiveEnabled(draftEnabled);
             } else {
                 showAlert('Failed to save settings', 'error');
             }
@@ -51,6 +71,34 @@ export const WpsSettingsPanel: React.FC<WpsSettingsPanelProps> = ({ subcmd }) =>
             showAlert('Error saving settings', 'error');
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handleApplyPin = async () => {
+        if (!pin) {
+            showAlert('PIN cannot be empty', 'warning');
+            return;
+        }
+        if (!/^\d{8}$/.test(pin)) {
+            showAlert('WPS PIN must be 8 digits', 'warning');
+            return;
+        }
+
+        setApplyingPin(true);
+        try {
+            // subcmd is passed directly: 0 for 2.4G, 1 for 5G
+            const res = await setWpsPin(subcmd, pin);
+            if (res && (res.success || res.result === 'success')) {
+                showAlert('PIN applied successfully', 'success');
+                setPin(''); // Clear input on success
+            } else {
+                showAlert('Failed to apply PIN', 'error');
+            }
+        } catch (e) {
+            console.error(e);
+            showAlert('Error applying PIN', 'error');
+        } finally {
+            setApplyingPin(false);
         }
     };
 
@@ -86,7 +134,7 @@ export const WpsSettingsPanel: React.FC<WpsSettingsPanelProps> = ({ subcmd }) =>
             <div className="flex items-center justify-between mb-6">
                 <label className="font-bold text-sm text-black">WPS function switch</label>
                 <div className="flex justify-end w-full sm:w-auto">
-                    <SquareSwitch isOn={wpsEnabled} onChange={() => setWpsEnabled(!wpsEnabled)} />
+                    <SquareSwitch isOn={draftEnabled} onChange={() => setDraftEnabled(!draftEnabled)} />
                 </div>
             </div>
             
@@ -101,8 +149,8 @@ export const WpsSettingsPanel: React.FC<WpsSettingsPanelProps> = ({ subcmd }) =>
                 </button>
             </div>
 
-            {/* Conditional Content */}
-            {wpsEnabled && (
+            {/* Conditional Content - Depends on Active State, not Draft State */}
+            {activeEnabled && (
                 <div className="animate-fade-in">
                     {/* PIN Section */}
                     <div className="flex flex-col sm:flex-row sm:items-center mb-6">
@@ -116,6 +164,8 @@ export const WpsSettingsPanel: React.FC<WpsSettingsPanelProps> = ({ subcmd }) =>
                                 type="text" 
                                 value={pin}
                                 onChange={(e) => setPin(e.target.value)}
+                                maxLength={8}
+                                placeholder="8 digits"
                                 className="w-full border border-gray-300 px-3 py-2 text-sm text-black outline-none focus:border-orange transition-all rounded-[2px] bg-white"
                             />
                         </div>
@@ -123,8 +173,12 @@ export const WpsSettingsPanel: React.FC<WpsSettingsPanelProps> = ({ subcmd }) =>
 
                     {/* Application Button for PIN */}
                     <div className="flex justify-end mb-12">
-                        <button className="bg-[#eeeeee] border-2 border-black text-black hover:bg-white font-bold py-1.5 px-8 text-sm transition-all rounded-[2px] shadow-sm min-w-[120px]">
-                            Application
+                        <button 
+                            onClick={handleApplyPin}
+                            disabled={applyingPin}
+                            className="bg-[#eeeeee] border-2 border-black text-black hover:bg-white font-bold py-1.5 px-8 text-sm transition-all rounded-[2px] shadow-sm min-w-[120px] flex items-center justify-center"
+                        >
+                            {applyingPin ? <Loader2 className="animate-spin w-4 h-4" /> : 'Application'}
                         </button>
                     </div>
 
