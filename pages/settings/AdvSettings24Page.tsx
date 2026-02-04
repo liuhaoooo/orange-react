@@ -150,27 +150,26 @@ export const WifiAdvancedPanel: React.FC<WifiAdvancedPanelProps> = ({ cmd, is5g 
         return [{ label: 'FRANCE', value: 'FR' }]; // Fallback
     }, [globalConfig.countryCode]);
 
-    // 2. Channels (Dependent on Country Code)
-    const channelOptions = useMemo(() => {
-        // If config not loaded yet, fallback
-        if (!globalConfig.countryCode) return [{ label: 'Auto', value: 'auto' }];
-
+    // Helper: Get Raw Channel List based on Country and Band
+    const rawChannelList = useMemo(() => {
+        if (!globalConfig.countryCode) return [];
         // Find selected country object
         const selectedCountryObj = globalConfig.countryCode.find((c: any) => c.value === countryCode);
-        
-        if (!selectedCountryObj) return [{ label: 'Auto', value: 'auto' }];
+        if (!selectedCountryObj) return [];
 
         // Get key based on band (channel_2g or channel_5g from country object)
         const key = is5g ? selectedCountryObj.channel_5g : selectedCountryObj.channel_2g;
         
         // Retrieve list from globalConfig root using the key
         const list = globalConfig[key];
-        if (Array.isArray(list)) {
-            return list.map((c: any) => ({ label: c.name, value: c.value }));
-        }
-        
-        return [{ label: 'Auto', value: 'auto' }];
+        return Array.isArray(list) ? list : [];
     }, [globalConfig, countryCode, is5g]);
+
+    // 2. Channels (Dependent on Country Code)
+    const channelOptions = useMemo(() => {
+        if (rawChannelList.length === 0) return [{ label: 'Auto', value: 'auto' }];
+        return rawChannelList.map((c: any) => ({ label: c.name, value: c.value }));
+    }, [rawChannelList]);
 
     // Ensure selected channel is valid when options change
     useEffect(() => {
@@ -182,7 +181,16 @@ export const WifiAdvancedPanel: React.FC<WifiAdvancedPanelProps> = ({ cmd, is5g 
         }
     }, [channelOptions, channel, loading]);
 
-    // 3. Wi-Fi Mode, Bandwidth, TX Power
+    // 3. Current Channel Max Bandwidth Linkage
+    const currentMaxBw = useMemo(() => {
+        const selectedChObj = rawChannelList.find((c: any) => c.value === channel);
+        if (selectedChObj && selectedChObj.maxBw !== undefined) {
+            return parseInt(selectedChObj.maxBw, 10);
+        }
+        return null; // No limit or 'auto'
+    }, [channel, rawChannelList]);
+
+    // 4. Wi-Fi Mode, Bandwidth, TX Power
     const configSection = is5g ? globalConfig.wlan_5g : globalConfig.wlan_2g;
 
     const modeOptions = useMemo(() => {
@@ -194,10 +202,31 @@ export const WifiAdvancedPanel: React.FC<WifiAdvancedPanelProps> = ({ cmd, is5g 
 
     const bandwidthOptions = useMemo(() => {
         if (configSection && Array.isArray(configSection.bandWidth)) {
-            return configSection.bandWidth.map((i: any) => ({ label: i.name, value: i.value }));
+            let opts = configSection.bandWidth;
+            
+            // Filter logic: if currentMaxBw is set (e.g. 3), filter out bandwidths with value > 3
+            if (currentMaxBw !== null) {
+                opts = opts.filter((bw: any) => {
+                    const val = parseInt(bw.value, 10);
+                    return !isNaN(val) ? val <= currentMaxBw : true;
+                });
+            }
+
+            return opts.map((i: any) => ({ label: i.name, value: i.value }));
         }
         return [];
-    }, [configSection]);
+    }, [configSection, currentMaxBw]);
+
+    // Ensure selected bandwidth is valid after filtering
+    useEffect(() => {
+        if (!loading && bandwidthOptions.length > 0) {
+            const exists = bandwidthOptions.find(opt => opt.value === bandWidth);
+            if (!exists) {
+                // If current bandwidth is filtered out, reset to the first available option
+                setBandWidth(bandwidthOptions[0].value);
+            }
+        }
+    }, [bandwidthOptions, bandWidth, loading]);
 
     const txOptions = useMemo(() => {
         if (configSection && Array.isArray(configSection.txOption)) {
@@ -237,7 +266,6 @@ export const WifiAdvancedPanel: React.FC<WifiAdvancedPanelProps> = ({ cmd, is5g 
                     </div>
                 )}
 
-                {/* Removed colons from labels as requested */}
                 <FormRow label="TX Power">
                     <StyledSelect 
                         value={txPower} 
