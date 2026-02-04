@@ -5,7 +5,7 @@ import { SquareSwitch } from '../../components/UIComponents';
 import { fetchUsageSettings, saveUsageSettings, UsageSettingsResponse } from '../../utils/api';
 import { useAlert } from '../../utils/AlertContext';
 
-const FormRow = ({ label, children, required = false, alignTop = false }: { label: string; children?: React.ReactNode; required?: boolean, alignTop?: boolean }) => (
+const FormRow = ({ label, children, required = false, alignTop = false }: { label: string; children: React.ReactNode; required?: boolean, alignTop?: boolean }) => (
   <div className={`flex flex-col sm:flex-row ${alignTop ? 'items-start' : 'sm:items-center'} py-4 border-b border-gray-100 last:border-0`}>
     <div className={`w-full sm:w-1/3 mb-2 sm:mb-0 ${alignTop ? 'pt-2' : ''}`}>
       <label className="font-bold text-sm text-black">
