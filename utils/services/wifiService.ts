@@ -34,3 +34,13 @@ export const saveMacFilter = async (subcmd: string, macfilter: string, maclist: 
     });
 
 export const checkWifiStatus = async () => apiRequest<{ wifiStatus: string }>(417, 'GET');
+
+export const fetchWpsSettings = async (subcmd: number) => apiRequest(132, 'GET', { subcmd });
+
+export const saveWpsSettings = async (subcmd: number, enabled: boolean) => {
+    const key = subcmd === 0 ? 'wlan2g_wps_switch' : 'wlan5g_wps_switch';
+    return apiRequest(132, 'POST', {
+        subcmd,
+        [key]: enabled ? '1' : '0'
+    });
+};
