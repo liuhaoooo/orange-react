@@ -15,7 +15,7 @@ interface EditSsidModalProps {
   onSave?: (updatedNetwork: WifiNetwork) => void;
 }
 
-const AUTH_OPTIONS = [
+const DEFAULT_AUTH_OPTIONS = [
     { value: "0", name: "OPEN" },
     { value: "2", name: "WPA2-PSK" },
     { value: "3", name: "WPA/WPA2-PSK" },
@@ -45,6 +45,11 @@ export const EditSsidModal: React.FC<EditSsidModalProps> = ({ isOpen, onClose, n
   const [networkPrefix, setNetworkPrefix] = useState<'main' | 'guest'>('main');
   const [networkBand, setNetworkBand] = useState<'24g' | '5g'>('24g');
   const [showOptimizationSwitch, setShowOptimizationSwitch] = useState(true);
+
+  // Dynamic Auth Options
+  const authOptions = (globalData.globalConfig && globalData.globalConfig.authentication) 
+    ? globalData.globalConfig.authentication 
+    : DEFAULT_AUTH_OPTIONS;
 
   const getStrength = (pass: string) => {
       if (!pass || pass.length === 0) return 0;
@@ -227,7 +232,7 @@ export const EditSsidModal: React.FC<EditSsidModalProps> = ({ isOpen, onClose, n
                         onChange={(e) => setAuthType(e.target.value)}
                         className="w-full border border-gray-300 p-2 text-sm outline-none focus:border-orange text-black rounded-sm appearance-none bg-white cursor-pointer"
                     >
-                        {AUTH_OPTIONS.map(opt => (
+                        {authOptions.map((opt: any) => (
                             <option key={opt.value} value={opt.value}>{opt.name}</option>
                         ))}
                     </select>
