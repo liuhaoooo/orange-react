@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from '../utils/GlobalStateContext';
 import { ChevronLeft, ChevronRight, Menu, ChevronUp, ChevronDown } from 'lucide-react';
@@ -80,12 +81,12 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
       id: 'wifi', 
       label: t('wifi'),
       subTabs: [
-          { id: 'mac_filtering_24', label: t('macFiltering24') },
-          { id: 'wps_settings_24', label: t('wpsSettings24') },
           { id: 'adv_settings_24', label: t('advSettings24') },
-          { id: 'mac_filtering_5', label: t('macFiltering5') },
+          { id: 'adv_settings_5', label: t('advSettings5') },
+          { id: 'wps_settings_24', label: t('wpsSettings24') },
           { id: 'wps_settings_5', label: t('wpsSettings5') },
-          { id: 'adv_settings_5', label: t('advSettings5') }
+          { id: 'mac_filtering_24', label: t('macFiltering24') },
+          { id: 'mac_filtering_5', label: t('macFiltering5') }
       ]
     },
     { 

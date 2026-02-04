@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, Pencil, Trash2, Loader2, Save } from 'lucide-react';
-import { fetchMacFilter, saveMacFilter } from '../../utils/api';
+import { fetchMacFilter, saveMacFilter, checkWifiStatus } from '../../utils/api';
 import { MacFilterRule } from '../../utils/services/types';
 import { useAlert } from '../../utils/AlertContext';
 import { MacFilterEditModal } from '../../components/MacFilterEditModal';
@@ -32,8 +32,14 @@ export const MacFilteringPanel: React.FC<MacFilteringPanelProps> = ({ subcmd }) 
           try {
               const res = await fetchMacFilter(subcmd);
               if (res && (res.success || res.cmd === 278)) {
-                  setMode(res.datas.macfilter || 'close');
-                  setRules(res.datas.maclist || []);
+                  // Optimization 1: Handle missing 'datas' field (normal empty state)
+                  if (res.datas) {
+                      setMode(res.datas.macfilter || 'close');
+                      setRules(res.datas.maclist || []);
+                  } else {
+                      setMode('close');
+                      setRules([]);
+                  }
               }
           } catch (e) {
               console.error("Failed to load MAC filter", e);
@@ -46,6 +52,11 @@ export const MacFilteringPanel: React.FC<MacFilteringPanelProps> = ({ subcmd }) 
   }, [subcmd, showAlert]);
 
   const handleAddClick = () => {
+      // Optimization 2: Max 32 rules check
+      if (rules.length >= 32) {
+          showAlert('The maximum number of entries is 32.', 'warning');
+          return;
+      }
       setEditingIndex(null);
       setIsModalOpen(true);
   };
@@ -76,6 +87,14 @@ export const MacFilteringPanel: React.FC<MacFilteringPanelProps> = ({ subcmd }) 
   const handleGlobalSave = async () => {
       setSaving(true);
       try {
+          // Optimization 4: Check WiFi Status before saving
+          const statusRes = await checkWifiStatus();
+          if (statusRes && statusRes.wifiStatus !== '1') {
+              showAlert('Wi-Fi is restarting, please try again later.', 'warning');
+              setSaving(false);
+              return;
+          }
+
           const res = await saveMacFilter(subcmd, mode, rules);
           if (res && (res.success || res.result === 'success')) {
               showAlert('Settings saved successfully', 'success');

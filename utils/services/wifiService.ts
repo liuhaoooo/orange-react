@@ -32,3 +32,5 @@ export const saveMacFilter = async (subcmd: string, macfilter: string, maclist: 
             maclist
         }
     });
+
+export const checkWifiStatus = async () => apiRequest<{ wifiStatus: string }>(417, 'GET');
