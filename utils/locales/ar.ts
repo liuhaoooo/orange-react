@@ -178,6 +178,7 @@ export const ar = {
     wpsSettings5: "5GHz WPS Settings",
     advSettings5: "5GHz Advanced Settings",
     multipleDhcp: "Multiple DHCP",
+    ipAddressReservation: "حجز عنوان IP",
     basicConfig: "Basic Configuration",
     topologyDiagram: "Network Topology Diagram",
     vpn: "VPN",

@@ -178,6 +178,7 @@ export const en = {
     wpsSettings5: "5GHz WPS Settings",
     advSettings5: "5GHz Advanced Settings",
     multipleDhcp: "Multiple DHCP",
+    ipAddressReservation: "IP Address Reservation",
     basicConfig: "Basic Config",
     topologyDiagram: "Topology Diagram",
     vpn: "VPN",

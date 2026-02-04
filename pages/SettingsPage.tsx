@@ -27,6 +27,7 @@ import { WpsSettings5Page } from './settings/WpsSettings5Page';
 import { AdvSettings24Page } from './settings/AdvSettings24Page';
 import { AdvSettings5Page } from './settings/AdvSettings5Page';
 import { DhcpSettingsPage } from './settings/DhcpSettingsPage';
+import { IpAddressReservationPage } from './settings/IpAddressReservationPage';
 import { MultipleDhcpPage } from './settings/MultipleDhcpPage';
 import { SystemUpgradePage } from './settings/SystemUpgradePage';
 
@@ -94,6 +95,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
       label: t('dhcp'),
       subTabs: [
           { id: 'dhcp_settings', label: t('dhcp') },
+          { id: 'ip_reservation', label: t('ipAddressReservation') },
           { id: 'multiple_dhcp', label: t('multipleDhcp') }
       ]
     },
@@ -360,6 +362,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <AdvSettings5Page />;
           case 'dhcp_settings':
               return <DhcpSettingsPage />;
+          case 'ip_reservation':
+              return <IpAddressReservationPage />;
           case 'multiple_dhcp':
               return <MultipleDhcpPage />;
           case 'system_upgrade':

@@ -178,6 +178,7 @@ export const cn = {
     wpsSettings5: "5GHz WPS 设置",
     advSettings5: "5GHz 高级设置",
     multipleDhcp: "多 DHCP",
+    ipAddressReservation: "IP 地址预留",
     basicConfig: "基本配置",
     topologyDiagram: "拓扑图",
     vpn: "VPN",
