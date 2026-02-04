@@ -1,6 +1,8 @@
 
-import React, { useState } from 'react';
-import { ChevronDown, Check } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronDown, Check, Loader2, Save } from 'lucide-react';
+import { fetchImsSettings, saveImsSettings } from '../../utils/api';
+import { useAlert } from '../../utils/AlertContext';
 
 // Custom Switch to match the screenshot (Black active state)
 const ImsSwitch = ({ isOn, onChange }: { isOn: boolean; onChange: () => void }) => (
@@ -22,16 +24,95 @@ const FormRow = ({ label, children }: { label: string; children?: React.ReactNod
     <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
       <label className="font-bold text-sm text-black">{label}</label>
     </div>
-    <div className="w-full sm:w-2/3 flex sm:justify-end items-center">
+    <div className="w-full sm:w-2/3 flex sm:justify-end items-center justify-start">
       {children}
     </div>
   </div>
 );
 
+const PDP_OPTIONS = [
+    { name: 'IPV4', value: 'IP' },
+    { name: 'IPV6', value: 'IPV6' },
+    { name: 'IPV4&V6', value: 'IPV4V6' },
+];
+
 export const ImsSettingsPage: React.FC = () => {
-  const [imsEnabled, setImsEnabled] = useState(true);
-  const [imsApn, setImsApn] = useState('ims');
-  const [pdpType, setPdpType] = useState('IPV4&V6');
+  const { showAlert } = useAlert();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  // Data State
+  const [imsEnabled, setImsEnabled] = useState(false); // volteSw
+  const [regStatus, setRegStatus] = useState(''); // volteRegStatus
+  const [imsApn, setImsApn] = useState(''); // ims
+  const [pdpType, setPdpType] = useState('IPV4V6'); // pdpType
+
+  useEffect(() => {
+    const init = async () => {
+        try {
+            const res = await fetchImsSettings();
+            if (res && (res.success || res.cmd === 1023)) {
+                setImsEnabled(res.volteSw === '1');
+                setRegStatus(res.volteRegStatus || '9');
+                setImsApn(res.ims || '');
+                setPdpType(res.pdpType || 'IPV4V6');
+            }
+        } catch (e) {
+            console.error("Failed to fetch IMS settings", e);
+            showAlert('Failed to load settings.', 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+    init();
+  }, [showAlert]);
+
+  const handleSave = async () => {
+      setSaving(true);
+      try {
+          const payload = {
+              volteSw: imsEnabled ? '1' : '0',
+              pdpType: pdpType,
+              ims: imsApn
+          };
+          
+          const res = await saveImsSettings(payload);
+          if (res && (res.success || res.cmd === 1023)) {
+              showAlert('Settings saved successfully.', 'success');
+          } else {
+              showAlert('Failed to save settings.', 'error');
+          }
+      } catch (e) {
+          console.error(e);
+          showAlert('An error occurred.', 'error');
+      } finally {
+          setSaving(false);
+      }
+  };
+
+  const getStatusText = (status: string) => {
+      switch(status) {
+          case '0': return "The system is initializing";
+          case '1': return "Initializing VoLTE Settings";
+          case '2': return "Resetting Module";
+          case '3': return "Registering";
+          case '4': return "Registered";
+          case '5': return "Error Configuring Module";
+          case '6': return "SIM Card Not Detected";
+          case '7': return "Factory Mode";
+          case '8': return "Stationed in the Network";
+          case '9': return "Unregistered";
+          default: return "Unknown Mistake";
+      }
+  };
+
+  if (loading) {
+      return (
+          <div className="w-full h-64 flex items-center justify-center">
+              <Loader2 className="animate-spin text-orange" size={40} />
+          </div>
+      );
+  }
 
   return (
     <div className="w-full animate-fade-in py-2">
@@ -41,44 +122,52 @@ export const ImsSettingsPage: React.FC = () => {
               <ImsSwitch isOn={imsEnabled} onChange={() => setImsEnabled(!imsEnabled)} />
           </FormRow>
 
-          {/* IMS Register Status */}
-          <FormRow label="IMS Register Status">
-              <div className="w-full flex justify-end">
-                <span className="text-black text-sm font-medium">The system is initializing</span>
-              </div>
-          </FormRow>
+          {/* Conditional Fields */}
+          {imsEnabled && (
+              <>
+                {/* IMS Register Status */}
+                <FormRow label="IMS Register Status">
+                    <span className="text-black text-sm font-medium">{getStatusText(regStatus)}</span>
+                </FormRow>
 
-          {/* IMS Input */}
-          <FormRow label="IMS">
-              <input 
-                type="text" 
-                value={imsApn}
-                onChange={(e) => setImsApn(e.target.value)}
-                className="w-full border border-gray-300 px-3 py-2 text-sm text-black outline-none focus:border-gray-400 transition-all rounded-[2px] bg-white"
-              />
-          </FormRow>
+                {/* IMS Input */}
+                <FormRow label="IMS">
+                    <input 
+                        type="text" 
+                        value={imsApn}
+                        onChange={(e) => setImsApn(e.target.value)}
+                        className="w-full border border-gray-300 px-3 py-2 text-sm text-black outline-none focus:border-orange transition-all rounded-[2px] bg-white"
+                    />
+                </FormRow>
 
-          {/* IMS PDP Type */}
-          <FormRow label="IMS PDP Type">
-              <div className="relative w-full">
-                <select 
-                  value={pdpType} 
-                  onChange={(e) => setPdpType(e.target.value)}
-                  className="w-full border border-gray-300 px-3 py-2 text-sm text-gray-600 outline-none focus:border-gray-400 transition-all rounded-[2px] appearance-none bg-white cursor-pointer"
-                >
-                  <option value="IPV4">IPV4</option>
-                  <option value="IPV6">IPV6</option>
-                  <option value="IPV4&V6">IPV4&V6</option>
-                </select>
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400">
-                    <ChevronDown size={16} />
-                </div>
-              </div>
-          </FormRow>
+                {/* IMS PDP Type */}
+                <FormRow label="IMS PDP Type">
+                    <div className="relative w-full">
+                        <select 
+                        value={pdpType} 
+                        onChange={(e) => setPdpType(e.target.value)}
+                        className="w-full border border-gray-300 px-3 py-2 text-sm text-gray-600 outline-none focus:border-orange transition-all rounded-[2px] appearance-none bg-white cursor-pointer"
+                        >
+                        {PDP_OPTIONS.map(opt => (
+                            <option key={opt.value} value={opt.value}>{opt.name}</option>
+                        ))}
+                        </select>
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400">
+                            <ChevronDown size={16} />
+                        </div>
+                    </div>
+                </FormRow>
+              </>
+          )}
 
           {/* Save Button */}
           <div className="flex justify-end pt-12 mt-2">
-            <button className="bg-white border-2 border-black text-black hover:bg-black hover:text-white font-bold py-1.5 px-8 text-sm transition-all rounded-[2px] shadow-sm uppercase tracking-wide min-w-[100px]">
+            <button 
+                onClick={handleSave}
+                disabled={saving}
+                className="bg-white border-2 border-black text-black hover:bg-black hover:text-white font-bold py-2 px-12 text-sm transition-all rounded-[2px] shadow-sm uppercase tracking-wide flex items-center"
+            >
+                {saving ? <Loader2 className="animate-spin w-4 h-4 me-2" /> : <Save size={18} className="me-2" />}
                 Save
             </button>
           </div>

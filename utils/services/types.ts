@@ -362,3 +362,13 @@ export interface UsageSettingsResponse {
     ul_mon_flow: string;
     [key: string]: any;
 }
+
+export interface ImsSettingsResponse {
+    success: boolean;
+    cmd: number;
+    volteSw: string;
+    volteRegStatus: string;
+    ims: string;
+    pdpType: string;
+    [key: string]: any;
+}

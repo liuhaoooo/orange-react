@@ -13,7 +13,8 @@ import {
     LockBandSettings,
     PlmnScanResponse,
     ApnProfile,
-    UsageSettingsResponse
+    UsageSettingsResponse,
+    ImsSettingsResponse
 } from './types';
 
 // Status & Connection
@@ -66,3 +67,7 @@ export const setDisplaySolution = async (value: string) => apiRequest(235, 'POST
 // Usage Settings
 export const fetchUsageSettings = async () => apiRequest<UsageSettingsResponse>(1021, 'GET');
 export const saveUsageSettings = async (data: any) => apiRequest(337, 'POST', data);
+
+// IMS Settings
+export const fetchImsSettings = async () => apiRequest<ImsSettingsResponse>(1023, 'GET');
+export const saveImsSettings = async (data: { volteSw: string; pdpType: string; ims: string }) => apiRequest(1023, 'POST', data);
