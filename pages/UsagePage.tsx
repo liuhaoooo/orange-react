@@ -235,7 +235,7 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
         </div>
 
         {/* Right Sidebar */}
-        <div className="lg:w-[320px] shrink-0">
+        <div className="lg:w-[400px] shrink-0">
             <div className="bg-[#f2f2f2] border border-gray-200 p-6 flex flex-col items-center text-center h-full min-h-[450px]">
                 
                 <div className="w-full max-w-[200px] mb-8 mt-12 relative">
