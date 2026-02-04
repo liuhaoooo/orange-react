@@ -168,8 +168,16 @@ export const WifiAdvancedPanel: React.FC<WifiAdvancedPanelProps> = ({ cmd, is5g 
     // 2. Channels (Dependent on Country Code)
     const channelOptions = useMemo(() => {
         if (rawChannelList.length === 0) return [{ label: 'Auto', value: 'auto' }];
-        return rawChannelList.map((c: any) => ({ label: c.name, value: c.value }));
-    }, [rawChannelList]);
+        
+        let opts = rawChannelList.map((c: any) => ({ label: c.name, value: c.value }));
+
+        // 5G DFS Logic: If DFS OFF (false), filter out channels with "DFS" in the label
+        if (is5g && !dfsSwitch) {
+            opts = opts.filter((opt: { label: string, value: string }) => !opt.label.toUpperCase().includes('DFS'));
+        }
+
+        return opts;
+    }, [rawChannelList, is5g, dfsSwitch]);
 
     // Ensure selected channel is valid when options change
     useEffect(() => {
@@ -224,11 +232,6 @@ export const WifiAdvancedPanel: React.FC<WifiAdvancedPanelProps> = ({ cmd, is5g 
         if (configSection && Array.isArray(configSection.bandWidth)) {
             let opts = configSection.bandWidth.map((i: any) => ({ label: i.name, value: i.value }));
             
-            // 5G DFS Logic: If DFS OFF (false), filter out value '4'
-            if (is5g && !dfsSwitch) {
-                opts = opts.filter((bw: any) => bw.value !== '4');
-            }
-
             // Filter logic: if currentMaxBw is set (e.g. 3), filter out bandwidths with value > 3
             if (currentMaxBw !== null) {
                 opts = opts.filter((bw: any) => {
@@ -240,7 +243,7 @@ export const WifiAdvancedPanel: React.FC<WifiAdvancedPanelProps> = ({ cmd, is5g 
             return opts;
         }
         return [];
-    }, [configSection, currentMaxBw, wifiWorkMode, is5g, dfsSwitch]);
+    }, [configSection, currentMaxBw, wifiWorkMode, is5g]);
 
     // Ensure selected bandwidth is valid after filtering
     useEffect(() => {
