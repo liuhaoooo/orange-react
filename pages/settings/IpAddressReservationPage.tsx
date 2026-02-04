@@ -33,6 +33,10 @@ export const IpAddressReservationPage: React.FC = () => {
   }, [showAlert]);
 
   const handleAddClick = () => {
+      if (rules.length >= 32) {
+          showAlert('The maximum number of entries is 32.', 'warning');
+          return;
+      }
       setEditingIndex(null);
       setIsModalOpen(true);
   };
