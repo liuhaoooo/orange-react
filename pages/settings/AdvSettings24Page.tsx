@@ -222,7 +222,7 @@ export const WifiAdvancedPanel: React.FC<WifiAdvancedPanelProps> = ({ cmd, is5g 
 
         // Default Config Logic
         if (configSection && Array.isArray(configSection.bandWidth)) {
-            let opts = configSection.bandWidth;
+            let opts = configSection.bandWidth.map((i: any) => ({ label: i.name, value: i.value }));
             
             // 5G DFS Logic: If DFS OFF (false), filter out value '4'
             if (is5g && !dfsSwitch) {
@@ -237,7 +237,7 @@ export const WifiAdvancedPanel: React.FC<WifiAdvancedPanelProps> = ({ cmd, is5g 
                 });
             }
 
-            return opts.map((i: any) => ({ label: i.name, value: i.value }));
+            return opts;
         }
         return [];
     }, [configSection, currentMaxBw, wifiWorkMode, is5g, dfsSwitch]);
