@@ -18,7 +18,11 @@ export const PasswordChangeModal: React.FC<PasswordChangeModalProps> = ({ isOpen
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
+  
+  // Field specific errors
+  const [passError, setPassError] = useState('');
+  const [confirmError, setConfirmError] = useState('');
+  const [generalError, setGeneralError] = useState('');
 
   // Reset state on open
   useEffect(() => {
@@ -27,7 +31,9 @@ export const PasswordChangeModal: React.FC<PasswordChangeModalProps> = ({ isOpen
         setConfirmPassword('');
         setShowPassword(false);
         setShowConfirmPassword(false);
-        setErrorMsg('');
+        setPassError('');
+        setConfirmError('');
+        setGeneralError('');
         setIsLoading(false);
     }
   }, [isOpen]);
@@ -41,36 +47,41 @@ export const PasswordChangeModal: React.FC<PasswordChangeModalProps> = ({ isOpen
   const strength = getStrength(password);
 
   const handleSubmit = async () => {
+    setPassError('');
+    setConfirmError('');
+    setGeneralError('');
+
+    let hasError = false;
+
     if (!password) {
-        setErrorMsg(t('emptyError'));
-        return;
+        setPassError(t('emptyError'));
+        hasError = true;
     }
-    if (password !== confirmPassword) {
-        setErrorMsg('Passwords do not match.');
-        return;
+    if (password && password !== confirmPassword) {
+        setConfirmError('Passwords do not match.');
+        hasError = true;
     }
 
+    if (hasError) return;
+
     setIsLoading(true);
-    setErrorMsg('');
 
     try {
         const res = await modifyPassword('admin', password);
         
-        // Logic based on specific message values as requested
         if (res.message === 'success') {
             onSuccess();
         } else if (res.message === 'ERROR') {
-            setErrorMsg(t('pwdModificationFailed'));
+            setGeneralError(t('pwdModificationFailed'));
         } else if (res.message === 'passwd same') {
-            setErrorMsg(t('pwdSameAsOld'));
+            setPassError(t('pwdSameAsOld'));
         } else if (res.message === 'username passwd same') {
-            setErrorMsg(t('pwdSameAsUser'));
+            setPassError(t('pwdSameAsUser'));
         } else {
-            // Fallback for other errors
-            setErrorMsg(res.message || t('pwdModificationFailed'));
+            setGeneralError(res.message || t('pwdModificationFailed'));
         }
     } catch (e) {
-        setErrorMsg('An error occurred.');
+        setGeneralError('An error occurred.');
     } finally {
         setIsLoading(false);
     }
@@ -115,8 +126,8 @@ export const PasswordChangeModal: React.FC<PasswordChangeModalProps> = ({ isOpen
                   <input 
                     type={showPassword ? "text" : "password"} 
                     value={password} 
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full border-2 border-black p-2 pr-10 text-sm outline-none focus:border-orange text-black font-medium" 
+                    onChange={(e) => { setPassword(e.target.value); setPassError(''); }}
+                    className={`w-full border-2 p-2 pr-10 text-sm outline-none transition-all font-medium ${passError ? 'border-red-500' : 'border-black focus:border-orange'}`} 
                   />
                   <button 
                     type="button"
@@ -126,16 +137,21 @@ export const PasswordChangeModal: React.FC<PasswordChangeModalProps> = ({ isOpen
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
               </div>
+              {passError && <p className="text-red-500 text-xs mt-1 font-bold">{passError}</p>}
               
               {/* Strength Meter */}
-              <div className="flex mt-3 h-2 w-full max-w-[200px]">
-                 <div className={`flex-1 me-1 transition-colors ${strength >= 1 ? 'bg-orange' : 'bg-gray-200'}`}></div>
-                 <div className={`flex-1 me-1 transition-colors ${strength >= 2 ? 'bg-orange' : 'bg-gray-200'}`}></div>
-                 <div className={`flex-1 transition-colors ${strength >= 3 ? 'bg-orange' : 'bg-gray-200'}`}></div>
-              </div>
-              <div className="text-end text-xs text-black mt-1">
-                 {strength === 0 ? 'Password Weak' : strength === 1 ? 'Password Weak' : strength === 2 ? 'Password Medium' : 'Password Strong'}
-              </div>
+              {!passError && (
+              <>
+                <div className="flex mt-3 h-2 w-full max-w-[200px]">
+                    <div className={`flex-1 me-1 transition-colors ${strength >= 1 ? 'bg-orange' : 'bg-gray-200'}`}></div>
+                    <div className={`flex-1 me-1 transition-colors ${strength >= 2 ? 'bg-orange' : 'bg-gray-200'}`}></div>
+                    <div className={`flex-1 transition-colors ${strength >= 3 ? 'bg-orange' : 'bg-gray-200'}`}></div>
+                </div>
+                <div className="text-end text-xs text-black mt-1">
+                    {strength === 0 ? 'Password Weak' : strength === 1 ? 'Password Weak' : strength === 2 ? 'Password Medium' : 'Password Strong'}
+                </div>
+              </>
+              )}
            </div>
 
            <div className="mb-6">
@@ -144,8 +160,8 @@ export const PasswordChangeModal: React.FC<PasswordChangeModalProps> = ({ isOpen
                   <input 
                     type={showConfirmPassword ? "text" : "password"} 
                     value={confirmPassword} 
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full border-2 border-gray-200 p-2 pr-10 text-sm outline-none focus:border-orange text-black font-medium" 
+                    onChange={(e) => { setConfirmPassword(e.target.value); setConfirmError(''); }}
+                    className={`w-full border-2 p-2 pr-10 text-sm outline-none transition-all font-medium ${confirmError ? 'border-red-500' : 'border-gray-200 focus:border-orange'}`} 
                   />
                   <button 
                     type="button"
@@ -155,11 +171,12 @@ export const PasswordChangeModal: React.FC<PasswordChangeModalProps> = ({ isOpen
                     {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
               </div>
+              {confirmError && <p className="text-red-500 text-xs mt-1 font-bold">{confirmError}</p>}
            </div>
 
-           {errorMsg && (
-              <div className="mb-4 text-red-500 text-sm font-bold">
-                  {errorMsg}
+           {generalError && (
+              <div className="mb-4 text-red-500 text-sm font-bold text-end">
+                  {generalError}
               </div>
            )}
 

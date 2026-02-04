@@ -16,7 +16,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Field Errors
+  const [userError, setUserError] = useState('');
+  const [passError, setPassError] = useState('');
+  // General API/Lock Error
   const [errorMsg, setErrorMsg] = useState('');
+  
   const [lockCountdown, setLockCountdown] = useState<number | null>(null);
   const { t } = useLanguage();
   const { setIsLoggedIn } = useGlobalState();
@@ -28,6 +34,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       setPassword('');
       setShowPassword(false);
       setErrorMsg('');
+      setUserError('');
+      setPassError('');
       setIsLoading(false);
       setLockCountdown(null);
     }
@@ -62,13 +70,23 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   }, [lockCountdown, t]);
 
   const handleSubmit = async () => {
-    if (!username || !password) {
-      setErrorMsg(t('emptyError'));
-      return;
+    setUserError('');
+    setPassError('');
+    setErrorMsg('');
+
+    let hasError = false;
+    if (!username) {
+        setUserError(t('emptyError'));
+        hasError = true;
+    }
+    if (!password) {
+        setPassError(t('emptyError'));
+        hasError = true;
     }
 
+    if (hasError) return;
+
     setIsLoading(true);
-    setErrorMsg('');
     setLockCountdown(null); // Reset countdown on new attempt
 
     try {
@@ -127,10 +145,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
             <input 
               type="text" 
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) => { setUsername(e.target.value); setUserError(''); }}
               disabled={isLoading}
-              className={`w-full border bg-white p-2 text-sm outline-none text-black ${errorMsg ? 'border-red-500' : 'border-gray-300 focus:border-orange'}`}
+              className={`w-full border bg-white p-2 text-sm outline-none text-black ${userError ? 'border-red-500' : 'border-gray-300 focus:border-orange'}`}
             />
+            {userError && <p className="text-red-500 text-xs mt-1 font-bold">{userError}</p>}
           </div>
 
           <div className="mb-4">
@@ -140,10 +159,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                   type={showPassword ? "text" : "password"} 
                   value={password} 
                   autoComplete="new-password"
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => { setPassword(e.target.value); setPassError(''); }}
                   onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
                   disabled={isLoading}
-                  className={`w-full border bg-white p-2 pr-10 text-sm outline-none text-black ${errorMsg ? 'border-red-500' : 'border-gray-300 focus:border-orange'}`}
+                  className={`w-full border bg-white p-2 pr-10 text-sm outline-none text-black ${passError ? 'border-red-500' : 'border-gray-300 focus:border-orange'}`}
                 />
                 <button 
                   type="button"
@@ -153,6 +172,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
             </div>
+            {passError && <p className="text-red-500 text-xs mt-1 font-bold">{passError}</p>}
           </div>
 
           {errorMsg && <p className="text-red-500 text-xs mb-4 text-start font-bold">{errorMsg}</p>}

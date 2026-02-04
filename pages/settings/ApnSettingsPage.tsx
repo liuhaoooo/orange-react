@@ -8,9 +8,9 @@ import { useLanguage } from '../../utils/i18nContext';
 import { useAlert } from '../../utils/AlertContext';
 
 // Reusable Form Components
-const SectionRow = ({ label, children, required = false }: { label: string; children?: React.ReactNode; required?: boolean }) => (
+const SectionRow = ({ label, children, required = false, error }: { label: string; children?: React.ReactNode; required?: boolean; error?: string }) => (
   <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100 last:border-0">
-    <div className="w-full sm:w-1/3 mb-1 sm:mb-0">
+    <div className="w-full sm:w-1/3 mb-1 sm:mb-0 self-start sm:self-center">
       <label className="font-bold text-sm text-black">
         {required && <span className="text-orange me-1">*</span>}
         {label}
@@ -18,6 +18,7 @@ const SectionRow = ({ label, children, required = false }: { label: string; chil
     </div>
     <div className="w-full sm:w-2/3">
       {children}
+      {error && <div className="text-red-500 text-xs mt-1">{error}</div>}
     </div>
   </div>
 );
@@ -29,12 +30,12 @@ const StyledInput = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
   />
 );
 
-const StyledSelect = ({ value, onChange, options }: { value: string, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void, options: {label: string, value: string}[] }) => (
+const StyledSelect = ({ value, onChange, options, hasError }: { value: string, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void, options: {label: string, value: string}[], hasError?: boolean }) => (
   <div className="relative w-full">
     <select 
       value={value} 
       onChange={onChange}
-      className="w-full border border-black px-3 py-2 text-sm text-black outline-none focus:border-orange focus:ring-1 focus:ring-orange transition-all rounded-[2px] appearance-none bg-white cursor-pointer font-medium"
+      className={`w-full border px-3 py-2 text-sm text-black outline-none transition-all rounded-[2px] appearance-none bg-white cursor-pointer font-medium ${hasError ? 'border-red-500 focus:border-red-500' : 'border-black focus:border-orange focus:ring-1 focus:ring-orange'}`}
     >
       {options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
     </select>
@@ -78,6 +79,9 @@ export const ApnSettingsPage: React.FC = () => {
   const [natEnabled, setNatEnabled] = useState(false);
   const [mtu, setMtu] = useState('1500');
   const [apnMode, setApnMode] = useState<'auto' | 'manual'>('auto');
+
+  // Error State
+  const [profileError, setProfileError] = useState('');
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -127,6 +131,7 @@ export const ApnSettingsPage: React.FC = () => {
 
   const handleModeChange = (mode: 'auto' | 'manual') => {
       setApnMode(mode);
+      setProfileError(''); // Clear error on mode change
       // Logic: Filter available profiles by mode
       const targetFlag = mode === 'auto' ? '0' : '1';
       const available = apnList.filter(p => p.edit_flag === targetFlag);
@@ -146,6 +151,7 @@ export const ApnSettingsPage: React.FC = () => {
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
       const name = e.target.value;
+      setProfileError('');
       const profile = apnList.find(p => p.name === name);
       if (profile) {
           setSelectedProfile(profile);
@@ -225,8 +231,9 @@ export const ApnSettingsPage: React.FC = () => {
   };
 
   const handleSave = async () => {
+      setProfileError('');
       if (!selectedProfile) {
-          showAlert(t('emptyError') + ' (Profile Name)', 'warning');
+          setProfileError(t('emptyError'));
           return;
       }
 
@@ -342,11 +349,12 @@ export const ApnSettingsPage: React.FC = () => {
         </SectionRow>
 
         {/* Profile Name */}
-        <SectionRow label="Profile Name">
+        <SectionRow label="Profile Name" error={profileError}>
             <StyledSelect 
                 value={selectedProfile?.name || ''} 
                 onChange={handleProfileChange} 
                 options={getFilteredProfiles().map(p => ({ label: p.name, value: p.name }))}
+                hasError={!!profileError}
             />
         </SectionRow>
 

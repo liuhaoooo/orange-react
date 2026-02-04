@@ -25,8 +25,9 @@ export const PukRequiredModal: React.FC<PukRequiredModalProps> = ({
   const [showNewPin, setShowNewPin] = useState(false);
   const [showConfirmPin, setShowConfirmPin] = useState(false);
 
-  const [errors, setErrors] = useState<{puk?: boolean; newPin?: boolean; confirmPin?: boolean}>({});
-  const [errorMsg, setErrorMsg] = useState('');
+  // Expanded Error State
+  const [errors, setErrors] = useState<{puk?: string; newPin?: string; confirmPin?: string}>({});
+  const [errorMsg, setErrorMsg] = useState(''); // General API Error
   const [isLoading, setIsLoading] = useState(false);
 
   const { updateGlobalData } = useGlobalState();
@@ -45,19 +46,19 @@ export const PukRequiredModal: React.FC<PukRequiredModalProps> = ({
   }, [isOpen]);
 
   const validate = () => {
-      const newErrors: {puk?: boolean; newPin?: boolean; confirmPin?: boolean} = {};
+      const newErrors: {puk?: string; newPin?: string; confirmPin?: string} = {};
       let isValid = true;
 
       if (!puk) {
-          newErrors.puk = true;
+          newErrors.puk = 'can not be empty.';
           isValid = false;
       }
       if (!newPin) {
-          newErrors.newPin = true;
+          newErrors.newPin = 'can not be empty.';
           isValid = false;
       }
       if (!confirmPin) {
-          newErrors.confirmPin = true;
+          newErrors.confirmPin = 'can not be empty.';
           isValid = false;
       }
 
@@ -73,7 +74,7 @@ export const PukRequiredModal: React.FC<PukRequiredModalProps> = ({
     }
 
     if (newPin !== confirmPin) {
-        setErrorMsg('New PIN and confirm PIN do not match.');
+        setErrors(prev => ({ ...prev, confirmPin: 'New PIN and confirm PIN do not match.' }));
         return;
     }
 
@@ -106,7 +107,7 @@ export const PukRequiredModal: React.FC<PukRequiredModalProps> = ({
   if (!isOpen) return null;
 
   const inputClass = (hasError?: boolean) => `w-full border-2 p-2 text-sm outline-none font-medium text-black rounded-[4px] ${hasError ? 'border-[#ff0000]' : 'border-gray-300 focus:border-orange'}`;
-  const errorTextClass = "text-[#ff0000] text-sm mt-1";
+  const errorTextClass = "text-[#ff0000] text-sm mt-1 font-bold";
 
   // Helper to determine if we show the counter (handle 0 case)
   const showAttempts = remainingAttempts !== undefined && remainingAttempts !== null && remainingAttempts !== '';
@@ -142,10 +143,10 @@ export const PukRequiredModal: React.FC<PukRequiredModalProps> = ({
             <input 
               type="text" 
               value={puk}
-              onChange={(e) => setPuk(e.target.value)}
-              className={inputClass(errors.puk)}
+              onChange={(e) => { setPuk(e.target.value); setErrors(p => ({...p, puk: undefined})); }}
+              className={inputClass(!!errors.puk)}
             />
-            {errors.puk && <div className={errorTextClass}>can not be empty.</div>}
+            {errors.puk && <div className={errorTextClass}>{errors.puk}</div>}
           </div>
 
           {/* New PIN Input */}
@@ -157,8 +158,8 @@ export const PukRequiredModal: React.FC<PukRequiredModalProps> = ({
                 <input 
                   type={showNewPin ? "text" : "password"} 
                   value={newPin}
-                  onChange={(e) => setNewPin(e.target.value)}
-                  className={`${inputClass(errors.newPin)} pr-10`}
+                  onChange={(e) => { setNewPin(e.target.value); setErrors(p => ({...p, newPin: undefined})); }}
+                  className={`${inputClass(!!errors.newPin)} pr-10`}
                 />
                 <button 
                   type="button"
@@ -168,7 +169,7 @@ export const PukRequiredModal: React.FC<PukRequiredModalProps> = ({
                   {showNewPin ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
             </div>
-            {errors.newPin && <div className={errorTextClass}>can not be empty.</div>}
+            {errors.newPin && <div className={errorTextClass}>{errors.newPin}</div>}
           </div>
 
           {/* Confirm PIN Input */}
@@ -180,8 +181,8 @@ export const PukRequiredModal: React.FC<PukRequiredModalProps> = ({
                 <input 
                   type={showConfirmPin ? "text" : "password"} 
                   value={confirmPin}
-                  onChange={(e) => setConfirmPin(e.target.value)}
-                  className={`${inputClass(errors.confirmPin)} pr-10`}
+                  onChange={(e) => { setConfirmPin(e.target.value); setErrors(p => ({...p, confirmPin: undefined})); }}
+                  className={`${inputClass(!!errors.confirmPin)} pr-10`}
                 />
                 <button 
                   type="button"
@@ -191,7 +192,7 @@ export const PukRequiredModal: React.FC<PukRequiredModalProps> = ({
                   {showConfirmPin ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
             </div>
-            {errors.confirmPin && <div className={errorTextClass}>can not be empty.</div>}
+            {errors.confirmPin && <div className={errorTextClass}>{errors.confirmPin}</div>}
           </div>
 
           {errorMsg && (

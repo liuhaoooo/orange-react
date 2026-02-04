@@ -26,7 +26,10 @@ export const SimPinModifyModal: React.FC<SimPinModifyModalProps> = ({
   const [showNewPin, setShowNewPin] = useState(false);
   const [showConfirmPin, setShowConfirmPin] = useState(false);
 
-  const [errorMsg, setErrorMsg] = useState('');
+  // Field Errors
+  const [oldPinError, setOldPinError] = useState('');
+  const [newPinError, setNewPinError] = useState('');
+  const [confirmPinError, setConfirmPinError] = useState('');
 
   useEffect(() => {
     if (isOpen) {
@@ -36,35 +39,52 @@ export const SimPinModifyModal: React.FC<SimPinModifyModalProps> = ({
       setShowOldPin(false);
       setShowNewPin(false);
       setShowConfirmPin(false);
-      setErrorMsg('');
+      setOldPinError('');
+      setNewPinError('');
+      setConfirmPinError('');
     }
   }, [isOpen]);
 
+  const clearErrors = () => {
+      setOldPinError('');
+      setNewPinError('');
+      setConfirmPinError('');
+  };
+
   const handleConfirm = () => {
-    setErrorMsg('');
+    clearErrors();
+    let valid = true;
     
     if (!oldPin) {
-        setErrorMsg('Please enter current PIN.');
-        return;
+        setOldPinError('Please enter current PIN.');
+        valid = false;
     }
+    
     if (!newPin) {
-        setErrorMsg('Please enter new PIN.');
-        return;
-    }
-    if (newPin.length < 4 || newPin.length > 8) {
-        setErrorMsg('PIN must be 4-8 digits.');
-        return;
-    }
-    if (newPin !== confirmPin) {
-        setErrorMsg('New PIN and Confirm PIN do not match.');
-        return;
-    }
-    if (oldPin === newPin) {
-        setErrorMsg('New PIN cannot be the same as current PIN.');
-        return;
+        setNewPinError('Please enter new PIN.');
+        valid = false;
+    } else if (newPin.length < 4 || newPin.length > 8) {
+        setNewPinError('PIN must be 4-8 digits.');
+        valid = false;
+    } else if (oldPin === newPin) {
+        setNewPinError('New PIN cannot be the same as current PIN.');
+        valid = false;
     }
 
-    onConfirm(oldPin, newPin);
+    if (!confirmPin) {
+        // Optional: Can treat empty confirm as mismatch if newPin is set
+        if(newPin) {
+            setConfirmPinError('Please confirm new PIN.');
+            valid = false;
+        }
+    } else if (newPin !== confirmPin) {
+        setConfirmPinError('New PIN and Confirm PIN do not match.');
+        valid = false;
+    }
+
+    if (valid) {
+        onConfirm(oldPin, newPin);
+    }
   };
 
   if (!isOpen) return null;
@@ -75,36 +95,44 @@ export const SimPinModifyModal: React.FC<SimPinModifyModalProps> = ({
       value: string, 
       setValue: (v: string) => void, 
       show: boolean, 
-      setShow: (v: boolean) => void
+      setShow: (v: boolean) => void,
+      error?: string
   ) => (
-      <div className="flex flex-col sm:flex-row sm:items-center mb-6">
-         <label className="font-bold text-sm text-black mb-2 sm:mb-0 sm:w-1/3 flex flex-wrap items-center">
-            <span className="text-red-500 me-1">*</span>
-            <span>{label}</span>
-            {subLabel && (
-                <span className="font-normal text-gray-500 text-xs ms-1 block w-full sm:w-auto mt-0.5 sm:mt-0">
-                    {subLabel}
-                </span>
-            )}
-         </label>
-         <div className="sm:w-2/3 relative">
-            <input 
-                type={show ? "text" : "password"} 
-                value={value}
-                onChange={(e) => { setValue(e.target.value); setErrorMsg(''); }}
-                disabled={isLoading}
-                className="w-full border border-gray-300 px-3 py-2 text-sm text-black outline-none focus:border-orange transition-all rounded-[2px] bg-white pr-10"
-                maxLength={8}
-            />
-            <button 
-              type="button"
-              onClick={() => setShow(!show)}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-black"
-              tabIndex={-1}
-            >
-              {show ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
+      <div className="flex flex-col mb-6">
+         <div className="flex flex-col sm:flex-row sm:items-center">
+            <label className="font-bold text-sm text-black mb-2 sm:mb-0 sm:w-1/3 flex flex-wrap items-center">
+                <span className="text-red-500 me-1">*</span>
+                <span>{label}</span>
+                {subLabel && (
+                    <span className="font-normal text-gray-500 text-xs ms-1 block w-full sm:w-auto mt-0.5 sm:mt-0">
+                        {subLabel}
+                    </span>
+                )}
+            </label>
+            <div className="sm:w-2/3 relative">
+                <input 
+                    type={show ? "text" : "password"} 
+                    value={value}
+                    onChange={(e) => { setValue(e.target.value); clearErrors(); }}
+                    disabled={isLoading}
+                    className={`w-full border px-3 py-2 text-sm text-black outline-none transition-all rounded-[2px] bg-white pr-10 ${error ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange'}`}
+                    maxLength={8}
+                />
+                <button 
+                type="button"
+                onClick={() => setShow(!show)}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-black"
+                tabIndex={-1}
+                >
+                {show ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+            </div>
          </div>
+         {error && (
+             <div className="sm:ps-[33.33%] mt-1">
+                 <p className="text-red-500 text-xs font-bold">{error}</p>
+             </div>
+         )}
       </div>
   );
 
@@ -127,7 +155,7 @@ export const SimPinModifyModal: React.FC<SimPinModifyModalProps> = ({
         <div className="p-8">
           
           {/* Old PIN */}
-          {renderInput('PIN Verification', `(Remaining times.${remainingAttempts})`, oldPin, setOldPin, showOldPin, setShowOldPin)}
+          {renderInput('PIN Verification', `(Remaining times.${remainingAttempts})`, oldPin, setOldPin, showOldPin, setShowOldPin, oldPinError)}
 
           {/* Warning Box */}
           <div className="bg-[#fff7e6] border-l-4 border-[#b45309]/0 p-4 mb-8 flex items-start rounded-[2px]">
@@ -138,17 +166,10 @@ export const SimPinModifyModal: React.FC<SimPinModifyModalProps> = ({
           </div>
 
           {/* New PIN */}
-          {renderInput('Modify PIN', '', newPin, setNewPin, showNewPin, setShowNewPin)}
+          {renderInput('Modify PIN', '', newPin, setNewPin, showNewPin, setShowNewPin, newPinError)}
 
           {/* Confirm PIN */}
-          {renderInput('Confirm PIN', '', confirmPin, setConfirmPin, showConfirmPin, setShowConfirmPin)}
-
-          {/* Error Message */}
-          {errorMsg && (
-              <div className="mb-6 text-end">
-                  <span className="text-red-500 text-sm font-bold">{errorMsg}</span>
-              </div>
-          )}
+          {renderInput('Confirm PIN', '', confirmPin, setConfirmPin, showConfirmPin, setShowConfirmPin, confirmPinError)}
 
           {/* Footer Buttons */}
           <div className="flex justify-end space-x-4">
@@ -161,8 +182,8 @@ export const SimPinModifyModal: React.FC<SimPinModifyModalProps> = ({
              </button>
              <button 
                onClick={handleConfirm}
-               disabled={isLoading || !oldPin || !newPin || !confirmPin}
-               className={`px-8 py-2 bg-[#eeeeee] border-2 border-transparent hover:border-gray-300 text-black font-bold text-sm transition-colors min-w-[120px] flex items-center justify-center rounded-[2px] ${(!oldPin || !newPin || !confirmPin || isLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
+               disabled={isLoading}
+               className="px-8 py-2 bg-[#eeeeee] border-2 border-transparent hover:border-gray-300 text-black font-bold text-sm transition-colors min-w-[120px] flex items-center justify-center rounded-[2px]"
              >
                {isLoading ? <Loader2 className="animate-spin w-4 h-4" /> : 'Confirm'}
              </button>

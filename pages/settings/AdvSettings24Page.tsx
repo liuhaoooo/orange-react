@@ -6,9 +6,9 @@ import { fetchWifiAdvanced, saveWifiAdvanced, checkWifiStatus } from '../../util
 import { useAlert } from '../../utils/AlertContext';
 import { useGlobalState } from '../../utils/GlobalStateContext';
 
-const FormRow = ({ label, children, required = false }: { label: string; children?: React.ReactNode; required?: boolean }) => (
+const FormRow = ({ label, children, required = false, error }: { label: string; children?: React.ReactNode; required?: boolean; error?: string }) => (
   <div className="flex flex-col sm:flex-row sm:items-center py-4 border-b border-gray-100 last:border-0">
-    <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
+    <div className="w-full sm:w-1/3 mb-2 sm:mb-0 self-start sm:self-center">
       <label className="font-bold text-sm text-black">
         {required && <span className="text-red-500 me-1">*</span>}
         {label}
@@ -16,6 +16,7 @@ const FormRow = ({ label, children, required = false }: { label: string; childre
     </div>
     <div className="w-full sm:w-2/3">
       {children}
+      {error && <div className="text-red-500 text-xs mt-1">{error}</div>}
     </div>
   </div>
 );
@@ -60,6 +61,7 @@ export const WifiAdvancedPanel: React.FC<WifiAdvancedPanelProps> = ({ cmd, is5g 
     
     // Validation Limits
     const [limitMaxNum, setLimitMaxNum] = useState(32);
+    const [maxNumError, setMaxNumError] = useState('');
 
     // Store raw data to preserve other fields if necessary
     const [rawData, setRawData] = useState<any>({});
@@ -107,16 +109,17 @@ export const WifiAdvancedPanel: React.FC<WifiAdvancedPanelProps> = ({ cmd, is5g 
     };
 
     const handleSave = async () => {
+        setMaxNumError('');
+        
+        // Validation: Max Station
+        const currentMax = parseInt(maxNum, 10);
+        if (isNaN(currentMax) || currentMax < 1 || currentMax > limitMaxNum) {
+            setMaxNumError(`Max Station must be between 1 and ${limitMaxNum}.`);
+            return;
+        }
+
         setSaving(true);
         try {
-            // Validation: Max Station
-            const currentMax = parseInt(maxNum, 10);
-            if (isNaN(currentMax) || currentMax < 1 || currentMax > limitMaxNum) {
-                showAlert(`Max Station must be between 1 and ${limitMaxNum}.`, 'warning');
-                setSaving(false);
-                return;
-            }
-
             // 1. Check Wifi Status (CMD 417)
             const statusRes = await checkWifiStatus();
             // If wifiStatus is NOT '1', it means restarting or busy
@@ -355,15 +358,16 @@ export const WifiAdvancedPanel: React.FC<WifiAdvancedPanelProps> = ({ cmd, is5g 
                     />
                 </FormRow>
 
-                <FormRow label="Max Station" required>
+                <FormRow label="Max Station" required error={maxNumError}>
                     <input 
                         type="text" 
                         value={maxNum}
                         onChange={(e) => {
                             const val = e.target.value;
                             if (/^\d*$/.test(val)) setMaxNum(val);
+                            setMaxNumError('');
                         }}
-                        className="w-full border border-gray-200 px-3 py-2 text-sm text-gray-600 outline-none focus:border-orange transition-all rounded-[2px] bg-white hover:border-gray-300"
+                        className={`w-full border px-3 py-2 text-sm text-gray-600 outline-none transition-all rounded-[2px] bg-white hover:border-gray-300 ${maxNumError ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-orange'}`}
                         maxLength={3}
                     />
                 </FormRow>

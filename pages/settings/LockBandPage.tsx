@@ -38,6 +38,11 @@ export const LockBandPage: React.FC = () => {
   const [sw4g, setSw4g] = useState(false);
   const [sw5g, setSw5g] = useState(false);
 
+  // Error States
+  const [err3g, setErr3g] = useState('');
+  const [err4g, setErr4g] = useState('');
+  const [err5g, setErr5g] = useState('');
+
   // Helper: Convert Hex String to Band Array
   // Logic: "Read from back (right), 1st bit=1 -> Band1, 2nd bit=1 -> Band2..."
   const hexToBands = (hex?: string): string[] => {
@@ -109,6 +114,10 @@ export const LockBandPage: React.FC = () => {
   }, [showAlert]);
 
   const toggleBand = (band: string, currentList: string[], setter: React.Dispatch<React.SetStateAction<string[]>>) => {
+    // Clear error when user changes selection
+    setErr3g('');
+    setErr4g('');
+    setErr5g('');
     if (currentList.includes(band)) {
         setter(currentList.filter(b => b !== band));
     } else {
@@ -116,26 +125,40 @@ export const LockBandPage: React.FC = () => {
     }
   };
 
-  const handleSave = async () => {
-      // Validation: If a switch is ON, its bands must NOT be empty.
-      // "3G、4G、5G其中一个没有勾选时，不能点击保存" -> If switch enabled but no band selected for it.
-      
-      let errorMsg = '';
-      if (sw3g && sel3g.length === 0) errorMsg = 'Please select at least one 3G Band.';
-      else if (sw4g && sel4g.length === 0) errorMsg = 'Please select at least one 4G Band.';
-      else if (sw5g && sel5g.length === 0) errorMsg = 'Please select at least one 5G Band.';
+  const handleSwitchChange = (band: '3g'|'4g'|'5g', current: boolean) => {
+      setErr3g('');
+      setErr4g('');
+      setErr5g('');
+      if(band === '3g') setSw3g(!current);
+      if(band === '4g') setSw4g(!current);
+      if(band === '5g') setSw5g(!current);
+  };
 
-      if (errorMsg) {
-          showAlert(errorMsg, 'warning');
-          return;
+  const handleSave = async () => {
+      setErr3g('');
+      setErr4g('');
+      setErr5g('');
+
+      // Validation: If a switch is ON, its bands must NOT be empty.
+      let hasError = false;
+      if (sw3g && sel3g.length === 0) {
+          setErr3g('Please select at least one 3G Band.');
+          hasError = true;
       }
+      if (sw4g && sel4g.length === 0) {
+          setErr4g('Please select at least one 4G Band.');
+          hasError = true;
+      }
+      if (sw5g && sel5g.length === 0) {
+          setErr5g('Please select at least one 5G Band.');
+          hasError = true;
+      }
+
+      if (hasError) return;
 
       setSaving(true);
       
-      // Construct specific payload structure: 
-      // {"cmd":161,"band5gRadio":"1","lock5gBand":"41","band4gRadio":"1","lock4gBand":"45","band3gRadio":"1","lock3gBand":"81","method":"POST",...}
       const payload: Partial<LockBandSettings> = {
-          // New keys as per requirement
           band3gRadio: sw3g ? '1' : '0',
           band4gRadio: sw4g ? '1' : '0',
           band5gRadio: sw5g ? '1' : '0',
@@ -176,12 +199,13 @@ export const LockBandPage: React.FC = () => {
       <div className="mb-10">
           <div className="flex items-center justify-between mb-8">
              <label className="font-bold text-sm text-black">3G lock band switch</label>
-             <SquareSwitch isOn={sw3g} onChange={() => setSw3g(!sw3g)} />
+             <SquareSwitch isOn={sw3g} onChange={() => handleSwitchChange('3g', sw3g)} />
           </div>
           
           {sw3g && (
               <div className="animate-fade-in">
                 <h3 className="font-bold text-sm text-black mb-6">3G band</h3>
+                {err3g && <div className="text-red-500 text-xs mb-4 font-bold">{err3g}</div>}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-y-6 gap-x-4">
                     {all3g.map(band => (
                         <BandCheckbox 
@@ -202,12 +226,13 @@ export const LockBandPage: React.FC = () => {
       <div className="mb-10">
           <div className="flex items-center justify-between mb-8">
              <label className="font-bold text-sm text-black">4G lock band switch</label>
-             <SquareSwitch isOn={sw4g} onChange={() => setSw4g(!sw4g)} />
+             <SquareSwitch isOn={sw4g} onChange={() => handleSwitchChange('4g', sw4g)} />
           </div>
           
           {sw4g && (
               <div className="animate-fade-in">
                 <h3 className="font-bold text-sm text-black mb-6">4G frequency band</h3>
+                {err4g && <div className="text-red-500 text-xs mb-4 font-bold">{err4g}</div>}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-y-6 gap-x-4">
                     {all4g.map(band => (
                         <BandCheckbox 
@@ -228,12 +253,13 @@ export const LockBandPage: React.FC = () => {
       <div className="mb-10">
           <div className="flex items-center justify-between mb-8">
              <label className="font-bold text-sm text-black">5G lock band switch</label>
-             <SquareSwitch isOn={sw5g} onChange={() => setSw5g(!sw5g)} />
+             <SquareSwitch isOn={sw5g} onChange={() => handleSwitchChange('5g', sw5g)} />
           </div>
           
           {sw5g && (
               <div className="animate-fade-in">
                 <h3 className="font-bold text-sm text-black mb-6">5G frequency band</h3>
+                {err5g && <div className="text-red-500 text-xs mb-4 font-bold">{err5g}</div>}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-y-6 gap-x-4">
                     {all5g.map(band => (
                         <BandCheckbox 
