@@ -6,7 +6,7 @@ import { useAlert } from '../../utils/AlertContext';
 import { Loader2 } from 'lucide-react';
 
 interface WpsSettingsPanelProps {
-    subcmd: number;
+    subcmd: number; // 0 for 2.4G, 1 for 5G (Settings/PIN)
 }
 
 export const WpsSettingsPanel: React.FC<WpsSettingsPanelProps> = ({ subcmd }) => {
@@ -15,13 +15,13 @@ export const WpsSettingsPanel: React.FC<WpsSettingsPanelProps> = ({ subcmd }) =>
     const [saving, setSaving] = useState(false);
     const [applyingPin, setApplyingPin] = useState(false);
     
-    // Split state: 
-    // draftEnabled controls the Switch UI immediately.
-    // activeEnabled controls the visibility of the bottom section (updated only after save).
-    const [draftEnabled, setDraftEnabled] = useState(false);
+    // activeEnabled: State from server (controls visibility of bottom section)
     const [activeEnabled, setActiveEnabled] = useState(false);
+    // draftEnabled: State of the switch UI
+    const [draftEnabled, setDraftEnabled] = useState(false);
     
     const [pin, setPin] = useState('');
+    const [pinError, setPinError] = useState('');
 
     useEffect(() => {
         loadData();
@@ -29,6 +29,7 @@ export const WpsSettingsPanel: React.FC<WpsSettingsPanelProps> = ({ subcmd }) =>
     }, [subcmd]);
 
     const loadData = async () => {
+        setLoading(true);
         try {
             const res = await fetchWpsSettings(subcmd);
             if (res && (res.success || res.cmd === 132)) {
@@ -46,11 +47,12 @@ export const WpsSettingsPanel: React.FC<WpsSettingsPanelProps> = ({ subcmd }) =>
         }
     };
 
-    const handleSave = async () => {
+    const handleSaveSwitch = async () => {
         setSaving(true);
         try {
-            // 1. Check Wifi Status
+            // 1. Check Wifi Status (CMD 417)
             const statusRes = await checkWifiStatus();
+            // If wifiStatus is NOT '1', it means restarting
             if (statusRes && statusRes.wifiStatus !== '1') {
                 showAlert('Wi-Fi is restarting, please try again later.', 'warning');
                 setSaving(false);
@@ -65,6 +67,7 @@ export const WpsSettingsPanel: React.FC<WpsSettingsPanelProps> = ({ subcmd }) =>
                 setActiveEnabled(draftEnabled);
             } else {
                 showAlert('Failed to save settings', 'error');
+                // Revert draft to active on failure? Or keep it? keeping it allows retry.
             }
         } catch(e) {
             console.error(e);
@@ -75,22 +78,25 @@ export const WpsSettingsPanel: React.FC<WpsSettingsPanelProps> = ({ subcmd }) =>
     };
 
     const handleApplyPin = async () => {
+        setPinError('');
+        
+        // Inline Validation
         if (!pin) {
-            showAlert('PIN cannot be empty', 'warning');
+            setPinError('PIN cannot be empty');
             return;
         }
         if (!/^\d{8}$/.test(pin)) {
-            showAlert('WPS PIN must be 8 digits', 'warning');
+            setPinError('WPS PIN must be 8 digits');
             return;
         }
 
         setApplyingPin(true);
         try {
-            // subcmd is passed directly: 0 for 2.4G, 1 for 5G
+            // PIN Subcmd: 0 for 2.4G, 1 for 5G. Matches prop subcmd.
             const res = await setWpsPin(subcmd, pin);
             if (res && (res.success || res.result === 'success')) {
                 showAlert('PIN applied successfully', 'success');
-                setPin(''); // Clear input on success
+                setPin(''); 
             } else {
                 showAlert('Failed to apply PIN', 'error');
             }
@@ -103,8 +109,8 @@ export const WpsSettingsPanel: React.FC<WpsSettingsPanelProps> = ({ subcmd }) =>
     };
 
     const handleStartPbc = async () => {
-        // subcmd 0 (2.4G) -> send 2
-        // subcmd 1 (5G) -> send 3
+        // PBC Subcmd: 2 for 2.4G, 3 for 5G
+        // prop subcmd: 0 for 2.4G, 1 for 5G
         const pbcSubcmd = subcmd === 0 ? 2 : 3;
         try {
             const res = await startWpsPbc(pbcSubcmd);
@@ -141,7 +147,7 @@ export const WpsSettingsPanel: React.FC<WpsSettingsPanelProps> = ({ subcmd }) =>
             {/* Save Button for Switch */}
             <div className="flex justify-end mb-12">
                 <button 
-                    onClick={handleSave}
+                    onClick={handleSaveSwitch}
                     disabled={saving}
                     className="bg-[#eeeeee] border-2 border-black text-black hover:bg-white font-bold py-1.5 px-8 text-sm transition-all rounded-[2px] shadow-sm min-w-[120px] flex items-center justify-center"
                 >
@@ -149,12 +155,12 @@ export const WpsSettingsPanel: React.FC<WpsSettingsPanelProps> = ({ subcmd }) =>
                 </button>
             </div>
 
-            {/* Conditional Content - Depends on Active State, not Draft State */}
+            {/* Conditional Content - Visibility controlled by activeEnabled (server state) */}
             {activeEnabled && (
                 <div className="animate-fade-in">
                     {/* PIN Section */}
-                    <div className="flex flex-col sm:flex-row sm:items-center mb-6">
-                        <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
+                    <div className="flex flex-col sm:flex-row sm:items-start mb-6">
+                        <div className="w-full sm:w-1/3 mb-2 sm:mb-0 pt-2">
                             <label className="font-bold text-sm text-black">
                                 <span className="text-red-500 me-1">*</span>WPSPIN
                             </label>
@@ -163,11 +169,17 @@ export const WpsSettingsPanel: React.FC<WpsSettingsPanelProps> = ({ subcmd }) =>
                             <input 
                                 type="text" 
                                 value={pin}
-                                onChange={(e) => setPin(e.target.value)}
+                                onChange={(e) => {
+                                    setPin(e.target.value);
+                                    if(pinError) setPinError('');
+                                }}
                                 maxLength={8}
                                 placeholder="8 digits"
-                                className="w-full border border-gray-300 px-3 py-2 text-sm text-black outline-none focus:border-orange transition-all rounded-[2px] bg-white"
+                                className={`w-full border px-3 py-2 text-sm text-black outline-none transition-all rounded-[2px] bg-white ${pinError ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange'}`}
                             />
+                            {pinError && (
+                                <p className="text-red-500 text-xs mt-1 font-bold">{pinError}</p>
+                            )}
                         </div>
                     </div>
 
