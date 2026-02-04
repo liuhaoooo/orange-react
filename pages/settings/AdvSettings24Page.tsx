@@ -201,9 +201,34 @@ export const WifiAdvancedPanel: React.FC<WifiAdvancedPanelProps> = ({ cmd, is5g 
     }, [configSection]);
 
     const bandwidthOptions = useMemo(() => {
+        // Fixed Rules Logic based on wifiWorkMode
+        if (!is5g) {
+            // 2.4GHz Rules
+            if (['0', '1', '3'].includes(wifiWorkMode)) {
+                return [{ label: '20MHz', value: '0' }];
+            }
+        } else {
+            // 5GHz Rules
+            if (['2', '7'].includes(wifiWorkMode)) {
+                return [{ label: '20MHz', value: '0' }];
+            }
+            if (['8', '10'].includes(wifiWorkMode)) {
+                return [
+                    { label: '20MHz', value: '0' },
+                    { label: '20MHz/40MHz', value: '1' }
+                ];
+            }
+        }
+
+        // Default Config Logic
         if (configSection && Array.isArray(configSection.bandWidth)) {
             let opts = configSection.bandWidth;
             
+            // 5G DFS Logic: If DFS OFF (false), filter out value '4'
+            if (is5g && !dfsSwitch) {
+                opts = opts.filter((bw: any) => bw.value !== '4');
+            }
+
             // Filter logic: if currentMaxBw is set (e.g. 3), filter out bandwidths with value > 3
             if (currentMaxBw !== null) {
                 opts = opts.filter((bw: any) => {
@@ -215,7 +240,7 @@ export const WifiAdvancedPanel: React.FC<WifiAdvancedPanelProps> = ({ cmd, is5g 
             return opts.map((i: any) => ({ label: i.name, value: i.value }));
         }
         return [];
-    }, [configSection, currentMaxBw]);
+    }, [configSection, currentMaxBw, wifiWorkMode, is5g, dfsSwitch]);
 
     // Ensure selected bandwidth is valid after filtering
     useEffect(() => {
