@@ -4,7 +4,9 @@ import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { FileText } from 'lucide-react';
 
-const PLMN_HELP_CONTENT: Record<string, string> = {
+type HelpContentGenerator = string | ((lang: string) => string);
+
+const PLMN_HELP_CONTENT: Record<string, HelpContentGenerator> = {
     "65202": `
               <p>Customer service:</p>
               <p>Call 136 7am-11pm (toll free) from any Orange mobile while in Botswana OR 72000136 from any network (chargeable)</p>
@@ -188,11 +190,120 @@ const PLMN_HELP_CONTENT: Record<string, string> = {
                 <p>706 (tapez 1)   24H/24   7j /7  - depuis un mobile (appel décompté de votre forfait voix)</p> 
                 <p>0825 000 706    24H/24   7j /7 - depuis un poste fixe (0,13€ HT/min)</p> 
                 <p>+33 675 052 000 - depuis l'international</p> 
-              `
+              `,
+    "63203": (lang) => {
+        if (lang === 'fr') {
+            return `<p>
+            Pour contacter le service client Orange Internet, appelez le 500 ou
+            rendez-vous sur
+            <a target="_blank" href="http://www.orange-bissau.com">
+              www.orange-bissau.com
+            </a>
+            .
+          </p>`;
+        }
+        if (lang === 'po') {
+            return `<p>
+            Para contactar o serviço ao cliente Orange Internet, ligue 500 ou
+            visite
+            <a target="_blank" href="http://www.orange-bissau.com">
+              www.orange-bissau.com
+            </a>
+            .
+          </p>`;
+        }
+        return `<p>
+            To contact Orange customer service, please call 500 or go to
+            <a target="_blank" href="http://www.orange-bissau.com">
+              www.orange-bissau.com
+            </a>
+            .
+          </p>`;
+    },
+    "41677": (lang) => {
+        if (lang === 'ar') {
+            return `<p>
+            لمزيد من المعلومات يرجى الاتصال على 1777 أو 0777700177 لمشتركي
+            الشبكات الاخرى، أو زيارة أحد معارض أورانج. ايضا يمكنك زيارة موقعنا
+            الالكتروني
+            <a target="_blank" href="http://www.orange.jo">www.orange.jo</a>
+          </p>`;
+        }
+        return `<p>
+            For more information, please call 1777 or 0777 700 177 from other
+            networks. Visit any of our shops or our Website
+            <a target="_blank" href="http://www.orange.jo">www.orange.jo</a>
+          </p>`;
+    },
+    "60400": (lang) => {
+        if (lang === 'ar') {
+            return `<p>
+            يمكنكم الإتصال بخدمة الزبناء Orange على الرقم 121 من رقم Orange او
+            121 121 63 06 من شبكة أخرى.
+          </p>`;
+        }
+        return `<p>
+            Pour contacter le Centre de Relation Client Orange, appelez le 121
+            depuis un numéro Orange ou le 06 63 121 121 depuis un autre
+            opérateur.
+          </p>`;
+    },
+    "60501": (lang) => {
+        if (lang === 'en') {
+            return `<p>
+            <label>Customer service available 24/24 and 7/7</label>
+            <label>1150 (free from your Orange mobile)</label>
+            <label>31 11 11 50 from a landline or mobile</label>
+            <label>
+              Access to your dedicated area
+              <a target="_blank" href="http://www.orange.tn/moncompte">
+                www.orange.tn/moncompte
+              </a>
+            </label>
+          </p>`;
+        }
+        return `<p>
+            <label>Service client accessible 24h/24 et 7j/7</label>
+            <label>1150 (gratuit depuis votre mobile Orange)</label>
+            <label>31 11 11 50 depuis une ligne fixe ou mobile</label>
+            <label>
+              Accès à votre espace dédié :
+              <a target="_blank" href="http://www.orange.tn/moncompte">
+                www.orange.tn/moncompte
+              </a>
+            </label>
+          </p>`;
+    },
+    "63201": (lang) => {
+        if (lang === 'fr') {
+            return `<p>
+            Pour contacter le service client Orange Internet, appelez le 500 ou
+            rendez-vous sur
+            <a target="_blank" href="https://www.orange-bissau.com">
+              www.orange-bissau.com
+            </a>
+          </p>`;
+        }
+        if (lang === 'po') {
+            return `<p>
+            Para contactar o serviço ao cliente Orange Internet, ligue 500 ou
+            visite
+            <a target="_blank" href="https://www.orange-bissau.com">
+              www.orange-bissau.com
+            </a>
+          </p>`;
+        }
+        return `<p>
+            To contact Orange customer service, please call 500 or go to
+            <a target="_blank" href="https://www.orange-bissau.com">
+              www.orange-bissau.com
+            </a>
+          </p>`;
+    }
 };
 
 export const HelpPage: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { globalData } = useGlobalState();
   const statusInfo = globalData.statusInfo || {};
   const connectionSettings = globalData.connectionSettings || {};
@@ -206,7 +317,16 @@ export const HelpPage: React.FC = () => {
 
   // Determine Help & Support Text based on PLMN
   const plmn = statusInfo.PLMN || '';
-  const helpContent = PLMN_HELP_CONTENT[plmn];
+  const currentLang = connectionSettings.language || language;
+  
+  const contentOrFunc = PLMN_HELP_CONTENT[plmn];
+  let helpContent = '';
+  
+  if (typeof contentOrFunc === 'function') {
+      helpContent = contentOrFunc(currentLang);
+  } else if (contentOrFunc) {
+      helpContent = contentOrFunc;
+  }
 
   return (
     <div className="w-full">
@@ -243,7 +363,7 @@ export const HelpPage: React.FC = () => {
               <h2 className="text-lg font-bold text-black mb-4">{t('myInformation')}</h2>
               
               <div className="mb-4">
-                <a href="#" className="text-blue-600 font-bold underline text-sm hover:text-blue-800">
+                <a href="https://neva.orange.com/privacyMBB" target="_blank" rel="noopener noreferrer" className="text-blue-600 font-bold underline text-sm hover:text-blue-800">
                   {t('personalDataNotice')}
                 </a>
               </div>
@@ -281,9 +401,13 @@ export const HelpPage: React.FC = () => {
               <h2 className="text-lg font-bold text-black mb-2">{t('helpSupport')}</h2>
               
               {helpContent ? (
-                  <div className="text-gray-500 text-sm mb-4 leading-relaxed [&>p]:mb-1" dangerouslySetInnerHTML={{ __html: helpContent }} />
+                  <div className="text-gray-500 text-sm mb-4 leading-relaxed [&>p]:mb-1 [&_a]:text-blue-600 [&_a]:underline [&_label]:block" dangerouslySetInnerHTML={{ __html: helpContent }} />
               ) : (
-                  <p className="text-gray-500 text-sm mb-4">{t('helpSupportText')}</p>
+                  <p className="text-gray-500 text-sm mb-4">
+                    <a target="_blank" href="http://www.orange.be" className="text-blue-600 underline hover:text-blue-800">
+                      http://www.orange.be
+                    </a>
+                  </p>
               )}
               
               <div className="flex items-center">
