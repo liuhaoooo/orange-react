@@ -1,10 +1,16 @@
 
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(process.cwd(), './'),
+    },
+  },
   server: {
     // Enable host to be accessible from network if needed
     host: '0.0.0.0', 
@@ -16,14 +22,14 @@ export default defineConfig({
         changeOrigin: true, // Required for virtual hosted sites
         secure: false, // Accept self-signed certificates if applicable
         // Optional: Log proxy requests for debugging
-        configure: (proxy, _options) => {
-          proxy.on('error', (err, _req, _res) => {
+        configure: (proxy: any, _options: any) => {
+          proxy.on('error', (err: any, _req: any, _res: any) => {
             console.log('proxy error', err);
           });
-          proxy.on('proxyReq', (proxyReq, req, _res) => {
+          proxy.on('proxyReq', (proxyReq: any, req: any, _res: any) => {
             console.log('Sending Request to the Target:', req.method, req.url);
           });
-          proxy.on('proxyRes', (proxyRes, req, _res) => {
+          proxy.on('proxyRes', (proxyRes: any, req: any, _res: any) => {
             console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
           });
         },
