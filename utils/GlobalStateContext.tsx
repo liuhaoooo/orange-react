@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react';
 import { getSessionId, checkAuthStatus, clearSessionId, fetchStatusInfo, fetchConnectionSettings, fetchWifiSettings, fetchAccountLevel, fetchGlobalConfig } from './api';
 
 // --- Custom Router Implementation ---
@@ -149,6 +149,7 @@ interface GlobalStateContextType {
   checkSession: () => Promise<boolean>;
   globalData: Record<string, any>;
   updateGlobalData: (key: string, value: any) => void;
+  isDebugMode: boolean;
 }
 
 const GlobalStateContext = createContext<GlobalStateContextType | undefined>(undefined);
@@ -161,6 +162,13 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const updateGlobalData = useCallback((key: string, value: any) => {
     setGlobalData(prev => ({ ...prev, [key]: value }));
   }, []);
+
+  // Compute debug mode based on connectionSettings
+  const isDebugMode = useMemo(() => {
+      const s = globalData.connectionSettings;
+      if (!s) return false;
+      return s.build_type === 'debug' || s.ver_type === 'debug' || s.ver_type === 'dbg';
+  }, [globalData.connectionSettings]);
 
   // Listen for global auth logout event (triggered by api.ts on NO_AUTH response)
   useEffect(() => {
@@ -279,7 +287,8 @@ export const GlobalStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
       setIsLoggedIn, 
       checkSession, 
       globalData, 
-      updateGlobalData
+      updateGlobalData,
+      isDebugMode
     }}>
       {children}
     </GlobalStateContext.Provider>

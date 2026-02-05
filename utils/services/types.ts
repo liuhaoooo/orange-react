@@ -187,6 +187,8 @@ export interface ConnectionSettingsResponse {
     guest_wifi_ssid_24g?: string;
     guest_wifi_switch_5g?: string;
     guest_wifi_ssid_5g?: string;
+    build_type?: string;
+    ver_type?: string;
     [key: string]: any;
 }
 
