@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Delete } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
-import servicesBgSvg from '../assets/services-bg.svg';
+import servicesBgSvg from '../assets/services-bg.png';
 
 interface ServicesPageProps {
   onOpenSettings: () => void;
