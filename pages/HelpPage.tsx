@@ -195,6 +195,7 @@ export const HelpPage: React.FC = () => {
   const { t } = useLanguage();
   const { globalData } = useGlobalState();
   const statusInfo = globalData.statusInfo || {};
+  const connectionSettings = globalData.connectionSettings || {};
   
   const [activeTab, setActiveTab] = useState<'info' | 'faq'>('info');
 
@@ -250,31 +251,27 @@ export const HelpPage: React.FC = () => {
               <div className="space-y-3 text-sm text-black">
                 <div className="flex">
                   <span className="text-gray-500 w-32 shrink-0">{t('phoneNumber')} :</span>
-                  <span className="font-medium">{statusInfo.msisdn || '0612345678'}</span>
+                  <span className="font-medium">{statusInfo.device_msisdn || ''}</span>
                 </div>
                 <div className="flex">
                   <span className="text-gray-500 w-32 shrink-0">{t('model')} :</span>
-                  <span className="font-medium">Airbox2</span>
+                  <span className="font-medium">{connectionSettings.device_module || ''}</span>
                 </div>
                 <div className="flex">
                   <span className="text-gray-500 w-32 shrink-0">{t('firmware')} :</span>
-                  <span className="font-medium">{statusInfo.sw_version || 'XX.XX.XXX.XX'}</span>
+                  <span className="font-medium">{connectionSettings.version || ''}</span>
                 </div>
                 <div className="flex">
                   <span className="text-gray-500 w-32 shrink-0">{t('type')} :</span>
-                  <span className="font-medium">{statusInfo.hw_version || 'YY.YYY.YYY.YYY'}</span>
+                  <span className="font-medium">{connectionSettings.build_type || ''}</span>
                 </div>
                 <div className="flex">
                   <span className="text-gray-500 w-32 shrink-0">{t('apn')} :</span>
-                  <span className="font-medium">{statusInfo.apn || 'orange-mib'}</span>
+                  <span className="font-medium">{statusInfo.apn_name || ''}</span>
                 </div>
                 <div className="flex">
                   <span className="text-gray-500 w-32 shrink-0">{t('networkStatus')} :</span>
                   <span className="font-medium">{getNetworkStatusText()}</span>
-                </div>
-                <div className="flex">
-                  <span className="text-gray-500 w-32 shrink-0">{t('version')} :</span>
-                  <span className="font-medium">20250817_Revamp_001</span>
                 </div>
               </div>
             </div>

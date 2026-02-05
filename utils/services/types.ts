@@ -44,6 +44,9 @@ export interface StatusInfoResponse {
   nation_limit_size?: string;
   internation_limit_size?: string;
   flow_limit_unit?: string;
+  // Fields for Help Page
+  device_msisdn?: string;
+  apn_name?: string;
   [key: string]: any;
 }
 
@@ -189,6 +192,9 @@ export interface ConnectionSettingsResponse {
     guest_wifi_ssid_5g?: string;
     build_type?: string;
     ver_type?: string;
+    // Fields for Help Page
+    device_module?: string;
+    version?: string;
     [key: string]: any;
 }
 
