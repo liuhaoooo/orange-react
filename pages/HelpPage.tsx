@@ -328,6 +328,9 @@ export const HelpPage: React.FC = () => {
       helpContent = contentOrFunc;
   }
 
+  // Determine User Guide Link
+  const userGuideUrl = connectionSettings.userguide_link || "http://customer.cwmpd.com/customer/ORANGE/Flybox_5G_CP06_User_Manual.pdf";
+
   return (
     <div className="w-full">
       {/* Header Tabs */}
@@ -412,7 +415,7 @@ export const HelpPage: React.FC = () => {
               
               <div className="flex items-center">
                  <FileText className="w-5 h-5 text-black me-2" />
-                 <a href="#" className="text-blue-600 font-bold underline text-sm hover:text-blue-800">
+                 <a href={userGuideUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 font-bold underline text-sm hover:text-blue-800">
                    {t('userGuide')}
                  </a>
               </div>
