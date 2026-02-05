@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { Delete } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
-// import servicesBgSvg from '../assets/services-bg.svg';
+import servicesBgSvg from '../assets/services-bg.svg';
 
 interface ServicesPageProps {
   onOpenSettings: () => void;
@@ -74,9 +75,9 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenSettings, onSh
              <h1 className="text-3xl font-bold text-black mb-6">{t('services')}</h1>
              <div className="w-full min-h-[500px] flex items-center justify-center bg-white border border-gray-200 shadow-sm flex-col">
                  <div className="text-center p-8 max-w-md w-full flex flex-col items-center">
-                     <div className="w-full max-w-[280px] mb-8 relative">
+                     <div className="w-full max-w-[200px] mb-8 relative">
                          <img 
-                            src={null} 
+                            src={servicesBgSvg} 
                             alt="Services Locked" 
                             className="w-full h-auto"
                          />
@@ -107,7 +108,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenSettings, onSh
                  <div className="text-center p-8 max-w-md w-full flex flex-col items-center">
                      <div className="w-full max-w-[280px] mb-8 relative">
                          <img 
-                            src={null} 
+                            src={servicesBgSvg} 
                             alt="Services Login" 
                             className="w-full h-auto"
                          />

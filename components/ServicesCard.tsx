@@ -1,9 +1,10 @@
+
 import React from 'react';
 import { Card, CardHeader } from './UIComponents';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { Link } from '../utils/GlobalStateContext';
-// import servicesBgSvg from '../assets/services-bg.svg';
+import servicesBgSvg from '../assets/services-bg.svg';
 
 interface ServicesCardProps {
   onOpenLogin?: () => void;
@@ -42,7 +43,7 @@ export const ServicesCard: React.FC<ServicesCardProps> = ({
         <div className="flex-1 bg-white flex flex-col items-center p-6 text-center justify-center">
              <div className="w-full max-w-[200px] mb-6 relative">
                  <img 
-                    src={null} 
+                    src={servicesBgSvg} 
                     alt="Services" 
                     className="w-full h-auto"
                  />
@@ -79,7 +80,7 @@ export const ServicesCard: React.FC<ServicesCardProps> = ({
             <div className="flex-1 bg-white flex flex-col items-center p-6 text-center justify-center">
                  <div className="w-full max-w-[200px] mb-6 relative">
                      <img 
-                        src={null} 
+                        src={servicesBgSvg} 
                         alt="Services Locked" 
                         className="w-full h-auto"
                      />
