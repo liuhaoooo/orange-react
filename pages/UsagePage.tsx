@@ -238,13 +238,13 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
         <div className="lg:w-[400px] shrink-0">
             <div className="bg-[#f2f2f2] border border-gray-200 p-6 flex flex-col items-center text-center h-full min-h-[450px]">
                 
-                <div className="w-full max-w-[200px] mb-8 mt-12 relative">
+                <div className="w-full mb-8 mt-12 relative px-4">
                      <img 
                         src={clientAreaSvg} 
                         alt="Client Area" 
                         className="w-full h-auto"
                      />
-                     <div className="absolute -top-4 -right-4 bg-orange text-white p-2 rounded-full">
+                     <div className="absolute -top-2 right-2 bg-orange text-white p-2 rounded-full">
                         <div className="w-2 h-2 bg-white rounded-full"></div>
                      </div>
                 </div>
