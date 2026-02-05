@@ -641,15 +641,12 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
               ) : (
                   <div className="flex-1 flex flex-col items-center justify-center p-10 bg-white">
                       {/* Illustration */}
-                      <div className="mb-6 relative w-64 h-48">
-                          <div className="flex justify-center items-end space-x-4 h-full">
-                              <MessageSquare className="w-24 h-24 text-orange fill-orange opacity-90 transform -scale-x-100" />
-                              <MessageSquare className="w-24 h-24 text-black fill-black opacity-90" />
-                          </div>
-                          {/* Decorative elements */}
-                          <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-orange rotate-45"></div>
-                          <div className="absolute top-1/4 left-1/3 w-2 h-2 bg-black rounded-full"></div>
-                          <div className="absolute top-1/3 right-1/3 w-2 h-2 bg-orange rounded-full"></div>
+                      <div className="w-full max-w-[450px] mb-6 relative">
+                         <img 
+                            src={messagesBgSvg} 
+                            alt="Select Message" 
+                            className="w-full h-auto"
+                         />
                       </div>
                       
                       <p className="text-black text-sm">{t('selectMsgToRead')}</p>
