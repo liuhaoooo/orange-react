@@ -89,7 +89,7 @@ export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
         <CardHeader title={t('messages')} />
         <div className="flex-1 flex flex-col items-center justify-center p-6 space-y-10 relative">
            
-           <div className="w-full max-w-[280px] mb-6 relative">
+           <div className="w-full max-w-[450px] mb-6 relative">
                  <img 
                     src={messagesBgSvg} 
                     alt="Messages" 

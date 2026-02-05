@@ -380,7 +380,7 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
             <h1 className="text-3xl font-bold text-black mb-6">{t('messages')}</h1>
             <div className="w-full h-[500px] flex items-center justify-center bg-white border border-gray-200 shadow-sm flex-col">
                <div className="text-center p-8 flex flex-col items-center">
-                   <div className="w-full max-w-[280px] mb-6 relative">
+                   <div className="w-full max-w-[450px] mb-6 relative">
                          <img 
                             src={messagesBgSvg} 
                             alt="Messages" 
