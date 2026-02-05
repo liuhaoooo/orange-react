@@ -4,7 +4,7 @@ import { Card, CardHeader } from './UIComponents';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { Link } from '../utils/GlobalStateContext';
-import servicesBgSvg from '@/assets/services-bg.png';
+import servicesBgSvg from '../assets/services-bg.png';
 
 interface ServicesCardProps {
   onOpenLogin?: () => void;
