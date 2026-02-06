@@ -250,8 +250,8 @@ function AppContent() {
         <Header onLogout={handleLogout} onLogin={openLoginModal} />
         
         {/* Updated max-w to 1450px for wider layout */}
-        {/* Increased pt from 100px to 105px to create ~25px gap between fixed header (80px) and page content */}
-        <main className="w-full max-w-[1450px] mx-auto p-4 md:px-6 pt-[105px] md:pt-[105px] relative z-0 flex-grow" dir="ltr">
+        {/* Adjusted padding-top: 80px for mobile (Header is 60px), 105px for desktop (Header is 80px + gap) */}
+        <main className="w-full max-w-[1450px] mx-auto p-4 md:px-6 pt-[85px] md:pt-[105px] relative z-0 flex-grow" dir="ltr">
           <Routes>
             {/* Main Dashboard Route */}
             <Route 

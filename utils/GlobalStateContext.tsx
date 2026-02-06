@@ -102,13 +102,14 @@ export const Link: React.FC<{ to: string; children: React.ReactNode; className?:
     );
 };
 
-export const NavLink: React.FC<{ to: string; children: React.ReactNode; className: (props: { isActive: boolean }) => string; end?: boolean }> = ({ to, children, className, end }) => {
+export const NavLink: React.FC<{ to: string; children: React.ReactNode; className: (props: { isActive: boolean }) => string; end?: boolean; onClick?: (e: React.MouseEvent) => void }> = ({ to, children, className, end, onClick }) => {
     const ctx = useContext(RouterContext);
     const currentPath = ctx ? ctx.location.pathname : '/';
     const isActive = end ? currentPath === to : currentPath.startsWith(to);
     
     const handleClick = (e: React.MouseEvent) => {
-        if (ctx) {
+        if (onClick) onClick(e);
+        if (!e.defaultPrevented && ctx) {
             e.preventDefault();
             ctx.navigate(to);
         }
