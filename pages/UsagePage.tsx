@@ -12,6 +12,38 @@ interface UsagePageProps {
   onOpenSettings: () => void;
 }
 
+const CLIENT_AREA_LINKS: Record<string, string> = {
+    "20610": 'http://www.orange.be',
+    "20801": 'https://espaceclient.orange.fr',
+    "27099": 'http://myorange.lu',
+    "25901": 'https://my.orange.md',
+    "26003": 'https://www.orange.pl/orangeekspert',
+    "22610": 'http://www.orange.ro/contul-meu',
+    "23101": 'http://www.orange.sk',
+    "21403": 'https://areaclientes.orange.es',
+    "21421": 'https://www.jazztel.com/',
+    "64700": 'https://reunion.orange.fr/',
+    "34001": 'http://ie.orangecaraibe.com',
+    "65202": 'http://www.orange.co.bw/',
+    "61302": 'http://www.orange.bf',
+    "62402": 'http://webtopocam.orange.com/cameroun/',
+    "60201": 'http://notify.orange.eg/cck-enrichment.aspx?lang=en',
+    "63203": 'http://pass.orange-bissau.com',
+    "61101": 'https://myorange.orange-guinee.com/',
+    "61203": 'https://espaceclient.orange.ci/',
+    "41677": 'https://selfcare.orange.jo/',
+    "61807": 'http://www.orange.com.lr',
+    "64602": 'http://123.orange.mg',
+    "61002": 'https://aospages.orangemali.com/aos/',
+    "60400": 'https://espace-client.orange.ma/',
+    "62303": 'https://www.orangerca.com/',
+    "63086": 'http://myorange.orange.cd/myorangewebapp/MyOrange-CongoDemocratique/',
+    "63089": 'http://myorange.orange.cd/myorangewebapp/MyOrange-CongoDemocratique/',
+    "60801": 'https://espaceclient.orange.sn/',
+    "61901": 'http://www.orange.sl',
+    "60501": 'https://monoffre.orange.tn',
+};
+
 const UsageDonut = ({ label, value, unit, total, color }: { label: string, value: number, unit: string, total: number, color: string }) => {
   const percentage = total > 0 ? (value / total) * 100 : 0;
   
@@ -64,6 +96,7 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
   const { isLoggedIn, globalData, updateGlobalData } = useGlobalState();
   const info = globalData.statusInfo;
   const flowLimitUnit = info?.flow_limit_unit;
+  const plmn = info?.PLMN || '';
 
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
@@ -111,6 +144,11 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
           setIsResetting(false);
           setIsConfirmOpen(false);
       }
+  };
+
+  const handleConnect = () => {
+      const url = CLIENT_AREA_LINKS[plmn] || 'http://www.orange.be';
+      window.open(url, '_blank');
   };
 
   // --- Calculations for Ring Charts ---
@@ -258,7 +296,10 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
                         {t('clientAreaDesc')}
                     </p>
 
-                    <button className="bg-orange hover:bg-orange-dark text-black font-bold py-2 px-8 text-sm transition-colors w-full rounded-none">
+                    <button 
+                        onClick={handleConnect}
+                        className="bg-orange hover:bg-orange-dark text-black font-bold py-2 px-8 text-sm transition-colors w-full rounded-none"
+                    >
                         {t('connect')}
                     </button>
                 </div>
