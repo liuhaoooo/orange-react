@@ -68,6 +68,9 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
 
+  // Get device name from settings or default to Flybox
+  const deviceName = globalData.connectionSettings?.board_type || 'Flybox';
+
   const handleAuthAction = (action: () => void) => {
     if (isLoggedIn) {
         action();
@@ -149,7 +152,7 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
       <div className="flex justify-between items-start mb-6">
         <div>
             <h1 className="text-3xl font-bold text-black mb-1">{t('usage')}</h1>
-            <p className="text-gray-400 text-sm">Info coming from Airbox2</p>
+            <p className="text-gray-400 text-sm">Info coming from {deviceName}</p>
         </div>
         <div className="flex space-x-3">
              <button 
