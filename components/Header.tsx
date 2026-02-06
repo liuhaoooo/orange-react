@@ -1,8 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { User, ChevronDown, HelpCircle, Settings, LogOut, LogIn } from 'lucide-react';
 import { useLanguage, languageAllList } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { Link, NavLink, useNavigate, useLocation } from '../utils/GlobalStateContext';
+import orangeLogo from '../assets/orange-logo.svg';
 
 interface HeaderProps {
   onLogout: () => void;
@@ -47,9 +49,8 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, onLogin }) => {
 
   // Dynamic classes based on scroll state
   const headerHeightClass = isScrolled ? 'h-[50px]' : 'h-[80px]';
-  const logoBoxClass = isScrolled ? 'px-3' : 'px-5';
+  const logoSizeClass = isScrolled ? 'h-8 w-8' : 'h-12 w-12';
   const logoTextClass = isScrolled ? 'text-lg' : 'text-2xl';
-  const logoTagClass = isScrolled ? 'text-[10px] p-0.5' : 'text-xs p-0.5 px-1';
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 bg-black text-white shadow-md transition-all duration-300 ${headerHeightClass}`}>
@@ -57,9 +58,11 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, onLogin }) => {
         {/* Logo Section */}
         <div className="flex items-center h-full me-4 md:me-8 transition-all duration-300">
           <Link to="/" className="flex items-center h-full group">
-              <div className={`bg-orange h-full flex items-center justify-center font-bold me-4 transition-all duration-300 ${logoBoxClass}`}>
-                <span className={`bg-white text-orange font-bold me-1 transition-all duration-300 ${logoTagClass}`}>orange</span>
-              </div>
+              <img 
+                src={orangeLogo} 
+                alt="Orange" 
+                className={`me-3 transition-all duration-300 ${logoSizeClass}`}
+              />
               <h1 className={`font-bold tracking-tight text-white transition-all duration-300 ${logoTextClass}`}>Airbox2</h1>
           </Link>
         </div>
