@@ -16,11 +16,14 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, onLogin }) => {
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { language, setLanguage, t } = useLanguage();
-  const { isLoggedIn } = useGlobalState();
+  const { isLoggedIn, globalData } = useGlobalState();
   const navigate = useNavigate();
   const location = useLocation();
 
   const currentLang = languageAllList.find(l => l.value === language) || languageAllList.find(l => l.value === 'en');
+  
+  // Get device name from global settings (CMD 585), default to Flybox
+  const deviceName = globalData.connectionSettings?.board_type || 'Flybox';
   
   // Check if current page is settings or help
   const isSettingsPage = location.pathname === '/settings';
@@ -63,7 +66,7 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, onLogin }) => {
                 alt="Orange" 
                 className={`me-3 transition-all duration-300 ${logoSizeClass}`}
               />
-              <h1 className={`font-bold tracking-tight text-white transition-all duration-300 ${logoTextClass}`}>Airbox2</h1>
+              <h1 className={`font-bold tracking-tight text-white transition-all duration-300 ${logoTextClass}`}>{deviceName}</h1>
           </Link>
         </div>
 
