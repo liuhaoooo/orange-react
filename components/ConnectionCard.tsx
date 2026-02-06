@@ -1,11 +1,13 @@
 
 import React, { useState } from 'react';
 import { Card, CardHeader, SquareSwitch, SignalStrengthIcon, BatteryStatusIcon } from './UIComponents';
-import { Timer, ArrowUpDown, TabletSmartphone } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { Link } from '../utils/GlobalStateContext';
 import { setDialMode, setRoamingEnable, fetchConnectionSettings } from '../utils/api';
+import timeElapsedSvg from '../assets/time_elapsed.svg';
+import dataUsageSvg from '../assets/data_usage.svg';
+import connectedSvg from '../assets/connected.svg';
 
 interface ConnectionCardProps {
   onOpenSettings: () => void;
@@ -234,12 +236,12 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
       {/* Top Stats Row: Reduced padding on mobile, responsive Gap */}
       <div className="p-2 pt-4 pb-4 sm:p-4 sm:pt-8 sm:pb-8 flex justify-between items-start border-b border-gray-200 gap-1 sm:gap-2 overflow-x-auto sm:overflow-visible">
           <StatItem 
-            icon={<Timer size={44} strokeWidth={1.5} />} 
+            icon={<img src={timeElapsedSvg} alt="Time Elapsed" className="w-11 h-11 sm:w-14 sm:h-14" />} 
             label={t('timeElapsed')} 
             value={statusInfo ? formatTime(statusInfo.time_elapsed) : "00:00:00"} 
           />
           <StatItem 
-            icon={<ArrowUpDown size={44} strokeWidth={1.5} />} 
+            icon={<img src={dataUsageSvg} alt="Data Usage" className="w-11 h-11 sm:w-14 sm:h-14" />} 
             label={t('dataUsage')} 
             value={formatDataUsage()} 
           />
@@ -261,7 +263,7 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
             value={getBatteryValue()} 
           />
           <StatItem 
-            icon={<TabletSmartphone size={44} strokeWidth={1.5} />} 
+            icon={<img src={connectedSvg} alt="Connected" className="w-11 h-11 sm:w-14 sm:h-14" />} 
             label={t('connected')} 
             value={getConnectedCount()} 
           />
