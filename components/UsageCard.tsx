@@ -12,7 +12,7 @@ const DonutChart = ({ value, label, unit, percentage }: { value: number, label: 
       {/* Responsive size: w-32 (128px) on mobile, w-40 (160px) on sm+ screens */}
       <div className="relative w-32 h-32 sm:w-40 sm:h-40 rounded-full flex items-center justify-center bg-gray-100"
            style={{
-             backgroundImage: `conic-gradient(#ff7900 ${percentage}%, #f2f2f2 ${percentage}% 100%)`
+             backgroundImage: `conic-gradient(#f16e00 ${percentage}%, #f2f2f2 ${percentage}% 100%)`
            }}
       >
         {/* Inner circle responsive size: w-24 (96px) on mobile, w-32 (128px) on sm+ */}

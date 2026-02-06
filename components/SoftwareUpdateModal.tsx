@@ -134,7 +134,7 @@ export const SoftwareUpdateModal: React.FC<SoftwareUpdateModalProps> = ({ isOpen
                     className={`px-8 py-2 font-bold text-sm h-10 min-w-[100px] flex items-center justify-center transition-colors text-white ${
                         !privacyAccepted 
                             ? 'bg-[#c3c3c3] cursor-not-allowed' // Gray out if disabled
-                            : 'bg-[#ffca99] hover:bg-orange' // Light orange/active orange
+                            : 'bg-orange/60 hover:bg-orange' // Light orange using opacity
                     }`}
                     >
                     {isLoading ? <Loader2 className="animate-spin w-4 h-4" /> : 'Finish'}

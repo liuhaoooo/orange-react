@@ -271,7 +271,7 @@ export const EditSsidModal: React.FC<EditSsidModalProps> = ({ isOpen, onClose, n
                             <div className={`flex-1 flex items-center justify-center transition-colors ${strength >= 2 ? 'bg-[#c0c0c0]' : 'bg-[#e0e0e0]'}`}>
                                 {t('medium')}
                             </div>
-                            <div className={`flex-1 flex items-center justify-center transition-colors ${strength >= 3 ? 'bg-[#00aa00] text-white' : 'bg-[#e0e0e0]'}`}>
+                            <div className={`flex-1 flex items-center justify-center transition-colors ${strength >= 3 ? 'bg-[#228722] text-white' : 'bg-[#e0e0e0]'}`}>
                                 {t('strong')}
                             </div>
                         </div>

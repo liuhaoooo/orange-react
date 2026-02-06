@@ -184,14 +184,14 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
                         value={natFormatted.val} 
                         unit={natFormatted.unit} 
                         total={natTotalConverted} 
-                        color="#ff7900" 
+                        color="#f16e00" 
                     />
                     <UsageDonut 
                         label={t('international')} 
                         value={intFormatted.val} 
                         unit={intFormatted.unit} 
                         total={intTotalConverted} 
-                        color="#ff7900" 
+                        color="#f16e00" 
                     />
                 </div>
             </div>

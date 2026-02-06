@@ -106,8 +106,8 @@ export const PukRequiredModal: React.FC<PukRequiredModalProps> = ({
 
   if (!isOpen) return null;
 
-  const inputClass = (hasError?: boolean) => `w-full border-2 p-2 text-sm outline-none font-medium text-black rounded-[4px] ${hasError ? 'border-[#ff0000]' : 'border-gray-300 focus:border-orange'}`;
-  const errorTextClass = "text-[#ff0000] text-sm mt-1 font-bold";
+  const inputClass = (hasError?: boolean) => `w-full border-2 p-2 text-sm outline-none font-medium text-black rounded-[4px] ${hasError ? 'border-[#cd3c14]' : 'border-gray-300 focus:border-orange'}`;
+  const errorTextClass = "text-[#cd3c14] text-sm mt-1 font-bold";
 
   // Helper to determine if we show the counter (handle 0 case)
   const showAttempts = remainingAttempts !== undefined && remainingAttempts !== null && remainingAttempts !== '';
@@ -133,7 +133,7 @@ export const PukRequiredModal: React.FC<PukRequiredModalProps> = ({
           {/* PUK Input */}
           <div className="mb-4">
             <label className="block font-bold text-sm mb-1 text-black text-start">
-               <span className="text-[#ff0000] me-1">*</span>PUK code required. 
+               <span className="text-[#cd3c14] me-1">*</span>PUK code required. 
                {showAttempts && (
                    <span className="text-gray-500 font-normal ms-1">
                        (remaining attempts: {remainingAttempts})
@@ -152,7 +152,7 @@ export const PukRequiredModal: React.FC<PukRequiredModalProps> = ({
           {/* New PIN Input */}
           <div className="mb-4">
             <label className="block font-bold text-sm mb-1 text-black text-start">
-               <span className="text-[#ff0000] me-1">*</span>New PIN Code
+               <span className="text-[#cd3c14] me-1">*</span>New PIN Code
             </label>
             <div className="relative w-full">
                 <input 
@@ -175,7 +175,7 @@ export const PukRequiredModal: React.FC<PukRequiredModalProps> = ({
           {/* Confirm PIN Input */}
           <div className="mb-6">
             <label className="block font-bold text-sm mb-1 text-black text-start">
-               <span className="text-[#ff0000] me-1">*</span>New PIN Code confirmed
+               <span className="text-[#cd3c14] me-1">*</span>New PIN Code confirmed
             </label>
             <div className="relative w-full">
                 <input 

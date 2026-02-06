@@ -131,7 +131,7 @@ export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
       {/* Sub Header: Inbox - Added shrink-0 to prevent compression */}
       <div className="px-6 py-4 border-b border-gray-200 flex items-center bg-white shrink-0">
           <span className="font-bold text-xl text-black me-3">{t('inbox')}</span>
-          <span className="bg-[#4169e1] text-white text-sm font-bold h-7 w-7 flex items-center justify-center rounded-full">
+          <span className="bg-[#4170d8] text-white text-sm font-bold h-7 w-7 flex items-center justify-center rounded-full">
              {totalCount}
           </span>
       </div>
@@ -158,7 +158,7 @@ export const MessagesCard: React.FC<MessagesCardProps> = ({ onOpenLogin }) => {
                                   {thread.count}
                               </span>
                           )}
-                          {thread.hasUnread && <div className="w-3.5 h-3.5 bg-[#4169e1] rounded-full"></div>}
+                          {thread.hasUnread && <div className="w-3.5 h-3.5 bg-[#4170d8] rounded-full"></div>}
                       </div>
                   </div>
               ))
