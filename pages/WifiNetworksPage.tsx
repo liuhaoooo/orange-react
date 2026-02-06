@@ -243,13 +243,13 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
 
   const FreqCheckbox = ({ label, checked, onChange, disabled }: { label: string, checked: boolean, onChange: () => void, disabled?: boolean }) => (
       <div 
-        className={`flex items-center me-4 ${!disabled ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}
+        className={`flex items-center me-2 sm:me-4 ${!disabled ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}
         onClick={() => !disabled && onChange()}
       >
-          <div className={`w-4 h-4 border flex items-center justify-center me-1.5 ${checked ? 'border-gray-400 bg-gray-100' : 'border-gray-300 bg-white'}`}>
-             {checked && <div className="w-2.5 h-2.5 bg-gray-400" style={{ clipPath: 'polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%)', backgroundColor: '#9ca3af' }}></div>}
+          <div className={`w-3.5 h-3.5 sm:w-4 sm:h-4 border flex items-center justify-center me-1.5 sm:me-2 ${checked ? 'border-gray-400 bg-gray-100' : 'border-gray-300 bg-white'}`}>
+             {checked && <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-gray-400" style={{ clipPath: 'polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%)', backgroundColor: '#9ca3af' }}></div>}
           </div>
-          <span className={`text-sm ${checked ? 'text-gray-400' : 'text-gray-300'}`}>{label}</span>
+          <span className={`text-xs sm:text-sm font-bold ${checked ? 'text-gray-400' : 'text-gray-300'}`}>{label}</span>
       </div>
   );
 
@@ -259,42 +259,43 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
          <h1 className="text-3xl font-bold text-black">{t('wifiNetworks')}</h1>
          <button 
            onClick={handleSettingsClick}
-           className="bg-orange hover:bg-orange-dark text-black px-4 py-2 font-bold text-sm flex items-center transition-colors border border-orange"
+           className="bg-orange hover:bg-orange-dark text-black px-4 py-2 font-bold text-sm flex items-center transition-colors border border-orange whitespace-nowrap"
          >
             <Settings size={16} className="me-2" />
             {t('settings')}
          </button>
       </div>
 
-      <div className="bg-white p-6 shadow-sm border border-gray-200">
-          <div className="border border-gray-300 max-h-[600px] overflow-y-auto">
+      <div className="bg-white shadow-sm border border-gray-200">
+          <div className="border-b border-gray-200 max-h-[600px] overflow-y-auto">
               {networks.map((net, index) => {
                   const isLoading = (loadingIds[net.id] || 0) > 0;
                   
                   return (
                   <div 
                       key={net.id} 
-                      className={`flex items-center p-4 min-h-[90px] ${index !== networks.length - 1 ? 'border-b border-gray-200' : ''}`}
+                      className={`flex items-center p-3 sm:p-4 min-h-[80px] sm:min-h-[90px] ${index !== networks.length - 1 ? 'border-b border-gray-200' : ''}`}
                   >
-                      <div className="me-4 relative shrink-0 cursor-pointer" onClick={() => handleInteraction(() => onOpenDevices(net.name))}>
+                      <div className="me-3 sm:me-4 relative shrink-0 cursor-pointer" onClick={() => handleInteraction(() => onOpenDevices(net.name))}>
                            <div className="bg-gray-100 p-2 rounded-sm">
-                              <User className="w-6 h-6 text-black fill-current" />
+                              <User className="w-5 h-5 sm:w-6 sm:h-6 text-black fill-current" />
                            </div>
-                           <div className="absolute -top-1.5 -right-1.5 bg-blue-600 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold border-2 border-white">
+                           <div className="absolute -top-1.5 -right-1.5 bg-blue-600 text-white text-[9px] sm:text-[10px] w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center rounded-full font-bold border-2 border-white">
                               {net.clients}
                            </div>
                       </div>
 
-                      <div className="flex-1 min-w-0 pe-4">
+                      <div className="flex-1 min-w-0 pe-2 sm:pe-4">
                           <div 
-                              className="font-bold text-black text-sm mb-1 cursor-pointer hover:text-orange transition-colors"
+                              className="font-bold text-black text-sm sm:text-sm mb-1 cursor-pointer hover:text-orange transition-colors truncate"
                               onClick={() => handleInteraction(() => onEditSsid({ ...net, frequency: net.frequencyLabel || (net.isMerged ? '2.4GHz' : '') }))}
+                              title={net.name}
                           >
                               {net.name}
                           </div>
                           
                           {net.isMerged ? (
-                              <div className="flex items-center">
+                              <div className="flex items-center flex-wrap">
                                   <FreqCheckbox 
                                     label="2.4 GHz" 
                                     checked={!!net.enabled24} 
@@ -310,25 +311,27 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
                               </div>
                           ) : (
                               <div className="flex items-center">
-                                  <span className="text-xs text-gray-400 font-bold bg-gray-100 px-1.5 py-0.5 rounded-sm">
+                                  <span className="text-xs text-gray-400 font-bold bg-gray-100 px-1.5 py-0.5 rounded-sm whitespace-nowrap">
                                       {net.frequencyLabel}
                                   </span>
                               </div>
                           )}
                       </div>
 
-                      <div className="flex items-center space-x-4 rtl:space-x-reverse shrink-0">
+                      <div className="flex items-center space-x-2 sm:space-x-4 rtl:space-x-reverse shrink-0">
                            {((net.isMerged && (net.enabled24 || net.enabled5)) || (!net.isMerged && net.enabled)) && (
                             <QrCode 
-                              className="w-6 h-6 cursor-pointer text-black hover:text-orange transition-colors"
+                              className="w-5 h-5 sm:w-6 sm:h-6 cursor-pointer text-black hover:text-orange transition-colors"
                               onClick={() => openQr(net)}
                             />
                            )}
-                           <SquareSwitch 
-                            isOn={net.isMerged ? (!!net.enabled24 || !!net.enabled5) : !!net.enabled} 
-                            onChange={() => net.isMerged ? toggleMergedNetwork(net) : toggleSplitNetwork(net)}
-                            isLoading={isLoading} 
-                           />
+                           <div className="scale-90 sm:scale-100">
+                               <SquareSwitch 
+                                isOn={net.isMerged ? (!!net.enabled24 || !!net.enabled5) : !!net.enabled} 
+                                onChange={() => net.isMerged ? toggleMergedNetwork(net) : toggleSplitNetwork(net)}
+                                isLoading={isLoading} 
+                               />
+                           </div>
                       </div>
                   </div>
               )})}

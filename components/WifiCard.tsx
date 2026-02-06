@@ -27,18 +27,18 @@ const FreqCheckbox = ({
     disabled?: boolean
 }) => (
   <div 
-    className={`flex items-center me-4 ${!disabled && onChange ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}
+    className={`flex items-center me-2 sm:me-4 ${!disabled && onChange ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}
     onClick={() => !disabled && onChange && onChange()}
   >
-      <div className={`w-4 h-4 border flex items-center justify-center me-2 ${checked ? 'border-gray-400 bg-gray-100' : 'border-gray-300 bg-white'}`}>
+      <div className={`w-3.5 h-3.5 sm:w-4 sm:h-4 border flex items-center justify-center me-1.5 sm:me-2 ${checked ? 'border-gray-400 bg-gray-100' : 'border-gray-300 bg-white'}`}>
          {checked && (
              <div 
-                className="w-2.5 h-2.5 bg-gray-500" 
+                className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-gray-500" 
                 style={{ clipPath: 'polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%)' }}
              />
          )}
       </div>
-      <span className={`text-sm font-bold ${checked ? 'text-gray-500' : 'text-gray-300'}`}>{label}</span>
+      <span className={`text-xs sm:text-sm font-bold ${checked ? 'text-gray-500' : 'text-gray-300'}`}>{label}</span>
   </div>
 );
 
@@ -286,24 +286,24 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
               const isLoading = (loadingIds[net.id] || 0) > 0;
               
               return (
-              <div key={net.id} className="flex items-center p-4 border-b border-gray-200 min-h-[90px]">
+              <div key={net.id} className="flex items-center p-3 sm:p-4 border-b border-gray-200 min-h-[85px] sm:min-h-[90px]">
                 {/* Icon */}
-                <div className="relative me-4 shrink-0">
-                  <User className="w-8 h-8 text-black fill-current" />
-                  <div className="absolute -top-1 -right-1 bg-blue-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full border border-white font-bold rtl:right-auto rtl:-left-1">
+                <div className="relative me-3 sm:me-4 shrink-0">
+                  <User className="w-7 h-7 sm:w-8 sm:h-8 text-black fill-current" />
+                  <div className="absolute -top-1 -right-1 bg-blue-500 text-white text-[9px] sm:text-[10px] w-3.5 h-3.5 sm:w-4 sm:h-4 flex items-center justify-center rounded-full border border-white font-bold rtl:right-auto rtl:-left-1">
                     {net.clients}
                   </div>
                 </div>
 
                 {/* Info Area */}
                 <div className="flex-1 min-w-0 pe-2">
-                  <div className="font-bold text-base truncate text-black text-start mb-1">
+                  <div className="font-bold text-sm sm:text-base truncate text-black text-start mb-0.5 sm:mb-1" title={net.name}>
                       {net.name}
                   </div>
                   
                   {net.isMerged ? (
                       /* Merged Mode: Show Checkboxes */
-                      <div className="flex items-center mt-1">
+                      <div className="flex items-center mt-1 flex-wrap">
                           <FreqCheckbox 
                             label="2.4 GHz" 
                             checked={!!net.enabled24} 
@@ -320,7 +320,7 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
                   ) : (
                       /* Split Mode: Show Label Only */
                       <div className="flex items-center mt-1">
-                          <span className="text-sm text-gray-400 font-bold bg-gray-100 px-1.5 py-0.5 rounded-sm">
+                          <span className="text-xs sm:text-sm text-gray-400 font-bold bg-gray-100 px-1.5 py-0.5 rounded-sm whitespace-nowrap">
                               {net.frequencyLabel}
                           </span>
                       </div>
@@ -328,31 +328,33 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
                 </div>
 
                 {/* Actions Area */}
-                <div className="flex items-center space-x-4 shrink-0 rtl:space-x-reverse">
+                <div className="flex items-center space-x-2 sm:space-x-4 shrink-0 rtl:space-x-reverse">
                   {/* QR: Show if enabled. For merged, if any is enabled. */}
                   {((net.isMerged && (net.enabled24 || net.enabled5)) || (!net.isMerged && net.enabled)) && net.hasQr && (
                       <QrCode 
-                          className="w-6 h-6 cursor-pointer text-black hover:text-orange transition-colors" 
+                          className="w-5 h-5 sm:w-6 sm:h-6 cursor-pointer text-black hover:text-orange transition-colors" 
                           onClick={() => openQrModal(net)}
                       />
                   )}
                   
                   {/* Switch */}
-                  <SquareSwitch 
-                    // Visual State: ON if either band is enabled
-                    isOn={net.isMerged ? (!!net.enabled24 || !!net.enabled5) : !!net.enabled} 
-                    onChange={() => net.isMerged ? toggleMergedNetwork(net) : toggleSplitNetwork(net)}
-                    isLoading={isLoading} 
-                  />
+                  <div className="shrink-0 scale-90 sm:scale-100">
+                    <SquareSwitch 
+                        // Visual State: ON if either band is enabled
+                        isOn={net.isMerged ? (!!net.enabled24 || !!net.enabled5) : !!net.enabled} 
+                        onChange={() => net.isMerged ? toggleMergedNetwork(net) : toggleSplitNetwork(net)}
+                        isLoading={isLoading} 
+                    />
+                  </div>
                 </div>
               </div>
             )})}
           </div>
 
-          <div className="mt-auto p-6">
+          <div className="mt-auto p-4 sm:p-6 pt-5 bg-white">
               <Link 
                 to="/wifi"
-                className="inline-block bg-orange hover:bg-orange-dark text-black font-bold py-2.5 px-8 text-base transition-colors rounded-none"
+                className="inline-block bg-orange hover:bg-orange-dark text-black font-bold py-2.5 px-6 sm:px-8 text-sm sm:text-base transition-colors rounded-none"
               >
                 {t('viewWifiNetworks')}
               </Link>
