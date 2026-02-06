@@ -4,11 +4,12 @@ import { Settings, Link as LinkIcon, Globe, Monitor, Smartphone } from 'lucide-r
 import { useNavigate } from '../utils/GlobalStateContext';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
-import { SquareSwitch, Card, SignalStrengthIcon, BatteryStatusIcon } from '../components/UIComponents';
+import { SquareSwitch, Card, SignalStrengthIcon } from '../components/UIComponents';
 import { setDialMode, setRoamingEnable, fetchConnectionSettings } from '../utils/api';
 import timeElapsedSvg from '../assets/time_elapsed.svg';
 import dataUsageSvg from '../assets/data_usage.svg';
 import connectedSvg from '../assets/connected.svg';
+import batterySvg from '../assets/battery.svg';
 
 interface ConnectionPageProps {
   onOpenSettings: () => void;
@@ -247,14 +248,7 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
             value={statusInfo?.network_type_str || t('noNetwork')} 
           />
           <StatBox 
-            icon={
-                <BatteryStatusIcon 
-                    status={statusInfo?.battery_status || '0'}
-                    chargeStatus={statusInfo?.battery_charge_status || '0'}
-                    level={statusInfo?.battery_level || '0'}
-                    size={60}
-                />
-            } 
+            icon={<img src={batterySvg} alt="Battery" className="w-[60px] h-[60px]" />} 
             label={t('battery')} 
             value={getBatteryValue()} 
           />

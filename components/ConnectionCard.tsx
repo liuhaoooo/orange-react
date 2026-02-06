@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Card, CardHeader, SquareSwitch, SignalStrengthIcon, BatteryStatusIcon } from './UIComponents';
+import { Card, CardHeader, SquareSwitch, SignalStrengthIcon } from './UIComponents';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { Link } from '../utils/GlobalStateContext';
@@ -8,6 +8,7 @@ import { setDialMode, setRoamingEnable, fetchConnectionSettings } from '../utils
 import timeElapsedSvg from '../assets/time_elapsed.svg';
 import dataUsageSvg from '../assets/data_usage.svg';
 import connectedSvg from '../assets/connected.svg';
+import batterySvg from '../assets/battery.svg';
 
 interface ConnectionCardProps {
   onOpenSettings: () => void;
@@ -251,14 +252,7 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
             value={statusInfo?.network_type_str || t('noNetwork')} 
           />
           <StatItem 
-            icon={
-              <BatteryStatusIcon 
-                status={statusInfo?.battery_status || '0'}
-                chargeStatus={statusInfo?.battery_charge_status || '0'}
-                level={statusInfo?.battery_level || '0'}
-                size={44}
-              />
-            } 
+            icon={<img src={batterySvg} alt="Battery" className="w-11 h-11 sm:w-14 sm:h-14" />} 
             label={t('battery')} 
             value={getBatteryValue()} 
           />
