@@ -1,6 +1,6 @@
 
 import React, { useState, useRef } from 'react';
-import { UploadCloud, FileText, Loader2 } from 'lucide-react';
+import { FileText, Loader2 } from 'lucide-react';
 import { ConfirmModal } from '../../components/ConfirmModal';
 import { useAlert } from '../../utils/AlertContext';
 import { uploadSystemUpdateFile, startSystemUpgrade } from '../../utils/api';
@@ -119,9 +119,6 @@ export const SystemUpgradePage: React.FC = () => {
           </div>
         ) : (
           <>
-            <div className="mb-6">
-               <UploadCloud size={80} className="text-[#aab2bd] fill-[#dae1e7]" strokeWidth={1.5} />
-            </div>
             <p className="text-[#666666] font-normal text-base text-center px-4">
               Drag .bin file here, or click to select .bin file to upgrade
             </p>
