@@ -21,7 +21,7 @@ import { PukRequiredModal } from './components/PukRequiredModal';
 import { SoftwareUpdateModal } from './components/SoftwareUpdateModal';
 import { LanguageProvider } from './utils/i18nContext';
 import { GlobalStateProvider, useGlobalState } from './utils/GlobalStateContext';
-import { AlertProvider } from './utils/AlertContext';
+import { AlertProvider, useAlert } from './utils/AlertContext';
 import { logout, fetchConnectionSettings } from './utils/api';
 import { WifiNetwork } from './types';
 
@@ -49,6 +49,7 @@ function AppContent() {
   const [editingNetwork, setEditingNetwork] = useState<WifiNetwork | undefined>(undefined);
   
   const { isLoggedIn, checkSession, setIsLoggedIn, globalData, updateGlobalData } = useGlobalState();
+  const { hideAlert } = useAlert();
   
   const prevIsLoggedIn = useRef(isLoggedIn);
 
@@ -86,7 +87,7 @@ function AppContent() {
       const success = await logout();
       if (success) {
         setIsLoggedIn(false);
-        // Reset warnings on logout
+        // Reset all modals and warnings on logout
         setPwdWarningDismissed(false);
         setIsPwdWarningOpen(false);
         setIsPwdChangeOpen(false);
@@ -94,6 +95,13 @@ function AppContent() {
         setIsPinManual(false);
         setIsPukModalOpen(false);
         setIsUpdateModalOpen(false);
+        
+        setIsDevicesModalOpen(false);
+        setIsEditSsidModalOpen(false);
+        setIsLangModalOpen(false);
+        
+        // Close any active alerts (success/error/loading)
+        hideAlert();
       }
     }
   };
@@ -244,7 +252,7 @@ function AppContent() {
         
         {/* Updated max-w to 1450px for wider layout */}
         {/* Increased pt from 100px to 105px to create ~25px gap between fixed header (80px) and page content */}
-        <main className="w-full max-w-[1450px] mx-auto p-4 md:p-6 pt-[105px] md:pt-[105px] relative z-0 flex-grow" dir="ltr">
+        <main className="w-full max-w-[1450px] mx-auto p-4 md:px-6 pt-[105px] md:pt-[105px] relative z-0 flex-grow" dir="ltr">
           <Routes>
             {/* Main Dashboard Route */}
             <Route 
