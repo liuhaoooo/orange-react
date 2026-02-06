@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { FileText } from 'lucide-react';
+import ledInfoOdu from '../assets/ledInfo_ODU.png';
+import ledInfoIdu from '../assets/ledInfo_IDU.png';
 
 type HelpContentGenerator = string | ((lang: string) => string);
 
@@ -308,7 +310,7 @@ export const HelpPage: React.FC = () => {
   const statusInfo = globalData.statusInfo || {};
   const connectionSettings = globalData.connectionSettings || {};
   
-  const [activeTab, setActiveTab] = useState<'info' | 'faq'>('info');
+  const [activeTab, setActiveTab] = useState<'info' | 'faq' | 'led'>('info');
 
   const getNetworkStatusText = () => {
     if (statusInfo.network_status === "1") return t('connected');
@@ -355,11 +357,21 @@ export const HelpPage: React.FC = () => {
         >
           {t('faq')}
         </button>
+        <button
+          onClick={() => setActiveTab('led')}
+          className={`px-4 py-3 font-bold text-sm border-b-4 transition-colors ${
+            activeTab === 'led'
+              ? 'text-orange border-orange'
+              : 'text-black border-transparent hover:border-gray-200'
+          }`}
+        >
+          {t('ledInfo')}
+        </button>
       </div>
 
       {/* Content */}
       <div className="animate-fade-in">
-        {activeTab === 'info' ? (
+        {activeTab === 'info' && (
           <div className="space-y-6">
             {/* My Information Section */}
             <div className="bg-white border border-gray-300 p-6">
@@ -421,7 +433,9 @@ export const HelpPage: React.FC = () => {
               </div>
             </div>
           </div>
-        ) : (
+        )}
+        
+        {activeTab === 'faq' && (
           <div className="bg-gray-200 border border-gray-300 h-[600px] flex flex-col items-center justify-center relative overflow-hidden">
              {/* Simulating a PDF Viewer container */}
              <div className="bg-white p-10 shadow-lg max-w-2xl w-full h-[90%] overflow-y-auto">
@@ -441,6 +455,143 @@ export const HelpPage: React.FC = () => {
                     <div className="bg-orange text-white px-2 py-1 font-bold text-xs">orange</div>
                 </div>
              </div>
+          </div>
+        )}
+
+        {activeTab === 'led' && (
+          <div className="space-y-6">
+            {/* ODU Card */}
+            <div className="bg-white border border-gray-300 p-6 shadow-sm">
+                <h3 className="font-bold text-black text-center mb-6">ODU LED Info</h3>
+                <div className="flex flex-col md:flex-row gap-8 items-start">
+                    <div className="w-full md:w-auto shrink-0 flex justify-center">
+                        <img src={ledInfoOdu} alt="ODU LED" className="max-h-[300px] w-auto object-contain" />
+                    </div>
+                    <div className="flex-1 w-full overflow-x-auto">
+                        <table className="w-full text-left text-xs sm:text-sm border-collapse border border-gray-200">
+                            <thead className="bg-gray-50 text-gray-700">
+                                <tr>
+                                    <th className="border border-gray-200 p-3 font-medium">Ordinal</th>
+                                    <th className="border border-gray-200 p-3 font-medium">Indicator</th>
+                                    <th className="border border-gray-200 p-3 font-medium">State</th>
+                                    <th className="border border-gray-200 p-3 font-medium">Description</th>
+                                </tr>
+                            </thead>
+                            <tbody className="text-gray-600">
+                                {/* 1. Power */}
+                                <tr>
+                                    <td rowSpan={2} className="border border-gray-200 p-3 align-middle">1</td>
+                                    <td rowSpan={2} className="border border-gray-200 p-3 align-middle">Power</td>
+                                    <td className="border border-gray-200 p-3">On</td>
+                                    <td className="border border-gray-200 p-3">The device is powered normally</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-gray-200 p-3">Off</td>
+                                    <td className="border border-gray-200 p-3">The device is not supplying power properly</td>
+                                </tr>
+                                {/* 2. 4G Status */}
+                                <tr>
+                                    <td rowSpan={2} className="border border-gray-200 p-3 align-middle">2</td>
+                                    <td rowSpan={2} className="border border-gray-200 p-3 align-middle">4G Status</td>
+                                    <td className="border border-gray-200 p-3">On</td>
+                                    <td className="border border-gray-200 p-3">The device is connected to 4G network</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-gray-200 p-3">Off</td>
+                                    <td className="border border-gray-200 p-3">The device is not connected to 4G network</td>
+                                </tr>
+                                {/* 3. 5G Status */}
+                                <tr>
+                                    <td rowSpan={2} className="border border-gray-200 p-3 align-middle">3</td>
+                                    <td rowSpan={2} className="border border-gray-200 p-3 align-middle">5G Status</td>
+                                    <td className="border border-gray-200 p-3">On</td>
+                                    <td className="border border-gray-200 p-3">The device is connected to 5G network</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-gray-200 p-3">Off</td>
+                                    <td className="border border-gray-200 p-3">The device is not connected to 5G network</td>
+                                </tr>
+                                {/* 4. Signal Strength */}
+                                <tr>
+                                    <td rowSpan={4} className="border border-gray-200 p-3 align-middle">4</td>
+                                    <td rowSpan={4} className="border border-gray-200 p-3 align-middle">Signal strength</td>
+                                    <td className="border border-gray-200 p-3">Red</td>
+                                    <td className="border border-gray-200 p-3">Weak signal quality</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-gray-200 p-3">Yellow</td>
+                                    <td className="border border-gray-200 p-3">Medium signal quality</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-gray-200 p-3">Green</td>
+                                    <td className="border border-gray-200 p-3">Excellent signal quality</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-gray-200 p-3">Off</td>
+                                    <td className="border border-gray-200 p-3">No signal</td>
+                                </tr>
+                                {/* 5. ETH */}
+                                <tr>
+                                    <td rowSpan={3} className="border border-gray-200 p-3 align-middle">5</td>
+                                    <td rowSpan={3} className="border border-gray-200 p-3 align-middle">ETH</td>
+                                    <td className="border border-gray-200 p-3">On</td>
+                                    <td className="border border-gray-200 p-3">The network port connection is normal</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-gray-200 p-3">Flashing</td>
+                                    <td className="border border-gray-200 p-3">Network port data is being transmitted</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-gray-200 p-3">Off</td>
+                                    <td className="border border-gray-200 p-3">The network port is not connected</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            {/* IDU Card */}
+            <div className="bg-white border border-gray-300 p-6 shadow-sm">
+                <h3 className="font-bold text-black text-center mb-6">IDU LED Info</h3>
+                <div className="flex flex-col md:flex-row gap-8 items-start">
+                    <div className="w-full md:w-auto shrink-0 flex justify-center">
+                        <img src={ledInfoIdu} alt="IDU LED" className="max-h-[300px] w-auto object-contain" />
+                    </div>
+                    <div className="flex-1 w-full overflow-x-auto">
+                        <table className="w-full text-left text-xs sm:text-sm border-collapse border border-gray-200">
+                            <thead className="bg-gray-50 text-gray-700">
+                                <tr>
+                                    <th className="border border-gray-200 p-3 font-medium">Indicator Type</th>
+                                    <th className="border border-gray-200 p-3 font-medium">Description</th>
+                                </tr>
+                            </thead>
+                            <tbody className="text-gray-600">
+                                <tr>
+                                    <td className="border border-gray-200 p-3">Blue (Flashing)</td>
+                                    <td className="border border-gray-200 p-3">Start MESH network</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-gray-200 p-3">Blue (Bright)</td>
+                                    <td className="border border-gray-200 p-3">MESH network is running</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-gray-200 p-3">Green (Bright)</td>
+                                    <td className="border border-gray-200 p-3">Normal working condition</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-gray-200 p-3">Red (Flashing)</td>
+                                    <td className="border border-gray-200 p-3">MESH network timeout or failure</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-gray-200 p-3">White (Flashing)</td>
+                                    <td className="border border-gray-200 p-3">Restored to factory settings or in the process of upgrading</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
           </div>
         )}
       </div>

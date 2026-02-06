@@ -206,5 +206,6 @@ export const en = {
     fotaUpgrade: "FOTA Upgrade",
     logSettings: "Log Settings",
     webSetting: "Web Setting",
-    resetCountersConfirm: "Do you want to reintialize the counters?"
+    resetCountersConfirm: "Do you want to reintialize the counters?",
+    ledInfo: "LED Info"
 };
