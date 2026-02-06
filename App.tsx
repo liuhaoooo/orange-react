@@ -84,25 +84,9 @@ function AppContent() {
 
   const handleLogout = async () => {
     if (isLoggedIn) {
-      const success = await logout();
-      if (success) {
-        setIsLoggedIn(false);
-        // Reset all modals and warnings on logout
-        setPwdWarningDismissed(false);
-        setIsPwdWarningOpen(false);
-        setIsPwdChangeOpen(false);
-        setIsPinModalOpen(false);
-        setIsPinManual(false);
-        setIsPukModalOpen(false);
-        setIsUpdateModalOpen(false);
-        
-        setIsDevicesModalOpen(false);
-        setIsEditSsidModalOpen(false);
-        setIsLangModalOpen(false);
-        
-        // Close any active alerts (success/error/loading)
-        hideAlert();
-      }
+      await logout();
+      setIsLoggedIn(false);
+      // Cleanup is now handled in the useEffect listening to isLoggedIn
     }
   };
 
@@ -228,6 +212,21 @@ function AppContent() {
     if (prevIsLoggedIn.current === true && isLoggedIn === false) {
       setIsLoginModalOpen(true);
       navigate('/'); // Auto redirect to dashboard
+      
+      // Close all modals and alerts on logout/session expiry
+      setPwdWarningDismissed(false);
+      setIsPwdWarningOpen(false);
+      setIsPwdChangeOpen(false);
+      setIsPinModalOpen(false);
+      setIsPinManual(false);
+      setIsPukModalOpen(false);
+      setIsUpdateModalOpen(false);
+      
+      setIsDevicesModalOpen(false);
+      setIsEditSsidModalOpen(false);
+      setIsLangModalOpen(false);
+      
+      hideAlert();
     }
     
     // Login Successful
@@ -236,7 +235,7 @@ function AppContent() {
     }
 
     prevIsLoggedIn.current = isLoggedIn;
-  }, [isLoggedIn, navigate]);
+  }, [isLoggedIn, navigate, hideAlert]);
 
   useEffect(() => {
     checkSession();
