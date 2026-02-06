@@ -49,7 +49,7 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, onLogin }) => {
 
   // Dynamic classes based on scroll state
   const headerHeightClass = isScrolled ? 'h-[50px]' : 'h-[80px]';
-  const logoSizeClass = isScrolled ? 'h-8 w-8' : 'h-12 w-12';
+  const logoSizeClass = isScrolled ? 'h-8 w-8' : 'h-[50px] w-[50px]';
   const logoTextClass = isScrolled ? 'text-lg' : 'text-2xl';
 
   return (
