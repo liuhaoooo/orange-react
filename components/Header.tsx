@@ -73,7 +73,7 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, onLogin }) => {
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 bg-black text-white shadow-md transition-all duration-300 ${headerHeightClass}`}>
-      <div className="w-full max-w-[1450px] mx-auto px-4 md:px-6 h-full flex items-center justify-between">
+      <div className="w-full max-w-[1450px] mx-auto px-4 md:px-6 h-full flex items-center">
         
         {/* Left: Logo & Title */}
         <div className="flex items-center h-full transition-all duration-300 shrink-0">
@@ -88,7 +88,8 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, onLogin }) => {
         </div>
 
         {/* Center: Navigation Links - Desktop Only */}
-        <nav className="hidden md:flex items-center space-x-0 h-full absolute left-1/2 transform -translate-x-1/2">
+        {/* Adjusted to align left (next to logo) instead of absolute center */}
+        <nav className="hidden md:flex items-center space-x-0 h-full ms-10">
           <NavLink to="/" end className={navLinkClass}>{t('dashboard')}</NavLink>
           <NavLink to="/connection" className={navLinkClass}>{t('connection')}</NavLink>
           <NavLink to="/usage" className={navLinkClass}>{t('usage')}</NavLink>
@@ -98,7 +99,7 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, onLogin }) => {
         </nav>
         
         {/* Right: Actions & Mobile Toggle */}
-        <div className="flex items-center space-x-3 md:space-x-4">
+        <div className="flex items-center space-x-3 md:space-x-4 ms-auto">
           
           {/* Language Selector */}
           <div className="relative">
