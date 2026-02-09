@@ -281,7 +281,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
     const handleClickOutside = (event: MouseEvent) => {
         if (isSearchOpen && 
             searchInputRef.current && 
-            !searchInputRef.current.contains(event.target as Node) &&
+            !searchInputRef.current.parentElement?.contains(event.target as Node) &&
             !(event.target as Element).closest('.search-toggle-btn')
         ) {
             setIsSearchOpen(false);
@@ -341,7 +341,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
 
   // Filter menu items for search
   const searchResults = useMemo(() => {
-    if (!searchQuery) return [];
+    if (!searchQuery.trim()) return [];
     
     const query = searchQuery.toLowerCase();
     const results: { sectionId: string; subTabId?: string; label: string; path: string }[] = [];
