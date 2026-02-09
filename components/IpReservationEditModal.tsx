@@ -10,6 +10,7 @@ interface IpReservationEditModalProps {
   onSave: (rule: IpReservationRule) => void;
   initialData?: IpReservationRule | null;
   existingRules?: IpReservationRule[];
+  currentLanIp?: string;
 }
 
 export const IpReservationEditModal: React.FC<IpReservationEditModalProps> = ({ 
@@ -17,7 +18,8 @@ export const IpReservationEditModal: React.FC<IpReservationEditModalProps> = ({
   onClose, 
   onSave, 
   initialData,
-  existingRules = []
+  existingRules = [],
+  currentLanIp
 }) => {
   const [ip, setIp] = useState('');
   const [mac, setMac] = useState('');
@@ -41,6 +43,7 @@ export const IpReservationEditModal: React.FC<IpReservationEditModalProps> = ({
     const parts = ip.split('.');
     if (parts.length !== 4) return false;
     return parts.every(part => {
+        if (!/^\d+$/.test(part)) return false;
         const num = parseInt(part, 10);
         return !isNaN(num) && num >= 0 && num <= 255;
     });
@@ -66,6 +69,9 @@ export const IpReservationEditModal: React.FC<IpReservationEditModalProps> = ({
     } else if (!isValidIp(trimmedIp)) {
       newErrors.ip = 'Invalid IP Address format.';
       isValid = false;
+    } else if (currentLanIp && trimmedIp === currentLanIp) {
+        newErrors.ip = 'IP Address cannot be the same as LAN IP.';
+        isValid = false;
     } else {
         // Check Duplicate IP
         const isIpDup = existingRules.some(r => r.ip === trimmedIp && r !== initialData);

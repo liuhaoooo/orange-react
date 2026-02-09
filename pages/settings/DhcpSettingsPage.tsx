@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { SquareSwitch } from '../../components/UIComponents';
-import { fetchDhcpSettings, saveDhcpSettings } from '../../utils/api';
+import { fetchDhcpSettings, saveDhcpSettings, fetchIpReservation } from '../../utils/api';
 import { useAlert } from '../../utils/AlertContext';
 
 const ipToLong = (ip: string) => {
@@ -67,27 +67,39 @@ export const DhcpSettingsPage: React.FC = () => {
   const [ipPoolEnd, setIpPoolEnd] = useState('');
   const [leaseTime, setLeaseTime] = useState('');
 
-  // Validation Errors
+  // Validation Data
+  const [reservedIps, setReservedIps] = useState<string[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
       const load = async () => {
           try {
-              const res = await fetchDhcpSettings();
-              if (res && (res.success || res.cmd === 3)) {
-                  setLanIp(res.lanIp || '');
-                  setSubnetMask(res.netMask || '');
-                  setDhcpServer(res.dhcpServer === '1');
-                  setPrimaryDns(res.main_dns || '');
-                  setSecondaryDns(res.vice_dns || '');
-                  setIpPoolStart(res.ipBegin || '');
-                  setIpPoolEnd(res.ipEnd || '');
+              const [dhcpRes, ipRes] = await Promise.all([
+                  fetchDhcpSettings(),
+                  fetchIpReservation()
+              ]);
+
+              if (dhcpRes && (dhcpRes.success || dhcpRes.cmd === 3)) {
+                  setLanIp(dhcpRes.lanIp || '');
+                  setSubnetMask(dhcpRes.netMask || '');
+                  setDhcpServer(dhcpRes.dhcpServer === '1');
+                  setPrimaryDns(dhcpRes.main_dns || '');
+                  setSecondaryDns(dhcpRes.vice_dns || '');
+                  setIpPoolStart(dhcpRes.ipBegin || '');
+                  setIpPoolEnd(dhcpRes.ipEnd || '');
                   // Parse expireTime (e.g. "12h" -> "12")
-                  const timeStr = res.expireTime || '';
+                  const timeStr = dhcpRes.expireTime || '';
                   setLeaseTime(timeStr.replace(/[^0-9]/g, ''));
               }
+
+              if (ipRes && (ipRes.success || ipRes.cmd === 115)) {
+                  if (Array.isArray(ipRes.datas)) {
+                      setReservedIps(ipRes.datas.map(item => item.ip));
+                  }
+              }
+
           } catch (e) {
-              console.error("Failed to load DHCP settings", e);
+              console.error("Failed to load settings", e);
               showAlert('Failed to load settings', 'error');
           } finally {
               setLoading(false);
@@ -107,6 +119,10 @@ export const DhcpSettingsPage: React.FC = () => {
           hasError = true;
       } else if (!isValidIp(lanIp)) {
           newErrors.lanIp = 'Invalid LAN IP address';
+          hasError = true;
+      } else if (reservedIps.includes(lanIp)) {
+          // Check if IP is in reserved list
+          newErrors.lanIp = 'IP address conflicts with IP Reservation list';
           hasError = true;
       }
 
