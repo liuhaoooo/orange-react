@@ -13,6 +13,32 @@ const ipToLong = (ip: string) => {
     }, 0);
 };
 
+const longToIp = (num: number): string => {
+  return [
+    (num >>> 24) & 0xff,
+    (num >>> 16) & 0xff,
+    (num >>> 8) & 0xff,
+    num & 0xff
+  ].join('.');
+};
+
+const getUsableIpRangeNumeric = (ip: string, netmask: string) => {
+  const ipNum = ipToLong(ip);
+  const maskNum = ipToLong(netmask);
+
+  const networkAddr = (ipNum & maskNum) >>> 0;
+  const wildcard = (~maskNum) >>> 0; 
+  const broadcastAddr = (networkAddr | wildcard) >>> 0;
+
+  if (wildcard === 0) {
+    return { min: networkAddr, max: networkAddr };
+  } else if (wildcard === 1) {
+    return { min: networkAddr, max: broadcastAddr };
+  } else {
+    return { min: networkAddr + 1, max: broadcastAddr - 1 };
+  }
+};
+
 const isValidSubnetMask = (subnetMask: string) => {
     if (!subnetMask) return false;
     const octets = subnetMask.split('.');
@@ -165,6 +191,21 @@ export const DhcpSettingsPage: React.FC = () => {
           } else if (!isValidIp(ipPoolStart) || !isValidIp(ipPoolEnd)) {
               newErrors.ipPool = 'Invalid IP Address in Pool';
               hasError = true;
+          } else if (!newErrors.lanIp && isMaskValid) {
+               // Range Validation
+               const range = getUsableIpRangeNumeric(lanIp, subnetMask);
+               const startNum = ipToLong(ipPoolStart);
+               const endNum = ipToLong(ipPoolEnd);
+               
+               if (startNum < range.min || startNum > range.max || endNum < range.min || endNum > range.max) {
+                   const minIpStr = longToIp(range.min);
+                   const maxIpStr = longToIp(range.max);
+                   newErrors.ipPool = `IP Pool must be within ${minIpStr} ~ ${maxIpStr}`;
+                   hasError = true;
+               } else if (startNum > endNum) {
+                   newErrors.ipPool = 'Start IP cannot be greater than End IP';
+                   hasError = true;
+               }
           }
 
           // Validate Lease Time
