@@ -118,47 +118,45 @@ export const RoutingPage: React.FC = () => {
   return (
     <div className="w-full animate-fade-in py-2">
       
-      {/* Table */}
-      <div className="w-full border-t border-gray-100">
-        {/* Header */}
-        <div className="grid grid-cols-12 py-4 border-b border-gray-100 min-w-[700px]">
-          <div className="col-span-1 ps-4 font-bold text-sm text-black">Serial Number</div>
-          <div className="col-span-1 font-bold text-sm text-black">State</div>
-          <div className="col-span-2 font-bold text-sm text-black">Interface Name</div>
-          <div className="col-span-3 font-bold text-sm text-black">Destination IP Address</div>
-          <div className="col-span-2 font-bold text-sm text-black">Subnet Mask</div>
-          <div className="col-span-2 font-bold text-sm text-black">Gateway</div>
-          <div className="col-span-1"></div>
-        </div>
-
-        {/* Rows */}
-        <div className="overflow-x-auto">
-          {rules.length > 0 ? rules.map((rule, index) => (
-            <div key={index} className="grid grid-cols-12 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors items-center min-w-[700px]">
-               <div className="col-span-1 ps-4 text-sm text-black font-medium">{index + 1}</div>
-               <div className="col-span-1 text-sm text-black font-medium">{rule.valid ? 'Valid' : 'Invalid'}</div>
-               <div className="col-span-2 text-sm text-black font-medium">{rule.ifName}</div>
-               <div className="col-span-3 text-sm text-black font-medium">{rule.ip}</div>
-               <div className="col-span-2 text-sm text-black font-medium">{rule.netmask}</div>
-               <div className="col-span-2 text-sm text-black font-medium">{rule.gateway}</div>
-               <div className="col-span-1 flex justify-end pe-4 space-x-3">
-                  <button 
-                    onClick={() => handleEditClick(index)}
-                    className="text-gray-500 hover:text-black transition-colors"
-                  >
-                    <Pencil size={16} />
-                  </button>
-                  <button 
-                    onClick={() => handleDeleteClick(index)}
-                    className="text-gray-500 hover:text-red-500 transition-colors"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-               </div>
+      {/* Table Container - Wrapped in overflow-x-auto for horizontal scroll */}
+      <div className="w-full border-t border-gray-100 overflow-x-auto">
+        <div className="min-w-[700px]">
+            {/* Header */}
+            <div className="grid grid-cols-12 py-4 border-b border-gray-100">
+                <div className="col-span-2 ps-4 font-bold text-sm text-black">State</div>
+                <div className="col-span-2 font-bold text-sm text-black">Interface Name</div>
+                <div className="col-span-3 font-bold text-sm text-black">Destination IP Address</div>
+                <div className="col-span-2 font-bold text-sm text-black">Subnet Mask</div>
+                <div className="col-span-2 font-bold text-sm text-black">Gateway</div>
+                <div className="col-span-1"></div>
             </div>
-          )) : (
-            <div className="py-8 text-center text-gray-400 italic">No Data</div>
-          )}
+
+            {/* Rows */}
+            {rules.length > 0 ? rules.map((rule, index) => (
+                <div key={index} className="grid grid-cols-12 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors items-center">
+                <div className="col-span-2 ps-4 text-sm text-black font-medium">{rule.valid ? 'Valid' : 'Invalid'}</div>
+                <div className="col-span-2 text-sm text-black font-medium">{rule.ifName}</div>
+                <div className="col-span-3 text-sm text-black font-medium">{rule.ip}</div>
+                <div className="col-span-2 text-sm text-black font-medium">{rule.netmask}</div>
+                <div className="col-span-2 text-sm text-black font-medium">{rule.gateway}</div>
+                <div className="col-span-1 flex justify-end pe-4 space-x-3">
+                    <button 
+                        onClick={() => handleEditClick(index)}
+                        className="text-gray-500 hover:text-black transition-colors"
+                    >
+                        <Pencil size={16} />
+                    </button>
+                    <button 
+                        onClick={() => handleDeleteClick(index)}
+                        className="text-gray-500 hover:text-red-500 transition-colors"
+                    >
+                        <Trash2 size={16} />
+                    </button>
+                </div>
+                </div>
+            )) : (
+                <div className="py-8 text-center text-gray-400 italic">No Data</div>
+            )}
         </div>
       </div>
 
