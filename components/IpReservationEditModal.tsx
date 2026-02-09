@@ -11,7 +11,16 @@ interface IpReservationEditModalProps {
   initialData?: IpReservationRule | null;
   existingRules?: IpReservationRule[];
   currentLanIp?: string;
+  currentNetmask?: string;
 }
+
+const ipToLong = (ip: string) => {
+    const octets = ip.split('.');
+    if (octets.length !== 4) return 0;
+    return octets.reduce((acc, octet) => {
+        return ((acc << 8) + parseInt(octet, 10)) >>> 0;
+    }, 0);
+};
 
 export const IpReservationEditModal: React.FC<IpReservationEditModalProps> = ({ 
   isOpen, 
@@ -19,7 +28,8 @@ export const IpReservationEditModal: React.FC<IpReservationEditModalProps> = ({
   onSave, 
   initialData,
   existingRules = [],
-  currentLanIp
+  currentLanIp,
+  currentNetmask
 }) => {
   const [ip, setIp] = useState('');
   const [mac, setMac] = useState('');
@@ -55,6 +65,21 @@ export const IpReservationEditModal: React.FC<IpReservationEditModalProps> = ({
     return regex.test(addr);
   };
 
+  const checkNetworkBroadcast = (ipAddr: string) => {
+      if (!currentLanIp || !currentNetmask) return null;
+      
+      const ipNum = ipToLong(ipAddr);
+      const maskNum = ipToLong(currentNetmask);
+      const lanNum = ipToLong(currentLanIp);
+
+      const network = (lanNum & maskNum) >>> 0;
+      const broadcast = (network | (~maskNum >>> 0)) >>> 0;
+
+      if (ipNum === network) return 'IP cannot be the Network Address.';
+      if (ipNum === broadcast) return 'IP cannot be the Broadcast Address.';
+      return null;
+  };
+
   const handleSave = () => {
     const trimmedIp = ip.trim();
     const trimmedMac = mac.trim().toUpperCase();
@@ -73,11 +98,17 @@ export const IpReservationEditModal: React.FC<IpReservationEditModalProps> = ({
         newErrors.ip = 'IP Address cannot be the same as LAN IP.';
         isValid = false;
     } else {
-        // Check Duplicate IP
-        const isIpDup = existingRules.some(r => r.ip === trimmedIp && r !== initialData);
-        if (isIpDup) {
-            newErrors.ip = 'IP Address already exists.';
+        const netErr = checkNetworkBroadcast(trimmedIp);
+        if (netErr) {
+            newErrors.ip = netErr;
             isValid = false;
+        } else {
+            // Check Duplicate IP
+            const isIpDup = existingRules.some(r => r.ip === trimmedIp && r !== initialData);
+            if (isIpDup) {
+                newErrors.ip = 'IP Address already exists.';
+                isValid = false;
+            }
         }
     }
 

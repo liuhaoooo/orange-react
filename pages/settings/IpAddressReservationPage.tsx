@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, Pencil, Trash2, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
-import { IpReservationRule, fetchIpReservation, saveIpReservation, fetchConnectionSettings } from '../../utils/api';
+import { IpReservationRule, fetchIpReservation, saveIpReservation, fetchDhcpSettings } from '../../utils/api';
 import { IpReservationEditModal } from '../../components/IpReservationEditModal';
 import { useAlert } from '../../utils/AlertContext';
 
@@ -11,6 +11,7 @@ export const IpAddressReservationPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [rules, setRules] = useState<IpReservationRule[]>([]);
   const [lanIp, setLanIp] = useState('');
+  const [subnetMask, setSubnetMask] = useState('');
   
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -19,17 +20,18 @@ export const IpAddressReservationPage: React.FC = () => {
   useEffect(() => {
       const load = async () => {
           try {
-              const [res, connRes] = await Promise.all([
+              const [res, dhcpRes] = await Promise.all([
                   fetchIpReservation(),
-                  fetchConnectionSettings()
+                  fetchDhcpSettings()
               ]);
 
               if (res && (res.success || res.cmd === 115)) {
                   setRules(res.datas || []);
               }
 
-              if (connRes && (connRes.success !== false)) {
-                  setLanIp(connRes.lanIp || '');
+              if (dhcpRes && (dhcpRes.success || dhcpRes.cmd === 3)) {
+                  setLanIp(dhcpRes.lanIp || '');
+                  setSubnetMask(dhcpRes.netMask || '');
               }
           } catch (e) {
               console.error("Failed to load IP reservations", e);
@@ -190,6 +192,7 @@ export const IpAddressReservationPage: React.FC = () => {
         initialData={editingIndex !== null ? rules[editingIndex] : null}
         existingRules={rules}
         currentLanIp={lanIp}
+        currentNetmask={subnetMask}
       />
     </div>
   );
