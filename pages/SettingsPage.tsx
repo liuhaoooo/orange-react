@@ -1,7 +1,7 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from '../utils/GlobalStateContext';
-import { ChevronLeft, ChevronRight, Menu, ChevronUp, ChevronDown } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Menu, ChevronUp, ChevronDown, Search, X } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { ApnSettingsPage } from './settings/ApnSettingsPage';
@@ -189,6 +189,11 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
+  // Search State
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
   const activeSection = menuItems.find(item => item.id === activeSectionId) || menuItems[0];
   
   // URL Persistence Logic
@@ -271,6 +276,22 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
     };
   }, [activeSectionId, activeSection.subTabs]);
 
+  // Handle click outside to close search
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+        if (isSearchOpen && 
+            searchInputRef.current && 
+            !searchInputRef.current.contains(event.target as Node) &&
+            !(event.target as Element).closest('.search-toggle-btn')
+        ) {
+            setIsSearchOpen(false);
+            setSearchQuery('');
+        }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isSearchOpen]);
+
   const scrollTabs = (direction: 'left' | 'right') => {
     if (tabsContainerRef.current) {
       const scrollAmount = 200;
@@ -308,6 +329,54 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
   const handleSubTabClick = (subId: string) => {
       navigate(`/settings?section=${activeSectionId}&sub=${subId}`);
   };
+
+  const handleSearchResultClick = (sectionId: string, subTabId?: string) => {
+      handleSectionClick(sectionId);
+      if (subTabId) {
+          navigate(`/settings?section=${sectionId}&sub=${subTabId}`);
+      }
+      setIsSearchOpen(false);
+      setSearchQuery('');
+  };
+
+  // Filter menu items for search
+  const searchResults = useMemo(() => {
+    if (!searchQuery) return [];
+    
+    const query = searchQuery.toLowerCase();
+    const results: { sectionId: string; subTabId?: string; label: string; path: string }[] = [];
+
+    menuItems.forEach(section => {
+        // Check main section matches
+        if (section.label.toLowerCase().includes(query)) {
+            results.push({
+                sectionId: section.id,
+                subTabId: section.subTabs?.[0]?.id,
+                label: section.label,
+                path: section.label
+            });
+        }
+        
+        // Check sub-tabs
+        if (section.subTabs) {
+            section.subTabs.forEach(sub => {
+                if (sub.label.toLowerCase().includes(query)) {
+                    // Avoid duplicate if both section and subtab match? 
+                    // Usually useful to show specific subtab match even if section matched.
+                    results.push({
+                        sectionId: section.id,
+                        subTabId: sub.id,
+                        label: sub.label,
+                        path: `${section.label} > ${sub.label}`
+                    });
+                }
+            });
+        }
+    });
+    
+    return results;
+  }, [searchQuery, menuItems]);
+
 
   const renderContent = () => {
       // Dispatch based on active tab ID or section ID
@@ -402,21 +471,74 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
   return (
     <div className="w-full max-w-7xl mx-auto pb-12">
       {/* Breadcrumb Header */}
-      <div className="bg-white px-4 md:px-6 py-2 mb-4 shadow-sm border border-gray-200 flex items-center rounded-[6px] transition-all hover:shadow-md">
-         <button onClick={() => navigate(-1)} className="me-4 text-gray-400 hover:text-orange transition-colors">
+      <div className="bg-white px-4 md:px-6 py-2 mb-4 shadow-sm border border-gray-200 flex items-center rounded-[6px] transition-all hover:shadow-md relative">
+         <button onClick={() => navigate(-1)} className="me-4 text-gray-400 hover:text-orange transition-colors shrink-0">
             <ChevronLeft size={28} strokeWidth={2.5} />
          </button>
-         <div className="flex flex-col">
+         <div className="flex flex-col flex-1 min-w-0">
             <span className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-0.5">{t('settings')}</span>
-            <span className="font-bold text-black text-lg md:text-xl flex items-center flex-wrap">
+            <span className="font-bold text-black text-lg md:text-xl flex items-center flex-wrap truncate">
                 {activeSection.label} 
                 {activeSubTabId && activeSection.subTabs && (
                     <>
                         <span className="mx-2 text-gray-300">/</span>
-                        <span className="text-orange">{activeSection.subTabs.find(t => t.id === activeSubTabId)?.label}</span>
+                        <span className="text-orange whitespace-nowrap">{activeSection.subTabs.find(t => t.id === activeSubTabId)?.label}</span>
                     </>
                 )}
             </span>
+         </div>
+         
+         {/* Search Box */}
+         <div className="ms-auto relative">
+             <div className={`flex items-center transition-all duration-300 ${isSearchOpen ? 'w-48 md:w-64' : 'w-10'}`}>
+                {isSearchOpen ? (
+                    <div className="relative w-full">
+                        <input
+                            ref={searchInputRef}
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder={t('search')}
+                            className="w-full border border-gray-300 rounded-full py-1.5 pl-3 pr-8 text-sm focus:outline-none focus:border-orange bg-gray-50 text-black"
+                            autoFocus
+                        />
+                        <button 
+                            onClick={() => { setIsSearchOpen(false); setSearchQuery(''); }}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black search-toggle-btn"
+                        >
+                            <X size={14} />
+                        </button>
+                    </div>
+                ) : (
+                    <button 
+                        onClick={() => setIsSearchOpen(true)}
+                        className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-orange transition-colors search-toggle-btn"
+                        title={t('search')}
+                    >
+                        <Search size={20} />
+                    </button>
+                )}
+             </div>
+
+             {/* Search Dropdown */}
+             {isSearchOpen && searchQuery && (
+                 <div className="absolute top-full right-0 mt-2 w-64 bg-white border border-gray-200 shadow-xl rounded-md overflow-hidden z-50 max-h-60 overflow-y-auto animate-fade-in">
+                     {searchResults.length > 0 ? (
+                         searchResults.map((res, idx) => (
+                             <button
+                                 key={idx}
+                                 onClick={() => handleSearchResultClick(res.sectionId, res.subTabId)}
+                                 className="w-full text-left px-4 py-2.5 text-sm hover:bg-orange/5 hover:text-orange border-b border-gray-50 last:border-0 transition-colors"
+                             >
+                                 <div className="font-bold text-black">{res.label}</div>
+                                 <div className="text-xs text-gray-400 mt-0.5">{res.path}</div>
+                             </button>
+                         ))
+                     ) : (
+                         <div className="px-4 py-3 text-sm text-gray-500 text-center italic">{t('noData')}</div>
+                     )}
+                 </div>
+             )}
          </div>
       </div>
 
