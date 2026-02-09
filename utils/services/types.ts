@@ -419,3 +419,19 @@ export interface IpReservationResponse {
     datas: IpReservationRule[];
     [key: string]: any;
 }
+
+export interface RoutingRule {
+    valid: boolean;
+    ifName: string;
+    netmask: string;
+    ip: string;
+    netmaskBits?: number;
+    gateway: string;
+}
+
+export interface RoutingSettingsResponse {
+    success: boolean;
+    cmd: number;
+    datas: RoutingRule[];
+    [key: string]: any;
+}

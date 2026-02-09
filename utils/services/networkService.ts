@@ -17,7 +17,9 @@ import {
     ImsSettingsResponse,
     DhcpSettingsResponse,
     IpReservationResponse,
-    IpReservationRule
+    IpReservationRule,
+    RoutingSettingsResponse,
+    RoutingRule
 } from './types';
 
 // Status & Connection
@@ -82,3 +84,7 @@ export const saveDhcpSettings = async (data: any) => apiRequest(3, 'POST', data)
 // IP Address Reservation
 export const fetchIpReservation = async () => apiRequest<IpReservationResponse>(115, 'GET');
 export const saveIpReservation = async (datas: IpReservationRule[]) => apiRequest(115, 'POST', { datas });
+
+// Routing Configuration
+export const fetchRoutingSettings = async () => apiRequest<RoutingSettingsResponse>(164, 'GET', { getfun: true });
+export const saveRoutingSettings = async (datas: RoutingRule[]) => apiRequest(164, 'POST', { datas });

@@ -30,6 +30,7 @@ import { DhcpSettingsPage } from './settings/DhcpSettingsPage';
 import { IpAddressReservationPage } from './settings/IpAddressReservationPage';
 import { MultipleDhcpPage } from './settings/MultipleDhcpPage';
 import { SystemUpgradePage } from './settings/SystemUpgradePage';
+import { RoutingPage } from './settings/RoutingPage';
 
 interface SettingsPageProps {
   onOpenLogin: () => void;
@@ -443,6 +444,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <IpAddressReservationPage />;
           case 'multiple_dhcp':
               return <MultipleDhcpPage />;
+          case 'routing':
+              return <RoutingPage />;
           case 'system_upgrade':
               return <SystemUpgradePage />;
           
