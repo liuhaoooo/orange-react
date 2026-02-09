@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Pencil, Trash2, ChevronLeft, ChevronRight, ChevronDown, Loader2 } from 'lucide-react';
-import { fetchRoutingSettings, saveRoutingSettings, RoutingRule } from '../../utils/api';
+import { fetchRoutingSettings, saveRoutingSettings, fetchMultipleApnSettings, RoutingRule } from '../../utils/api';
 import { useAlert } from '../../utils/AlertContext';
 import { RoutingEditModal } from '../../components/RoutingEditModal';
 
@@ -11,6 +11,15 @@ export const RoutingPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [rules, setRules] = useState<RoutingRule[]>([]);
   
+  // Interface Options
+  const [interfaceOptions, setInterfaceOptions] = useState<{label: string, value: string}[]>([
+      { label: 'WAN', value: 'WAN' },
+      { label: 'LAN', value: 'LAN' },
+      { label: 'GRE', value: 'GRE' },
+      { label: 'PPP', value: 'PPP' },
+      { label: 'Main APN', value: 'APN' },
+  ]);
+
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -18,12 +27,35 @@ export const RoutingPage: React.FC = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetchRoutingSettings();
-        if (res && (res.success || res.cmd === 164)) {
-            setRules(res.datas || []);
+        const [routingRes, apnRes] = await Promise.all([
+            fetchRoutingSettings(),
+            fetchMultipleApnSettings()
+        ]);
+
+        if (routingRes && (routingRes.success || routingRes.cmd === 164)) {
+            setRules(routingRes.datas || []);
         }
+
+        if (apnRes && (apnRes.success || apnRes.cmd === 130)) {
+             const arr = [
+                { label: 'WAN', value: 'WAN' },
+                { label: 'LAN', value: 'LAN' },
+                { label: 'GRE', value: 'GRE' },
+                { label: 'PPP', value: 'PPP' },
+                { label: 'Main APN', value: 'APN' },
+             ];
+             const num = parseInt(apnRes.multiApnNum || '0', 10);
+             for (let i = 1; i <= num; i++) {
+                 // Check if active (apnSwitch{i} == '1')
+                 if (apnRes[`apnSwitch${i}`] === '1') {
+                     arr.push({ label: `APN${i}`, value: `APN${i}` });
+                 }
+             }
+             setInterfaceOptions(arr);
+        }
+
       } catch (e) {
-        console.error("Failed to fetch routing settings", e);
+        console.error("Failed to load settings", e);
         showAlert('Failed to load settings.', 'error');
       } finally {
         setLoading(false);
@@ -181,6 +213,7 @@ export const RoutingPage: React.FC = () => {
         onClose={() => setIsModalOpen(false)}
         onSave={handleModalSave}
         initialData={editingIndex !== null ? rules[editingIndex] : null}
+        interfaceOptions={interfaceOptions}
       />
     </div>
   );

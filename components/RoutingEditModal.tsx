@@ -9,13 +9,15 @@ interface RoutingEditModalProps {
   onClose: () => void;
   onSave: (rule: RoutingRule) => void;
   initialData?: RoutingRule | null;
+  interfaceOptions: { label: string; value: string }[];
 }
 
 export const RoutingEditModal: React.FC<RoutingEditModalProps> = ({ 
   isOpen, 
   onClose, 
   onSave, 
-  initialData
+  initialData,
+  interfaceOptions
 }) => {
   const [ifName, setIfName] = useState('WAN');
   const [isValid, setIsValid] = useState(true);
@@ -23,13 +25,6 @@ export const RoutingEditModal: React.FC<RoutingEditModalProps> = ({
   const [netmask, setNetmask] = useState('');
   const [gateway, setGateway] = useState('');
   const [errors, setErrors] = useState<{ ip?: string; netmask?: string; gateway?: string }>({});
-
-  const INTERFACE_OPTIONS = [
-    { label: 'WAN', value: 'WAN' },
-    { label: 'LAN', value: 'LAN' },
-    { label: 'Bridge', value: 'Bridge' },
-    { label: 'GRE', value: 'GRE' },
-  ];
 
   useEffect(() => {
     if (isOpen) {
@@ -40,7 +35,8 @@ export const RoutingEditModal: React.FC<RoutingEditModalProps> = ({
         setNetmask(initialData.netmask);
         setGateway(initialData.gateway);
       } else {
-        setIfName('WAN');
+        // Default to first option or WAN if available
+        setIfName(interfaceOptions.length > 0 ? interfaceOptions[0].value : 'WAN');
         setIsValid(true);
         setIp('');
         setNetmask('');
@@ -48,7 +44,7 @@ export const RoutingEditModal: React.FC<RoutingEditModalProps> = ({
       }
       setErrors({});
     }
-  }, [isOpen, initialData]);
+  }, [isOpen, initialData, interfaceOptions]);
 
   const validateIp = (value: string) => {
     // Simple regex for IPv4 validation
@@ -121,7 +117,7 @@ export const RoutingEditModal: React.FC<RoutingEditModalProps> = ({
                     onChange={(e) => setIfName(e.target.value)}
                     className="w-full border border-gray-200 px-3 py-2 text-sm text-gray-600 outline-none focus:border-orange transition-all rounded-[2px] appearance-none bg-white cursor-pointer"
                 >
-                    {INTERFACE_OPTIONS.map(opt => (
+                    {interfaceOptions.map(opt => (
                         <option key={opt.value} value={opt.value}>{opt.label}</option>
                     ))}
                 </select>
