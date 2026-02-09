@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardHeader, SquareSwitch, SignalStrengthIcon } from './UIComponents';
 import { useLanguage } from '../utils/i18nContext';
@@ -201,15 +200,23 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
     return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
   };
 
-  // Data Usage: Sum of 4 flows -> Fixed to 2 decimals + MB
+  // Data Usage: Sum of 4 flows -> Auto convert KB/MB/GB
   const formatDataUsage = () => {
     if (!statusInfo) return "0.00 MB";
-    const total = 
+    const totalMb = 
       parseFloat(statusInfo.roam_dl_mon_flow || "0") + 
       parseFloat(statusInfo.roam_ul_mon_flow || "0") + 
       parseFloat(statusInfo.ul_mon_flow || "0") + 
       parseFloat(statusInfo.dl_mon_flow || "0");
-    return `${total.toFixed(2)} MB`;
+    
+    if (isNaN(totalMb)) return "0.00 MB";
+
+    if (totalMb >= 1024) {
+      return `${(totalMb / 1024).toFixed(2)} GB`;
+    } else if (totalMb < 1 && totalMb > 0) {
+      return `${(totalMb * 1024).toFixed(2)} KB`;
+    }
+    return `${totalMb.toFixed(2)} MB`;
   };
 
   // Connected Devices Count
