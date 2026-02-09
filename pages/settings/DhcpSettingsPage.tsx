@@ -5,11 +5,33 @@ import { SquareSwitch } from '../../components/UIComponents';
 import { fetchDhcpSettings, saveDhcpSettings } from '../../utils/api';
 import { useAlert } from '../../utils/AlertContext';
 
+const ipToLong = (ip: string) => {
+    const octets = ip.split('.');
+    if (octets.length !== 4) return 0;
+    return octets.reduce((acc, octet) => {
+        return ((acc << 8) + parseInt(octet, 10)) >>> 0;
+    }, 0);
+};
+
+const isValidSubnetMask = (subnetMask: string) => {
+    if (!subnetMask) return false;
+    const octets = subnetMask.split('.');
+    if (octets.length !== 4) return false;
+    let binaryString = '';
+    for (const octetStr of octets) {
+        const num = parseInt(octetStr, 10);
+        if (Number.isNaN(num) || num < 0 || num > 255) return false;
+        binaryString += num.toString(2).padStart(8, '0');
+    }
+    return /^1+0*$/.test(binaryString);
+};
+
 const isValidIp = (ip: string) => {
     if (!ip) return false;
     const parts = ip.split('.');
     if (parts.length !== 4) return false;
     return parts.every(part => {
+        if (!/^\d+$/.test(part)) return false;
         const num = parseInt(part, 10);
         return !isNaN(num) && num >= 0 && num <= 255;
     });
@@ -79,7 +101,7 @@ export const DhcpSettingsPage: React.FC = () => {
       const newErrors: Record<string, string> = {};
       let hasError = false;
 
-      // Validate LAN IP
+      // Validate LAN IP Format
       if (!lanIp) {
           newErrors.lanIp = 'LAN IP cannot be empty';
           hasError = true;
@@ -89,12 +111,34 @@ export const DhcpSettingsPage: React.FC = () => {
       }
 
       // Validate Subnet Mask
+      let isMaskValid = false;
       if (!subnetMask) {
           newErrors.subnetMask = 'Subnet Mask cannot be empty';
           hasError = true;
       } else if (!isValidIp(subnetMask)) {
+          newErrors.subnetMask = 'Invalid Subnet Mask format';
+          hasError = true;
+      } else if (!isValidSubnetMask(subnetMask)) {
           newErrors.subnetMask = 'Invalid Subnet Mask';
           hasError = true;
+      } else {
+          isMaskValid = true;
+      }
+
+      // Check Host IP Availability (Network/Broadcast address conflict)
+      if (!newErrors.lanIp && isMaskValid) {
+          const ipNum = ipToLong(lanIp);
+          const maskNum = ipToLong(subnetMask);
+          const networkAddress = (ipNum & maskNum) >>> 0;
+          const broadcastAddress = (networkAddress | (~maskNum >>> 0)) >>> 0;
+
+          if (ipNum === broadcastAddress) {
+              newErrors.lanIp = 'Cannot use broadcast address';
+              hasError = true;
+          } else if (ipNum === networkAddress) {
+              newErrors.lanIp = 'Cannot use network address';
+              hasError = true;
+          }
       }
 
       if (dhcpServer) {
