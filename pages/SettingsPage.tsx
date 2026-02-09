@@ -193,6 +193,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null); // Ref for the entire search component
 
   const activeSection = menuItems.find(item => item.id === activeSectionId) || menuItems[0];
   
@@ -279,10 +280,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
   // Handle click outside to close search
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+        // Check if the click is outside the entire search container
         if (isSearchOpen && 
-            searchInputRef.current && 
-            !searchInputRef.current.parentElement?.contains(event.target as Node) &&
-            !(event.target as Element).closest('.search-toggle-btn')
+            searchContainerRef.current && 
+            !searchContainerRef.current.contains(event.target as Node)
         ) {
             setIsSearchOpen(false);
             setSearchQuery('');
@@ -331,12 +332,19 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
   };
 
   const handleSearchResultClick = (sectionId: string, subTabId?: string) => {
-      handleSectionClick(sectionId);
-      if (subTabId) {
-          navigate(`/settings?section=${sectionId}&sub=${subTabId}`);
-      }
+      // Close search interface
       setIsSearchOpen(false);
       setSearchQuery('');
+      setIsMobileMenuOpen(false);
+      
+      // Perform Navigation
+      if (subTabId) {
+          navigate(`/settings?section=${sectionId}&sub=${subTabId}`);
+      } else {
+          // If no specific sub-tab is in the result (only section matched), 
+          // let handleSectionClick determine the default sub-tab
+          handleSectionClick(sectionId);
+      }
   };
 
   // Filter menu items for search
@@ -489,7 +497,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
          </div>
          
          {/* Search Box */}
-         <div className="ms-auto relative">
+         <div className="ms-auto relative" ref={searchContainerRef}>
              <div className={`flex items-center transition-all duration-300 ${isSearchOpen ? 'w-48 md:w-64' : 'w-10'}`}>
                 {isSearchOpen ? (
                     <div className="relative w-full">
