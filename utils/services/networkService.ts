@@ -1,4 +1,5 @@
 
+
 import { apiRequest } from './core';
 import { 
     StatusInfoResponse, 
@@ -20,7 +21,8 @@ import {
     IpReservationRule,
     RoutingSettingsResponse,
     RoutingRule,
-    MeshSettingsResponse
+    MeshSettingsResponse,
+    TopologyDataResponse
 } from './types';
 
 // Status & Connection
@@ -94,3 +96,6 @@ export const applyRoutingSettings = async () => apiRequest(20, 'POST');
 // Mesh Configuration
 export const fetchMeshSettings = async () => apiRequest<MeshSettingsResponse>(314, 'GET');
 export const saveMeshSettings = async (data: { mesh_switch: string; mesh_role: string; networking: number }) => apiRequest(314, 'POST', data);
+
+// Topology
+export const fetchTopologyData = async () => apiRequest<TopologyDataResponse>(315, 'GET');

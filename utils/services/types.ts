@@ -1,4 +1,5 @@
 
+
 export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
@@ -442,4 +443,12 @@ export interface MeshSettingsResponse {
     mesh_role: string;
     curMode: string;
     [key: string]: any;
+}
+
+export interface TopologyDataResponse {
+  success: boolean;
+  cmd: number;
+  message: string;
+  tuopuData: string;
+  [key: string]: any;
 }

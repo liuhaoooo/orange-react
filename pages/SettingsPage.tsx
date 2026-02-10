@@ -32,6 +32,7 @@ import { MultipleDhcpPage } from './settings/MultipleDhcpPage';
 import { SystemUpgradePage } from './settings/SystemUpgradePage';
 import { RoutingPage } from './settings/RoutingPage';
 import { MeshBasicConfigPage } from './settings/MeshBasicConfigPage';
+import { TopologyDiagramPage } from './settings/TopologyDiagramPage';
 
 interface SettingsPageProps {
   onOpenLogin: () => void;
@@ -451,6 +452,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <SystemUpgradePage />;
           case 'basic_config':
               return <MeshBasicConfigPage />;
+          case 'topology_diagram':
+              return <TopologyDiagramPage />;
           
           default:
               // Default Placeholder Layout
