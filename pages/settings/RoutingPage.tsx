@@ -4,9 +4,11 @@ import { Pencil, Trash2, ChevronLeft, ChevronRight, ChevronDown, Loader2 } from 
 import { fetchRoutingSettings, saveRoutingSettings, fetchMultipleApnSettings, RoutingRule } from '../../utils/api';
 import { useAlert } from '../../utils/AlertContext';
 import { RoutingEditModal } from '../../components/RoutingEditModal';
+import { useGlobalState } from '../../utils/GlobalStateContext';
 
 export const RoutingPage: React.FC = () => {
   const { showAlert } = useAlert();
+  const { globalData } = useGlobalState();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [rules, setRules] = useState<RoutingRule[]>([]);
@@ -23,6 +25,8 @@ export const RoutingPage: React.FC = () => {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+  const hideGateway = globalData.connectionSettings?.aeraId === 'IO24071';
 
   useEffect(() => {
     const load = async () => {
@@ -94,7 +98,7 @@ export const RoutingPage: React.FC = () => {
     setSaving(true);
     try {
       const res = await saveRoutingSettings(rules);
-      if (res && (res.success || res.result === 'success')) {
+      if (res && (res.success || res. result === 'success')) {
         showAlert('Settings saved successfully.', 'success');
       } else {
         showAlert('Failed to save settings.', 'error');
@@ -124,10 +128,10 @@ export const RoutingPage: React.FC = () => {
             {/* Header */}
             <div className="grid grid-cols-12 py-4 border-b border-gray-100">
                 <div className="col-span-2 ps-4 font-bold text-sm text-black">State</div>
-                <div className="col-span-2 font-bold text-sm text-black">Interface Name</div>
-                <div className="col-span-3 font-bold text-sm text-black">Destination IP Address</div>
+                <div className={`${hideGateway ? 'col-span-3' : 'col-span-2'} font-bold text-sm text-black`}>Interface Name</div>
+                <div className={`${hideGateway ? 'col-span-4' : 'col-span-3'} font-bold text-sm text-black`}>Destination IP Address</div>
                 <div className="col-span-2 font-bold text-sm text-black">Subnet Mask</div>
-                <div className="col-span-2 font-bold text-sm text-black">Gateway</div>
+                {!hideGateway && <div className="col-span-2 font-bold text-sm text-black">Gateway</div>}
                 <div className="col-span-1"></div>
             </div>
 
@@ -135,10 +139,10 @@ export const RoutingPage: React.FC = () => {
             {rules.length > 0 ? rules.map((rule, index) => (
                 <div key={index} className="grid grid-cols-12 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors items-center">
                 <div className="col-span-2 ps-4 text-sm text-black font-medium">{rule.valid ? 'Valid' : 'Invalid'}</div>
-                <div className="col-span-2 text-sm text-black font-medium">{rule.ifName}</div>
-                <div className="col-span-3 text-sm text-black font-medium">{rule.ip}</div>
+                <div className={`${hideGateway ? 'col-span-3' : 'col-span-2'} text-sm text-black font-medium`}>{rule.ifName}</div>
+                <div className={`${hideGateway ? 'col-span-4' : 'col-span-3'} text-sm text-black font-medium`}>{rule.ip}</div>
                 <div className="col-span-2 text-sm text-black font-medium">{rule.netmask}</div>
-                <div className="col-span-2 text-sm text-black font-medium">{rule.gateway}</div>
+                {!hideGateway && <div className="col-span-2 text-sm text-black font-medium">{rule.gateway}</div>}
                 <div className="col-span-1 flex justify-end pe-4 space-x-3">
                     <button 
                         onClick={() => handleEditClick(index)}
@@ -212,6 +216,7 @@ export const RoutingPage: React.FC = () => {
         onSave={handleModalSave}
         initialData={editingIndex !== null ? rules[editingIndex] : null}
         interfaceOptions={interfaceOptions}
+        hideGateway={hideGateway}
       />
     </div>
   );

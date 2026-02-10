@@ -10,6 +10,7 @@ interface RoutingEditModalProps {
   onSave: (rule: RoutingRule) => void;
   initialData?: RoutingRule | null;
   interfaceOptions: { label: string; value: string }[];
+  hideGateway?: boolean;
 }
 
 export const RoutingEditModal: React.FC<RoutingEditModalProps> = ({ 
@@ -17,7 +18,8 @@ export const RoutingEditModal: React.FC<RoutingEditModalProps> = ({
   onClose, 
   onSave, 
   initialData,
-  interfaceOptions
+  interfaceOptions,
+  hideGateway
 }) => {
   const [ifName, setIfName] = useState('WAN');
   const [isValid, setIsValid] = useState(true);
@@ -72,12 +74,14 @@ export const RoutingEditModal: React.FC<RoutingEditModalProps> = ({
       validForm = false;
     }
 
-    if (!gateway) {
-      newErrors.gateway = 'can not be empty';
-      validForm = false;
-    } else if (!validateIp(gateway)) {
-      newErrors.gateway = 'Invalid Gateway';
-      validForm = false;
+    if (!hideGateway) {
+        if (!gateway) {
+          newErrors.gateway = 'can not be empty';
+          validForm = false;
+        } else if (!validateIp(gateway)) {
+          newErrors.gateway = 'Invalid Gateway';
+          validForm = false;
+        }
     }
 
     setErrors(newErrors);
@@ -88,7 +92,7 @@ export const RoutingEditModal: React.FC<RoutingEditModalProps> = ({
         valid: isValid,
         ip,
         netmask,
-        gateway
+        gateway: hideGateway ? '' : gateway
       });
       onClose();
     }
@@ -178,7 +182,7 @@ export const RoutingEditModal: React.FC<RoutingEditModalProps> = ({
           </div>
 
           {/* Subnet Mask */}
-          <div className="mb-6 flex flex-col sm:flex-row sm:items-start">
+          <div className={`${hideGateway ? 'mb-8' : 'mb-6'} flex flex-col sm:flex-row sm:items-start`}>
              <label className="font-bold text-sm text-black w-1/3 mb-2 sm:mb-0 pt-2">
                 <span className="text-red-500 me-1">*</span>Subnet Mask
              </label>
@@ -199,25 +203,27 @@ export const RoutingEditModal: React.FC<RoutingEditModalProps> = ({
           </div>
 
           {/* Gateway */}
-          <div className="mb-8 flex flex-col sm:flex-row sm:items-start">
-             <label className="font-bold text-sm text-black w-1/3 mb-2 sm:mb-0 pt-2">
-                <span className="text-red-500 me-1">*</span>Gateway
-             </label>
-             <div className="w-full sm:w-2/3">
-                <input 
-                    type="text" 
-                    value={gateway}
-                    onChange={(e) => {
-                        setGateway(e.target.value);
-                        if(errors.gateway) setErrors({...errors, gateway: undefined});
-                    }}
-                    className={`w-full border px-3 py-2 text-sm text-black outline-none transition-all rounded-[2px] bg-white ${errors.gateway ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange'}`}
-                />
-                {errors.gateway && (
-                    <p className="text-red-500 text-sm mt-1">{errors.gateway}</p>
-                )}
-             </div>
-          </div>
+          {!hideGateway && (
+              <div className="mb-8 flex flex-col sm:flex-row sm:items-start">
+                 <label className="font-bold text-sm text-black w-1/3 mb-2 sm:mb-0 pt-2">
+                    <span className="text-red-500 me-1">*</span>Gateway
+                 </label>
+                 <div className="w-full sm:w-2/3">
+                    <input 
+                        type="text" 
+                        value={gateway}
+                        onChange={(e) => {
+                            setGateway(e.target.value);
+                            if(errors.gateway) setErrors({...errors, gateway: undefined});
+                        }}
+                        className={`w-full border px-3 py-2 text-sm text-black outline-none transition-all rounded-[2px] bg-white ${errors.gateway ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange'}`}
+                    />
+                    {errors.gateway && (
+                        <p className="text-red-500 text-sm mt-1">{errors.gateway}</p>
+                    )}
+                 </div>
+              </div>
+          )}
 
           <div className="flex justify-end space-x-4">
             <button 
