@@ -181,21 +181,21 @@ export const MeshBasicConfigPage: React.FC = () => {
                                 options={ROLE_OPTIONS}
                             />
                         </FormRow>
-
-                        {/* Operate Button - Only visible if actually active (saved as ON) */}
-                        {isMeshActive && (
-                            <FormRow label="Operate">
-                                <button 
-                                    onClick={handleOneClickNetworking}
-                                    disabled={networkingLoading}
-                                    className="bg-[#eeeeee] border-2 border-black text-black hover:bg-white font-bold py-2 px-6 text-sm transition-all rounded-[2px] shadow-sm whitespace-nowrap flex items-center"
-                                >
-                                    {networkingLoading && <Loader2 className="animate-spin w-4 h-4 me-2" />}
-                                    One click networking
-                                </button>
-                            </FormRow>
-                        )}
                     </>
+                )}
+
+                {/* Operate Button - Only visible if actually active (saved as ON) */}
+                {isMeshActive && (
+                    <FormRow label="Operate">
+                        <button 
+                            onClick={handleOneClickNetworking}
+                            disabled={networkingLoading}
+                            className="bg-[#eeeeee] border-2 border-black text-black hover:bg-white font-bold py-2 px-6 text-sm transition-all rounded-[2px] shadow-sm whitespace-nowrap flex items-center"
+                        >
+                            {networkingLoading && <Loader2 className="animate-spin w-4 h-4 me-2" />}
+                            One click networking
+                        </button>
+                    </FormRow>
                 )}
 
                 {/* Save Button */}
