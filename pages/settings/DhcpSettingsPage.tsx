@@ -212,9 +212,12 @@ export const DhcpSettingsPage: React.FC = () => {
           if (!leaseTime) {
               newErrors.leaseTime = 'Lease Time cannot be empty';
               hasError = true;
-          } else if (isNaN(parseInt(leaseTime, 10))) {
-              newErrors.leaseTime = 'Lease Time must be a number';
-              hasError = true;
+          } else {
+              const val = parseInt(leaseTime, 10);
+              if (isNaN(val) || val < 1 || val > 168) {
+                  newErrors.leaseTime = 'Lease Time must be between 1 and 168';
+                  hasError = true;
+              }
           }
 
           // Optional DNS Validation
