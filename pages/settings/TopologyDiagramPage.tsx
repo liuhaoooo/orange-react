@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Loader2, RefreshCcw } from 'lucide-react';
+import { Loader2, AlertTriangle } from 'lucide-react';
 import * as d3 from 'd3';
 import { fetchTopologyData, fetchStatusInfo } from '../../utils/api';
 import { useLanguage } from '../../utils/i18nContext';
@@ -376,7 +376,15 @@ export const TopologyDiagramPage: React.FC = () => {
     const { t } = useLanguage();
     const { showAlert } = useAlert();
     const { globalData } = useGlobalState();
+    
+    // Determine Mesh status from CMD 585 (Connection Settings)
+    // Assuming mesh_switch is available in connectionSettings map.
+    const meshSwitch = globalData.connectionSettings?.mesh_switch;
+    const isMeshEnabled = meshSwitch === '1';
+
     const svgRef = useRef<SVGSVGElement>(null);
+    const prevTopoDataRef = useRef<string>("");
+    
     const [loading, setLoading] = useState(true);
     const [treeData, setTreeData] = useState<any>(null);
     const [localHostMac, setLocalHostMac] = useState("");
@@ -389,37 +397,67 @@ export const TopologyDiagramPage: React.FC = () => {
         "4": `${t("dataIs")} ${t("on")} (${t("notConnected")})`
     };
 
-    const loadData = useCallback(async () => {
-        setLoading(true);
+    const loadData = useCallback(async (isInitial = false) => {
+        if (isInitial) setLoading(true);
         try {
-            // Fetch Status for DHCP list and connection status
+            // 1. Fetch Topology Data (CMD 315)
+            const topoRes = await fetchTopologyData();
+            const rawTopoData = topoRes?.tuopuData || "";
+
+            // 2. Data Diffing: If topology string hasn't changed, skip re-rendering
+            if (!isInitial && rawTopoData === prevTopoDataRef.current && rawTopoData !== "") {
+                return; 
+            }
+            
+            // 3. Fetch Status for DHCP list (mapping names) and network status
+            // We fetch this here to ensure mapping is consistent with the current topo snapshot
             const statusRes = await fetchStatusInfo();
             const dhcpList: any[] = (statusRes && Array.isArray(statusRes.dhcp_list_info)) ? statusRes.dhcp_list_info : [];
-            setNetworkState(statusRes?.network_status || "2"); // Default to not connected
+            
+            if (statusRes?.network_status) {
+                setNetworkState(statusRes.network_status);
+            }
 
-            // Fetch Topology
-            const topoRes = await fetchTopologyData();
             if (topoRes && topoRes.tuopuData) {
+                // Update Ref
+                prevTopoDataRef.current = topoRes.tuopuData;
+
                 const processed = DataHandle_createData(topoRes.tuopuData, dhcpList);
                 setTreeData(processed.treeData);
                 if(processed.localHostMac) setLocalHostMac(processed.localHostMac);
-            } else {
-                showAlert("No topology data available", "info");
+            } else if (isInitial) {
+                // Only show alert on initial load if empty, otherwise silent fail during polling
+                // showAlert("No topology data available", "info");
             }
         } catch (e) {
             console.error(e);
-            showAlert("Failed to load topology", "error");
+            if (isInitial) showAlert("Failed to load topology", "error");
         } finally {
-            setLoading(false);
+            if (isInitial) setLoading(false);
         }
     }, [showAlert, t]);
 
+    // Setup Polling
     useEffect(() => {
-        loadData();
-    }, [loadData]);
+        if (!isMeshEnabled) {
+             setLoading(false);
+             return;
+        }
 
+        // Initial Load
+        loadData(true);
+
+        // Auto Refresh every 10 seconds
+        const intervalId = setInterval(() => {
+            loadData(false);
+        }, 10000);
+
+        return () => clearInterval(intervalId);
+    }, [isMeshEnabled, loadData]);
+
+    // D3 Rendering
     useEffect(() => {
-        if (!treeData || !svgRef.current) return;
+        if (!treeData || !svgRef.current || !isMeshEnabled) return;
 
         // --- D3 Rendering Logic ---
         const renderTopology = (data: any) => {
@@ -645,8 +683,22 @@ export const TopologyDiagramPage: React.FC = () => {
 
         renderTopology(treeData);
 
-    }, [treeData, localHostMac, networkState, globalData.connectionSettings, t]);
+    }, [treeData, localHostMac, networkState, globalData.connectionSettings, t, isMeshEnabled]);
 
+    // Render Mesh Disabled Warning
+    if (!isMeshEnabled) {
+        return (
+            <div className="w-full h-96 flex flex-col items-center justify-center p-6 text-center animate-fade-in">
+                <div className="bg-orange/10 p-6 rounded-full mb-4">
+                    <AlertTriangle className="text-orange w-12 h-12" />
+                </div>
+                <h3 className="text-xl font-bold text-black mb-2">Mesh networking is not enabled</h3>
+                <p className="text-gray-500 max-w-md">
+                    Please enable Mesh networking in the Basic Config settings to view the network topology.
+                </p>
+            </div>
+        );
+    }
 
     if (loading) {
         return (
@@ -659,17 +711,6 @@ export const TopologyDiagramPage: React.FC = () => {
 
     return (
         <div className="w-full animate-fade-in py-2">
-            <div className="flex justify-between items-center mb-4 px-4">
-                <h3 className="font-bold text-lg text-black">Network Topology</h3>
-                <button 
-                    onClick={loadData}
-                    className="flex items-center space-x-2 bg-white border border-gray-300 px-4 py-2 rounded-md hover:bg-gray-50 transition-colors text-sm font-bold"
-                >
-                    <RefreshCcw size={16} />
-                    <span>Refresh</span>
-                </button>
-            </div>
-            
             <div className="w-full h-[600px] border border-gray-200 rounded-lg bg-[#f9f9f9] overflow-hidden relative">
                 <svg ref={svgRef} id="mainsvg" width="100%" height="100%" className="cursor-move"></svg>
             </div>
