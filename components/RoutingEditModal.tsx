@@ -11,6 +11,7 @@ interface RoutingEditModalProps {
   initialData?: RoutingRule | null;
   interfaceOptions: { label: string; value: string }[];
   hideGateway?: boolean;
+  existingIps?: string[];
 }
 
 export const RoutingEditModal: React.FC<RoutingEditModalProps> = ({ 
@@ -19,7 +20,8 @@ export const RoutingEditModal: React.FC<RoutingEditModalProps> = ({
   onSave, 
   initialData,
   interfaceOptions,
-  hideGateway
+  hideGateway,
+  existingIps = []
 }) => {
   const [ifName, setIfName] = useState('WAN');
   const [isValid, setIsValid] = useState(true);
@@ -63,6 +65,9 @@ export const RoutingEditModal: React.FC<RoutingEditModalProps> = ({
       validForm = false;
     } else if (!validateIp(ip)) {
       newErrors.ip = 'Invalid IP Address';
+      validForm = false;
+    } else if (existingIps.includes(ip) && ip !== initialData?.ip) {
+      newErrors.ip = 'Destination IP already exists';
       validForm = false;
     }
 
@@ -163,7 +168,7 @@ export const RoutingEditModal: React.FC<RoutingEditModalProps> = ({
           {/* Destination IP Address */}
           <div className="mb-6 flex flex-col sm:flex-row sm:items-start">
              <label className="font-bold text-sm text-black w-1/3 mb-2 sm:mb-0 pt-2">
-                <span className="text-red-500 me-1">*</span>Destination IP Address
+                <span className="text-red-500 me-1">*</span>Destination IP
              </label>
              <div className="w-full sm:w-2/3">
                 <input 

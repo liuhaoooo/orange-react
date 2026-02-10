@@ -88,3 +88,4 @@ export const saveIpReservation = async (datas: IpReservationRule[]) => apiReques
 // Routing Configuration
 export const fetchRoutingSettings = async () => apiRequest<RoutingSettingsResponse>(164, 'GET', { getfun: true });
 export const saveRoutingSettings = async (datas: RoutingRule[]) => apiRequest(164, 'POST', { datas });
+export const applyRoutingSettings = async () => apiRequest(20, 'POST');

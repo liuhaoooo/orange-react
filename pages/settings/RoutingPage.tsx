@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Pencil, Trash2, ChevronLeft, ChevronRight, ChevronDown, Loader2 } from 'lucide-react';
-import { fetchRoutingSettings, saveRoutingSettings, fetchMultipleApnSettings, RoutingRule } from '../../utils/api';
+import { fetchRoutingSettings, saveRoutingSettings, applyRoutingSettings, fetchMultipleApnSettings, RoutingRule } from '../../utils/api';
 import { useAlert } from '../../utils/AlertContext';
 import { RoutingEditModal } from '../../components/RoutingEditModal';
 import { useGlobalState } from '../../utils/GlobalStateContext';
@@ -69,6 +69,10 @@ export const RoutingPage: React.FC = () => {
   }, [showAlert]);
 
   const handleAddClick = () => {
+    if (rules.length >= 32) {
+      showAlert('The maximum number of entries is 32.', 'warning');
+      return;
+    }
     setEditingIndex(null);
     setIsModalOpen(true);
   };
@@ -97,9 +101,30 @@ export const RoutingPage: React.FC = () => {
   const handleGlobalSave = async () => {
     setSaving(true);
     try {
-      const res = await saveRoutingSettings(rules);
-      if (res && (res.success || res. result === 'success')) {
-        showAlert('Settings saved successfully.', 'success');
+      // Calculate netmaskBits for payload
+      const processedRules = rules.map(r => {
+         const bits = r.netmask.split('.').reduce((c, octet) => {
+             const n = parseInt(octet, 10);
+             return c + (n >>> 0).toString(2).split('1').length - 1;
+         }, 0);
+         return { ...r, netmaskBits: bits };
+      });
+
+      const res = await saveRoutingSettings(processedRules);
+      
+      if (res && (res.success || res.result === 'success')) {
+        // Apply settings after successful save
+        try {
+            const applyRes = await applyRoutingSettings();
+            if (applyRes && (applyRes.success || applyRes.result === 'success')) {
+                showAlert('Settings saved successfully.', 'success');
+            } else {
+                showAlert('Settings saved but failed to apply.', 'warning');
+            }
+        } catch (applyErr) {
+            console.error("Failed to apply settings", applyErr);
+            showAlert('Settings saved but failed to apply.', 'warning');
+        }
       } else {
         showAlert('Failed to save settings.', 'error');
       }
@@ -129,7 +154,7 @@ export const RoutingPage: React.FC = () => {
             <div className="grid grid-cols-12 py-4 border-b border-gray-100">
                 <div className="col-span-2 ps-4 font-bold text-sm text-black">State</div>
                 <div className={`${hideGateway ? 'col-span-3' : 'col-span-2'} font-bold text-sm text-black`}>Interface Name</div>
-                <div className={`${hideGateway ? 'col-span-4' : 'col-span-3'} font-bold text-sm text-black`}>Destination IP Address</div>
+                <div className={`${hideGateway ? 'col-span-4' : 'col-span-3'} font-bold text-sm text-black`}>Destination IP</div>
                 <div className="col-span-2 font-bold text-sm text-black">Subnet Mask</div>
                 {!hideGateway && <div className="col-span-2 font-bold text-sm text-black">Gateway</div>}
                 <div className="col-span-1"></div>
@@ -217,6 +242,7 @@ export const RoutingPage: React.FC = () => {
         initialData={editingIndex !== null ? rules[editingIndex] : null}
         interfaceOptions={interfaceOptions}
         hideGateway={hideGateway}
+        existingIps={rules.map(r => r.ip)}
       />
     </div>
   );
