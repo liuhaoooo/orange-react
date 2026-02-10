@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import * as d3 from 'd3';
-import { fetchTopologyData, fetchStatusInfo } from '../../utils/api';
+import { fetchTopologyData, fetchStatusInfo, fetchMeshSettings } from '../../utils/api';
 import { useLanguage } from '../../utils/i18nContext';
 import { useAlert } from '../../utils/AlertContext';
 import { useGlobalState } from '../../utils/GlobalStateContext';
@@ -377,10 +377,8 @@ export const TopologyDiagramPage: React.FC = () => {
     const { showAlert } = useAlert();
     const { globalData } = useGlobalState();
     
-    // Determine Mesh status from CMD 585 (Connection Settings)
-    // Assuming mesh_switch is available in connectionSettings map.
-    const meshSwitch = globalData.connectionSettings?.mesh_switch;
-    const isMeshEnabled = meshSwitch === '1';
+    // Local state for Mesh status to ensure we have fresh data on mount
+    const [isMeshEnabled, setIsMeshEnabled] = useState<boolean | null>(null);
 
     const svgRef = useRef<SVGSVGElement>(null);
     const prevTopoDataRef = useRef<string>("");
@@ -396,6 +394,27 @@ export const TopologyDiagramPage: React.FC = () => {
         "3": `${t("dataIs")} ${t("on")} (${t("connected")})`, // Fallback for cellular
         "4": `${t("dataIs")} ${t("on")} (${t("notConnected")})`
     };
+
+    // Effect: Check Mesh Status FRESH on mount
+    useEffect(() => {
+        const checkMesh = async () => {
+            try {
+                // Fetch specifically Mesh Settings (CMD 314) to get the real-time switch status
+                // This avoids stale data from global connectionSettings if the user didn't refresh
+                const res = await fetchMeshSettings();
+                if (res && (res.success || res.cmd === 314)) {
+                    setIsMeshEnabled(res.mesh_switch === '1');
+                } else {
+                    // Fallback to global data if request fails, or assume disabled/error
+                    setIsMeshEnabled(globalData.connectionSettings?.mesh_switch === '1');
+                }
+            } catch (e) {
+                console.error("Failed to fetch mesh settings", e);
+                setIsMeshEnabled(globalData.connectionSettings?.mesh_switch === '1');
+            }
+        };
+        checkMesh();
+    }, [globalData.connectionSettings]); // globalData dep mostly for fallback if API fails completely
 
     const loadData = useCallback(async (isInitial = false) => {
         if (isInitial) setLoading(true);
@@ -439,6 +458,9 @@ export const TopologyDiagramPage: React.FC = () => {
 
     // Setup Polling
     useEffect(() => {
+        // Wait until mesh status is determined
+        if (isMeshEnabled === null) return;
+
         if (!isMeshEnabled) {
              setLoading(false);
              return;
@@ -567,10 +589,10 @@ export const TopologyDiagramPage: React.FC = () => {
                     return ROUTER_ICON;
                 })
                 .attr("class", "node-img toolTipClick cursor-pointer")
-                .attr("x", (d: any) => d.data.cloud ? d.x - 32 : d.x - 32)
-                .attr("y", (d: any) => d.data.cloud ? d.y + 10 : d.y + 15)
-                .attr("width", 64)
-                .attr("height", 64);
+                .attr("x", (d: any) => d.data.cloud ? d.x - 50 : d.x - 32)
+                .attr("y", (d: any) => d.data.cloud ? d.y - 25 : d.y + 15)
+                .attr("width", (d: any) => d.data.cloud ? 100 : 64)
+                .attr("height", (d: any) => d.data.cloud ? 100 : 64);
 
             // Cloud Label
             nodes.append("text")
@@ -686,7 +708,7 @@ export const TopologyDiagramPage: React.FC = () => {
     }, [treeData, localHostMac, networkState, globalData.connectionSettings, t, isMeshEnabled]);
 
     // Render Mesh Disabled Warning
-    if (!isMeshEnabled) {
+    if (isMeshEnabled === false) { // Explicitly false, not null (loading)
         return (
             <div className="w-full h-96 flex flex-col items-center justify-center p-6 text-center animate-fade-in">
                 <div className="bg-orange/10 p-6 rounded-full mb-4">
@@ -700,7 +722,7 @@ export const TopologyDiagramPage: React.FC = () => {
         );
     }
 
-    if (loading) {
+    if (loading || isMeshEnabled === null) {
         return (
             <div className="w-full h-96 flex flex-col items-center justify-center">
                 <Loader2 className="animate-spin text-orange mb-4" size={40} />
