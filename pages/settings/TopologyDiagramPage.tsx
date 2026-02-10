@@ -6,15 +6,22 @@ import { fetchTopologyData, fetchStatusInfo } from '../../utils/api';
 import { useLanguage } from '../../utils/i18nContext';
 import { useAlert } from '../../utils/AlertContext';
 import { useGlobalState } from '../../utils/GlobalStateContext';
+import cloudIcon from '../../assets/cloud.png';
+import routerIcon from '../../assets/router.png';
+import deviceIcon from '../../assets/network_device.png';
+import wifiIcon from '../../assets/wifi.png';
+import portIcon from '../../assets/network_port.png';
+import successIcon from '../../assets/success.png';
+import errorIcon from '../../assets/error.png';
 
-// --- Icons (Base64 SVG strings for simplicity without external assets) ---
-const CLOUD_ICON = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM1NTUiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTcuNSAxOWMxLjkzIDAgMy41LTEuNTcgMy41LTMuNSAwLTEuNjItMS4wNS0yLjk4LTIuNTItMy4zNS0uMTctMy42My0zLjEzLTYuNS02LjgxLTYuNS0yLjY3IDAtNS4wMSAxLjUzLTYuMTcgMy45LTIuMzYuMjctNC4xNiAyLjIyLTQuMTYgNC42QzEuNSAxNy40MyAzLjA3IDE5IDUuNSAxOWgxMiJcLz48L3N2Zz4=`;
-const ROUTER_ICON = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cmVjdCB4PSIyIiB5PSIxNCIgd2lkdGg9IjIwIiBoZWlnaHQ9IgiIiByeD0iMiIvPjxwYXRoIGQ9Ik02LjAxIDEwYTUtNSAwIDAgMSAxMS45OCAwIi8+PHBhdGggZD0iTTEyIDJ2OCIvPjxwYXRoIGQ9Ik0xMiAyMHYuMDEiLz48L3N2Zz4=`;
-const DEVICE_ICON = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM2NjYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cmVjdCB4PSI1IiB5PSIyIiB3aWR0aD0iMTQiIGhlaWdodD0iMjAiIHJ4PSIyIiByeT0iMiIvPjxwYXRoIGQ9Ik0xMiAxOHYuMDEiLz48L3N2Zz4=`;
-const WIFI_ICON = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNNSAxMi41NWE4LjAzIDguMDMgMCAwIDEgMTQtMCIvPjxwYXRoIGQ9Ik0xLjQyIDlhMTYgMTYgMCAwIDEgMjEuMTYgMCIvPjxwYXRoIGQ9Ik04LjUzIDE2LjExYTQgNCAwIDAgMSA2Ljk0IDAiLz48cGF0aCBkPSJNMTIgMjBoLjAxIi8+PC9zdmc+`;
-const PORT_ICON = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNOSAzTDUgOSIvPjxwYXRoIGQ9Ik0xNSAzTDE5IDkiLz48cmVjdCB4PSIzIiB5PSI5IiB3aWR0aD0iMTgiIGhlaWdodD0iMTIiIHJ4PSIyIi8+PHBhdGggZD0iTTYgMTVIMTgiLz48L3N2Zz4=`;
-const SUCCESS_ICON = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMyMjg3MjIiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48Y2lyY2xlIGN4PSIxMiIgY3k9InMTMiIgcj0iMTAiLz48cGF0aCBkPSJNOSAxMmwyIDIgNC00Ii8+PC9zdmc+`;
-const ERROR_ICON = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNkYzI2MjYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxMCIvPjxwYXRoIGQ9Im0xNSA5LTYgNiIvPjxwYXRoIGQ9Im05IDkgNiA2Ii8+PC9zdmc+`;
+// --- Icons ---
+const CLOUD_ICON = cloudIcon;
+const ROUTER_ICON = routerIcon;
+const DEVICE_ICON = deviceIcon;
+const WIFI_ICON = wifiIcon;
+const PORT_ICON = portIcon;
+const SUCCESS_ICON = successIcon;
+const ERROR_ICON = errorIcon;
 
 // --- Data Processing Functions ---
 
