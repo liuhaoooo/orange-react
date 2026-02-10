@@ -93,4 +93,4 @@ export const applyRoutingSettings = async () => apiRequest(20, 'POST');
 
 // Mesh Configuration
 export const fetchMeshSettings = async () => apiRequest<MeshSettingsResponse>(314, 'GET');
-export const saveMeshSettings = async (data: { mesh_switch: string; mesh_role: string }) => apiRequest(314, 'POST', data);
+export const saveMeshSettings = async (data: { mesh_switch: string; mesh_role: string; networking: number }) => apiRequest(314, 'POST', data);
