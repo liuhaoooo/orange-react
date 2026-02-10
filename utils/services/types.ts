@@ -435,3 +435,11 @@ export interface RoutingSettingsResponse {
     datas: RoutingRule[];
     [key: string]: any;
 }
+
+export interface MeshSettingsResponse {
+    success: boolean;
+    mesh_switch: string;
+    mesh_role: string;
+    curMode: string;
+    [key: string]: any;
+}

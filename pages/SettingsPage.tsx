@@ -31,6 +31,7 @@ import { IpAddressReservationPage } from './settings/IpAddressReservationPage';
 import { MultipleDhcpPage } from './settings/MultipleDhcpPage';
 import { SystemUpgradePage } from './settings/SystemUpgradePage';
 import { RoutingPage } from './settings/RoutingPage';
+import { MeshBasicConfigPage } from './settings/MeshBasicConfigPage';
 
 interface SettingsPageProps {
   onOpenLogin: () => void;
@@ -448,6 +449,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <RoutingPage />;
           case 'system_upgrade':
               return <SystemUpgradePage />;
+          case 'basic_config':
+              return <MeshBasicConfigPage />;
           
           default:
               // Default Placeholder Layout

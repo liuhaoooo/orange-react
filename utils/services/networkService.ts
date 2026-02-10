@@ -19,7 +19,8 @@ import {
     IpReservationResponse,
     IpReservationRule,
     RoutingSettingsResponse,
-    RoutingRule
+    RoutingRule,
+    MeshSettingsResponse
 } from './types';
 
 // Status & Connection
@@ -89,3 +90,7 @@ export const saveIpReservation = async (datas: IpReservationRule[]) => apiReques
 export const fetchRoutingSettings = async () => apiRequest<RoutingSettingsResponse>(164, 'GET', { getfun: true });
 export const saveRoutingSettings = async (datas: RoutingRule[]) => apiRequest(164, 'POST', { datas });
 export const applyRoutingSettings = async () => apiRequest(20, 'POST');
+
+// Mesh Configuration
+export const fetchMeshSettings = async () => apiRequest<MeshSettingsResponse>(314, 'GET');
+export const saveMeshSettings = async (data: { mesh_switch: string; mesh_role: string }) => apiRequest(314, 'POST', data);
