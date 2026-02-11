@@ -1,23 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
-import { Edit2, Save, Check, X, Loader2 } from 'lucide-react';
+import { Edit2, Save, Loader2 } from 'lucide-react';
 import { fetchMultipleApnSettings, saveMultipleApnSettings, MultipleApnResponse } from '../../utils/api';
 import { useAlert } from '../../utils/AlertContext';
 import { MultipleApnEditModal } from '../../components/MultipleApnEditModal';
-
-// Custom switch to match the specific black/white style in the provided design
-const BlackSquareSwitch = ({ isOn, onChange }: { isOn: boolean; onChange: () => void }) => (
-  <div 
-    className="flex border border-black w-14 h-8 cursor-pointer select-none"
-    onClick={onChange}
-  >
-    <div className={`flex-1 flex items-center justify-center transition-colors ${isOn ? 'bg-black text-white' : 'bg-white'}`}>
-      {isOn && <Check size={18} strokeWidth={3} />}
-    </div>
-    <div className={`flex-1 flex items-center justify-center transition-colors ${!isOn ? 'bg-black text-white' : 'bg-white'}`}>
-      {!isOn && <X size={18} strokeWidth={3} />}
-    </div>
-  </div>
-);
+import { SquareSwitch, PrimaryButton } from '../../components/UIComponents';
 
 interface ApnRow {
     id: string;
@@ -179,7 +166,7 @@ export const MultipleApnPage: React.FC = () => {
             {data.length > 0 ? data.map((row) => (
               <tr key={row.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                 <td className="py-3 pe-4">
-                  <BlackSquareSwitch isOn={row.isActive} onChange={() => toggleSwitch(row.id)} />
+                  <SquareSwitch isOn={row.isActive} onChange={() => toggleSwitch(row.id)} />
                 </td>
                 <td className="py-3 px-4 text-sm text-black font-medium">{row.apn}</td>
                 <td className="py-3 px-4 text-sm text-black font-medium">{row.configName}</td>
@@ -205,14 +192,13 @@ export const MultipleApnPage: React.FC = () => {
 
       {/* Footer Actions */}
       <div className="flex justify-end pt-8 mt-4 border-t border-gray-200">
-          <button 
+          <PrimaryButton 
             onClick={handleGlobalSave}
-            disabled={saving}
-            className="bg-white border-2 border-black text-black hover:bg-black hover:text-white font-bold py-2.5 px-12 text-sm transition-all rounded-[2px] shadow-sm uppercase tracking-wide flex items-center"
+            loading={saving}
+            icon={<Save size={18} />}
           >
-              {saving ? <Loader2 className="animate-spin w-4 h-4 me-2" /> : <Save size={18} className="me-2" />}
-              Save
-          </button>
+            Save
+          </PrimaryButton>
       </div>
 
       <MultipleApnEditModal 
