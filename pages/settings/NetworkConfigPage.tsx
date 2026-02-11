@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import { SquareSwitch } from '../../components/UIComponents';
+import { SquareSwitch, FormRow, PrimaryButton } from '../../components/UIComponents';
 import { fetchNetworkConfigInfo, setFlightMode, searchNetwork } from '../../utils/api';
 import { useAlert } from '../../utils/AlertContext';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Search } from 'lucide-react';
 
 export const NetworkConfigPage: React.FC = () => {
   const [flightMode, setFlightModeState] = useState(false);
@@ -15,7 +15,6 @@ export const NetworkConfigPage: React.FC = () => {
   useEffect(() => {
     const init = async () => {
         try {
-            // Fetch initial state using CMD 218
             const res = await fetchNetworkConfigInfo();
             if (res && res.success) {
                 setFlightModeState(res.flightMode === '1');
@@ -77,37 +76,26 @@ export const NetworkConfigPage: React.FC = () => {
 
   return (
     <div className="w-full animate-fade-in py-2">
-      <div className="space-y-0.5">
-        {/* Flight Mode Row */}
-        <div className="flex items-center justify-between py-3 border-b border-gray-100">
-           <label className="font-bold text-sm text-black">Flight Mode</label>
-           <div className="flex justify-end">
+      <div className="max-w-4xl">
+        <FormRow label="Flight Mode">
              <SquareSwitch 
                 isOn={flightMode} 
                 onChange={toggleFlightMode} 
                 isLoading={switching}
              />
-           </div>
-        </div>
+        </FormRow>
 
-        {/* Re-search Network Row */}
-        <div className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
-           <label className="font-bold text-sm text-black">Re-search Network</label>
-           <div className="flex justify-end">
-             <button 
+        <FormRow label="Re-search Network">
+             <PrimaryButton 
                 onClick={handleSearch}
                 disabled={flightMode || searchLoading}
-                className={`border-2 font-bold py-2 px-10 text-sm transition-all rounded-[2px] shadow-sm min-w-[120px] flex items-center justify-center
-                    ${(flightMode || searchLoading) 
-                        ? 'bg-[#f5f5f5] border-gray-300 text-gray-400 cursor-not-allowed' 
-                        : 'bg-[#eeeeee] border-black text-black hover:bg-black hover:text-white'
-                    }
-                `}
+                loading={searchLoading}
+                className="bg-[#f2f2f2] border-black text-black hover:bg-black hover:text-white"
+                icon={<Search size={16} />}
              >
-                {searchLoading ? <Loader2 className="animate-spin w-4 h-4" /> : 'Search'}
-             </button>
-           </div>
-        </div>
+                Search
+             </PrimaryButton>
+        </FormRow>
       </div>
     </div>
   );

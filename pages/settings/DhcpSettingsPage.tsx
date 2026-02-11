@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
-import { SquareSwitch } from '../../components/UIComponents';
+import { Save, Loader2 } from 'lucide-react';
+import { SquareSwitch, FormRow, StyledInput, PrimaryButton } from '../../components/UIComponents';
 import { fetchDhcpSettings, saveDhcpSettings, fetchIpReservation } from '../../utils/api';
 import { useAlert } from '../../utils/AlertContext';
 
@@ -63,21 +63,6 @@ const isValidIp = (ip: string) => {
     });
 };
 
-const FormRow = ({ label, children, required = false, error }: { label: string; children?: React.ReactNode; required?: boolean; error?: string }) => (
-  <div className="flex flex-col sm:flex-row sm:items-center py-4 border-b border-gray-100 last:border-0">
-    <div className="w-full sm:w-1/3 mb-2 sm:mb-0 self-start sm:self-center">
-      <label className="font-bold text-sm text-black">
-        {required && <span className="text-red-500 me-1">*</span>}
-        {label}
-      </label>
-    </div>
-    <div className="w-full sm:w-2/3">
-      {children}
-      {error && <div className="text-red-500 text-xs mt-1 font-bold">{error}</div>}
-    </div>
-  </div>
-);
-
 export const DhcpSettingsPage: React.FC = () => {
   const { showAlert } = useAlert();
   const [loading, setLoading] = useState(true);
@@ -113,7 +98,6 @@ export const DhcpSettingsPage: React.FC = () => {
                   setSecondaryDns(dhcpRes.vice_dns || '');
                   setIpPoolStart(dhcpRes.ipBegin || '');
                   setIpPoolEnd(dhcpRes.ipEnd || '');
-                  // Parse expireTime (e.g. "12h" -> "12")
                   const timeStr = dhcpRes.expireTime || '';
                   setLeaseTime(timeStr.replace(/[^0-9]/g, ''));
               }
@@ -147,7 +131,6 @@ export const DhcpSettingsPage: React.FC = () => {
           newErrors.lanIp = 'Invalid LAN IP address';
           hasError = true;
       } else if (reservedIps.includes(lanIp)) {
-          // Check if IP is in reserved list
           newErrors.lanIp = 'IP address conflicts with IP Reservation list';
           hasError = true;
       }
@@ -167,7 +150,7 @@ export const DhcpSettingsPage: React.FC = () => {
           isMaskValid = true;
       }
 
-      // Check Host IP Availability (Network/Broadcast address conflict)
+      // Check Host IP Availability
       if (!newErrors.lanIp && isMaskValid) {
           const ipNum = ipToLong(lanIp);
           const maskNum = ipToLong(subnetMask);
@@ -184,7 +167,6 @@ export const DhcpSettingsPage: React.FC = () => {
       }
 
       if (dhcpServer) {
-          // Validate IP Pool
           if (!ipPoolStart || !ipPoolEnd) {
               newErrors.ipPool = 'IP Address Pool range cannot be empty';
               hasError = true;
@@ -192,7 +174,6 @@ export const DhcpSettingsPage: React.FC = () => {
               newErrors.ipPool = 'Invalid IP Address in Pool';
               hasError = true;
           } else if (!newErrors.lanIp && isMaskValid) {
-               // Range Validation
                const range = getUsableIpRangeNumeric(lanIp, subnetMask);
                const startNum = ipToLong(ipPoolStart);
                const endNum = ipToLong(ipPoolEnd);
@@ -208,7 +189,6 @@ export const DhcpSettingsPage: React.FC = () => {
                }
           }
 
-          // Validate Lease Time
           if (!leaseTime) {
               newErrors.leaseTime = 'Lease Time cannot be empty';
               hasError = true;
@@ -220,7 +200,6 @@ export const DhcpSettingsPage: React.FC = () => {
               }
           }
 
-          // Optional DNS Validation
           if (primaryDns && !isValidIp(primaryDns)) {
               newErrors.primaryDns = 'Invalid Primary DNS';
               hasError = true;
@@ -246,7 +225,7 @@ export const DhcpSettingsPage: React.FC = () => {
               vice_dns: secondaryDns,
               ipBegin: ipPoolStart,
               ipEnd: ipPoolEnd,
-              expireTime: `${leaseTime}h` // Append 'h' as per requirement
+              expireTime: `${leaseTime}h` 
           };
 
           const res = await saveDhcpSettings(payload);
@@ -273,124 +252,96 @@ export const DhcpSettingsPage: React.FC = () => {
 
   return (
     <div className="w-full animate-fade-in py-6">
-      
-      {/* Form Section */}
       <div className="max-w-4xl">
-        
-        {/* LAN IP */}
         <FormRow label="LAN IP" required error={errors.lanIp}>
-            <input 
-                type="text" 
+            <StyledInput 
                 value={lanIp}
                 onChange={(e) => {
                     setLanIp(e.target.value);
                     if(errors.lanIp) setErrors(prev => ({...prev, lanIp: ''}));
                 }}
-                className={`w-full border px-3 py-2 text-sm text-black outline-none transition-all rounded-[2px] bg-white hover:border-gray-400 ${errors.lanIp ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange'}`}
+                hasError={!!errors.lanIp}
             />
         </FormRow>
 
-        {/* Subnet Mask */}
         <FormRow label="Subnet Mask" required error={errors.subnetMask}>
-            <input 
-                type="text" 
+            <StyledInput 
                 value={subnetMask}
                 onChange={(e) => {
                     setSubnetMask(e.target.value);
                     if(errors.subnetMask) setErrors(prev => ({...prev, subnetMask: ''}));
                 }}
-                className={`w-full border px-3 py-2 text-sm text-black outline-none transition-all rounded-[2px] bg-white hover:border-gray-400 ${errors.subnetMask ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange'}`}
+                hasError={!!errors.subnetMask}
             />
         </FormRow>
 
-        {/* DHCP Server Switch */}
-        <div className="flex flex-col sm:flex-row sm:items-center py-4 border-b border-gray-100">
-            <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
-                <label className="font-bold text-sm text-black">DHCP Server</label>
-            </div>
-            <div className="w-full sm:w-2/3 flex justify-end">
-                <SquareSwitch isOn={dhcpServer} onChange={() => setDhcpServer(!dhcpServer)} />
-            </div>
-        </div>
+        <FormRow label="DHCP Server">
+             <SquareSwitch isOn={dhcpServer} onChange={() => setDhcpServer(!dhcpServer)} />
+        </FormRow>
 
-        {/* DHCP Dependent Fields */}
         {dhcpServer && (
             <div className="animate-fade-in">
-                {/* Primary DNS */}
                 <FormRow label="Primary DNS" error={errors.primaryDns}>
-                    <input 
-                        type="text" 
+                    <StyledInput 
                         value={primaryDns}
                         onChange={(e) => setPrimaryDns(e.target.value)}
-                        className={`w-full border px-3 py-2 text-sm text-black outline-none transition-all rounded-[2px] bg-white hover:border-gray-400 ${errors.primaryDns ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange'}`}
+                        hasError={!!errors.primaryDns}
                     />
                 </FormRow>
 
-                {/* Secondary DNS */}
                 <FormRow label="Secondary DNS" error={errors.secondaryDns}>
-                    <input 
-                        type="text" 
+                    <StyledInput 
                         value={secondaryDns}
                         onChange={(e) => setSecondaryDns(e.target.value)}
-                        className={`w-full border px-3 py-2 text-sm text-black outline-none transition-all rounded-[2px] bg-white hover:border-gray-400 ${errors.secondaryDns ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange'}`}
+                        hasError={!!errors.secondaryDns}
                     />
                 </FormRow>
 
-                {/* IP Address Pool */}
                 <FormRow label="IP Address Pool" required error={errors.ipPool}>
                     <div className="flex items-center gap-2">
-                        <input 
-                            type="text" 
+                        <StyledInput 
                             value={ipPoolStart}
                             onChange={(e) => {
                                 setIpPoolStart(e.target.value);
                                 if(errors.ipPool) setErrors(prev => ({...prev, ipPool: ''}));
                             }}
-                            className={`w-full border px-3 py-2 text-sm text-black outline-none transition-all rounded-[2px] bg-white hover:border-gray-400 ${errors.ipPool ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange'}`}
+                            hasError={!!errors.ipPool}
                         />
                         <span className="text-black">-</span>
-                        <input 
-                            type="text" 
+                        <StyledInput 
                             value={ipPoolEnd}
                             onChange={(e) => {
                                 setIpPoolEnd(e.target.value);
                                 if(errors.ipPool) setErrors(prev => ({...prev, ipPool: ''}));
                             }}
-                            className={`w-full border px-3 py-2 text-sm text-black outline-none transition-all rounded-[2px] bg-white hover:border-gray-400 ${errors.ipPool ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange'}`}
+                            hasError={!!errors.ipPool}
                         />
                     </div>
                 </FormRow>
 
-                {/* Lease Time */}
                 <FormRow label="Lease Time" required error={errors.leaseTime}>
-                    <div className="relative w-full">
-                        <input 
-                            type="text" 
-                            value={leaseTime}
-                            onChange={(e) => {
-                                const val = e.target.value;
-                                if (/^\d*$/.test(val)) setLeaseTime(val);
-                                if(errors.leaseTime) setErrors(prev => ({...prev, leaseTime: ''}));
-                            }}
-                            className={`w-full border px-3 py-2 text-sm text-black outline-none transition-all rounded-[2px] bg-white pr-16 hover:border-gray-400 ${errors.leaseTime ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange'}`}
-                        />
-                        <div className="absolute right-0 top-0 bottom-0 flex items-center justify-center px-4 bg-[#f3f4f6] border-l border-gray-300 text-gray-500 text-sm rounded-r-[2px]">
-                            Hour
-                        </div>
-                    </div>
+                    <StyledInput 
+                        value={leaseTime}
+                        onChange={(e) => {
+                            const val = e.target.value;
+                            if (/^\d*$/.test(val)) setLeaseTime(val);
+                            if(errors.leaseTime) setErrors(prev => ({...prev, leaseTime: ''}));
+                        }}
+                        hasError={!!errors.leaseTime}
+                        suffix="Hour"
+                    />
                 </FormRow>
             </div>
         )}
 
-        {/* Form Save Button */}
         <div className="flex justify-end pt-8 pb-2">
-            <button 
+            <PrimaryButton 
                 onClick={handleSave}
-                disabled={saving}
-                className="bg-[#eeeeee] border-2 border-black text-black hover:bg-white font-bold py-1.5 px-10 text-sm transition-all rounded-[2px] shadow-sm min-w-[120px] flex items-center justify-center"
+                loading={saving}
+                icon={<Save size={18} />}
             >
-                {saving ? <Loader2 className="animate-spin w-4 h-4" /> : 'Save'}
-            </button>
+                Save
+            </PrimaryButton>
         </div>
 
       </div>

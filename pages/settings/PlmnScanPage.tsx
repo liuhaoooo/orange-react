@@ -1,8 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { scanPlmnNetwork, getPlmnList, apiRequest } from '../../utils/api';
 import { useAlert } from '../../utils/AlertContext';
 import { useGlobalState } from '../../utils/GlobalStateContext';
+import { PrimaryButton } from '../../components/UIComponents';
 
 interface PlmnItem {
     status: string;
@@ -51,10 +53,8 @@ export const PlmnScanPage: React.FC = () => {
       return status;
   };
 
-  // Helper to parse response string
   const parseList = (rawString: string): PlmnItem[] => {
       if (!rawString) return [];
-      // Format: "1,CHN-TELECOM,CTCC,46011,7|3,CHINA BROADNET,CBN,46015,7"
       const rows = rawString.split('|');
       return rows.map(row => {
           const cols = row.split(',');
@@ -65,7 +65,7 @@ export const PlmnScanPage: React.FC = () => {
               plmn: cols[3] || '',
               network: cols[4] || ''
           };
-      }).filter(item => item.plmn); // Filter out empty lines if any
+      }).filter(item => item.plmn); 
   };
 
   useEffect(() => {
@@ -83,7 +83,6 @@ export const PlmnScanPage: React.FC = () => {
   }, []);
 
   const handleScan = async () => {
-      // Check SIM Status
       const simStatus = globalData.statusInfo?.sim_status;
       if (simStatus !== '1') {
           showAlert('SIM card is not ready. Cannot scan.', 'warning');
@@ -117,15 +116,12 @@ export const PlmnScanPage: React.FC = () => {
   };
 
   const handleSelect = async (row: PlmnItem) => {
-      // Prevent selection if loading, already selected, or unavailable
       if (loading || processingKey || row.status === '2' || row.status === '0' || row.status === '3') return;
 
       const key = `${row.plmn}_${row.network}`;
       setProcessingKey(key);
 
       try {
-          // Payload: {"cmd":228,"plmn_select_cmd":"4","plmn":"46011","act":"7", ...}
-          // Using apiRequest directly as requested to avoid changing api.ts
           const res = await apiRequest(228, 'POST', { 
               plmn_select_cmd: '4', 
               plmn: row.plmn, 
@@ -134,14 +130,12 @@ export const PlmnScanPage: React.FC = () => {
           
           if (res && res.success) {
               showAlert('Network registered successfully', 'success');
-              // Optimistically update the list
               setList(prev => prev.map(item => {
-                  // Ensure specific match for multi-RAT scenarios
                   if (item.plmn === row.plmn && item.network === row.network) {
-                      return { ...item, status: '2' }; // Set new current
+                      return { ...item, status: '2' }; 
                   }
                   if (item.status === '2') {
-                      return { ...item, status: '1' }; // Demote old current to available
+                      return { ...item, status: '1' }; 
                   }
                   return item;
               }));
@@ -227,22 +221,15 @@ export const PlmnScanPage: React.FC = () => {
         </table>
       </div>
 
-      {/* Footer Actions */}
       <div className="flex justify-end pt-4 border-t border-gray-200 mt-4">
-          <button 
+          <PrimaryButton 
             onClick={handleScan}
             disabled={loading || !!processingKey}
-            className={`
-                border-2 border-black font-bold py-2 px-8 text-sm transition-all rounded-[2px] shadow-sm flex items-center
-                ${(loading || !!processingKey)
-                    ? 'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed' 
-                    : 'bg-[#eeeeee] text-black hover:bg-black hover:text-white'
-                }
-            `}
+            loading={loading}
+            className="bg-[#eeeeee] border-black text-black hover:bg-black hover:text-white"
           >
-              {loading && <Loader2 className="animate-spin w-4 h-4 me-2" />}
               PLMN scan
-          </button>
+          </PrimaryButton>
       </div>
     </div>
   );

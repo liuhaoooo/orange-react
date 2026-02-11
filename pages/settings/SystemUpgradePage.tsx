@@ -4,6 +4,7 @@ import { FileText, Loader2 } from 'lucide-react';
 import { ConfirmModal } from '../../components/ConfirmModal';
 import { useAlert } from '../../utils/AlertContext';
 import { uploadSystemUpdateFile, startSystemUpgrade } from '../../utils/api';
+import { PrimaryButton } from '../../components/UIComponents';
 
 export const SystemUpgradePage: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -55,7 +56,6 @@ export const SystemUpgradePage: React.FC = () => {
       setIsUpgrading(true);
 
       try {
-          // Step 1: Upload
           const uploadRes = await uploadSystemUpdateFile(file);
           
           if (!uploadRes.success) {
@@ -64,7 +64,6 @@ export const SystemUpgradePage: React.FC = () => {
               return;
           }
 
-          // Step 2: Trigger Upgrade
           try {
               const upgradeRes = await startSystemUpgrade(file.name);
               
@@ -72,13 +71,9 @@ export const SystemUpgradePage: React.FC = () => {
                    showAlert(upgradeRes.message || 'Upgrade failed', 'error', 'Upgrade Failed');
                    setIsUpgrading(false);
               } else {
-                   // Success or timeout (device rebooting)
-                   // The device will restart, so we show a success message.
                    showAlert('Upgrade started. The device will reboot automatically.', 'success', 'Upgrading');
-                   // We don't turn off upgrading state to prevent further interactions
               }
           } catch (e) {
-              // Network error likely due to reboot
               console.log("Upgrade trigger error (likely reboot)", e);
               showAlert('Upgrade started. The device is rebooting...', 'success', 'Upgrading');
           }
@@ -128,13 +123,13 @@ export const SystemUpgradePage: React.FC = () => {
 
       {file && (
         <div className="flex justify-end mt-8 animate-fade-in">
-           <button 
-                onClick={(e) => { e.stopPropagation(); handleUpgradeClick(); }}
+            <PrimaryButton 
+                onClick={(e) => { e?.stopPropagation(); handleUpgradeClick(); }}
                 disabled={isUpgrading}
-                className="bg-white border-2 border-black text-black hover:bg-black hover:text-white font-bold py-2.5 px-12 text-sm transition-all rounded-[2px] shadow-sm uppercase tracking-wide flex items-center min-w-[140px] justify-center"
-           >
-              {isUpgrading ? <Loader2 className="animate-spin w-5 h-5" /> : 'Upgrade'}
-           </button>
+                loading={isUpgrading}
+            >
+                Upgrade
+            </PrimaryButton>
         </div>
       )}
 

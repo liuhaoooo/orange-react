@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, Pencil, Trash2, Loader2, Save } from 'lucide-react';
+import { Pencil, Trash2, Loader2 } from 'lucide-react';
 import { fetchMacFilter, saveMacFilter, checkWifiStatus } from '../../utils/api';
 import { MacFilterRule } from '../../utils/services/types';
 import { useAlert } from '../../utils/AlertContext';
 import { MacFilterEditModal } from '../../components/MacFilterEditModal';
+import { StyledSelect, PrimaryButton } from '../../components/UIComponents';
 
 interface MacFilteringPanelProps {
     subcmd: string; // '1' for 2.4G, '0' for 5G
@@ -23,7 +24,6 @@ export const MacFilteringPanel: React.FC<MacFilteringPanelProps> = ({ subcmd }) 
   const [mode, setMode] = useState('close');
   const [rules, setRules] = useState<MacFilterRule[]>([]);
   
-  // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
@@ -32,7 +32,6 @@ export const MacFilteringPanel: React.FC<MacFilteringPanelProps> = ({ subcmd }) 
           try {
               const res = await fetchMacFilter(subcmd);
               if (res && (res.success || res.cmd === 278)) {
-                  // Optimization 1: Handle missing 'datas' field (normal empty state)
                   if (res.datas) {
                       setMode(res.datas.macfilter || 'close');
                       setRules(res.datas.maclist || []);
@@ -52,7 +51,6 @@ export const MacFilteringPanel: React.FC<MacFilteringPanelProps> = ({ subcmd }) 
   }, [subcmd, showAlert]);
 
   const handleAddClick = () => {
-      // Optimization 2: Max 32 rules check
       if (rules.length >= 32) {
           showAlert('The maximum number of entries is 32.', 'warning');
           return;
@@ -76,10 +74,8 @@ export const MacFilteringPanel: React.FC<MacFilteringPanelProps> = ({ subcmd }) 
 
   const handleModalSave = (rule: MacFilterRule) => {
       if (editingIndex !== null) {
-          // Edit
           setRules(prev => prev.map((r, i) => i === editingIndex ? rule : r));
       } else {
-          // Add
           setRules(prev => [...prev, rule]);
       }
   };
@@ -87,7 +83,6 @@ export const MacFilteringPanel: React.FC<MacFilteringPanelProps> = ({ subcmd }) 
   const handleGlobalSave = async () => {
       setSaving(true);
       try {
-          // Optimization 4: Check WiFi Status before saving
           const statusRes = await checkWifiStatus();
           if (statusRes && statusRes.wifiStatus !== '1') {
               showAlert('Wi-Fi is restarting, please try again later.', 'warning');
@@ -119,33 +114,24 @@ export const MacFilteringPanel: React.FC<MacFilteringPanelProps> = ({ subcmd }) 
 
   return (
     <div className="w-full animate-fade-in py-2">
-      {/* Top Control */}
       <div className="flex justify-between items-center mb-6">
         <label className="font-bold text-sm text-black">Filtering Rules:</label>
-        <div className="relative w-48">
-            <select
+        <div className="w-48">
+            <StyledSelect
                 value={mode}
                 onChange={(e) => setMode(e.target.value)}
-                className="w-full border border-gray-200 px-3 py-2 text-sm text-gray-600 outline-none focus:border-orange transition-all rounded-[2px] appearance-none bg-white cursor-pointer"
-            >
-                {FILTER_OPTIONS.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.name}</option>
-                ))}
-            </select>
-            <ChevronDown size={16} className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400" />
+                options={FILTER_OPTIONS.map(o => ({ label: o.name, value: o.value }))}
+            />
         </div>
       </div>
 
-      {/* Table */}
       <div className="w-full border-t border-gray-100">
-          {/* Header */}
           <div className="grid grid-cols-12 py-4 border-b border-gray-100">
               <div className="col-span-2 ps-4 font-bold text-sm text-black">Index</div>
               <div className="col-span-5 font-bold text-sm text-black">MAC Address</div>
               <div className="col-span-5 font-bold text-sm text-black">Remark</div>
           </div>
 
-          {/* Rows */}
           {rules.map((rule, index) => (
               <div key={index} className="grid grid-cols-12 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors items-center">
                   <div className="col-span-2 ps-4 text-sm text-black font-medium">{index + 1}</div>
@@ -172,27 +158,25 @@ export const MacFilteringPanel: React.FC<MacFilteringPanelProps> = ({ subcmd }) 
           )}
       </div>
 
-      {/* Footer Buttons */}
       <div className="flex justify-end mt-12 space-x-4">
-            <button 
+            <PrimaryButton 
                 onClick={handleAddClick}
-                className="bg-[#eeeeee] border-2 border-black text-black hover:bg-white font-bold py-2.5 px-8 text-sm transition-all rounded-[2px] shadow-sm min-w-[120px]"
+                className="bg-[#eeeeee] border-black text-black hover:bg-white"
             >
                 Add Rule
-            </button>
-            <button 
+            </PrimaryButton>
+            <PrimaryButton 
                 onClick={handleClearAll}
-                className="bg-[#eeeeee] border-2 border-black text-black hover:bg-white font-bold py-2.5 px-8 text-sm transition-all rounded-[2px] shadow-sm min-w-[120px]"
+                className="bg-[#eeeeee] border-black text-black hover:bg-white"
             >
                 Clear All
-            </button>
-            <button 
+            </PrimaryButton>
+            <PrimaryButton 
                 onClick={handleGlobalSave}
-                disabled={saving}
-                className="bg-white border-2 border-black text-black hover:bg-black hover:text-white font-bold py-2.5 px-12 text-sm transition-all rounded-[2px] shadow-sm min-w-[120px] flex items-center justify-center"
+                loading={saving}
             >
-                {saving ? <Loader2 className="animate-spin w-4 h-4 me-2" /> : 'Save'}
-            </button>
+                Save
+            </PrimaryButton>
       </div>
 
       <MacFilterEditModal 

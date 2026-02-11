@@ -5,6 +5,7 @@ import { fetchRoutingSettings, saveRoutingSettings, applyRoutingSettings, fetchM
 import { useAlert } from '../../utils/AlertContext';
 import { RoutingEditModal } from '../../components/RoutingEditModal';
 import { useGlobalState } from '../../utils/GlobalStateContext';
+import { PrimaryButton } from '../../components/UIComponents';
 
 export const RoutingPage: React.FC = () => {
   const { showAlert } = useAlert();
@@ -13,7 +14,6 @@ export const RoutingPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [rules, setRules] = useState<RoutingRule[]>([]);
   
-  // Interface Options
   const [interfaceOptions, setInterfaceOptions] = useState<{label: string, value: string}[]>([
       { label: 'WAN', value: 'WAN' },
       { label: 'LAN', value: 'LAN' },
@@ -22,7 +22,6 @@ export const RoutingPage: React.FC = () => {
       { label: 'Main APN', value: 'APN' },
   ]);
 
-  // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
@@ -50,7 +49,6 @@ export const RoutingPage: React.FC = () => {
              ];
              const num = parseInt(apnRes.multiApnNum || '0', 10);
              for (let i = 1; i <= num; i++) {
-                 // Check if active (apnSwitch{i} == '1')
                  if (apnRes[`apnSwitch${i}`] === '1') {
                      arr.push({ label: `APN${i}`, value: `APN${i}` });
                  }
@@ -101,7 +99,6 @@ export const RoutingPage: React.FC = () => {
   const handleGlobalSave = async () => {
     setSaving(true);
     try {
-      // Calculate netmaskBits for payload
       const processedRules = rules.map(r => {
          const bits = r.netmask.split('.').reduce((c, octet) => {
              const n = parseInt(octet, 10);
@@ -113,7 +110,6 @@ export const RoutingPage: React.FC = () => {
       const res = await saveRoutingSettings(processedRules);
       
       if (res && (res.success || res.result === 'success')) {
-        // Apply settings after successful save
         try {
             const applyRes = await applyRoutingSettings();
             if (applyRes && (applyRes.success || applyRes.result === 'success')) {
@@ -147,10 +143,8 @@ export const RoutingPage: React.FC = () => {
   return (
     <div className="w-full animate-fade-in py-2">
       
-      {/* Table Container - Wrapped in overflow-x-auto for horizontal scroll */}
       <div className="w-full border-t border-gray-100 overflow-x-auto">
         <div className="min-w-[700px]">
-            {/* Header */}
             <div className="grid grid-cols-12 py-4 border-b border-gray-100">
                 <div className="col-span-2 ps-4 font-bold text-sm text-black">State</div>
                 <div className={`${hideGateway ? 'col-span-3' : 'col-span-2'} font-bold text-sm text-black`}>Interface Name</div>
@@ -160,7 +154,6 @@ export const RoutingPage: React.FC = () => {
                 <div className="col-span-1"></div>
             </div>
 
-            {/* Rows */}
             {rules.length > 0 ? rules.map((rule, index) => (
                 <div key={index} className="grid grid-cols-12 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors items-center">
                 <div className="col-span-2 ps-4 text-sm text-black font-medium">{rule.valid ? 'Valid' : 'Invalid'}</div>
@@ -189,7 +182,6 @@ export const RoutingPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Pagination */}
       <div className="flex justify-end items-center mt-8 space-x-4">
         <div className="relative">
             <select className="border border-gray-200 py-1.5 ps-3 pe-8 text-sm text-gray-600 rounded-[2px] appearance-none bg-white outline-none cursor-pointer hover:border-gray-300">
@@ -212,27 +204,25 @@ export const RoutingPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Footer Buttons */}
       <div className="flex justify-end mt-12 space-x-4">
-        <button 
+        <PrimaryButton 
             onClick={handleAddClick}
-            className="bg-[#eeeeee] border-2 border-black text-black hover:bg-white font-bold py-2.5 px-8 text-sm transition-all rounded-[2px] shadow-sm min-w-[120px]"
+            className="bg-[#eeeeee] border-black text-black hover:bg-white"
         >
             Add Rule
-        </button>
-        <button 
+        </PrimaryButton>
+        <PrimaryButton 
             onClick={handleClearAll}
-            className="bg-[#eeeeee] border-2 border-black text-black hover:bg-white font-bold py-2.5 px-8 text-sm transition-all rounded-[2px] shadow-sm min-w-[120px]"
+            className="bg-[#eeeeee] border-black text-black hover:bg-white"
         >
             Clear All
-        </button>
-        <button 
+        </PrimaryButton>
+        <PrimaryButton 
             onClick={handleGlobalSave}
-            disabled={saving}
-            className="bg-white border-2 border-black text-black hover:bg-black hover:text-white font-bold py-2.5 px-8 text-sm transition-all rounded-[2px] shadow-sm min-w-[120px] flex items-center justify-center"
+            loading={saving}
         >
-             {saving ? <Loader2 className="animate-spin w-4 h-4 me-2" /> : 'Save'}
-        </button>
+             Save
+        </PrimaryButton>
       </div>
 
       <RoutingEditModal 

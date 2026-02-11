@@ -1,11 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { Save, Check, Loader2 } from 'lucide-react';
-import { SquareSwitch } from '../../components/UIComponents';
+import { SquareSwitch, PrimaryButton } from '../../components/UIComponents';
 import { fetchLockBandSettings, saveLockBandSettings, LockBandSettings } from '../../utils/api';
 import { useAlert } from '../../utils/AlertContext';
 
-// Custom Checkbox
 const BandCheckbox: React.FC<{ label: string; checked: boolean; onChange: () => void }> = ({ label, checked, onChange }) => (
   <div 
     className="flex items-center cursor-pointer select-none group"
@@ -23,28 +22,22 @@ export const LockBandPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Available Bands (derived from all_band_X)
   const [all3g, setAll3g] = useState<string[]>([]);
   const [all4g, setAll4g] = useState<string[]>([]);
   const [all5g, setAll5g] = useState<string[]>([]);
 
-  // Selected Bands (names of checked bands)
   const [sel3g, setSel3g] = useState<string[]>([]);
   const [sel4g, setSel4g] = useState<string[]>([]);
   const [sel5g, setSel5g] = useState<string[]>([]);
 
-  // Switches
   const [sw3g, setSw3g] = useState(false);
   const [sw4g, setSw4g] = useState(false);
   const [sw5g, setSw5g] = useState(false);
 
-  // Error States
   const [err3g, setErr3g] = useState('');
   const [err4g, setErr4g] = useState('');
   const [err5g, setErr5g] = useState('');
 
-  // Helper: Convert Hex String to Band Array
-  // Logic: "Read from back (right), 1st bit=1 -> Band1, 2nd bit=1 -> Band2..."
   const hexToBands = (hex?: string): string[] => {
     if (!hex || hex === '0') return [];
     try {
@@ -58,7 +51,6 @@ export const LockBandPage: React.FC = () => {
             n >>= 1n;
             index++;
         }
-        // Sort numerically
         return bands.sort((a, b) => {
             const numA = parseInt(a.replace('Band', ''));
             const numB = parseInt(b.replace('Band', ''));
@@ -70,7 +62,6 @@ export const LockBandPage: React.FC = () => {
     }
   };
 
-  // Helper: Convert Band Array to Hex String
   const bandsToHex = (bands: string[]): string => {
     if (bands.length === 0) return "0";
     let n = 0n;
@@ -88,17 +79,14 @@ export const LockBandPage: React.FC = () => {
         try {
             const res = await fetchLockBandSettings();
             if (res && (res.success || res.success === undefined)) {
-                // Parse Available Bands using `all_band_X` as per instructions
                 setAll3g(hexToBands(res.all_band_3g));
                 setAll4g(hexToBands(res.all_band_4g));
                 setAll5g(hexToBands(res.all_band_5g));
 
-                // Parse Selected Bands using `band_X_mask` as per instructions
                 setSel3g(hexToBands(res.band_3g_mask));
                 setSel4g(hexToBands(res.band_4g_mask));
                 setSel5g(hexToBands(res.band_5g_mask));
 
-                // Parse Switches using `band_X_switch` as per instructions
                 setSw3g(res.band_3g_switch === '1');
                 setSw4g(res.band_4g_switch === '1');
                 setSw5g(res.band_5g_switch === '1');
@@ -114,7 +102,6 @@ export const LockBandPage: React.FC = () => {
   }, [showAlert]);
 
   const toggleBand = (band: string, currentList: string[], setter: React.Dispatch<React.SetStateAction<string[]>>) => {
-    // Clear error when user changes selection
     setErr3g('');
     setErr4g('');
     setErr5g('');
@@ -139,7 +126,6 @@ export const LockBandPage: React.FC = () => {
       setErr4g('');
       setErr5g('');
 
-      // Validation: If a switch is ON, its bands must NOT be empty.
       let hasError = false;
       if (sw3g && sel3g.length === 0) {
           setErr3g('Please select at least one 3G Band.');
@@ -194,7 +180,6 @@ export const LockBandPage: React.FC = () => {
   return (
     <div className="w-full animate-fade-in py-2">
       
-      {/* 3G Section */}
       {all3g.length > 0 && (
       <div className="mb-10">
           <div className="flex items-center justify-between mb-8">
@@ -221,7 +206,6 @@ export const LockBandPage: React.FC = () => {
       </div>
       )}
 
-      {/* 4G Section */}
       {all4g.length > 0 && (
       <div className="mb-10">
           <div className="flex items-center justify-between mb-8">
@@ -248,7 +232,6 @@ export const LockBandPage: React.FC = () => {
       </div>
       )}
 
-      {/* 5G Section */}
       {all5g.length > 0 && (
       <div className="mb-10">
           <div className="flex items-center justify-between mb-8">
@@ -275,18 +258,15 @@ export const LockBandPage: React.FC = () => {
       </div>
       )}
 
-      {/* Footer Actions */}
       <div className="flex justify-end pt-12 mt-4">
-            <button 
+            <PrimaryButton 
                 onClick={handleSave}
-                disabled={saving}
-                className="bg-white border-2 border-black text-black hover:bg-black hover:text-white font-bold py-2.5 px-12 text-sm transition-all rounded-[2px] shadow-sm uppercase tracking-wide flex items-center"
+                loading={saving}
+                icon={<Save size={18} />}
             >
-                {saving ? <Loader2 className="animate-spin w-4 h-4 me-2" /> : <Save size={18} className="me-2" />}
                 Save
-            </button>
+            </PrimaryButton>
       </div>
-
     </div>
   );
 };

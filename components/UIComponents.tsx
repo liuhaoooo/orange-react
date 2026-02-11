@@ -90,16 +90,16 @@ export const BatteryStatusIcon: React.FC<{
 
 // --- Standardized Form Components ---
 
-export const FormRow = ({ label, children, required = false, error, className = "" }: { label: string; children?: React.ReactNode; required?: boolean; error?: string; className?: string }) => (
-  <div className={`flex flex-col sm:flex-row sm:items-center py-4 border-b border-gray-100 last:border-0 ${className}`}>
-    <div className="w-full sm:w-1/3 mb-2 sm:mb-0">
+export const FormRow = ({ label, children, required = false, error, className = "", alignTop = false }: { label: string; children?: React.ReactNode; required?: boolean; error?: string; className?: string; alignTop?: boolean }) => (
+  <div className={`flex flex-col sm:flex-row ${alignTop ? 'items-start' : 'sm:items-center'} py-4 border-b border-gray-100 last:border-0 ${className}`}>
+    <div className={`w-full sm:w-1/3 mb-2 sm:mb-0 ${alignTop ? 'pt-2' : ''}`}>
       <label className="font-bold text-sm text-black">
         {required && <span className="text-orange me-1">*</span>}
         {label}
       </label>
     </div>
-    <div className="w-full sm:w-2/3 flex flex-col items-end">
-         <div className="w-full flex justify-start sm:justify-end items-center">
+    <div className={`w-full sm:w-2/3 flex flex-col ${alignTop ? 'justify-start' : 'justify-center'} items-end`}>
+         <div className={`w-full flex ${alignTop ? 'items-start' : 'items-center'} justify-start sm:justify-end`}>
             {children}
          </div>
          {error && <div className="text-red-500 text-xs mt-1 w-full text-end">{error}</div>}
@@ -107,23 +107,37 @@ export const FormRow = ({ label, children, required = false, error, className = 
   </div>
 );
 
-export const StyledInput = ({ hasError, className = "", ...props }: React.InputHTMLAttributes<HTMLInputElement> & { hasError?: boolean }) => (
-  <input
+export const StyledInput = ({ hasError, suffix, className = "", ...props }: React.InputHTMLAttributes<HTMLInputElement> & { hasError?: boolean; suffix?: string }) => (
+  <div className={`relative w-full ${className}`}>
+    <input
+      {...props}
+      className={`w-full border px-3 py-2 text-sm text-black outline-none transition-all rounded-[2px] bg-white placeholder-gray-400 h-10 ${hasError ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange focus:ring-1 focus:ring-orange'} ${suffix ? 'pe-16' : ''} ${props.disabled ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`}
+    />
+    {suffix && (
+      <div className="absolute right-0 top-0 bottom-0 flex items-center justify-center px-4 bg-[#f3f4f6] border-l border-gray-300 text-gray-500 text-sm rounded-r-[2px]">
+          {suffix}
+      </div>
+    )}
+  </div>
+);
+
+export const StyledTextarea = ({ hasError, className = "", ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { hasError?: boolean }) => (
+  <textarea
     {...props}
-    className={`w-full border px-3 py-2 text-sm text-black outline-none transition-all rounded-[2px] bg-white placeholder-gray-400 h-10 ${hasError ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange focus:ring-1 focus:ring-orange'} ${className}`}
+    className={`w-full border px-3 py-2 text-sm text-black outline-none transition-all rounded-[2px] bg-white min-h-[120px] resize-y font-sans ${hasError ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange focus:ring-1 focus:ring-orange'} ${className}`}
   />
 );
 
-export const StyledSelect = ({ value, onChange, options, className = "", disabled = false }: { value: string, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void, options: { name: string, value: string }[], className?: string, disabled?: boolean }) => (
+export const StyledSelect = ({ value, onChange, options, className = "", disabled = false, hasError = false }: { value: string, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void, options: { label?: string; name?: string; value: string }[], className?: string, disabled?: boolean, hasError?: boolean }) => (
   <div className={`relative w-full ${className}`}>
     <select
       value={value}
       onChange={onChange}
       disabled={disabled}
-      className={`w-full border border-gray-300 px-3 py-2 text-sm text-gray-600 outline-none focus:border-orange focus:ring-1 focus:ring-orange transition-all rounded-[2px] appearance-none bg-white cursor-pointer h-10 ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+      className={`w-full border px-3 py-2 text-sm text-black outline-none transition-all rounded-[2px] appearance-none bg-white cursor-pointer h-10 ${hasError ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-orange focus:ring-1 focus:ring-orange'} ${disabled ? 'bg-gray-100 cursor-not-allowed text-gray-500' : ''}`}
     >
       {options.map(opt => (
-        <option key={opt.value} value={opt.value}>{opt.name}</option>
+        <option key={opt.value} value={opt.value}>{opt.label || opt.name}</option>
       ))}
     </select>
     <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400">
@@ -132,7 +146,26 @@ export const StyledSelect = ({ value, onChange, options, className = "", disable
   </div>
 );
 
-export const PrimaryButton = ({ onClick, disabled, loading, children, className = "", icon }: { onClick?: () => void; disabled?: boolean; loading?: boolean; children: React.ReactNode; className?: string; icon?: React.ReactNode }) => (
+export const RadioGroup = ({ options, value, onChange, className = "" }: { options: { label: string; value: any }[], value: any, onChange: (val: any) => void, className?: string }) => (
+  <div className={`flex flex-wrap gap-4 sm:gap-6 items-center ${className}`}>
+    {options.map((opt) => (
+      <label key={opt.label} className="flex items-center cursor-pointer select-none group">
+        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center me-2 transition-colors shrink-0 ${value === opt.value ? 'border-black' : 'border-gray-300 group-hover:border-gray-400'}`}>
+            {value === opt.value && <div className="w-2.5 h-2.5 rounded-full bg-black"></div>}
+        </div>
+        <span className={`text-sm font-bold ${value === opt.value ? 'text-black' : 'text-gray-500 group-hover:text-gray-700'}`}>{opt.label}</span>
+        <input 
+            type="radio" 
+            className="hidden" 
+            checked={value === opt.value} 
+            onChange={() => onChange(opt.value)} 
+        />
+      </label>
+    ))}
+  </div>
+);
+
+export const PrimaryButton = ({ onClick, disabled, loading, children, className = "", icon }: { onClick?: (e?: any) => void; disabled?: boolean; loading?: boolean; children: React.ReactNode; className?: string; icon?: React.ReactNode }) => (
     <button
         onClick={onClick}
         disabled={disabled || loading}

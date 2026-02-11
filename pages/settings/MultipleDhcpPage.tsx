@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { ChevronDown, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { PrimaryButton } from '../../components/UIComponents';
 
 interface DhcpRule {
   id: string;
@@ -18,9 +19,7 @@ export const MultipleDhcpPage: React.FC = () => {
   return (
     <div className="w-full animate-fade-in py-6">
       
-      {/* Table Section */}
       <div className="w-full border-t border-gray-100">
-          {/* Header */}
           <div className="grid grid-cols-12 py-4 border-b border-gray-100">
               <div className="col-span-3 ps-4 font-bold text-sm text-black">Bridge</div>
               <div className="col-span-3 font-bold text-sm text-black">LAN IP</div>
@@ -28,7 +27,6 @@ export const MultipleDhcpPage: React.FC = () => {
               <div className="col-span-3 font-bold text-sm text-black">DHCP Server</div>
           </div>
 
-          {/* Rows */}
           {rules.map((rule) => (
               <div key={rule.id} className="grid grid-cols-12 py-6 border-b border-gray-100 hover:bg-gray-50 transition-colors items-center">
                   <div className="col-span-3 ps-4 text-sm text-black font-medium">{rule.bridge}</div>
@@ -52,7 +50,6 @@ export const MultipleDhcpPage: React.FC = () => {
           )}
       </div>
 
-      {/* Pagination */}
       <div className="flex justify-end items-center mt-6 space-x-4">
           <div className="relative">
               <select className="border border-gray-200 py-1.5 ps-3 pe-8 text-sm text-gray-600 rounded-[2px] appearance-none bg-white outline-none cursor-pointer hover:border-gray-300">
@@ -75,14 +72,13 @@ export const MultipleDhcpPage: React.FC = () => {
           </div>
       </div>
 
-      {/* Bottom Buttons */}
       <div className="flex justify-end mt-8 space-x-4">
-            <button className="bg-[#eeeeee] border-2 border-black text-black hover:bg-white font-bold py-2.5 px-8 text-sm transition-all rounded-[2px] shadow-sm min-w-[120px]">
+            <PrimaryButton className="bg-[#eeeeee] border-black text-black hover:bg-white">
                 Add Rule
-            </button>
-            <button className="bg-[#eeeeee] border-2 border-black text-black hover:bg-white font-bold py-2.5 px-8 text-sm transition-all rounded-[2px] shadow-sm min-w-[120px]">
+            </PrimaryButton>
+            <PrimaryButton className="bg-[#eeeeee] border-black text-black hover:bg-white">
                 Save
-            </button>
+            </PrimaryButton>
       </div>
     </div>
   );
