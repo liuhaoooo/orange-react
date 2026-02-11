@@ -620,7 +620,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
                      <div 
                         ref={tabsContainerRef}
                         onScroll={checkScrollButtons}
-                        className="flex-1 flex gap-2 overflow-x-auto pb-2 px-1 thin-scrollbar scroll-smooth"
+                        className="flex-1 flex gap-2 overflow-x-auto pb-2 pr-1 thin-scrollbar scroll-smooth"
                      >
                          {activeSection.subTabs.map(tab => (
                              <button
