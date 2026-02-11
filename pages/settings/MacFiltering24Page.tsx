@@ -5,10 +5,10 @@ import { fetchMacFilter, saveMacFilter, checkWifiStatus } from '../../utils/api'
 import { MacFilterRule } from '../../utils/services/types';
 import { useAlert } from '../../utils/AlertContext';
 import { MacFilterEditModal } from '../../components/MacFilterEditModal';
-import { StyledSelect, PrimaryButton } from '../../components/UIComponents';
+import { StyledSelect, PrimaryButton, TabToggle } from '../../components/UIComponents';
 
 interface MacFilteringPanelProps {
-    subcmd: string; // '1' for 2.4G, '0' for 5G
+    subcmd: string; // '1' for 2.4G, '0' for 5G (based on original file logic, check API docs if available, assuming correct)
 }
 
 const FILTER_OPTIONS = [
@@ -29,6 +29,7 @@ export const MacFilteringPanel: React.FC<MacFilteringPanelProps> = ({ subcmd }) 
 
   useEffect(() => {
       const load = async () => {
+          setLoading(true);
           try {
               const res = await fetchMacFilter(subcmd);
               if (res && (res.success || res.cmd === 278)) {
@@ -190,6 +191,31 @@ export const MacFilteringPanel: React.FC<MacFilteringPanelProps> = ({ subcmd }) 
   );
 };
 
-export const MacFiltering24Page: React.FC = () => {
-    return <MacFilteringPanel subcmd="1" />;
+export const MacFilteringPage: React.FC = () => {
+    const [activeBand, setActiveBand] = useState('2.4g');
+
+    return (
+        <div className="w-full">
+            <div className="mb-6 border-b border-gray-200 pb-2">
+                <TabToggle 
+                    options={[
+                        { label: '2.4GHz', value: '2.4g' },
+                        { label: '5GHz', value: '5g' }
+                    ]}
+                    activeValue={activeBand}
+                    onChange={setActiveBand}
+                />
+            </div>
+            
+            {activeBand === '2.4g' ? (
+                // subcmd '1' for 2.4G based on previous implementation
+                <MacFilteringPanel key="2.4g" subcmd="1" />
+            ) : (
+                // subcmd '0' for 5G based on previous implementation
+                <MacFilteringPanel key="5g" subcmd="0" />
+            )}
+        </div>
+    );
 };
+// Export alias
+export const MacFiltering24Page = MacFilteringPage;

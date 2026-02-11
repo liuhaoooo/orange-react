@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Loader2, Save } from 'lucide-react';
-import { SquareSwitch, FormRow, StyledSelect, StyledInput, PrimaryButton } from '../../components/UIComponents';
+import { SquareSwitch, FormRow, StyledSelect, StyledInput, PrimaryButton, TabToggle } from '../../components/UIComponents';
 import { fetchWifiAdvanced, saveWifiAdvanced, checkWifiStatus } from '../../utils/api';
 import { useAlert } from '../../utils/AlertContext';
 import { useGlobalState } from '../../utils/GlobalStateContext';
@@ -324,6 +324,29 @@ export const WifiAdvancedPanel: React.FC<WifiAdvancedPanelProps> = ({ cmd, is5g 
     );
 };
 
-export const AdvSettings24Page: React.FC = () => {
-  return <WifiAdvancedPanel cmd={230} is5g={false} />;
+export const WifiAdvancedSettingsPage: React.FC = () => {
+    const [activeBand, setActiveBand] = useState('2.4g');
+
+    return (
+        <div className="w-full">
+            <div className="mb-6 border-b border-gray-200 pb-2">
+                <TabToggle 
+                    options={[
+                        { label: '2.4GHz', value: '2.4g' },
+                        { label: '5GHz', value: '5g' }
+                    ]}
+                    activeValue={activeBand}
+                    onChange={setActiveBand}
+                />
+            </div>
+            
+            {activeBand === '2.4g' ? (
+                <WifiAdvancedPanel key="2.4g" cmd={230} is5g={false} />
+            ) : (
+                <WifiAdvancedPanel key="5g" cmd={231} is5g={true} />
+            )}
+        </div>
+    );
 };
+// Export alias for backward compatibility or routing usage if needed
+export const AdvSettings24Page = WifiAdvancedSettingsPage;

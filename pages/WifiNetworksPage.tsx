@@ -130,8 +130,9 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
         onOpenSettings();
         return;
     }
+    // Updated to point to new merged page
     navigate('/settings', { 
-        state: { sectionId: 'wifi', subTabId: 'adv_settings_24' } 
+        state: { sectionId: 'wifi', subTabId: 'wifi_advanced' } 
     });
   };
 

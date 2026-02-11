@@ -165,6 +165,20 @@ export const RadioGroup = ({ options, value, onChange, className = "" }: { optio
   </div>
 );
 
+export const TabToggle = ({ options, activeValue, onChange, className = "" }: { options: { label: string; value: string }[], activeValue: string, onChange: (val: string) => void, className?: string }) => (
+  <div className={`flex space-x-1 bg-gray-100 p-1 rounded-[4px] inline-flex ${className}`}>
+    {options.map((opt) => (
+      <button
+        key={opt.value}
+        onClick={() => onChange(opt.value)}
+        className={`px-6 py-1.5 text-sm font-bold rounded-[3px] transition-all ${activeValue === opt.value ? 'bg-white text-orange shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+      >
+        {opt.label}
+      </button>
+    ))}
+  </div>
+);
+
 export const PrimaryButton = ({ onClick, disabled, loading, children, className = "", icon }: { onClick?: (e?: any) => void; disabled?: boolean; loading?: boolean; children: React.ReactNode; className?: string; icon?: React.ReactNode }) => (
     <button
         onClick={onClick}

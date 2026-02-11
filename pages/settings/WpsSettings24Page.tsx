@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { SquareSwitch, FormRow, StyledInput, PrimaryButton } from '../../components/UIComponents';
+import { SquareSwitch, FormRow, StyledInput, PrimaryButton, TabToggle } from '../../components/UIComponents';
 import { fetchWpsSettings, saveWpsSettings, startWpsPbc, setWpsPin, checkWifiStatus } from '../../utils/api';
 import { useAlert } from '../../utils/AlertContext';
 import { Loader2 } from 'lucide-react';
@@ -122,8 +122,7 @@ export const WpsSettingsPanel: React.FC<WpsSettingsPanelProps> = ({ subcmd }) =>
     }
 
     return (
-        <div className="w-full animate-fade-in py-6">
-            
+        <div className="w-full animate-fade-in py-2">
             <div className="flex items-center justify-between mb-6">
                 <label className="font-bold text-sm text-black">WPS function switch</label>
                 <div className="flex justify-end w-full sm:w-auto">
@@ -181,12 +180,33 @@ export const WpsSettingsPanel: React.FC<WpsSettingsPanelProps> = ({ subcmd }) =>
                     </div>
                 </div>
             )}
-
         </div>
     );
 };
 
-export const WpsSettings24Page: React.FC = () => {
-    // subcmd 0 for 2.4G
-    return <WpsSettingsPanel subcmd={0} />;
+export const WpsSettingsPage: React.FC = () => {
+    const [activeBand, setActiveBand] = useState('2.4g');
+
+    return (
+        <div className="w-full">
+            <div className="mb-6 border-b border-gray-200 pb-2">
+                <TabToggle 
+                    options={[
+                        { label: '2.4GHz', value: '2.4g' },
+                        { label: '5GHz', value: '5g' }
+                    ]}
+                    activeValue={activeBand}
+                    onChange={setActiveBand}
+                />
+            </div>
+            
+            {activeBand === '2.4g' ? (
+                <WpsSettingsPanel key="2.4g" subcmd={0} />
+            ) : (
+                <WpsSettingsPanel key="5g" subcmd={1} />
+            )}
+        </div>
+    );
 };
+// Export alias
+export const WpsSettings24Page = WpsSettingsPage;

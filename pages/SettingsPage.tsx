@@ -21,11 +21,8 @@ import { DisplaySolutionPage } from './settings/DisplaySolutionPage';
 import { UsageSettingsPage } from './settings/UsageSettingsPage';
 import { ImsSettingsPage } from './settings/ImsSettingsPage';
 import { MacFiltering24Page } from './settings/MacFiltering24Page';
-import { MacFiltering5Page } from './settings/MacFiltering5Page';
 import { WpsSettings24Page } from './settings/WpsSettings24Page';
-import { WpsSettings5Page } from './settings/WpsSettings5Page';
 import { AdvSettings24Page } from './settings/AdvSettings24Page';
-import { AdvSettings5Page } from './settings/AdvSettings5Page';
 import { DhcpSettingsPage } from './settings/DhcpSettingsPage';
 import { IpAddressReservationPage } from './settings/IpAddressReservationPage';
 import { MultipleDhcpPage } from './settings/MultipleDhcpPage';
@@ -85,12 +82,9 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
       id: 'wifi', 
       label: t('wifi'),
       subTabs: [
-          { id: 'adv_settings_24', label: t('advSettings24') },
-          { id: 'adv_settings_5', label: t('advSettings5') },
-          { id: 'wps_settings_24', label: t('wpsSettings24') },
-          { id: 'wps_settings_5', label: t('wpsSettings5') },
-          { id: 'mac_filtering_24', label: t('macFiltering24') },
-          { id: 'mac_filtering_5', label: t('macFiltering5') }
+          { id: 'wifi_advanced', label: t('wifiAdvancedSettings') },
+          { id: 'wifi_wps', label: t('wpsSettings') },
+          { id: 'wifi_mac_filter', label: t('macFiltering') }
       ]
     },
     { 
@@ -428,18 +422,13 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <UsageSettingsPage type="international" />;
           case 'ims':
               return <ImsSettingsPage />;
-          case 'mac_filtering_24':
-              return <MacFiltering24Page />;
-          case 'mac_filtering_5':
-              return <MacFiltering5Page />;
-          case 'wps_settings_24':
-              return <WpsSettings24Page />;
-          case 'wps_settings_5':
-              return <WpsSettings5Page />;
-          case 'adv_settings_24':
-              return <AdvSettings24Page />;
-          case 'adv_settings_5':
-              return <AdvSettings5Page />;
+          // Updated cases for unified Wi-Fi pages
+          case 'wifi_advanced':
+              return <AdvSettings24Page />; // This now exports WifiAdvancedSettingsPage
+          case 'wifi_wps':
+              return <WpsSettings24Page />; // This now exports WpsSettingsPage
+          case 'wifi_mac_filter':
+              return <MacFiltering24Page />; // This now exports MacFilteringPage
           case 'dhcp_settings':
               return <DhcpSettingsPage />;
           case 'ip_reservation':
