@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, Check, Loader2, Save } from 'lucide-react';
+import { ChevronDown, Check, X, Loader2, Save } from 'lucide-react';
 import { fetchImsSettings, saveImsSettings } from '../../utils/api';
 import { useAlert } from '../../utils/AlertContext';
 
@@ -13,8 +13,8 @@ const ImsSwitch = ({ isOn, onChange }: { isOn: boolean; onChange: () => void }) 
     <div className={`flex-1 flex items-center justify-center transition-colors ${isOn ? 'bg-black text-white' : 'bg-white'}`}>
       {isOn && <Check size={16} strokeWidth={3} />}
     </div>
-    <div className={`flex-1 flex items-center justify-center transition-colors bg-white`}>
-      {/* Right side is empty/white based on design */}
+    <div className={`flex-1 flex items-center justify-center transition-colors ${!isOn ? 'bg-black text-white' : 'bg-white'}`}>
+      {!isOn && <X size={16} strokeWidth={3} />}
     </div>
   </div>
 );
