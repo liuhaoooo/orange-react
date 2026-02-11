@@ -169,7 +169,12 @@ export const PrimaryButton = ({ onClick, disabled, loading, children, className 
     <button
         onClick={onClick}
         disabled={disabled || loading}
-        className={`bg-white border-2 border-black text-black hover:bg-black hover:text-white font-bold py-2.5 px-12 text-sm transition-all rounded-[2px] shadow-sm uppercase tracking-wide flex items-center justify-center min-w-[120px] ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+        className={`
+            font-bold py-2.5 px-12 text-sm transition-all rounded-[2px] shadow-sm uppercase tracking-wide flex items-center justify-center min-w-[120px] border-2
+            bg-white border-black text-black hover:bg-black hover:text-white
+            disabled:!bg-[#e0e0e0] disabled:!border-[#e0e0e0] disabled:!text-[#a0a0a0] disabled:cursor-not-allowed disabled:shadow-none disabled:!opacity-100
+            ${className}
+        `}
     >
         {loading ? <Loader2 className="animate-spin w-4 h-4 me-2" /> : (icon ? <span className="me-2">{icon}</span> : null)}
         {children}
