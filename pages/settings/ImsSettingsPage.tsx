@@ -1,23 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, Check, X, Loader2, Save } from 'lucide-react';
+import { ChevronDown, Loader2, Save } from 'lucide-react';
 import { fetchImsSettings, saveImsSettings } from '../../utils/api';
 import { useAlert } from '../../utils/AlertContext';
-
-// Custom Switch to match the screenshot (Black active state)
-const ImsSwitch = ({ isOn, onChange }: { isOn: boolean; onChange: () => void }) => (
-  <div 
-    className="flex border border-black w-14 h-7 cursor-pointer select-none"
-    onClick={onChange}
-  >
-    <div className={`flex-1 flex items-center justify-center transition-colors ${isOn ? 'bg-black text-white' : 'bg-white'}`}>
-      {isOn && <Check size={16} strokeWidth={3} />}
-    </div>
-    <div className={`flex-1 flex items-center justify-center transition-colors ${!isOn ? 'bg-black text-white' : 'bg-white'}`}>
-      {!isOn && <X size={16} strokeWidth={3} />}
-    </div>
-  </div>
-);
+import { SquareSwitch } from '../../components/UIComponents';
 
 const FormRow = ({ label, children }: { label: string; children?: React.ReactNode }) => (
   <div className="flex flex-col sm:flex-row sm:items-center py-4 border-b border-gray-100 last:border-0">
@@ -119,7 +105,7 @@ export const ImsSettingsPage: React.FC = () => {
       <div className="max-w-4xl">
           {/* IMS On/Off */}
           <FormRow label="IMS On/Off">
-              <ImsSwitch isOn={imsEnabled} onChange={() => setImsEnabled(!imsEnabled)} />
+              <SquareSwitch isOn={imsEnabled} onChange={() => setImsEnabled(!imsEnabled)} />
           </FormRow>
 
           {/* Conditional Fields */}
