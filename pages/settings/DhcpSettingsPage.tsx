@@ -298,7 +298,7 @@ export const DhcpSettingsPage: React.FC = () => {
                 </FormRow>
 
                 <FormRow label="IP Address Pool" required error={errors.ipPool}>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 w-full">
                         <StyledInput 
                             value={ipPoolStart}
                             onChange={(e) => {
@@ -307,7 +307,7 @@ export const DhcpSettingsPage: React.FC = () => {
                             }}
                             hasError={!!errors.ipPool}
                         />
-                        <span className="text-black">-</span>
+                        <span className="text-black shrink-0">-</span>
                         <StyledInput 
                             value={ipPoolEnd}
                             onChange={(e) => {
