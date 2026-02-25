@@ -80,7 +80,7 @@ export const VpnPage: React.FC = () => {
   useEffect(() => {
     const fetchVpnData = async () => {
       try {
-        const response = await fetch('/cgi-bin/api.cgi', {
+        const response = await fetch('/cgi-bin/http.cgi', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ cmd: 272, method: 'GET', sessionId: '' })
@@ -147,7 +147,7 @@ export const VpnPage: React.FC = () => {
         client_ip_netmask: ''
       };
 
-      const response = await fetch('/cgi-bin/api.cgi', {
+      const response = await fetch('/cgi-bin/http.cgi', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
