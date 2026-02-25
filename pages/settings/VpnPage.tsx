@@ -4,6 +4,7 @@ import { Save, ChevronDown, ChevronUp, Eye, EyeOff, Check } from 'lucide-react';
 import { FormRow, SquareSwitch, StyledInput, StyledSelect, PrimaryButton } from '../../components/UIComponents';
 import { useLanguage } from '../../utils/i18nContext';
 import { useAlert } from '../../utils/AlertContext';
+import { apiRequest } from '../../utils/services/core';
 
 // Helper Checkbox Component
 const Checkbox = ({ label, checked, onChange }: { label: string; checked: boolean; onChange: (checked: boolean) => void }) => (
@@ -80,12 +81,7 @@ export const VpnPage: React.FC = () => {
   useEffect(() => {
     const fetchVpnData = async () => {
       try {
-        const response = await fetch('/cgi-bin/http.cgi', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ cmd: 272, method: 'GET', sessionId: '' })
-        });
-        const data = await response.json();
+        const data = await apiRequest(272, 'GET');
         if (data && data.success) {
           setVpnEnabled(data.vpn_switch === '1');
           setNatEnabled(data.vpn_nat === '1');
@@ -120,10 +116,6 @@ export const VpnPage: React.FC = () => {
     setSaving(true);
     try {
       const payload = {
-        cmd: 272,
-        method: 'POST',
-        sessionId: '',
-        token: '',
         subcmd: '0',
         vpn_switch: vpnEnabled ? '1' : '0',
         vpn_nat: natEnabled ? '1' : '0',
@@ -147,12 +139,7 @@ export const VpnPage: React.FC = () => {
         client_ip_netmask: ''
       };
 
-      const response = await fetch('/cgi-bin/http.cgi', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await response.json();
+      const data = await apiRequest(272, 'POST', payload);
       if (data && data.success) {
         showAlert(t('settingsSaved') || 'Settings saved successfully', 'success');
       } else {
