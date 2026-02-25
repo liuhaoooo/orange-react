@@ -232,7 +232,7 @@ export const VpnPage: React.FC = () => {
 
                 {lacTunnelAuth && (
                   <FormRow label="Tunnel Password">
-                    <StyledInput value={lacTunnelPassword} onChange={(e) => setLacTunnelPassword(e.target.value)} />
+                    <PasswordInput value={lacTunnelPassword} onChange={(e) => setLacTunnelPassword(e.target.value)} />
                   </FormRow>
                 )}
 
@@ -246,7 +246,7 @@ export const VpnPage: React.FC = () => {
                       <StyledInput value={lnsTunnelName} onChange={(e) => setLnsTunnelName(e.target.value)} />
                     </FormRow>
                     <FormRow label="Tunnel Password">
-                      <StyledInput value={lnsTunnelPassword} onChange={(e) => setLnsTunnelPassword(e.target.value)} />
+                      <PasswordInput value={lnsTunnelPassword} onChange={(e) => setLnsTunnelPassword(e.target.value)} />
                     </FormRow>
                   </>
                 )}
