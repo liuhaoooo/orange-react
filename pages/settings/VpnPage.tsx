@@ -46,6 +46,12 @@ export const VpnPage: React.FC = () => {
   const { showAlert } = useAlert();
   const [saving, setSaving] = useState(false);
 
+  // Status Fields
+  const [vpnStatus, setVpnStatus] = useState('');
+  const [vpnLocalIp, setVpnLocalIp] = useState('');
+  const [vpnPeerIp, setVpnPeerIp] = useState('');
+  const [vpnIpsecStatus, setVpnIpsecStatus] = useState('');
+
   // Main Settings
   const [vpnEnabled, setVpnEnabled] = useState(false);
   const [natEnabled, setNatEnabled] = useState(true);
@@ -81,32 +87,43 @@ export const VpnPage: React.FC = () => {
   useEffect(() => {
     const fetchVpnData = async () => {
       try {
-        const data = await apiRequest(272, 'GET');
-        if (data && data.success) {
-          setVpnEnabled(data.vpn_switch === '1');
-          setNatEnabled(data.vpn_nat === '1');
-          setDefaultRouting(data.vpn_defualt === '1');
-          setVpnMode(data.vpn_mode || '0');
-          setServerAddress(data.vpn_url || '');
-          setUsername(data.username || '');
-          setPassword(data.passwd || '');
-          setMtu(data.vpn_mtu || '');
+        const [settingsData, statusData] = await Promise.all([
+          apiRequest(272, 'GET'),
+          apiRequest(586, 'GET')
+        ]);
+
+        if (settingsData && settingsData.success) {
+          setVpnEnabled(settingsData.vpn_switch === '1');
+          setNatEnabled(settingsData.vpn_nat === '1');
+          setDefaultRouting(settingsData.vpn_defualt === '1');
+          setVpnMode(settingsData.vpn_mode || '0');
+          setServerAddress(settingsData.vpn_url || '');
+          setUsername(settingsData.username || '');
+          setPassword(settingsData.passwd || '');
+          setMtu(settingsData.vpn_mtu || '');
           
-          setLnsSurvival(data.lnsCheckup === '1');
-          setIpsecEnabled(data.IPSec === '1');
-          setPresharedKey(data.presharedKey || '');
+          setLnsSurvival(settingsData.lnsCheckup === '1');
+          setIpsecEnabled(settingsData.IPSec === '1');
+          setPresharedKey(settingsData.presharedKey || '');
           
-          setLacTunnelName(data.lac_tunnel_name || '');
-          setIpAddressObtained(data.lac_local_ip || '');
-          setLacTunnelAuth(data.lac_auth_enable === '1');
-          setLacTunnelPassword(data.lac_challenge_pass || '');
+          setLacTunnelName(settingsData.lac_tunnel_name || '');
+          setIpAddressObtained(settingsData.lac_local_ip || '');
+          setLacTunnelAuth(settingsData.lac_auth_enable === '1');
+          setLacTunnelPassword(settingsData.lac_challenge_pass || '');
           
-          setLnsTunnelAuth(data.lns_auth_enable === '1');
-          setLnsTunnelName(data.lns_tunnel_name || '');
-          setLnsTunnelPassword(data.lns_challenge_pass || '');
+          setLnsTunnelAuth(settingsData.lns_auth_enable === '1');
+          setLnsTunnelName(settingsData.lns_tunnel_name || '');
+          setLnsTunnelPassword(settingsData.lns_challenge_pass || '');
+        }
+
+        if (statusData && statusData.success) {
+          setVpnStatus(statusData.vpn_status || '');
+          setVpnLocalIp(statusData.vpn_local_ip || '');
+          setVpnPeerIp(statusData.vpn_peer_ip || '');
+          setVpnIpsecStatus(statusData.vpn_ipsec_status || '');
         }
       } catch (error) {
-        console.error("Failed to fetch VPN settings", error);
+        console.error("Failed to fetch VPN settings or status", error);
       }
     };
     fetchVpnData();
@@ -155,6 +172,32 @@ export const VpnPage: React.FC = () => {
 
   return (
     <div className="w-full max-w-4xl animate-fade-in py-2">
+      <div className="mb-6 space-y-4">
+        <FormRow label="VPN connection status">
+          <span className="text-sm font-medium text-gray-900">
+            {vpnStatus === '1' ? 'Connected' : 'Disconnected'}
+          </span>
+        </FormRow>
+
+        <FormRow label="VPN Local IP">
+          <span className="text-sm font-medium text-gray-900">
+            {vpnLocalIp && vpnLocalIp !== '0' ? vpnLocalIp : 'No IP was obtained'}
+          </span>
+        </FormRow>
+
+        <FormRow label="VPN peer IP">
+          <span className="text-sm font-medium text-gray-900">
+            {vpnPeerIp && vpnPeerIp !== '0' ? vpnPeerIp : 'No IP was obtained'}
+          </span>
+        </FormRow>
+
+        <FormRow label="IPsec connection status">
+          <span className="text-sm font-medium text-gray-900">
+            {vpnEnabled && vpnIpsecStatus && vpnIpsecStatus !== '0' ? 'Connected' : 'Disconnected'}
+          </span>
+        </FormRow>
+      </div>
+
       <FormRow label="VPN switch">
         <SquareSwitch isOn={vpnEnabled} onChange={() => setVpnEnabled(!vpnEnabled)} />
       </FormRow>
