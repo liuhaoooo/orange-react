@@ -28,6 +28,7 @@ import { IpAddressReservationPage } from './settings/IpAddressReservationPage';
 import { MultipleDhcpPage } from './settings/MultipleDhcpPage';
 import { SystemUpgradePage } from './settings/SystemUpgradePage';
 import { RoutingPage } from './settings/RoutingPage';
+import { VpnPage } from './settings/VpnPage';
 import { MeshBasicConfigPage } from './settings/MeshBasicConfigPage';
 import { TopologyDiagramPage } from './settings/TopologyDiagramPage';
 
@@ -443,6 +444,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <MeshBasicConfigPage />;
           case 'topology_diagram':
               return <TopologyDiagramPage />;
+          case 'vpn_main':
+              return <VpnPage />;
           
           default:
               // Default Placeholder Layout
