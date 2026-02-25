@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Save, ChevronDown, ChevronUp, Eye, EyeOff, Check } from 'lucide-react';
 import { FormRow, SquareSwitch, StyledInput, StyledSelect, PrimaryButton } from '../../components/UIComponents';
 import { useLanguage } from '../../utils/i18nContext';
@@ -46,43 +46,124 @@ export const VpnPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
 
   // Main Settings
-  const [vpnEnabled, setVpnEnabled] = useState(true);
+  const [vpnEnabled, setVpnEnabled] = useState(false);
   const [natEnabled, setNatEnabled] = useState(true);
   const [defaultRouting, setDefaultRouting] = useState(true);
-  const [vpnMode, setVpnMode] = useState('0'); // '0' = L2TP, '1' = PPTP
+  const [vpnMode, setVpnMode] = useState('1'); // '0' = L2TP, '1' = PPTP
   
   // Common Fields
-  const [serverAddress, setServerAddress] = useState('1.1.1.1');
-  const [username, setUsername] = useState('test');
-  const [password, setPassword] = useState('password');
-  const [mtu, setMtu] = useState('1459');
+  const [serverAddress, setServerAddress] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [mtu, setMtu] = useState('588');
 
   // L2TP Specific
   const [lnsSurvival, setLnsSurvival] = useState(true);
-  const [ipsecEnabled, setIpsecEnabled] = useState(true);
-  const [presharedKey, setPresharedKey] = useState('test');
+  const [ipsecEnabled, setIpsecEnabled] = useState(false);
+  const [presharedKey, setPresharedKey] = useState('');
   
   // Advanced Settings (L2TP)
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const [lacTunnelName, setLacTunnelName] = useState('');
   const [ipAddressObtained, setIpAddressObtained] = useState('');
   const [lacTunnelAuth, setLacTunnelAuth] = useState(false);
-  const [lnsTunnelAuth, setLnsTunnelAuth] = useState(true);
+  const [lacTunnelPassword, setLacTunnelPassword] = useState('');
+  const [lnsTunnelAuth, setLnsTunnelAuth] = useState(false);
   const [lnsTunnelName, setLnsTunnelName] = useState('');
-  const [tunnelPassword, setTunnelPassword] = useState('');
+  const [lnsTunnelPassword, setLnsTunnelPassword] = useState('');
 
   const vpnModeOptions = [
     { name: "L2TP", value: "0" },
     { name: "PPTP", value: "1" }
   ];
 
-  const handleSave = () => {
+  useEffect(() => {
+    const fetchVpnData = async () => {
+      try {
+        const response = await fetch('/cgi-bin/api.cgi', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cmd: 272, method: 'GET', sessionId: '' })
+        });
+        const data = await response.json();
+        if (data && data.success) {
+          setVpnEnabled(data.vpn_switch === '1');
+          setNatEnabled(data.vpn_nat === '1');
+          setDefaultRouting(data.vpn_defualt === '1');
+          setVpnMode(data.vpn_mode || '0');
+          setServerAddress(data.vpn_url || '');
+          setUsername(data.username || '');
+          setPassword(data.passwd || '');
+          setMtu(data.vpn_mtu || '');
+          
+          setLnsSurvival(data.lnsCheckup === '1');
+          setIpsecEnabled(data.IPSec === '1');
+          setPresharedKey(data.presharedKey || '');
+          
+          setLacTunnelName(data.lac_tunnel_name || '');
+          setIpAddressObtained(data.lac_local_ip || '');
+          setLacTunnelAuth(data.lac_auth_enable === '1');
+          setLacTunnelPassword(data.lac_challenge_pass || '');
+          
+          setLnsTunnelAuth(data.lns_auth_enable === '1');
+          setLnsTunnelName(data.lns_tunnel_name || '');
+          setLnsTunnelPassword(data.lns_challenge_pass || '');
+        }
+      } catch (error) {
+        console.error("Failed to fetch VPN settings", error);
+      }
+    };
+    fetchVpnData();
+  }, []);
+
+  const handleSave = async () => {
     setSaving(true);
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const payload = {
+        cmd: 272,
+        method: 'POST',
+        sessionId: '',
+        token: '',
+        subcmd: '0',
+        vpn_switch: vpnEnabled ? '1' : '0',
+        vpn_nat: natEnabled ? '1' : '0',
+        vpn_defualt: defaultRouting ? '1' : '0',
+        vpn_mode: vpnMode,
+        vpn_url: serverAddress,
+        username: username,
+        passwd: password,
+        vpn_mtu: mtu,
+        lnsCheckup: lnsSurvival ? '1' : '0',
+        IPSec: ipsecEnabled ? '1' : '0',
+        presharedKey: presharedKey,
+        lac_tunnel_name: lacTunnelName,
+        lac_local_ip: ipAddressObtained,
+        lac_auth_enable: lacTunnelAuth ? '1' : '0',
+        lac_challenge_pass: lacTunnelPassword,
+        lns_auth_enable: lnsTunnelAuth ? '1' : '0',
+        lns_tunnel_name: lnsTunnelName,
+        lns_challenge_pass: lnsTunnelPassword,
+        client_ip_range: '',
+        client_ip_netmask: ''
+      };
+
+      const response = await fetch('/cgi-bin/api.cgi', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json();
+      if (data && data.success) {
+        showAlert(t('settingsSaved') || 'Settings saved successfully', 'success');
+      } else {
+        showAlert(t('errorSaving') || 'Failed to save settings', 'error');
+      }
+    } catch (error) {
+      console.error("Failed to save VPN settings", error);
+      showAlert(t('errorSaving') || 'Failed to save settings', 'error');
+    } finally {
       setSaving(false);
-      showAlert(t('settingsSaved'), 'success');
-    }, 1000);
+    }
   };
 
   return (
@@ -164,7 +245,7 @@ export const VpnPage: React.FC = () => {
 
                 {lacTunnelAuth && (
                   <FormRow label="Tunnel Password">
-                    <StyledInput value={tunnelPassword} onChange={(e) => setTunnelPassword(e.target.value)} />
+                    <StyledInput value={lacTunnelPassword} onChange={(e) => setLacTunnelPassword(e.target.value)} />
                   </FormRow>
                 )}
 
@@ -173,9 +254,14 @@ export const VpnPage: React.FC = () => {
                 </FormRow>
 
                 {lnsTunnelAuth && (
-                  <FormRow label="LNS tunnel name">
-                    <StyledInput value={lnsTunnelName} onChange={(e) => setLnsTunnelName(e.target.value)} />
-                  </FormRow>
+                  <>
+                    <FormRow label="LNS tunnel name">
+                      <StyledInput value={lnsTunnelName} onChange={(e) => setLnsTunnelName(e.target.value)} />
+                    </FormRow>
+                    <FormRow label="Tunnel Password">
+                      <StyledInput value={lnsTunnelPassword} onChange={(e) => setLnsTunnelPassword(e.target.value)} />
+                    </FormRow>
+                  </>
                 )}
               </div>
             )}
