@@ -79,6 +79,8 @@ export const VpnPage: React.FC = () => {
   const [lnsTunnelName, setLnsTunnelName] = useState('');
   const [lnsTunnelPassword, setLnsTunnelPassword] = useState('');
 
+  const [errors, setErrors] = useState<Record<string, boolean>>({});
+
   const vpnModeOptions = [
     { name: "L2TP", value: "0" },
     { name: "PPTP", value: "1" }
@@ -129,7 +131,41 @@ export const VpnPage: React.FC = () => {
     fetchVpnData();
   }, []);
 
+  const validateForm = () => {
+    const newErrors: Record<string, boolean> = {};
+    let isValid = true;
+
+    if (!serverAddress.trim()) {
+      newErrors.serverAddress = true;
+      isValid = false;
+    }
+    if (!username.trim()) {
+      newErrors.username = true;
+      isValid = false;
+    }
+    if (!password.trim()) {
+      newErrors.password = true;
+      isValid = false;
+    }
+    if (!mtu.trim()) {
+      newErrors.mtu = true;
+      isValid = false;
+    }
+    if (vpnMode === '0' && ipsecEnabled && !presharedKey.trim()) {
+      newErrors.presharedKey = true;
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
   const handleSave = async () => {
+    if (!validateForm()) {
+      showAlert(t('pleaseFillRequiredFields') || 'Please fill in all required fields', 'error');
+      return;
+    }
+
     setSaving(true);
     try {
       const payload = {
@@ -219,19 +255,19 @@ export const VpnPage: React.FC = () => {
       </FormRow>
 
       <FormRow label="Server address" required>
-        <StyledInput value={serverAddress} onChange={(e) => setServerAddress(e.target.value)} />
+        <StyledInput value={serverAddress} onChange={(e) => { setServerAddress(e.target.value); setErrors({ ...errors, serverAddress: false }); }} hasError={errors.serverAddress} />
       </FormRow>
 
       <FormRow label="Username" required>
-        <StyledInput value={username} onChange={(e) => setUsername(e.target.value)} />
+        <StyledInput value={username} onChange={(e) => { setUsername(e.target.value); setErrors({ ...errors, username: false }); }} hasError={errors.username} />
       </FormRow>
 
       <FormRow label="Password" required>
-        <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} />
+        <PasswordInput value={password} onChange={(e) => { setPassword(e.target.value); setErrors({ ...errors, password: false }); }} hasError={errors.password} />
       </FormRow>
 
       <FormRow label="MTU" required>
-        <StyledInput value={mtu} onChange={(e) => setMtu(e.target.value)} />
+        <StyledInput value={mtu} onChange={(e) => { setMtu(e.target.value); setErrors({ ...errors, mtu: false }); }} hasError={errors.mtu} />
       </FormRow>
 
       {vpnMode === '0' && (
@@ -246,7 +282,7 @@ export const VpnPage: React.FC = () => {
 
           {ipsecEnabled && (
             <FormRow label="Pre-shared secret key" required>
-              <StyledInput value={presharedKey} onChange={(e) => setPresharedKey(e.target.value)} />
+              <StyledInput value={presharedKey} onChange={(e) => { setPresharedKey(e.target.value); setErrors({ ...errors, presharedKey: false }); }} hasError={errors.presharedKey} />
             </FormRow>
           )}
 
