@@ -162,17 +162,21 @@ export const VpnPage: React.FC = () => {
                   <SquareSwitch isOn={lacTunnelAuth} onChange={() => setLacTunnelAuth(!lacTunnelAuth)} />
                 </FormRow>
 
+                {lacTunnelAuth && (
+                  <FormRow label="Tunnel Password">
+                    <StyledInput value={tunnelPassword} onChange={(e) => setTunnelPassword(e.target.value)} />
+                  </FormRow>
+                )}
+
                 <FormRow label="LNS Tunnel Authentication">
                   <SquareSwitch isOn={lnsTunnelAuth} onChange={() => setLnsTunnelAuth(!lnsTunnelAuth)} />
                 </FormRow>
 
-                <FormRow label="LNS tunnel name">
-                  <StyledInput value={lnsTunnelName} onChange={(e) => setLnsTunnelName(e.target.value)} />
-                </FormRow>
-
-                <FormRow label="Tunnel Password">
-                  <StyledInput value={tunnelPassword} onChange={(e) => setTunnelPassword(e.target.value)} />
-                </FormRow>
+                {lnsTunnelAuth && (
+                  <FormRow label="LNS tunnel name">
+                    <StyledInput value={lnsTunnelName} onChange={(e) => setLnsTunnelName(e.target.value)} />
+                  </FormRow>
+                )}
               </div>
             )}
           </div>
