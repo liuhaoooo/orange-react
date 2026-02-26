@@ -146,51 +146,43 @@ export const VpnPage: React.FC = () => {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     let isValid = true;
-    const requiredMsg = t('requiredField') || 'This field is required';
-    const invalidIpMsg = t('invalidIp') || 'Invalid IP address';
-    const invalidMtuMsg = t('invalidMtu') || 'MTU must be an integer between 576 and 1460';
 
     if (!serverAddress.trim()) {
-      newErrors.serverAddress = requiredMsg;
+      newErrors.serverAddress = 'Server address can not be empty.';
       isValid = false;
     } else if (!isValidIp(serverAddress.trim())) {
-      newErrors.serverAddress = invalidIpMsg;
+      newErrors.serverAddress = 'Invalid IP Address.';
       isValid = false;
     }
 
     if (!username.trim()) {
-      newErrors.username = requiredMsg;
+      newErrors.username = 'Username can not be empty.';
       isValid = false;
     }
 
     if (!password.trim()) {
-      newErrors.password = requiredMsg;
+      newErrors.password = 'Password can not be empty.';
       isValid = false;
     }
 
-    if (!mtu.trim()) {
-      newErrors.mtu = requiredMsg;
+    const mtuNum = parseInt(mtu.trim(), 10);
+    if (isNaN(mtuNum) || mtuNum < 576 || mtuNum > 1460 || !/^\d+$/.test(mtu.trim())) {
+      newErrors.mtu = 'MTU must be between 576 and 1460.';
       isValid = false;
-    } else {
-      const mtuNum = parseInt(mtu.trim(), 10);
-      if (isNaN(mtuNum) || mtuNum < 576 || mtuNum > 1460 || !/^\d+$/.test(mtu.trim())) {
-        newErrors.mtu = invalidMtuMsg;
-        isValid = false;
-      }
     }
 
     if (vpnMode === '0' && ipsecEnabled && !presharedKey.trim()) {
-      newErrors.presharedKey = requiredMsg;
+      newErrors.presharedKey = 'Pre-shared secret key can not be empty.';
       isValid = false;
     }
 
     if (vpnMode === '0' && lacTunnelAuth && !lacTunnelPassword.trim()) {
-      newErrors.lacTunnelPassword = requiredMsg;
+      newErrors.lacTunnelPassword = 'Tunnel Password can not be empty.';
       isValid = false;
     }
 
     if (vpnMode === '0' && lnsTunnelAuth && !lnsTunnelPassword.trim()) {
-      newErrors.lnsTunnelPassword = requiredMsg;
+      newErrors.lnsTunnelPassword = 'Tunnel Password can not be empty.';
       isValid = false;
     }
 
