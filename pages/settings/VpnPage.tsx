@@ -41,6 +41,17 @@ const PasswordInput = ({ value, onChange, placeholder, hasError }: { value: stri
   );
 };
 
+const isValidIp = (ip: string) => {
+  if (!ip) return false;
+  const parts = ip.split('.');
+  if (parts.length !== 4) return false;
+  return parts.every(part => {
+    if (!/^\d+$/.test(part)) return false;
+    const num = parseInt(part, 10);
+    return !isNaN(num) && num >= 0 && num <= 255;
+  });
+};
+
 export const VpnPage: React.FC = () => {
   const { t } = useLanguage();
   const { showAlert } = useAlert();
@@ -135,25 +146,50 @@ export const VpnPage: React.FC = () => {
     const newErrors: Record<string, string> = {};
     let isValid = true;
     const requiredMsg = t('requiredField') || 'This field is required';
+    const invalidIpMsg = t('invalidIp') || 'Invalid IP address';
+    const invalidMtuMsg = t('invalidMtu') || 'MTU must be an integer between 576 and 1460';
 
     if (!serverAddress.trim()) {
       newErrors.serverAddress = requiredMsg;
       isValid = false;
+    } else if (!isValidIp(serverAddress.trim())) {
+      newErrors.serverAddress = invalidIpMsg;
+      isValid = false;
     }
+
     if (!username.trim()) {
       newErrors.username = requiredMsg;
       isValid = false;
     }
+
     if (!password.trim()) {
       newErrors.password = requiredMsg;
       isValid = false;
     }
+
     if (!mtu.trim()) {
       newErrors.mtu = requiredMsg;
       isValid = false;
+    } else {
+      const mtuNum = parseInt(mtu.trim(), 10);
+      if (isNaN(mtuNum) || mtuNum < 576 || mtuNum > 1460 || !/^\d+$/.test(mtu.trim())) {
+        newErrors.mtu = invalidMtuMsg;
+        isValid = false;
+      }
     }
+
     if (vpnMode === '0' && ipsecEnabled && !presharedKey.trim()) {
       newErrors.presharedKey = requiredMsg;
+      isValid = false;
+    }
+
+    if (vpnMode === '0' && lacTunnelAuth && !lacTunnelPassword.trim()) {
+      newErrors.lacTunnelPassword = requiredMsg;
+      isValid = false;
+    }
+
+    if (vpnMode === '0' && lnsTunnelAuth && !lnsTunnelPassword.trim()) {
+      newErrors.lnsTunnelPassword = requiredMsg;
       isValid = false;
     }
 
@@ -310,8 +346,8 @@ export const VpnPage: React.FC = () => {
                 </FormRow>
 
                 {lacTunnelAuth && (
-                  <FormRow label="Tunnel Password">
-                    <PasswordInput value={lacTunnelPassword} onChange={(e) => setLacTunnelPassword(e.target.value)} />
+                  <FormRow label="Tunnel Password" required error={errors.lacTunnelPassword}>
+                    <PasswordInput value={lacTunnelPassword} onChange={(e) => { setLacTunnelPassword(e.target.value); setErrors({ ...errors, lacTunnelPassword: '' }); }} hasError={!!errors.lacTunnelPassword} />
                   </FormRow>
                 )}
 
@@ -324,8 +360,8 @@ export const VpnPage: React.FC = () => {
                     <FormRow label="LNS tunnel name">
                       <StyledInput value={lnsTunnelName} onChange={(e) => setLnsTunnelName(e.target.value)} />
                     </FormRow>
-                    <FormRow label="Tunnel Password">
-                      <PasswordInput value={lnsTunnelPassword} onChange={(e) => setLnsTunnelPassword(e.target.value)} />
+                    <FormRow label="Tunnel Password" required error={errors.lnsTunnelPassword}>
+                      <PasswordInput value={lnsTunnelPassword} onChange={(e) => { setLnsTunnelPassword(e.target.value); setErrors({ ...errors, lnsTunnelPassword: '' }); }} hasError={!!errors.lnsTunnelPassword} />
                     </FormRow>
                   </>
                 )}
