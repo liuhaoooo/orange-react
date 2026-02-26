@@ -79,7 +79,7 @@ export const VpnPage: React.FC = () => {
   const [lnsTunnelName, setLnsTunnelName] = useState('');
   const [lnsTunnelPassword, setLnsTunnelPassword] = useState('');
 
-  const [errors, setErrors] = useState<Record<string, boolean>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const vpnModeOptions = [
     { name: "L2TP", value: "0" },
@@ -132,27 +132,28 @@ export const VpnPage: React.FC = () => {
   }, []);
 
   const validateForm = () => {
-    const newErrors: Record<string, boolean> = {};
+    const newErrors: Record<string, string> = {};
     let isValid = true;
+    const requiredMsg = t('requiredField') || 'This field is required';
 
     if (!serverAddress.trim()) {
-      newErrors.serverAddress = true;
+      newErrors.serverAddress = requiredMsg;
       isValid = false;
     }
     if (!username.trim()) {
-      newErrors.username = true;
+      newErrors.username = requiredMsg;
       isValid = false;
     }
     if (!password.trim()) {
-      newErrors.password = true;
+      newErrors.password = requiredMsg;
       isValid = false;
     }
     if (!mtu.trim()) {
-      newErrors.mtu = true;
+      newErrors.mtu = requiredMsg;
       isValid = false;
     }
     if (vpnMode === '0' && ipsecEnabled && !presharedKey.trim()) {
-      newErrors.presharedKey = true;
+      newErrors.presharedKey = requiredMsg;
       isValid = false;
     }
 
@@ -162,7 +163,6 @@ export const VpnPage: React.FC = () => {
 
   const handleSave = async () => {
     if (!validateForm()) {
-      showAlert(t('pleaseFillRequiredFields') || 'Please fill in all required fields', 'error');
       return;
     }
 
@@ -254,20 +254,20 @@ export const VpnPage: React.FC = () => {
         />
       </FormRow>
 
-      <FormRow label="Server address" required>
-        <StyledInput value={serverAddress} onChange={(e) => { setServerAddress(e.target.value); setErrors({ ...errors, serverAddress: false }); }} hasError={errors.serverAddress} />
+      <FormRow label="Server address" required error={errors.serverAddress}>
+        <StyledInput value={serverAddress} onChange={(e) => { setServerAddress(e.target.value); setErrors({ ...errors, serverAddress: '' }); }} hasError={!!errors.serverAddress} />
       </FormRow>
 
-      <FormRow label="Username" required>
-        <StyledInput value={username} onChange={(e) => { setUsername(e.target.value); setErrors({ ...errors, username: false }); }} hasError={errors.username} />
+      <FormRow label="Username" required error={errors.username}>
+        <StyledInput value={username} onChange={(e) => { setUsername(e.target.value); setErrors({ ...errors, username: '' }); }} hasError={!!errors.username} />
       </FormRow>
 
-      <FormRow label="Password" required>
-        <PasswordInput value={password} onChange={(e) => { setPassword(e.target.value); setErrors({ ...errors, password: false }); }} hasError={errors.password} />
+      <FormRow label="Password" required error={errors.password}>
+        <PasswordInput value={password} onChange={(e) => { setPassword(e.target.value); setErrors({ ...errors, password: '' }); }} hasError={!!errors.password} />
       </FormRow>
 
-      <FormRow label="MTU" required>
-        <StyledInput value={mtu} onChange={(e) => { setMtu(e.target.value); setErrors({ ...errors, mtu: false }); }} hasError={errors.mtu} />
+      <FormRow label="MTU" required error={errors.mtu}>
+        <StyledInput value={mtu} onChange={(e) => { setMtu(e.target.value); setErrors({ ...errors, mtu: '' }); }} hasError={!!errors.mtu} />
       </FormRow>
 
       {vpnMode === '0' && (
@@ -281,8 +281,8 @@ export const VpnPage: React.FC = () => {
           </FormRow>
 
           {ipsecEnabled && (
-            <FormRow label="Pre-shared secret key" required>
-              <StyledInput value={presharedKey} onChange={(e) => { setPresharedKey(e.target.value); setErrors({ ...errors, presharedKey: false }); }} hasError={errors.presharedKey} />
+            <FormRow label="Pre-shared secret key" required error={errors.presharedKey}>
+              <StyledInput value={presharedKey} onChange={(e) => { setPresharedKey(e.target.value); setErrors({ ...errors, presharedKey: '' }); }} hasError={!!errors.presharedKey} />
             </FormRow>
           )}
 
