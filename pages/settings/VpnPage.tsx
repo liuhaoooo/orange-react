@@ -5,6 +5,7 @@ import { FormRow, SquareSwitch, StyledInput, StyledSelect, PrimaryButton } from 
 import { useLanguage } from '../../utils/i18nContext';
 import { useAlert } from '../../utils/AlertContext';
 import { apiRequest } from '../../utils/services/core';
+import { useGlobalState } from '../../utils/GlobalStateContext';
 
 // Helper Checkbox Component
 const Checkbox = ({ label, checked, onChange }: { label: string; checked: boolean; onChange: (checked: boolean) => void }) => (
@@ -55,6 +56,7 @@ const isValidIp = (ip: string) => {
 export const VpnPage: React.FC = () => {
   const { t } = useLanguage();
   const { showAlert } = useAlert();
+  const { globalData } = useGlobalState();
   const [saving, setSaving] = useState(false);
 
   // Status Fields
@@ -98,12 +100,18 @@ export const VpnPage: React.FC = () => {
   ];
 
   useEffect(() => {
+    if (globalData.statusInfo) {
+      setVpnStatus(globalData.statusInfo.vpn_status || '');
+      setVpnLocalIp(globalData.statusInfo.vpn_local_ip || '');
+      setVpnPeerIp(globalData.statusInfo.vpn_peer_ip || '');
+      setVpnIpsecStatus(globalData.statusInfo.vpn_ipsec_status || '');
+    }
+  }, [globalData.statusInfo]);
+
+  useEffect(() => {
     const fetchVpnData = async () => {
       try {
-        const [settingsData, statusData] = await Promise.all([
-          apiRequest(272, 'GET'),
-          apiRequest(586, 'GET')
-        ]);
+        const settingsData = await apiRequest(272, 'GET');
 
         if (settingsData && settingsData.success) {
           setVpnEnabled(settingsData.vpn_switch === '1');
@@ -128,15 +136,8 @@ export const VpnPage: React.FC = () => {
           setLnsTunnelName(settingsData.lns_tunnel_name || '');
           setLnsTunnelPassword(settingsData.lns_challenge_pass || '');
         }
-
-        if (statusData && statusData.success) {
-          setVpnStatus(statusData.vpn_status || '');
-          setVpnLocalIp(statusData.vpn_local_ip || '');
-          setVpnPeerIp(statusData.vpn_peer_ip || '');
-          setVpnIpsecStatus(statusData.vpn_ipsec_status || '');
-        }
       } catch (error) {
-        console.error("Failed to fetch VPN settings or status", error);
+        console.error("Failed to fetch VPN settings", error);
       }
     };
     fetchVpnData();
