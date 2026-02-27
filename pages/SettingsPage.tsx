@@ -107,9 +107,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
       id: 'security', 
       label: t('security') || 'Security',
       subTabs: [
-          { id: 'parental_mode', label: t('parentalMode') },
-          { id: 'url_limit', label: t('urlLimit') },
-          { id: 'time_limit', label: t('timeLimit') },
           { id: 'url_filter', label: t('urlFilter') },
           { id: 'dmz', label: t('dmz') },
           { id: 'port_forwarding', label: t('portForwarding') },
@@ -117,6 +114,15 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
           { id: 'mac_filtering', label: t('macFiltering') },
           { id: 'port_filtering', label: t('portFiltering') },
           { id: 'ddos_protection', label: t('ddosProtection') }
+      ]
+    },
+    { 
+      id: 'parental_control', 
+      label: t('parentalControl') || 'Parental Control',
+      subTabs: [
+          { id: 'parental_mode', label: t('parentalMode') },
+          { id: 'url_limit', label: t('urlLimit') },
+          { id: 'time_limit', label: t('timeLimit') }
       ]
     },
     { 
