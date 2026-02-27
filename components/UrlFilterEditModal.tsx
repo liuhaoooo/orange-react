@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { UrlFilterRule } from '../utils/api';
 
@@ -67,26 +68,24 @@ export const UrlFilterEditModal: React.FC<UrlFilterEditModalProps> = ({
     onClose();
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-[2px] w-full max-w-2xl shadow-xl">
-        <div className="flex justify-between items-center p-6 pb-4">
+  return createPortal(
+    <div className="fixed inset-0 bg-black/70 z-[9999] flex items-center justify-center p-4">
+      <div className="bg-white w-full max-w-lg shadow-2xl relative animate-fade-in text-black border border-gray-300">
+        <div className="flex justify-between items-center p-6 pb-4 border-b border-gray-100">
           <h2 className="text-xl font-bold text-black">
             {initialData ? 'Edit Rule' : 'Add Rule'}
           </h2>
           <button onClick={onClose} className="text-gray-500 hover:text-black transition-colors">
-            <X size={20} />
+            <X size={24} />
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
-          <div className="grid grid-cols-12 gap-4 items-start">
-            <div className="col-span-3 pt-2">
-              <label className="text-sm font-bold text-black">
-                <span className="text-red-500 mr-1">*</span>URL
-              </label>
-            </div>
-            <div className="col-span-9">
+        <div className="p-8 pb-8 pt-6">
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-start">
+            <label className="block font-bold text-sm text-black w-full sm:w-1/4 mb-2 sm:mb-0 pt-2">
+              <span className="text-red-500 me-1">*</span>URL
+            </label>
+            <div className="w-full sm:w-3/4">
               <input
                 type="text"
                 value={url}
@@ -94,7 +93,7 @@ export const UrlFilterEditModal: React.FC<UrlFilterEditModalProps> = ({
                   setUrl(e.target.value);
                   setError('');
                 }}
-                className="w-full border border-gray-200 rounded-[2px] p-2 text-sm focus:outline-none focus:border-gray-400"
+                className={`w-full border px-3 py-2 text-sm text-black outline-none transition-all rounded-[2px] ${error && error.includes('URL') ? 'border-red-500' : 'border-gray-300 focus:border-orange'}`}
               />
               <div className="text-right text-gray-400 text-xs mt-1">
                 Example: www.google.com
@@ -102,40 +101,41 @@ export const UrlFilterEditModal: React.FC<UrlFilterEditModalProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-12 gap-4 items-start">
-            <div className="col-span-3 pt-2">
-              <label className="text-sm font-bold text-black">Remark</label>
-            </div>
-            <div className="col-span-9">
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-start">
+            <label className="block font-bold text-sm text-black w-full sm:w-1/4 mb-2 sm:mb-0 pt-2">
+              Remark
+            </label>
+            <div className="w-full sm:w-3/4">
               <textarea
                 value={remark}
                 onChange={(e) => setRemark(e.target.value)}
                 rows={4}
-                className="w-full border border-gray-200 rounded-[2px] p-2 text-sm focus:outline-none focus:border-gray-400 resize-y"
+                className="w-full border border-gray-300 px-3 py-2 text-sm text-black outline-none transition-all rounded-[2px] focus:border-orange resize-y"
               />
             </div>
           </div>
 
           {error && (
-            <div className="text-red-500 text-sm text-center">{error}</div>
+            <div className="text-red-500 text-sm text-center mb-4 font-bold">{error}</div>
           )}
-        </div>
 
-        <div className="flex justify-end space-x-4 p-6 pt-2">
-          <button
-            onClick={onClose}
-            className="bg-[#f5f5f5] border-2 border-black text-black hover:bg-gray-200 font-bold py-1.5 px-8 text-sm transition-all rounded-[2px] shadow-sm"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            className="bg-[#f5f5f5] border-2 border-black text-black hover:bg-gray-200 font-bold py-1.5 px-8 text-sm transition-all rounded-[2px] shadow-sm"
-          >
-            Confirm
-          </button>
+          <div className="flex justify-end space-x-4 mt-8">
+            <button
+              onClick={onClose}
+              className="bg-[#eeeeee] border-2 border-black text-black font-bold py-2 px-8 text-sm transition-all rounded-[2px] shadow-sm min-w-[120px]"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              className="bg-[#eeeeee] border-2 border-black text-black font-bold py-2 px-8 text-sm transition-all rounded-[2px] shadow-sm min-w-[120px]"
+            >
+              Confirm
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
