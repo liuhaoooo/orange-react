@@ -1,5 +1,11 @@
 
 export const el = {
+    info: "Info",
+    device: "Dispositivo",
+    security: "Seguridad",
+    advancedApplications: "Aplicaciones avanzadas",
+    upgrade: "Actualización",
+    systemManagement: "Gestión del sistema",
     menu: "Menú",
     dashboard: "Tablero",
     myNumber: "Mi número",

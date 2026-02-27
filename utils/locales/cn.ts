@@ -1,5 +1,11 @@
 
 export const cn = {
+    info: "信息",
+    device: "设备",
+    security: "安全",
+    advancedApplications: "高级应用",
+    upgrade: "升级",
+    systemManagement: "系统管理",
     menu: "菜单",
     dashboard: "仪表盘",
     myNumber: "我的号码",

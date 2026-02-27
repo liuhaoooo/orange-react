@@ -45,6 +45,14 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
   // Menu Configuration
   const menuItems = [
     { 
+      id: 'info', 
+      label: t('info') || 'Info',
+      subTabs: [
+          { id: 'device_info', label: t('deviceInfo') },
+          { id: 'network_info', label: t('networkInfo') }
+      ]
+    },
+    { 
       id: 'network', 
       label: t('network'),
       subTabs: [
@@ -55,21 +63,20 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
           { id: 'plmn_scan', label: t('plmnScan') },
           { id: 'lock_band', label: t('lockBand') },
           { id: 'cell_locking', label: t('cellLocking') },
-          { id: 'link_detection', label: t('linkDetection') },
-          { id: 'vlan', label: t('vlan') },
+          { id: 'link_detection', label: t('linkDetection') }
       ]
     },
-    { id: 'device_info', label: t('deviceInfo') },
-    { id: 'network_info', label: t('networkInfo') },
     { 
-      id: 'sim', 
-      label: t('simFunction'),
+      id: 'wifi', 
+      label: t('wlan') || 'WLAN',
       subTabs: [
-          { id: 'sim_function', label: t('simFunction') },
-          { id: 'sim_switching', label: t('simCardSwitching') }
+          { id: 'wifi_mac_filter', label: t('macFiltering') },
+          { id: 'wifi_wps', label: t('wpsSettings') },
+          { id: 'wifi_advanced', label: t('wifiAdvancedSettings') },
+          { id: 'basic_config', label: t('basicConfig') },
+          { id: 'topology_diagram', label: t('topologyDiagram') }
       ]
     },
-    { id: 'display_solution', label: t('displaySolution') },
     { 
       id: 'usage', 
       label: t('usage'), 
@@ -78,68 +85,30 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
         { id: 'international', label: t('international') }
       ] 
     },
-    { id: 'ims', label: t('imsSetting') },
     { 
-      id: 'wifi', 
-      label: t('wifi'),
+      id: 'sim', 
+      label: t('simFunction') || 'SIM',
       subTabs: [
-          { id: 'wifi_advanced', label: t('wifiAdvancedSettings') },
-          { id: 'wifi_wps', label: t('wpsSettings') },
-          { id: 'wifi_mac_filter', label: t('macFiltering') }
+          { id: 'sim_function', label: t('simFunction') },
+          { id: 'sim_switching', label: t('simCardSwitching') }
       ]
     },
     { 
-      id: 'dhcp', 
-      label: t('dhcp'),
+      id: 'device', 
+      label: t('device') || 'Device',
       subTabs: [
           { id: 'dhcp_settings', label: t('dhcp') },
-          { id: 'ip_reservation', label: t('ipAddressReservation') },
-          { id: 'multiple_dhcp', label: t('multipleDhcp') }
-      ]
-    },
-    { id: 'routing', label: t('routingConfiguration') },
-    { 
-      id: 'mesh', 
-      label: t('meshNetworking'),
-      subTabs: [
-          { id: 'basic_config', label: t('basicConfig') },
-          { id: 'topology_diagram', label: t('topologyDiagram') }
+          { id: 'multiple_dhcp', label: t('multipleDhcp') },
+          { id: 'vlan', label: t('vlan') }
       ]
     },
     { 
-      id: 'vpn', 
-      label: t('vpnSettings'),
-      subTabs: [
-          { id: 'vpn_main', label: t('vpn') },
-          { id: 'gre_settings', label: t('greSettings') },
-          { id: 'ipsec_vpn', label: t('ipsecVpn') },
-          { id: 'ipsec_status', label: t('ipsecStatus') }
-      ]
-    },
-    { id: 'sipalg', label: t('sipAlg') },
-    { id: 'voice', label: t('voice') },
-    { 
-      id: 'ip_passthrough', 
-      label: t('ipPassthrough'),
-      subTabs: [
-          { id: 'ip_passthrough_main', label: t('ipPassthrough') },
-          { id: 'multiple_ip_passthrough', label: t('multipleIpPassthrough') }
-      ]
-    },
-    { id: 'tr069', label: t('tr069') },
-    { 
-      id: 'parental', 
-      label: t('parentalControl'),
+      id: 'security', 
+      label: t('security') || 'Security',
       subTabs: [
           { id: 'parental_mode', label: t('parentalMode') },
           { id: 'url_limit', label: t('urlLimit') },
-          { id: 'time_limit', label: t('timeLimit') }
-      ]
-    },
-    { 
-      id: 'firewall', 
-      label: t('firewall'),
-      subTabs: [
+          { id: 'time_limit', label: t('timeLimit') },
           { id: 'url_filter', label: t('urlFilter') },
           { id: 'dmz', label: t('dmz') },
           { id: 'port_forwarding', label: t('portForwarding') },
@@ -149,35 +118,45 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
           { id: 'ddos_protection', label: t('ddosProtection') }
       ]
     },
-    { id: 'access_control', label: t('accessControl') },
     { 
-      id: 'diagnosis', 
-      label: t('diagnosis'),
+      id: 'advanced_applications', 
+      label: t('advancedApplications') || 'Advanced Applications',
       subTabs: [
-          { id: 'ping', label: t('ping') },
-          { id: 'trace', label: t('trace') }
+          { id: 'vpn_main', label: t('vpn') },
+          { id: 'gre_settings', label: t('greSettings') },
+          { id: 'ipsec_vpn', label: t('ipsecVpn') },
+          { id: 'ipsec_status', label: t('ipsecStatus') },
+          { id: 'ip_passthrough_main', label: t('ipPassthrough') },
+          { id: 'multiple_ip_passthrough', label: t('multipleIpPassthrough') }
+      ]
+    },
+    { 
+      id: 'upgrade', 
+      label: t('upgrade') || 'Upgrade',
+      subTabs: [
+          { id: 'system_upgrade', label: t('systemUpgrade') },
+          { id: 'system_auto_upgrade', label: t('systemAutoUpgrade') },
+          { id: 'fota_upgrade', label: t('fotaUpgrade') }
       ]
     },
     { 
       id: 'system', 
-      label: t('systemSettings'),
+      label: t('systemManagement') || 'System Management',
       subTabs: [
           { id: 'system_settings_main', label: t('systemSettings') },
           { id: 'change_password', label: t('changePassword') },
           { id: 'change_username', label: t('changeUsername') },
           { id: 'time_settings', label: t('timeSettings') },
-          { id: 'system_upgrade', label: t('systemUpgrade') },
-          { id: 'system_auto_upgrade', label: t('systemAutoUpgrade') },
-          { id: 'fota_upgrade', label: t('fotaUpgrade') },
           { id: 'log_settings', label: t('logSettings') },
-          { id: 'web_setting', label: t('webSetting') }
+          { id: 'web_setting', label: t('webSetting') },
+          { id: 'ping', label: t('ping') },
+          { id: 'trace', label: t('trace') }
       ]
-    },
-    { id: 'clat', label: t('clat') },
+    }
   ];
 
-  // State for Navigation - Default to 'network' as it is the first item
-  const [activeSectionId, setActiveSectionId] = useState('network'); 
+  // State for Navigation - Default to 'info' as it is the first item
+  const [activeSectionId, setActiveSectionId] = useState('info'); 
   const [activeSubTabId, setActiveSubTabId] = useState(''); 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   

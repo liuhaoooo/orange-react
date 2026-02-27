@@ -1,5 +1,11 @@
 
 export const en = {
+    info: "Info",
+    device: "Device",
+    security: "Security",
+    advancedApplications: "Advanced Applications",
+    upgrade: "Upgrade",
+    systemManagement: "System Management",
     menu: "Menu",
     dashboard: "Dashboard",
     myNumber: "My number",

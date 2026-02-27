@@ -1,5 +1,11 @@
 
 export const ar = {
+    info: "معلومات",
+    device: "جهاز",
+    security: "أمان",
+    advancedApplications: "تطبيقات متقدمة",
+    upgrade: "ترقية",
+    systemManagement: "إدارة النظام",
     menu: "قائمة",
     dashboard: "لوحة القيادة",
     myNumber: "رقمي",

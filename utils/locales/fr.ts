@@ -1,5 +1,11 @@
 
 export const fr = {
+    info: "Info",
+    device: "Appareil",
+    security: "Sécurité",
+    advancedApplications: "Applications avancées",
+    upgrade: "Mise à niveau",
+    systemManagement: "Gestion du système",
     menu: "Menu",
     dashboard: "Tableau de bord",
     myNumber: "Mon numéro",
