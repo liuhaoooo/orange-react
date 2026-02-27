@@ -453,17 +453,30 @@ export interface TopologyDataResponse {
   [key: string]: any;
 }
 
+export interface UrlFilterDefaultRule {
+    enableRule: boolean;
+    acceptAll: boolean;
+    ippro: string;
+}
+
+export interface UrlFilterDefaultResponse {
+    success: boolean;
+    cmd: number;
+    datas: UrlFilterDefaultRule[];
+    [key: string]: any;
+}
+
 export interface UrlFilterRule {
-    enabled: boolean;
-    priority: number;
-    url: string;
+    enableLink: boolean;
+    enableRule: boolean;
+    ippro: string;
     remark: string;
+    url: string;
 }
 
 export interface UrlFilterResponse {
     success: boolean;
     cmd: number;
-    mode: 'whitelist' | 'blacklist';
-    datas: UrlFilterRule[];
+    datas?: UrlFilterRule[];
     [key: string]: any;
 }

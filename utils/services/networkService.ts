@@ -23,6 +23,8 @@ import {
     RoutingRule,
     MeshSettingsResponse,
     TopologyDataResponse,
+    UrlFilterDefaultRule,
+    UrlFilterDefaultResponse,
     UrlFilterRule,
     UrlFilterResponse
 } from './types';
@@ -103,5 +105,8 @@ export const saveMeshSettings = async (data: { mesh_switch: string; mesh_role: s
 export const fetchTopologyData = async () => apiRequest<TopologyDataResponse>(315, 'GET');
 
 // URL Filter
-export const fetchUrlFilter = async () => apiRequest<UrlFilterResponse>(116, 'GET');
-export const saveUrlFilter = async (data: { mode: 'whitelist' | 'blacklist', datas: UrlFilterRule[] }) => apiRequest(116, 'POST', data);
+export const fetchUrlFilterDefault = async () => apiRequest<UrlFilterDefaultResponse>(29, 'GET');
+export const saveUrlFilterDefault = async (datas: UrlFilterDefaultRule[]) => apiRequest(29, 'POST', { datas });
+export const fetchUrlFilterRules = async () => apiRequest<UrlFilterResponse>(26, 'GET', { getfun: true });
+export const saveUrlFilterRules = async (datas: UrlFilterRule[]) => apiRequest(26, 'POST', { datas });
+export const applyUrlFilterSettings = async () => apiRequest(20, 'POST');

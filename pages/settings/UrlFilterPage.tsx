@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, Pencil, Trash2, ChevronLeft, ChevronRight, Loader2, Check } from 'lucide-react';
-import { UrlFilterRule, fetchUrlFilter, saveUrlFilter } from '../../utils/api';
+import { UrlFilterRule, fetchUrlFilterDefault, saveUrlFilterDefault, fetchUrlFilterRules, saveUrlFilterRules, applyUrlFilterSettings } from '../../utils/api';
 import { UrlFilterEditModal } from '../../components/UrlFilterEditModal';
 import { useAlert } from '../../utils/AlertContext';
 
@@ -18,12 +18,17 @@ export const UrlFilterPage: React.FC = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetchUrlFilter();
-        if (res && (res.success || res.cmd === 116)) {
-          setRules(res.datas || []);
-          if (res.mode) {
-            setMode(res.mode);
-          }
+        const [defaultRes, rulesRes] = await Promise.all([
+          fetchUrlFilterDefault(),
+          fetchUrlFilterRules()
+        ]);
+        
+        if (defaultRes && defaultRes.success && defaultRes.datas && defaultRes.datas.length > 0) {
+          setMode(defaultRes.datas[0].acceptAll ? 'blacklist' : 'whitelist');
+        }
+        
+        if (rulesRes && rulesRes.success) {
+          setRules(rulesRes.datas || []);
         }
       } catch (e) {
         console.error("Failed to load URL filter rules", e);
@@ -68,14 +73,31 @@ export const UrlFilterPage: React.FC = () => {
   };
 
   const toggleRuleEnabled = (index: number) => {
-    setRules(prev => prev.map((r, i) => i === index ? { ...r, enabled: !r.enabled } : r));
+    setRules(prev => prev.map((r, i) => i === index ? { ...r, enableRule: !r.enableRule } : r));
   };
 
   const handleGlobalSave = async () => {
     setSaving(true);
     try {
-      const res = await saveUrlFilter({ mode, datas: rules });
-      if (res && (res.success || res.result === 'success')) {
+      const isBlacklist = mode === 'blacklist';
+      
+      const defaultDatas = [
+        { enableRule: true, acceptAll: isBlacklist, ippro: "IPV4" },
+        { enableRule: true, acceptAll: isBlacklist, ippro: "IPV6" }
+      ];
+      
+      const rulesDatas = rules.map(r => ({
+        ...r,
+        enableLink: !isBlacklist // enableLink is false for blacklist, true for whitelist
+      }));
+
+      const [defaultRes, rulesRes] = await Promise.all([
+        saveUrlFilterDefault(defaultDatas),
+        saveUrlFilterRules(rulesDatas)
+      ]);
+
+      if (defaultRes?.success && rulesRes?.success) {
+        await applyUrlFilterSettings();
         showAlert('Settings saved successfully', 'success');
       } else {
         showAlert('Failed to save settings', 'error');
@@ -100,44 +122,35 @@ export const UrlFilterPage: React.FC = () => {
     <div className="w-full animate-fade-in py-6">
       <div className="flex justify-between items-start mb-4">
         <h3 className="font-bold text-base text-black mt-1">Default Filter Rules</h3>
-        <div className="flex flex-col items-end space-y-4">
-          <div className="flex items-center space-x-6">
-            <label className="flex items-center space-x-2 cursor-pointer">
-              <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${mode === 'whitelist' ? 'border-black' : 'border-gray-300'}`}>
-                {mode === 'whitelist' && <div className="w-2 h-2 bg-black rounded-full" />}
-              </div>
-              <span className="text-sm text-gray-700">Whitelist</span>
-              <input 
-                type="radio" 
-                name="filterMode" 
-                value="whitelist" 
-                checked={mode === 'whitelist'} 
-                onChange={() => setMode('whitelist')} 
-                className="hidden" 
-              />
-            </label>
-            <label className="flex items-center space-x-2 cursor-pointer">
-              <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${mode === 'blacklist' ? 'border-black' : 'border-gray-300'}`}>
-                {mode === 'blacklist' && <div className="w-2 h-2 bg-black rounded-full" />}
-              </div>
-              <span className="text-sm text-gray-700">Blacklist</span>
-              <input 
-                type="radio" 
-                name="filterMode" 
-                value="blacklist" 
-                checked={mode === 'blacklist'} 
-                onChange={() => setMode('blacklist')} 
-                className="hidden" 
-              />
-            </label>
-          </div>
-          <button 
-            onClick={handleGlobalSave}
-            disabled={saving}
-            className="bg-[#eeeeee] border-2 border-black text-black hover:bg-white font-bold py-1.5 px-8 text-sm transition-all rounded-[2px] shadow-sm min-w-[100px] flex items-center justify-center"
-          >
-            {saving ? <Loader2 className="animate-spin w-4 h-4" /> : 'Save'}
-          </button>
+        <div className="flex items-center space-x-6">
+          <label className="flex items-center space-x-2 cursor-pointer">
+            <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${mode === 'whitelist' ? 'border-black' : 'border-gray-300'}`}>
+              {mode === 'whitelist' && <div className="w-2 h-2 bg-black rounded-full" />}
+            </div>
+            <span className="text-sm text-gray-700">Whitelist</span>
+            <input 
+              type="radio" 
+              name="filterMode" 
+              value="whitelist" 
+              checked={mode === 'whitelist'} 
+              onChange={() => setMode('whitelist')} 
+              className="hidden" 
+            />
+          </label>
+          <label className="flex items-center space-x-2 cursor-pointer">
+            <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${mode === 'blacklist' ? 'border-black' : 'border-gray-300'}`}>
+              {mode === 'blacklist' && <div className="w-2 h-2 bg-black rounded-full" />}
+            </div>
+            <span className="text-sm text-gray-700">Blacklist</span>
+            <input 
+              type="radio" 
+              name="filterMode" 
+              value="blacklist" 
+              checked={mode === 'blacklist'} 
+              onChange={() => setMode('blacklist')} 
+              className="hidden" 
+            />
+          </label>
         </div>
       </div>
       
@@ -145,8 +158,7 @@ export const UrlFilterPage: React.FC = () => {
         {/* Header */}
         <div className="grid grid-cols-12 py-4 border-b border-gray-100">
           <div className="col-span-2 ps-4 font-bold text-sm text-black">Enable Rule</div>
-          <div className="col-span-2 font-bold text-sm text-black">Priority</div>
-          <div className="col-span-4 font-bold text-sm text-black">URL</div>
+          <div className="col-span-6 font-bold text-sm text-black">URL</div>
           <div className="col-span-3 font-bold text-sm text-black">Remark</div>
           <div className="col-span-1"></div>
         </div>
@@ -159,7 +171,7 @@ export const UrlFilterPage: React.FC = () => {
                 onClick={() => toggleRuleEnabled(index)}
                 className="w-14 h-7 flex items-center border border-black rounded-[2px] overflow-hidden"
               >
-                {item.enabled ? (
+                {item.enableRule ? (
                   <>
                     <div className="w-1/2 h-full bg-[#333] flex items-center justify-center text-white">
                       <Check size={16} strokeWidth={3} />
@@ -176,8 +188,7 @@ export const UrlFilterPage: React.FC = () => {
                 )}
               </button>
             </div>
-            <div className="col-span-2 text-sm text-black">{item.priority}</div>
-            <div className="col-span-4 text-sm text-black">{item.url}</div>
+            <div className="col-span-6 text-sm text-black">{item.url}</div>
             <div className="col-span-3 text-sm text-black truncate pr-2">{item.remark}</div>
             <div className="col-span-1 flex justify-end pe-4 space-x-3">
               <button 

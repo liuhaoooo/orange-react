@@ -60,8 +60,9 @@ export const UrlFilterEditModal: React.FC<UrlFilterEditModalProps> = ({
     }
 
     onSave({
-      enabled: initialData ? initialData.enabled : true,
-      priority: initialData ? initialData.priority : existingRules.length + 1,
+      enableLink: initialData ? initialData.enableLink : false, // Will be overridden by parent based on mode
+      enableRule: initialData ? initialData.enableRule : true,
+      ippro: initialData ? initialData.ippro : 'IPV4V6',
       url: url.trim(),
       remark: remark.trim()
     });
