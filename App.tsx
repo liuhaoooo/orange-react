@@ -53,6 +53,13 @@ function AppContent() {
   
   const prevIsLoggedIn = useRef(isLoggedIn);
 
+  // Open login modal on initial load if not logged in
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setIsLoginModalOpen(true);
+    }
+  }, []);
+
   const openLoginModal = () => setIsLoginModalOpen(true);
   const closeLoginModal = () => setIsLoginModalOpen(false);
 
