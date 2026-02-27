@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { UrlFilterRule } from '../utils/api';
+import { FormRow, StyledInput } from './UIComponents';
 
 interface UrlFilterEditModalProps {
   isOpen: boolean;
@@ -82,43 +83,31 @@ export const UrlFilterEditModal: React.FC<UrlFilterEditModalProps> = ({
         </div>
 
         <div className="p-8 pb-8 pt-6">
-          <div className="mb-6 flex flex-col sm:flex-row sm:items-start">
-            <label className="block font-bold text-sm text-black w-full sm:w-1/4 mb-2 sm:mb-0 pt-2">
-              <span className="text-red-500 me-1">*</span>URL
-            </label>
-            <div className="w-full sm:w-3/4">
-              <input
+          <FormRow label="URL" required={true} error={error && error.includes('URL') ? error : undefined} className="border-b-0 py-2" alignTop={true}>
+            <div className="w-full">
+              <StyledInput
                 type="text"
                 value={url}
                 onChange={(e) => {
                   setUrl(e.target.value);
                   setError('');
                 }}
-                className={`w-full border px-3 py-2 text-sm text-black outline-none transition-all rounded-[2px] ${error && error.includes('URL') ? 'border-red-500' : 'border-gray-300 focus:border-orange'}`}
+                hasError={!!(error && error.includes('URL'))}
               />
               <div className="text-right text-gray-400 text-xs mt-1">
                 Example: www.google.com
               </div>
             </div>
-          </div>
+          </FormRow>
 
-          <div className="mb-6 flex flex-col sm:flex-row sm:items-start">
-            <label className="block font-bold text-sm text-black w-full sm:w-1/4 mb-2 sm:mb-0 pt-2">
-              Remark
-            </label>
-            <div className="w-full sm:w-3/4">
-              <textarea
-                value={remark}
-                onChange={(e) => setRemark(e.target.value)}
-                rows={4}
-                className="w-full border border-gray-300 px-3 py-2 text-sm text-black outline-none transition-all rounded-[2px] focus:border-orange resize-y"
-              />
-            </div>
-          </div>
-
-          {error && (
-            <div className="text-red-500 text-sm text-center mb-4 font-bold">{error}</div>
-          )}
+          <FormRow label="Remark" className="border-b-0 py-2" alignTop={true}>
+            <textarea
+              value={remark}
+              onChange={(e) => setRemark(e.target.value)}
+              rows={4}
+              className="w-full border border-gray-300 px-3 py-2 text-sm text-black outline-none transition-all rounded-[2px] focus:border-orange focus:ring-1 focus:ring-orange resize-y"
+            />
+          </FormRow>
 
           <div className="flex justify-end space-x-4 mt-8">
             <button
