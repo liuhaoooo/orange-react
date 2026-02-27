@@ -68,7 +68,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
     },
     { 
       id: 'wifi', 
-      label: t('wlan') || 'WLAN',
+      label: t('WLAN') || 'WLAN',
       subTabs: [
           { id: 'wifi_mac_filter', label: t('macFiltering') },
           { id: 'wifi_wps', label: t('wpsSettings') },
@@ -98,6 +98,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
       label: t('device') || 'Device',
       subTabs: [
           { id: 'dhcp_settings', label: t('dhcp') },
+          { id: 'ip_reservation', label: t('ipAddressReservation') },
           { id: 'multiple_dhcp', label: t('multipleDhcp') },
           { id: 'vlan', label: t('vlan') }
       ]
@@ -220,11 +221,11 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
              }
         }
     } else {
-        // Priority 3: Default (Network -> APN)
-        if (activeSectionId === 'network' && !activeSubTabId) {
-            setActiveSubTabId('apn_settings');
+        // Priority 3: Default (Info -> Device Info)
+        if (activeSectionId === 'info' && !activeSubTabId) {
+            setActiveSubTabId('device_info');
             // Sync URL
-            navigate(`/settings?section=network&sub=apn_settings`, { replace: true });
+            navigate(`/settings?section=info&sub=device_info`, { replace: true });
         }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
