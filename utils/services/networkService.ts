@@ -101,3 +101,7 @@ export const saveMeshSettings = async (data: { mesh_switch: string; mesh_role: s
 
 // Topology
 export const fetchTopologyData = async () => apiRequest<TopologyDataResponse>(315, 'GET');
+
+// URL Filter
+export const fetchUrlFilter = async () => apiRequest<UrlFilterResponse>(116, 'GET');
+export const saveUrlFilter = async (data: { mode: 'whitelist' | 'blacklist', datas: UrlFilterRule[] }) => apiRequest(116, 'POST', data);
