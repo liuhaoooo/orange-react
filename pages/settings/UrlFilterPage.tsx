@@ -3,6 +3,7 @@ import { ChevronDown, Pencil, Trash2, ChevronLeft, ChevronRight, Loader2, Check 
 import { UrlFilterRule, fetchUrlFilterDefault, saveUrlFilterDefault, fetchUrlFilterRules, saveUrlFilterRules, applyUrlFilterSettings } from '../../utils/api';
 import { UrlFilterEditModal } from '../../components/UrlFilterEditModal';
 import { useAlert } from '../../utils/AlertContext';
+import { SquareSwitch } from '../../components/UIComponents';
 
 export const UrlFilterPage: React.FC = () => {
   const { showAlert } = useAlert();
@@ -167,26 +168,10 @@ export const UrlFilterPage: React.FC = () => {
         {rules.length > 0 ? rules.map((item, index) => (
           <div key={index} className="grid grid-cols-12 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors items-center">
             <div className="col-span-2 ps-4">
-              <button 
-                onClick={() => toggleRuleEnabled(index)}
-                className="w-14 h-7 flex items-center border border-black rounded-[2px] overflow-hidden"
-              >
-                {item.enableRule ? (
-                  <>
-                    <div className="w-1/2 h-full bg-[#333] flex items-center justify-center text-white">
-                      <Check size={16} strokeWidth={3} />
-                    </div>
-                    <div className="w-1/2 h-full bg-white"></div>
-                  </>
-                ) : (
-                  <>
-                    <div className="w-1/2 h-full bg-white"></div>
-                    <div className="w-1/2 h-full bg-[#eeeeee] flex items-center justify-center border-l border-black">
-                      <div className="w-2 h-2 rounded-full bg-gray-400"></div>
-                    </div>
-                  </>
-                )}
-              </button>
+              <SquareSwitch 
+                isOn={item.enableRule} 
+                onChange={() => toggleRuleEnabled(index)} 
+              />
             </div>
             <div className="col-span-6 text-sm text-black">{item.url}</div>
             <div className="col-span-3 text-sm text-black truncate pr-2">{item.remark}</div>
