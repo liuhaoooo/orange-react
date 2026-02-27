@@ -452,3 +452,18 @@ export interface TopologyDataResponse {
   tuopuData: string;
   [key: string]: any;
 }
+
+export interface UrlFilterRule {
+    enabled: boolean;
+    priority: number;
+    url: string;
+    remark: string;
+}
+
+export interface UrlFilterResponse {
+    success: boolean;
+    cmd: number;
+    mode: 'whitelist' | 'blacklist';
+    datas: UrlFilterRule[];
+    [key: string]: any;
+}

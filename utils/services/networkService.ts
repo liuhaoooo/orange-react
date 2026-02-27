@@ -22,7 +22,9 @@ import {
     RoutingSettingsResponse,
     RoutingRule,
     MeshSettingsResponse,
-    TopologyDataResponse
+    TopologyDataResponse,
+    UrlFilterRule,
+    UrlFilterResponse
 } from './types';
 
 // Status & Connection
