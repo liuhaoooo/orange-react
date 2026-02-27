@@ -183,6 +183,8 @@ export const cn = {
     macFiltering5: "5GHz MAC 过滤",
     wpsSettings5: "5GHz WPS 设置",
     advSettings5: "5GHz 高级设置",
+    wifiAdvancedSettings: "Wi-Fi 高级",
+    wpsSettings: "WPS 设置",
     multipleDhcp: "多 DHCP",
     ipAddressReservation: "IP 地址预留",
     basicConfig: "基本配置",

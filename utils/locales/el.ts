@@ -183,6 +183,8 @@ export const el = {
     macFiltering5: "5GHz MAC Filtering",
     wpsSettings5: "5GHz WPS Settings",
     advSettings5: "5GHz Advanced Settings",
+    wifiAdvancedSettings: "Wi-Fi Avanzado",
+    wpsSettings: "Configuración WPS",
     multipleDhcp: "Multiple DHCP",
     ipAddressReservation: "Reserva de dirección IP",
     basicConfig: "Basic Configuration",
