@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, Pencil, Trash2, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
-import { UrlLimitRule, fetchUrlLimitRules, saveUrlLimitRules, applyUrlLimitSettings } from '../../utils/api';
+import { ChevronDown, Pencil, Trash2, ChevronLeft, ChevronRight, Loader2, AlertCircle } from 'lucide-react';
+import { UrlLimitRule, fetchUrlLimitRules, saveUrlLimitRules, applyUrlLimitSettings, fetchParentalModeSettings } from '../../utils/api';
 import { UrlLimitEditModal } from '../../components/UrlLimitEditModal';
 import { useAlert } from '../../utils/AlertContext';
 import { SquareSwitch } from '../../components/UIComponents';
@@ -12,6 +12,7 @@ export const UrlLimitPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [rules, setRules] = useState<UrlLimitRule[]>([]);
+  const [parentalModeEnabled, setParentalModeEnabled] = useState(true);
   
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -29,8 +30,15 @@ export const UrlLimitPage: React.FC = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const rulesRes = await fetchUrlLimitRules();
+        const [parentalRes, rulesRes] = await Promise.all([
+          fetchParentalModeSettings(),
+          fetchUrlLimitRules()
+        ]);
         
+        if (parentalRes && (parentalRes.success || parentalRes.cmd === 391)) {
+          setParentalModeEnabled(parentalRes.enable === '1');
+        }
+
         if (rulesRes && (rulesRes.success || rulesRes.cmd === 383)) {
           setRules(rulesRes.datas || []);
         }
@@ -130,6 +138,20 @@ export const UrlLimitPage: React.FC = () => {
     return (
       <div className="w-full h-64 flex items-center justify-center">
         <Loader2 className="animate-spin text-orange" size={40} />
+      </div>
+    );
+  }
+
+  if (!parentalModeEnabled) {
+    return (
+      <div className="w-full py-16 flex flex-col items-center justify-center animate-fade-in">
+        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+          <AlertCircle size={32} className="text-gray-400" />
+        </div>
+        <h3 className="text-lg font-bold text-black mb-2">Parental Mode is Disabled</h3>
+        <p className="text-gray-500 text-sm text-center max-w-md">
+          Please enable Parental Mode first to configure URL Limit rules.
+        </p>
       </div>
     );
   }
