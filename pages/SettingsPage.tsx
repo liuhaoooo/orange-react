@@ -39,6 +39,7 @@ import { UpnpPage } from './settings/UpnpPage';
 import { DdosProtectionPage } from './settings/DdosProtectionPage';
 import { PortForwardingPage } from './settings/PortForwardingPage';
 import { ParentalModePage } from './settings/ParentalModePage';
+import { UrlLimitPage } from './settings/UrlLimitPage';
 
 interface SettingsPageProps {
   onOpenLogin: () => void;
@@ -456,6 +457,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <PortForwardingPage />;
           case 'parental_mode':
               return <ParentalModePage />;
+          case 'url_limit':
+              return <UrlLimitPage />;
           
           default:
               // Default Placeholder Layout

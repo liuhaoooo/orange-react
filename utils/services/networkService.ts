@@ -37,6 +37,8 @@ import {
     PortFilterResponse,
     PortForwardingRule,
     PortForwardingResponse,
+    UrlLimitRule,
+    UrlLimitResponse,
     UrlFilterDefaultRule,
     UrlFilterDefaultResponse,
     UrlFilterRule,
@@ -159,3 +161,8 @@ export const saveParentalModeSettings = async (enable: string) => apiRequest(391
 export const fetchPortForwardingRules = async () => apiRequest<PortForwardingResponse>(27, 'GET', { getfun: true });
 export const savePortForwardingRules = async (datas: PortForwardingRule[]) => apiRequest(27, 'POST', { success: true, datas });
 export const applyPortForwardingSettings = async () => apiRequest(20, 'POST');
+
+// URL Limit
+export const fetchUrlLimitRules = async () => apiRequest<UrlLimitResponse>(383, 'GET', { getfun: true });
+export const saveUrlLimitRules = async (datas: UrlLimitRule[]) => apiRequest(383, 'POST', { success: true, datas });
+export const applyUrlLimitSettings = async () => apiRequest(20, 'POST');

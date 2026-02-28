@@ -558,6 +558,21 @@ export interface PortForwardingResponse {
     [key: string]: any;
 }
 
+export interface UrlLimitRule {
+    enableRule: boolean;
+    enableLink: boolean;
+    mac: string;
+    url: string;
+    ippro: string;
+}
+
+export interface UrlLimitResponse {
+    success: boolean;
+    cmd: number;
+    datas?: UrlLimitRule[];
+    [key: string]: any;
+}
+
 export interface UrlFilterDefaultRule {
     enableRule: boolean;
     acceptAll: boolean;
