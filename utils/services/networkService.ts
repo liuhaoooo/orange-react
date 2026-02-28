@@ -27,6 +27,7 @@ import {
     GlobalMacFilterDefaultResponse,
     GlobalMacFilterRule,
     GlobalMacFilterResponse,
+    DmzSettingsResponse,
     PortFilterDefaultRule,
     PortFilterDefaultResponse,
     PortFilterRule,
@@ -132,3 +133,7 @@ export const savePortFilterDefault = async (datas: PortFilterDefaultRule[]) => a
 export const fetchPortFilterRules = async () => apiRequest<PortFilterResponse>(21, 'GET', { getfun: true });
 export const savePortFilterRules = async (datas: PortFilterRule[]) => apiRequest(21, 'POST', { datas });
 export const applyPortFilterSettings = async () => apiRequest(20, 'POST');
+
+// DMZ
+export const fetchDmzSettings = async () => apiRequest<DmzSettingsResponse>(172, 'GET', { subcmd: 6, success: true });
+export const saveDmzSettings = async (enabled: string, ip: string) => apiRequest(172, 'POST', { subcmd: 6, success: true, enabled, ip });

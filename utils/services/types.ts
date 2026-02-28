@@ -481,6 +481,14 @@ export interface GlobalMacFilterResponse {
     [key: string]: any;
 }
 
+export interface DmzSettingsResponse {
+    success: boolean;
+    cmd: number;
+    enabled: string;
+    ip: string;
+    [key: string]: any;
+}
+
 export interface PortFilterDefaultRule {
     enableRule: boolean;
     acceptAll: boolean;

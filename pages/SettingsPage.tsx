@@ -34,6 +34,7 @@ import { TopologyDiagramPage } from './settings/TopologyDiagramPage';
 import { UrlFilterPage } from './settings/UrlFilterPage';
 import { GlobalMacFilteringPage } from './settings/GlobalMacFilteringPage';
 import { PortFilteringPage } from './settings/PortFilteringPage';
+import { DmzPage } from './settings/DmzPage';
 
 interface SettingsPageProps {
   onOpenLogin: () => void;
@@ -441,6 +442,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <GlobalMacFilteringPage />;
           case 'port_filtering':
               return <PortFilteringPage />;
+          case 'dmz':
+              return <DmzPage />;
           
           default:
               // Default Placeholder Layout
