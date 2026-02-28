@@ -38,6 +38,7 @@ import { DmzPage } from './settings/DmzPage';
 import { UpnpPage } from './settings/UpnpPage';
 import { DdosProtectionPage } from './settings/DdosProtectionPage';
 import { PortForwardingPage } from './settings/PortForwardingPage';
+import { ParentalModePage } from './settings/ParentalModePage';
 
 interface SettingsPageProps {
   onOpenLogin: () => void;
@@ -453,6 +454,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <DdosProtectionPage />;
           case 'port_forwarding':
               return <PortForwardingPage />;
+          case 'parental_mode':
+              return <ParentalModePage />;
           
           default:
               // Default Placeholder Layout

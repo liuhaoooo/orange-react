@@ -30,6 +30,7 @@ import {
     DmzSettingsResponse,
     UpnpSettingsResponse,
     DdosSettingsResponse,
+    ParentalModeResponse,
     PortFilterDefaultRule,
     PortFilterDefaultResponse,
     PortFilterRule,
@@ -149,6 +150,10 @@ export const saveUpnpSettings = async (upnpSwitch: string) => apiRequest(333, 'P
 // DDoS
 export const fetchDdosSettings = async () => apiRequest<DdosSettingsResponse>(275, 'GET');
 export const saveDdosSettings = async (ddosSwich: string) => apiRequest(275, 'POST', { ddosSwich });
+
+// Parental Mode
+export const fetchParentalModeSettings = async () => apiRequest<ParentalModeResponse>(391, 'GET');
+export const saveParentalModeSettings = async (enable: string) => apiRequest(391, 'POST', { enable });
 
 // Port Forwarding
 export const fetchPortForwardingRules = async () => apiRequest<PortForwardingResponse>(27, 'GET', { getfun: true });

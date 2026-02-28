@@ -504,6 +504,13 @@ export interface DdosSettingsResponse {
     [key: string]: any;
 }
 
+export interface ParentalModeResponse {
+    success: boolean;
+    cmd: number;
+    enable: string;
+    [key: string]: any;
+}
+
 export interface PortFilterDefaultRule {
     enableRule: boolean;
     acceptAll: boolean;
