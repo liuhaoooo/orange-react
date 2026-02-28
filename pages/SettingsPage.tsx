@@ -33,6 +33,7 @@ import { MeshBasicConfigPage } from './settings/MeshBasicConfigPage';
 import { TopologyDiagramPage } from './settings/TopologyDiagramPage';
 import { UrlFilterPage } from './settings/UrlFilterPage';
 import { GlobalMacFilteringPage } from './settings/GlobalMacFilteringPage';
+import { PortFilteringPage } from './settings/PortFilteringPage';
 
 interface SettingsPageProps {
   onOpenLogin: () => void;
@@ -438,6 +439,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <UrlFilterPage />;
           case 'mac_filtering':
               return <GlobalMacFilteringPage />;
+          case 'port_filtering':
+              return <PortFilteringPage />;
           
           default:
               // Default Placeholder Layout

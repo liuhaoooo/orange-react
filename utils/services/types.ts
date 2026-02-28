@@ -481,6 +481,35 @@ export interface GlobalMacFilterResponse {
     [key: string]: any;
 }
 
+export interface PortFilterDefaultRule {
+    enableRule: boolean;
+    acceptAll: boolean;
+    ippro: string;
+}
+
+export interface PortFilterDefaultResponse {
+    success: boolean;
+    cmd: number;
+    datas: PortFilterDefaultRule[];
+    [key: string]: any;
+}
+
+export interface PortFilterRule {
+    enableLink: boolean;
+    enableRule: boolean;
+    ippro: string;
+    protocol: string;
+    remark: string;
+    port: string;
+}
+
+export interface PortFilterResponse {
+    success: boolean;
+    cmd: number;
+    datas?: PortFilterRule[];
+    [key: string]: any;
+}
+
 export interface UrlFilterDefaultRule {
     enableRule: boolean;
     acceptAll: boolean;

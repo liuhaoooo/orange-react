@@ -27,6 +27,10 @@ import {
     GlobalMacFilterDefaultResponse,
     GlobalMacFilterRule,
     GlobalMacFilterResponse,
+    PortFilterDefaultRule,
+    PortFilterDefaultResponse,
+    PortFilterRule,
+    PortFilterResponse,
     UrlFilterDefaultRule,
     UrlFilterDefaultResponse,
     UrlFilterRule,
@@ -121,3 +125,10 @@ export const saveGlobalMacFilterDefault = async (datas: GlobalMacFilterDefaultRu
 export const fetchGlobalMacFilterRules = async () => apiRequest<GlobalMacFilterResponse>(23, 'GET', { getfun: true });
 export const saveGlobalMacFilterRules = async (datas: GlobalMacFilterRule[]) => apiRequest(23, 'POST', { datas });
 export const applyGlobalMacFilterSettings = async () => apiRequest(20, 'POST');
+
+// Port Filter
+export const fetchPortFilterDefault = async () => apiRequest<PortFilterDefaultResponse>(28, 'GET');
+export const savePortFilterDefault = async (datas: PortFilterDefaultRule[]) => apiRequest(28, 'POST', { datas });
+export const fetchPortFilterRules = async () => apiRequest<PortFilterResponse>(21, 'GET', { getfun: true });
+export const savePortFilterRules = async (datas: PortFilterRule[]) => apiRequest(21, 'POST', { datas });
+export const applyPortFilterSettings = async () => apiRequest(20, 'POST');
