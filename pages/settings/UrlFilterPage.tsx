@@ -24,11 +24,11 @@ export const UrlFilterPage: React.FC = () => {
           fetchUrlFilterRules()
         ]);
         
-        if (defaultRes && defaultRes.success && defaultRes.datas && defaultRes.datas.length > 0) {
+        if (defaultRes && (defaultRes.success || defaultRes.cmd === 29) && defaultRes.datas && defaultRes.datas.length > 0) {
           setMode(defaultRes.datas[0].acceptAll ? 'blacklist' : 'whitelist');
         }
         
-        if (rulesRes && rulesRes.success) {
+        if (rulesRes && (rulesRes.success || rulesRes.cmd === 26)) {
           setRules(rulesRes.datas || []);
         }
       } catch (e) {
@@ -97,7 +97,7 @@ export const UrlFilterPage: React.FC = () => {
         saveUrlFilterRules(rulesDatas)
       ]);
 
-      if (defaultRes?.success && rulesRes?.success) {
+      if ((defaultRes?.success || defaultRes?.cmd === 29) && (rulesRes?.success || rulesRes?.cmd === 26)) {
         await applyUrlFilterSettings();
         showAlert('Settings saved successfully', 'success');
       } else {
