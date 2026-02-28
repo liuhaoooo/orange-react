@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { fetchDdosSettings, saveDdosSettings } from '../../utils/api';
 import { useAlert } from '../../utils/AlertContext';
-import { FormRow, ToggleSwitch } from '../../components/UIComponents';
+import { FormRow, SquareSwitch } from '../../components/UIComponents';
 
 export const DdosProtectionPage: React.FC = () => {
   const { showAlert } = useAlert();
@@ -57,9 +57,9 @@ export const DdosProtectionPage: React.FC = () => {
     <div className="w-full animate-fade-in py-6">
       <div className="w-full">
         <FormRow label="DDoS Protection Switch">
-          <ToggleSwitch 
+          <SquareSwitch 
             isOn={enabled} 
-            onToggle={() => setEnabled(!enabled)} 
+            onChange={() => setEnabled(!enabled)} 
           />
         </FormRow>
 
