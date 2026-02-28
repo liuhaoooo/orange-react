@@ -533,6 +533,24 @@ export interface PortFilterResponse {
     [key: string]: any;
 }
 
+export interface PortForwardingRule {
+    enableRule: boolean;
+    ifName: string;
+    mappingIp: string;
+    mappingIpPort: string;
+    mappingPort: string;
+    port: string;
+    protocol: string;
+    remark: string;
+}
+
+export interface PortForwardingResponse {
+    success: boolean;
+    cmd: number;
+    datas?: PortForwardingRule[];
+    [key: string]: any;
+}
+
 export interface UrlFilterDefaultRule {
     enableRule: boolean;
     acceptAll: boolean;

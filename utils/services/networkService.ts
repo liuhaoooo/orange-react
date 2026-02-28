@@ -34,6 +34,8 @@ import {
     PortFilterDefaultResponse,
     PortFilterRule,
     PortFilterResponse,
+    PortForwardingRule,
+    PortForwardingResponse,
     UrlFilterDefaultRule,
     UrlFilterDefaultResponse,
     UrlFilterRule,
@@ -147,3 +149,8 @@ export const saveUpnpSettings = async (upnpSwitch: string) => apiRequest(333, 'P
 // DDoS
 export const fetchDdosSettings = async () => apiRequest<DdosSettingsResponse>(275, 'GET');
 export const saveDdosSettings = async (ddosSwich: string) => apiRequest(275, 'POST', { ddosSwich });
+
+// Port Forwarding
+export const fetchPortForwardingRules = async () => apiRequest<PortForwardingResponse>(27, 'GET', { getfun: true });
+export const savePortForwardingRules = async (datas: PortForwardingRule[]) => apiRequest(27, 'POST', { success: true, datas });
+export const applyPortForwardingSettings = async () => apiRequest(20, 'POST');
