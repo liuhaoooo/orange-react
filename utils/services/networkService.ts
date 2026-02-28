@@ -23,6 +23,10 @@ import {
     RoutingRule,
     MeshSettingsResponse,
     TopologyDataResponse,
+    GlobalMacFilterDefaultRule,
+    GlobalMacFilterDefaultResponse,
+    GlobalMacFilterRule,
+    GlobalMacFilterResponse,
     UrlFilterDefaultRule,
     UrlFilterDefaultResponse,
     UrlFilterRule,
@@ -110,3 +114,10 @@ export const saveUrlFilterDefault = async (datas: UrlFilterDefaultRule[]) => api
 export const fetchUrlFilterRules = async () => apiRequest<UrlFilterResponse>(26, 'GET', { getfun: true });
 export const saveUrlFilterRules = async (datas: UrlFilterRule[]) => apiRequest(26, 'POST', { datas });
 export const applyUrlFilterSettings = async () => apiRequest(20, 'POST');
+
+// Global MAC Filter
+export const fetchGlobalMacFilterDefault = async () => apiRequest<GlobalMacFilterDefaultResponse>(30, 'GET');
+export const saveGlobalMacFilterDefault = async (datas: GlobalMacFilterDefaultRule[]) => apiRequest(30, 'POST', { datas });
+export const fetchGlobalMacFilterRules = async () => apiRequest<GlobalMacFilterResponse>(23, 'GET', { getfun: true });
+export const saveGlobalMacFilterRules = async (datas: GlobalMacFilterRule[]) => apiRequest(23, 'POST', { datas });
+export const applyGlobalMacFilterSettings = async () => apiRequest(20, 'POST');

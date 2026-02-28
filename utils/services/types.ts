@@ -453,6 +453,34 @@ export interface TopologyDataResponse {
   [key: string]: any;
 }
 
+export interface GlobalMacFilterDefaultRule {
+    enableRule: boolean;
+    acceptAll: boolean;
+    ippro: string;
+}
+
+export interface GlobalMacFilterDefaultResponse {
+    success: boolean;
+    cmd: number;
+    datas: GlobalMacFilterDefaultRule[];
+    [key: string]: any;
+}
+
+export interface GlobalMacFilterRule {
+    enableLink: boolean;
+    enableRule: boolean;
+    ippro: string;
+    remark: string;
+    mac: string;
+}
+
+export interface GlobalMacFilterResponse {
+    success: boolean;
+    cmd: number;
+    datas?: GlobalMacFilterRule[];
+    [key: string]: any;
+}
+
 export interface UrlFilterDefaultRule {
     enableRule: boolean;
     acceptAll: boolean;

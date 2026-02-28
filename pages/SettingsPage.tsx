@@ -32,6 +32,7 @@ import { VpnPage } from './settings/VpnPage';
 import { MeshBasicConfigPage } from './settings/MeshBasicConfigPage';
 import { TopologyDiagramPage } from './settings/TopologyDiagramPage';
 import { UrlFilterPage } from './settings/UrlFilterPage';
+import { GlobalMacFilteringPage } from './settings/GlobalMacFilteringPage';
 
 interface SettingsPageProps {
   onOpenLogin: () => void;
@@ -435,6 +436,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <VpnPage />;
           case 'url_filter':
               return <UrlFilterPage />;
+          case 'mac_filtering':
+              return <GlobalMacFilteringPage />;
           
           default:
               // Default Placeholder Layout
