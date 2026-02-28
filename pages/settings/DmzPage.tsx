@@ -74,7 +74,7 @@ export const DmzPage: React.FC = () => {
 
   return (
     <div className="w-full animate-fade-in py-6">
-      <div className="max-w-3xl">
+      <div className="w-full">
         <FormRow label="DMZ Switch">
           <SquareSwitch 
             isOn={enabled} 
