@@ -489,6 +489,21 @@ export interface DmzSettingsResponse {
     [key: string]: any;
 }
 
+export interface UpnpSettingsResponse {
+    success: boolean;
+    cmd: number;
+    upnpSwitch: string;
+    [key: string]: any;
+}
+
+export interface DdosSettingsResponse {
+    success: boolean;
+    cmd: number;
+    ddosSwich: string;
+    ackFloodSwich: string;
+    [key: string]: any;
+}
+
 export interface PortFilterDefaultRule {
     enableRule: boolean;
     acceptAll: boolean;

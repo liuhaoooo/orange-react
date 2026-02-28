@@ -28,6 +28,8 @@ import {
     GlobalMacFilterRule,
     GlobalMacFilterResponse,
     DmzSettingsResponse,
+    UpnpSettingsResponse,
+    DdosSettingsResponse,
     PortFilterDefaultRule,
     PortFilterDefaultResponse,
     PortFilterRule,
@@ -137,3 +139,11 @@ export const applyPortFilterSettings = async () => apiRequest(20, 'POST');
 // DMZ
 export const fetchDmzSettings = async () => apiRequest<DmzSettingsResponse>(172, 'GET', { subcmd: 6, success: true });
 export const saveDmzSettings = async (enabled: string, ip: string) => apiRequest(172, 'POST', { subcmd: 6, success: true, enabled, ip });
+
+// UPnP
+export const fetchUpnpSettings = async () => apiRequest<UpnpSettingsResponse>(333, 'GET');
+export const saveUpnpSettings = async (upnpSwitch: string) => apiRequest(333, 'POST', { upnpSwitch });
+
+// DDoS
+export const fetchDdosSettings = async () => apiRequest<DdosSettingsResponse>(275, 'GET');
+export const saveDdosSettings = async (ddosSwich: string) => apiRequest(275, 'POST', { ddosSwich });

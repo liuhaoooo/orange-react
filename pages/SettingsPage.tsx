@@ -35,6 +35,8 @@ import { UrlFilterPage } from './settings/UrlFilterPage';
 import { GlobalMacFilteringPage } from './settings/GlobalMacFilteringPage';
 import { PortFilteringPage } from './settings/PortFilteringPage';
 import { DmzPage } from './settings/DmzPage';
+import { UpnpPage } from './settings/UpnpPage';
+import { DdosProtectionPage } from './settings/DdosProtectionPage';
 
 interface SettingsPageProps {
   onOpenLogin: () => void;
@@ -444,6 +446,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <PortFilteringPage />;
           case 'dmz':
               return <DmzPage />;
+          case 'upnp':
+              return <UpnpPage />;
+          case 'ddos_protection':
+              return <DdosProtectionPage />;
           
           default:
               // Default Placeholder Layout
