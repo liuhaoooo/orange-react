@@ -40,6 +40,7 @@ import { DdosProtectionPage } from './settings/DdosProtectionPage';
 import { PortForwardingPage } from './settings/PortForwardingPage';
 import { ParentalModePage } from './settings/ParentalModePage';
 import { UrlLimitPage } from './settings/UrlLimitPage';
+import { TimeLimitPage } from './settings/TimeLimitPage';
 
 interface SettingsPageProps {
   onOpenLogin: () => void;
@@ -459,6 +460,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <ParentalModePage />;
           case 'url_limit':
               return <UrlLimitPage />;
+          case 'time_limit':
+              return <TimeLimitPage />;
           
           default:
               // Default Placeholder Layout

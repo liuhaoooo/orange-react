@@ -1,18 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, AlertCircle } from 'lucide-react';
-import { UrlLimitRule } from '../utils/api';
+import { TimeLimitRule } from '../utils/api';
 import { FormRow, StyledInput } from './UIComponents';
 
-interface UrlLimitEditModalProps {
+interface TimeLimitEditModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (rules: UrlLimitRule[]) => void;
-  initialData: UrlLimitRule | null;
+  onSave: (rules: TimeLimitRule[]) => void;
+  initialData: TimeLimitRule | null;
   prefilledMacs?: string[];
 }
 
-export const UrlLimitEditModal: React.FC<UrlLimitEditModalProps> = ({
+const DAYS_OF_WEEK = [
+  { label: 'Mon', value: '1' },
+  { label: 'Tue', value: '2' },
+  { label: 'Wed', value: '3' },
+  { label: 'Thu', value: '4' },
+  { label: 'Fri', value: '5' },
+  { label: 'Sat', value: '6' },
+  { label: 'Sun', value: '0' },
+];
+
+export const TimeLimitEditModal: React.FC<TimeLimitEditModalProps> = ({
   isOpen,
   onClose,
   onSave,
@@ -20,17 +30,23 @@ export const UrlLimitEditModal: React.FC<UrlLimitEditModalProps> = ({
   prefilledMacs = []
 }) => {
   const [macAddress, setMacAddress] = useState('');
-  const [url, setUrl] = useState('');
+  const [startTime, setStartTime] = useState('00:00');
+  const [endTime, setEndTime] = useState('23:59');
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
         setMacAddress(initialData.mac);
-        setUrl(initialData.url);
+        setStartTime(initialData.startTime);
+        setEndTime(initialData.endTime);
+        setSelectedDays(initialData.scheduleDays ? initialData.scheduleDays.split(',') : []);
       } else {
         setMacAddress(prefilledMacs.join(', '));
-        setUrl('');
+        setStartTime('00:00');
+        setEndTime('23:59');
+        setSelectedDays(['1', '2', '3', '4', '5', '6', '0']);
       }
       setErrors({});
     }
@@ -41,6 +57,11 @@ export const UrlLimitEditModal: React.FC<UrlLimitEditModalProps> = ({
   const validateMac = (mac: string) => {
     const regex = /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/;
     return regex.test(mac.trim());
+  };
+
+  const validateTime = (time: string) => {
+    const regex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+    return regex.test(time);
   };
 
   const handleSave = () => {
@@ -56,8 +77,16 @@ export const UrlLimitEditModal: React.FC<UrlLimitEditModalProps> = ({
       }
     }
 
-    if (!url.trim()) {
-      newErrors.url = 'URL is required';
+    if (!validateTime(startTime)) {
+      newErrors.startTime = 'Invalid time format (HH:MM)';
+    }
+
+    if (!validateTime(endTime)) {
+      newErrors.endTime = 'Invalid time format (HH:MM)';
+    }
+
+    if (selectedDays.length === 0) {
+      newErrors.scheduleDays = 'Please select at least one day';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -66,18 +95,24 @@ export const UrlLimitEditModal: React.FC<UrlLimitEditModalProps> = ({
     }
 
     const cleanedMacs = macAddress.split(',').map(m => m.trim()).filter(Boolean).join(',');
-    const cleanedUrls = url.split(',').map(u => u.trim()).filter(Boolean).join(',');
 
-    const newRules: UrlLimitRule[] = [{
+    const newRules: TimeLimitRule[] = [{
       enableRule: initialData ? initialData.enableRule : true,
-      enableLink: false,
       mac: cleanedMacs,
-      url: cleanedUrls,
-      ippro: initialData ? initialData.ippro : 'IPV4V6'
+      startTime: startTime,
+      endTime: endTime,
+      scheduleDays: selectedDays.join(',')
     }];
 
     onSave(newRules);
     onClose();
+  };
+
+  const toggleDay = (dayValue: string) => {
+    setSelectedDays(prev => 
+      prev.includes(dayValue) ? prev.filter(d => d !== dayValue) : [...prev, dayValue]
+    );
+    setErrors(prev => ({ ...prev, scheduleDays: '' }));
   };
 
   return createPortal(
@@ -95,7 +130,7 @@ export const UrlLimitEditModal: React.FC<UrlLimitEditModalProps> = ({
         <div className="p-8 pb-8 pt-6">
           <div className="bg-[#fff8e6] text-[#b38000] p-3 rounded-[2px] mb-6 flex items-center text-sm">
             <AlertCircle size={16} className="me-2 shrink-0" />
-            Use when entering multiple urls, separated
+            Use when entering multiple MAC addresses, separated by commas
           </div>
 
           <FormRow label="MAC Address" required={true} error={errors.macAddress} className="border-b-0 py-2 mt-4" alignTop={true}>
@@ -112,17 +147,45 @@ export const UrlLimitEditModal: React.FC<UrlLimitEditModalProps> = ({
             </div>
           </FormRow>
 
-          <FormRow label="URL" required={true} error={errors.url} className="border-b-0 py-2 mt-4" alignTop={true}>
-            <div className="w-full">
+          <FormRow label="Limit Time" required={true} error={errors.startTime || errors.endTime} className="border-b-0 py-2 mt-4" alignTop={true}>
+            <div className="w-full flex items-center space-x-2">
               <StyledInput
-                type="text"
-                value={url}
+                type="time"
+                value={startTime}
                 onChange={(e) => {
-                  setUrl(e.target.value);
-                  setErrors(prev => ({ ...prev, url: '' }));
+                  setStartTime(e.target.value);
+                  setErrors(prev => ({ ...prev, startTime: '' }));
                 }}
-                hasError={!!errors.url}
+                hasError={!!errors.startTime}
               />
+              <span className="text-gray-500">-</span>
+              <StyledInput
+                type="time"
+                value={endTime}
+                onChange={(e) => {
+                  setEndTime(e.target.value);
+                  setErrors(prev => ({ ...prev, endTime: '' }));
+                }}
+                hasError={!!errors.endTime}
+              />
+            </div>
+          </FormRow>
+
+          <FormRow label="Limit Date" required={true} error={errors.scheduleDays} className="border-b-0 py-2 mt-4" alignTop={true}>
+            <div className="w-full flex flex-wrap gap-2">
+              {DAYS_OF_WEEK.map(day => (
+                <button
+                  key={day.value}
+                  onClick={() => toggleDay(day.value)}
+                  className={`px-3 py-1.5 text-sm rounded-[2px] border transition-colors ${
+                    selectedDays.includes(day.value)
+                      ? 'bg-black text-white border-black'
+                      : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
+                  }`}
+                >
+                  {day.label}
+                </button>
+              ))}
             </div>
           </FormRow>
 

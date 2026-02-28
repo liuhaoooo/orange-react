@@ -573,6 +573,21 @@ export interface UrlLimitResponse {
     [key: string]: any;
 }
 
+export interface TimeLimitRule {
+    enableRule: boolean;
+    mac: string;
+    startTime: string;
+    endTime: string;
+    scheduleDays: string;
+}
+
+export interface TimeLimitResponse {
+    success: boolean;
+    cmd: number;
+    datas?: TimeLimitRule[];
+    [key: string]: any;
+}
+
 export interface UrlFilterDefaultRule {
     enableRule: boolean;
     acceptAll: boolean;

@@ -39,6 +39,8 @@ import {
     PortForwardingResponse,
     UrlLimitRule,
     UrlLimitResponse,
+    TimeLimitRule,
+    TimeLimitResponse,
     UrlFilterDefaultRule,
     UrlFilterDefaultResponse,
     UrlFilterRule,
@@ -166,3 +168,8 @@ export const applyPortForwardingSettings = async () => apiRequest(20, 'POST');
 export const fetchUrlLimitRules = async () => apiRequest<UrlLimitResponse>(383, 'GET', { getfun: true });
 export const saveUrlLimitRules = async (datas: UrlLimitRule[]) => apiRequest(383, 'POST', { success: true, datas });
 export const applyUrlLimitSettings = async () => apiRequest(20, 'POST');
+
+// Time Limit
+export const fetchTimeLimitRules = async () => apiRequest<TimeLimitResponse>(385, 'GET', { getfun: true });
+export const saveTimeLimitRules = async (datas: TimeLimitRule[]) => apiRequest(385, 'POST', { success: true, datas });
+export const applyTimeLimitSettings = async () => apiRequest(20, 'POST');
