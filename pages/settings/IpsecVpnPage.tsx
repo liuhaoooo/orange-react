@@ -213,6 +213,17 @@ export const IpsecVpnPage: React.FC = () => {
 
     setSaving(true);
     try {
+      if (ipsecSwitch) {
+        const vpnStatusData = await apiRequest(425, 'GET');
+        if (vpnStatusData && vpnStatusData.success) {
+          if (vpnStatusData.greSwitch === '1' || vpnStatusData.vxlanSwitch === '1') {
+            showAlert('Multiple VPNS cannot be enabled at the same time, which may cause conflicts between VPN functions', 'error');
+            setSaving(false);
+            return;
+          }
+        }
+      }
+
       let payload: any = {
         ipsecSwitch: ipsecSwitch ? '1' : '0',
         subcmd: 0
