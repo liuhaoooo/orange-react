@@ -117,7 +117,6 @@ export const IpPassthroughPage: React.FC = () => {
                 value={mac} 
                 onChange={(e) => { setMac(e.target.value); setErrors({ ...errors, mac: '' }); }} 
                 hasError={!!errors.mac} 
-                placeholder="e.g., AA:AA:AA:AA:AA:AA"
               />
             </FormRow>
           )}

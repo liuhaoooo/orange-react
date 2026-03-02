@@ -1,21 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Edit2, X } from 'lucide-react';
-import { FormRow, SquareSwitch, StyledInput, StyledSelect, PrimaryButton } from '../../components/UIComponents';
+import { Save, Edit2 } from 'lucide-react';
+import { PrimaryButton } from '../../components/UIComponents';
 import { useLanguage } from '../../utils/i18nContext';
 import { useAlert } from '../../utils/AlertContext';
 import { apiRequest } from '../../utils/services/core';
-
-interface IpPassRow {
-  id: number;
-  flag: string;
-  mode: string;
-  mac: string;
-}
-
-const modeOptions = [
-  { label: 'Standard Mode', value: '0' },
-  { label: 'Compatibility Mode', value: '1' },
-];
+import { MultipleIpPassthroughEditModal, IpPassRow } from '../../components/MultipleIpPassthroughEditModal';
 
 export const MultipleIpPassthroughPage: React.FC = () => {
   const { t } = useLanguage();
@@ -29,10 +18,7 @@ export const MultipleIpPassthroughPage: React.FC = () => {
   ]);
 
   const [editingRow, setEditingRow] = useState<IpPassRow | null>(null);
-  const [editFlag, setEditFlag] = useState('0');
-  const [editMode, setEditMode] = useState('0');
-  const [editMac, setEditMac] = useState('');
-  const [editError, setEditError] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchMultipleIpPassthroughData = async () => {
@@ -83,31 +69,16 @@ export const MultipleIpPassthroughPage: React.FC = () => {
 
   const openEditModal = (row: IpPassRow) => {
     setEditingRow(row);
-    setEditFlag(row.flag);
-    setEditMode(row.mode);
-    setEditMac(row.mac);
-    setEditError('');
+    setIsModalOpen(true);
   };
 
   const closeEditModal = () => {
+    setIsModalOpen(false);
     setEditingRow(null);
   };
 
-  const saveEditModal = () => {
-    if (editFlag === '1' && editMode === '0') {
-      if (!editMac.trim()) {
-        setEditError('MAC Address is required');
-        return;
-      } else {
-        const macRegex = /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/;
-        if (!macRegex.test(editMac)) {
-          setEditError('Invalid MAC Address format');
-          return;
-        }
-      }
-    }
-
-    setRows(rows.map(r => r.id === editingRow?.id ? { ...r, flag: editFlag, mode: editMode, mac: editMac } : r));
+  const saveEditModal = (updatedRow: IpPassRow) => {
+    setRows(rows.map(r => r.id === updatedRow.id ? updatedRow : r));
     closeEditModal();
   };
 
@@ -150,60 +121,12 @@ export const MultipleIpPassthroughPage: React.FC = () => {
         </PrimaryButton>
       </div>
 
-      {editingRow && (
-        <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[6px] shadow-xl w-full max-w-lg overflow-hidden animate-fade-in">
-            <div className="flex justify-between items-center p-6 border-b border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900">Edit IP Passthrough{editingRow.id}</h3>
-              <button onClick={closeEditModal} className="text-gray-500 hover:text-black transition-colors">
-                <X size={20} />
-              </button>
-            </div>
-            <div className="p-6 space-y-6">
-              <FormRow label="Enabled">
-                <SquareSwitch isOn={editFlag === '1'} onChange={() => setEditFlag(editFlag === '1' ? '0' : '1')} />
-              </FormRow>
-              
-              {editFlag === '1' && (
-                <>
-                  <FormRow label="Mode">
-                    <StyledSelect
-                      value={editMode}
-                      onChange={(e) => setEditMode(e.target.value)}
-                      options={modeOptions}
-                    />
-                  </FormRow>
-
-                  {editMode === '0' && (
-                    <FormRow label="MAC Address" required error={editError}>
-                      <StyledInput 
-                        value={editMac} 
-                        onChange={(e) => { setEditMac(e.target.value); setEditError(''); }} 
-                        hasError={!!editError} 
-                        placeholder="e.g., AA:AA:AA:AA:AA:AA"
-                      />
-                    </FormRow>
-                  )}
-                </>
-              )}
-            </div>
-            <div className="flex justify-end p-6 border-t border-gray-200 space-x-4 bg-gray-50">
-              <button 
-                onClick={closeEditModal} 
-                className="px-6 py-2 text-sm font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-colors uppercase"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={saveEditModal} 
-                className="px-6 py-2 text-sm font-bold text-black bg-orange hover:bg-orange-dark transition-colors uppercase"
-              >
-                Confirm
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <MultipleIpPassthroughEditModal
+        isOpen={isModalOpen}
+        onClose={closeEditModal}
+        onSave={saveEditModal}
+        initialData={editingRow}
+      />
     </div>
   );
 };
