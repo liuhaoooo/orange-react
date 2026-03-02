@@ -30,6 +30,7 @@ import { SystemUpgradePage } from './settings/SystemUpgradePage';
 import { RoutingPage } from './settings/RoutingPage';
 import { VpnPage } from './settings/VpnPage';
 import { GreSettingsPage } from './settings/GreSettingsPage';
+import { IpsecVpnPage } from './settings/IpsecVpnPage';
 import { MeshBasicConfigPage } from './settings/MeshBasicConfigPage';
 import { TopologyDiagramPage } from './settings/TopologyDiagramPage';
 import { UrlFilterPage } from './settings/UrlFilterPage';
@@ -445,6 +446,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <VpnPage />;
           case 'gre_settings':
               return <GreSettingsPage />;
+          case 'ipsec_vpn':
+              return <IpsecVpnPage />;
           case 'url_filter':
               return <UrlFilterPage />;
           case 'mac_filtering':
