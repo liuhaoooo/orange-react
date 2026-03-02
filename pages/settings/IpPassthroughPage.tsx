@@ -101,23 +101,27 @@ export const IpPassthroughPage: React.FC = () => {
         <SquareSwitch isOn={ipPassSwitch} onChange={() => setIpPassSwitch(!ipPassSwitch)} />
       </FormRow>
 
-      <FormRow label="Mode">
-        <StyledSelect
-          value={mode}
-          onChange={(e) => setMode(e.target.value)}
-          options={modeOptions}
-        />
-      </FormRow>
+      {ipPassSwitch && (
+        <>
+          <FormRow label="Mode">
+            <StyledSelect
+              value={mode}
+              onChange={(e) => setMode(e.target.value)}
+              options={modeOptions}
+            />
+          </FormRow>
 
-      {mode === '0' && (
-        <FormRow label="MAC Address" required error={errors.mac}>
-          <StyledInput 
-            value={mac} 
-            onChange={(e) => { setMac(e.target.value); setErrors({ ...errors, mac: '' }); }} 
-            hasError={!!errors.mac} 
-            placeholder="e.g., AA:AA:AA:AA:AA:AA"
-          />
-        </FormRow>
+          {mode === '0' && (
+            <FormRow label="MAC Address" required error={errors.mac}>
+              <StyledInput 
+                value={mac} 
+                onChange={(e) => { setMac(e.target.value); setErrors({ ...errors, mac: '' }); }} 
+                hasError={!!errors.mac} 
+                placeholder="e.g., AA:AA:AA:AA:AA:AA"
+              />
+            </FormRow>
+          )}
+        </>
       )}
 
       <div className="flex justify-end pt-8">
