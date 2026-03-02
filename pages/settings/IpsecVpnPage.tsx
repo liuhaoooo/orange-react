@@ -98,8 +98,44 @@ export const IpsecVpnPage: React.FC = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    // Fetch initial data if API is available
-    // For now, we just initialize with default values
+    const fetchIpsecData = async () => {
+      try {
+        const data = await apiRequest(281, 'GET');
+        if (data && data.success) {
+          setIpsecSwitch(data.ipsecSwitch === '1');
+          setRuleName(data.ruleName || '');
+          setConnectionMode(data.connectType || 'tunnel');
+          setMtu(data.mtu || '1500');
+          
+          setLocalGateway(data.localIp || '');
+          setLocalSubnet(data.localSubnetIp || '');
+          setLocalSubnetMask(data.localMask || '');
+          
+          setPeerGateway(data.peerIp || '');
+          setTerminalNetwork(data.peerSubnetIp || '');
+          setRemoteSubnetMask(data.peerMask || '');
+          
+          setIkeVersion(data.ikeVersion || '1');
+          setIkeEncryption(data.ikeEncrypt || 'des');
+          setIkeAuthentication(data.ikeDic || 'md5');
+          setPreSharedKey(data.preshare || '');
+          setDhGroup(data.ikeGroup || 'modp2048');
+          setIkeSaSurvivalCycle(data.ikeLifeTime || '24');
+          
+          setDpdEnabled(data.ikeDpdSwitch === '1');
+          setDpdDelay(data.ikeDpddelay || '30');
+          setDpdTimeout(data.ikeDpdtimeout || '120');
+          
+          setIpsecSaSurvivalCycle(data.lifeTime || '24');
+          setIpsecEncryption(data.encrypt || 'des');
+          setIpsecIntegrity(data.dic || 'md5');
+          setPfsKeyGroup(data.group || 'none');
+        }
+      } catch (error) {
+        console.error("Failed to fetch IPsec settings", error);
+      }
+    };
+    fetchIpsecData();
   }, []);
 
   const validateForm = () => {
@@ -177,14 +213,50 @@ export const IpsecVpnPage: React.FC = () => {
 
     setSaving(true);
     try {
-      // Dummy API call for now since no specific command was provided
-      // const payload = { ... };
-      // await apiRequest(CMD, 'POST', payload);
-      
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      showAlert(t('settingsSaved') || 'Settings saved successfully', 'success');
+      let payload: any = {
+        ipsecSwitch: ipsecSwitch ? '1' : '0',
+      };
+
+      if (ipsecSwitch) {
+        payload = {
+          ...payload,
+          ruleName: ruleName,
+          connectType: connectionMode,
+          mtu: mtu,
+          peerIp: peerGateway,
+          ikeVersion: ikeVersion,
+          ikeEncrypt: ikeEncryption,
+          ikeDic: ikeAuthentication,
+          preshare: preSharedKey,
+          ikeGroup: dhGroup,
+          ikeLifeTime: ikeSaSurvivalCycle,
+          ikeDpdSwitch: dpdEnabled ? '1' : '0',
+          lifeTime: ipsecSaSurvivalCycle,
+          encrypt: ipsecEncryption,
+          dic: ipsecIntegrity,
+          group: pfsKeyGroup
+        };
+
+        if (dpdEnabled) {
+          payload.ikeDpddelay = dpdDelay;
+          payload.ikeDpdtimeout = dpdTimeout;
+        }
+
+        if (connectionMode === 'tunnel') {
+          payload.localIp = localGateway;
+          payload.localSubnetIp = localSubnet;
+          payload.localMask = localSubnetMask;
+          payload.peerSubnetIp = terminalNetwork;
+          payload.peerMask = remoteSubnetMask;
+        }
+      }
+
+      const data = await apiRequest(281, 'POST', payload);
+      if (data && data.success) {
+        showAlert(t('settingsSaved') || 'Settings saved successfully', 'success');
+      } else {
+        showAlert(t('errorSaving') || 'Failed to save settings', 'error');
+      }
     } catch (error) {
       console.error("Failed to save IPsec settings", error);
       showAlert(t('errorSaving') || 'Failed to save settings', 'error');
@@ -274,25 +346,21 @@ export const IpsecVpnPage: React.FC = () => {
               />
             </FormRow>
 
-            {connectionMode === 'transport' && (
-              <>
-                <FormRow label="Encryption algorithm">
-                  <StyledSelect
-                    value={ikeEncryption}
-                    onChange={(e) => setIkeEncryption(e.target.value)}
-                    options={encryptionOptions}
-                  />
-                </FormRow>
+            <FormRow label="Encryption algorithm">
+              <StyledSelect
+                value={ikeEncryption}
+                onChange={(e) => setIkeEncryption(e.target.value)}
+                options={encryptionOptions}
+              />
+            </FormRow>
 
-                <FormRow label="Authentication Algorithm">
-                  <StyledSelect
-                    value={ikeAuthentication}
-                    onChange={(e) => setIkeAuthentication(e.target.value)}
-                    options={authenticationOptions}
-                  />
-                </FormRow>
-              </>
-            )}
+            <FormRow label="Authentication Algorithm">
+              <StyledSelect
+                value={ikeAuthentication}
+                onChange={(e) => setIkeAuthentication(e.target.value)}
+                options={authenticationOptions}
+              />
+            </FormRow>
 
             <FormRow label="Pre-shared key">
               <StyledInput value={preSharedKey} onChange={(e) => setPreSharedKey(e.target.value)} />

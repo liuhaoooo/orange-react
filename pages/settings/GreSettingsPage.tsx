@@ -100,15 +100,21 @@ export const GreSettingsPage: React.FC = () => {
 
     setSaving(true);
     try {
-      const payload = {
+      let payload: any = {
         greSwitch: greSwitch ? '1' : '0',
-        url: url,
-        tunnel: tunnel,
-        peerIpValue: peerIpValue,
-        greIpValue: greIpValue,
-        greNatSwitch: greNatSwitch ? '1' : '0',
-        greDefaultGW: greDefaultGW ? '1' : '0'
       };
+
+      if (greSwitch) {
+        payload = {
+          ...payload,
+          url: url,
+          tunnel: tunnel,
+          peerIpValue: peerIpValue,
+          greIpValue: greIpValue,
+          greNatSwitch: greNatSwitch ? '1' : '0',
+          greDefaultGW: greDefaultGW ? '1' : '0'
+        };
+      }
 
       const data = await apiRequest(260, 'POST', payload);
       if (data && data.success) {
@@ -130,35 +136,39 @@ export const GreSettingsPage: React.FC = () => {
         <SquareSwitch isOn={greSwitch} onChange={() => setGreSwitch(!greSwitch)} />
       </FormRow>
 
-      <FormRow label="Default Gateway Switch">
-        <SquareSwitch isOn={greDefaultGW} onChange={() => setGreDefaultGW(!greDefaultGW)} />
-      </FormRow>
+      {greSwitch && (
+        <div className="mt-6 space-y-6 animate-fade-in">
+          <FormRow label="Default Gateway Switch">
+            <SquareSwitch isOn={greDefaultGW} onChange={() => setGreDefaultGW(!greDefaultGW)} />
+          </FormRow>
 
-      <FormRow label="NAT">
-        <SquareSwitch isOn={greNatSwitch} onChange={() => setGreNatSwitch(!greNatSwitch)} />
-      </FormRow>
+          <FormRow label="NAT">
+            <SquareSwitch isOn={greNatSwitch} onChange={() => setGreNatSwitch(!greNatSwitch)} />
+          </FormRow>
 
-      <FormRow label="Tunnel Name">
-        <StyledInput value={tunnel} readOnly disabled />
-      </FormRow>
+          <FormRow label="Tunnel Name">
+            <StyledInput value={tunnel} readOnly disabled />
+          </FormRow>
 
-      <FormRow label="GRE Server Address" required error={errors.url}>
-        <StyledInput value={url} onChange={(e) => { setUrl(e.target.value); setErrors({ ...errors, url: '' }); }} hasError={!!errors.url} />
-      </FormRow>
+          <FormRow label="GRE Server Address" required error={errors.url}>
+            <StyledInput value={url} onChange={(e) => { setUrl(e.target.value); setErrors({ ...errors, url: '' }); }} hasError={!!errors.url} />
+          </FormRow>
 
-      <FormRow label="Peer IP" required error={errors.peerIpValue}>
-        <StyledInput value={peerIpValue} onChange={(e) => { setPeerIpValue(e.target.value); setErrors({ ...errors, peerIpValue: '' }); }} hasError={!!errors.peerIpValue} />
-      </FormRow>
+          <FormRow label="Peer IP" required error={errors.peerIpValue}>
+            <StyledInput value={peerIpValue} onChange={(e) => { setPeerIpValue(e.target.value); setErrors({ ...errors, peerIpValue: '' }); }} hasError={!!errors.peerIpValue} />
+          </FormRow>
 
-      <FormRow label="Local IP" required error={errors.greIpValue}>
-        <StyledInput value={greIpValue} onChange={(e) => { setGreIpValue(e.target.value); setErrors({ ...errors, greIpValue: '' }); }} hasError={!!errors.greIpValue} />
-      </FormRow>
+          <FormRow label="Local IP" required error={errors.greIpValue}>
+            <StyledInput value={greIpValue} onChange={(e) => { setGreIpValue(e.target.value); setErrors({ ...errors, greIpValue: '' }); }} hasError={!!errors.greIpValue} />
+          </FormRow>
 
-      <FormRow label="GRE connection status">
-        <span className={`text-sm font-medium ${!greStatus ? 'text-red-500' : 'text-gray-900'}`}>
-          {!greStatus ? 'Disconnected' : 'Connected'}
-        </span>
-      </FormRow>
+          <FormRow label="GRE connection status">
+            <span className={`text-sm font-medium ${!greStatus ? 'text-red-500' : 'text-gray-900'}`}>
+              {!greStatus ? 'Disconnected' : 'Connected'}
+            </span>
+          </FormRow>
+        </div>
+      )}
 
       <div className="flex justify-end pt-8">
         <PrimaryButton
