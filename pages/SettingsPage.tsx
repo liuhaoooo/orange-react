@@ -34,6 +34,8 @@ import { IpsecVpnPage } from './settings/IpsecVpnPage';
 import { IpsecStatusPage } from './settings/IpsecStatusPage';
 import { IpPassthroughPage } from './settings/IpPassthroughPage';
 import { MultipleIpPassthroughPage } from './settings/MultipleIpPassthroughPage';
+import { SipAlgPage } from './settings/SipAlgPage';
+import { Tr069Page } from './settings/Tr069Page';
 import { MeshBasicConfigPage } from './settings/MeshBasicConfigPage';
 import { TopologyDiagramPage } from './settings/TopologyDiagramPage';
 import { UrlFilterPage } from './settings/UrlFilterPage';
@@ -78,7 +80,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
           { id: 'plmn_scan', label: t('plmnScan') },
           { id: 'lock_band', label: t('lockBand') },
           { id: 'cell_locking', label: t('cellLocking') },
-          { id: 'link_detection', label: t('linkDetection') }
+          { id: 'link_detection', label: t('linkDetection') },
+          { id: 'display_solution', label: t('displaySolution') }
       ]
     },
     { 
@@ -115,7 +118,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
           { id: 'dhcp_settings', label: t('dhcp') },
           { id: 'ip_reservation', label: t('ipAddressReservation') },
           { id: 'multiple_dhcp', label: t('multipleDhcp') },
-          { id: 'vlan', label: t('vlan') }
+          { id: 'vlan', label: t('vlan') },
+          { id: 'routing', label: t('routingConfiguration') }
       ]
     },
     { 
@@ -149,7 +153,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
           { id: 'ipsec_vpn', label: t('ipsecVpn') },
           { id: 'ipsec_status', label: t('ipsecStatus') },
           { id: 'ip_passthrough_main', label: t('ipPassthrough') },
-          { id: 'multiple_ip_passthrough', label: t('multipleIpPassthrough') }
+          { id: 'multiple_ip_passthrough', label: t('multipleIpPassthrough') },
+          { id: 'sip_alg', label: t('sipAlg') },
+          { id: 'tr069', label: t('tr069') },
+          { id: 'ims', label: t('imsSetting') }
       ]
     },
     { 
@@ -457,6 +464,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <IpPassthroughPage />;
           case 'multiple_ip_passthrough':
               return <MultipleIpPassthroughPage />;
+          case 'sip_alg':
+              return <SipAlgPage />;
+          case 'tr069':
+              return <Tr069Page />;
           case 'url_filter':
               return <UrlFilterPage />;
           case 'mac_filtering':
