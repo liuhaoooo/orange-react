@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Check, X, Battery, BatteryWarning, BatteryCharging, Zap, Loader2, ChevronDown } from 'lucide-react';
+import { Check, X, Battery, BatteryWarning, BatteryCharging, Zap, Loader2, ChevronDown, Eye, EyeOff } from 'lucide-react';
 
 export const CardHeader: React.FC<{ title: string; extraIcons?: React.ReactNode }> = ({ title, extraIcons }) => (
   <div className="bg-black text-white px-5 py-4 flex justify-between items-center shrink-0">
@@ -120,6 +120,30 @@ export const StyledInput = ({ hasError, suffix, className = "", ...props }: Reac
     )}
   </div>
 );
+
+export const PasswordInput = ({ value, onChange, placeholder, hasError, className = "" }: { value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; placeholder?: string; hasError?: boolean; className?: string }) => {
+  const [showPassword, setShowPassword] = React.useState(false);
+
+  return (
+    <div className={`relative w-full ${className}`}>
+      <StyledInput
+        type={showPassword ? 'text' : 'password'}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        hasError={hasError}
+        style={{ paddingRight: '40px' }}
+      />
+      <button
+        type="button"
+        onClick={() => setShowPassword(!showPassword)}
+        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+      >
+        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+      </button>
+    </div>
+  );
+};
 
 export const StyledTextarea = ({ hasError, className = "", ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { hasError?: boolean }) => (
   <textarea

@@ -1,46 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { Save, ChevronDown, ChevronUp, Eye, EyeOff, Check } from 'lucide-react';
-import { FormRow, SquareSwitch, StyledInput, StyledSelect, PrimaryButton } from '../../components/UIComponents';
+import { Save, ChevronDown, ChevronUp } from 'lucide-react';
+import { FormRow, SquareSwitch, StyledInput, StyledSelect, PrimaryButton, PasswordInput } from '../../components/UIComponents';
 import { useLanguage } from '../../utils/i18nContext';
 import { useAlert } from '../../utils/AlertContext';
 import { apiRequest } from '../../utils/services/core';
 import { useGlobalState } from '../../utils/GlobalStateContext';
-
-// Helper Checkbox Component
-const Checkbox = ({ label, checked, onChange }: { label: string; checked: boolean; onChange: (checked: boolean) => void }) => (
-  <div className="flex items-center cursor-pointer select-none" onClick={() => onChange(!checked)}>
-    <div className={`w-5 h-5 border rounded-[2px] flex items-center justify-center mr-2 transition-colors ${checked ? 'bg-black border-black' : 'bg-white border-gray-300'}`}>
-      {checked && <Check size={16} className="text-white" strokeWidth={3} />}
-    </div>
-    <span className="text-sm font-bold text-black">{label}</span>
-  </div>
-);
-
-// Helper Password Input Component
-const PasswordInput = ({ value, onChange, placeholder, hasError }: { value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; placeholder?: string; hasError?: boolean }) => {
-  const [showPassword, setShowPassword] = useState(false);
-
-  return (
-    <div className="relative w-full">
-      <StyledInput
-        type={showPassword ? 'text' : 'password'}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        hasError={hasError}
-        style={{ paddingRight: '40px' }}
-      />
-      <button
-        type="button"
-        onClick={() => setShowPassword(!showPassword)}
-        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
-      >
-        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-      </button>
-    </div>
-  );
-};
 
 const isValidIp = (ip: string) => {
   if (!ip) return false;
@@ -176,14 +141,22 @@ export const VpnPage: React.FC = () => {
       isValid = false;
     }
 
+    let openAdvanced = false;
+
     if (vpnMode === '0' && lacTunnelAuth && !lacTunnelPassword.trim()) {
       newErrors.lacTunnelPassword = 'Tunnel Password can not be empty.';
       isValid = false;
+      openAdvanced = true;
     }
 
     if (vpnMode === '0' && lnsTunnelAuth && !lnsTunnelPassword.trim()) {
       newErrors.lnsTunnelPassword = 'Tunnel Password can not be empty.';
       isValid = false;
+      openAdvanced = true;
+    }
+
+    if (openAdvanced) {
+      setIsAdvancedOpen(true);
     }
 
     setErrors(newErrors);
@@ -302,11 +275,11 @@ export const VpnPage: React.FC = () => {
       {vpnMode === '0' && (
         <>
           <FormRow label="LNS survival test">
-            <Checkbox label="Enabled" checked={lnsSurvival} onChange={setLnsSurvival} />
+            <SquareSwitch isOn={lnsSurvival} onChange={() => setLnsSurvival(!lnsSurvival)} />
           </FormRow>
 
           <FormRow label="IPsec">
-            <Checkbox label="Enabled" checked={ipsecEnabled} onChange={setIpsecEnabled} />
+            <SquareSwitch isOn={ipsecEnabled} onChange={() => setIpsecEnabled(!ipsecEnabled)} />
           </FormRow>
 
           {ipsecEnabled && (
