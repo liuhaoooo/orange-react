@@ -225,8 +225,6 @@ export const IpsecVpnPage: React.FC = () => {
           mtu: mtu,
           peerIp: peerGateway,
           ikeVersion: ikeVersion,
-          ikeEncrypt: ikeEncryption,
-          ikeDic: ikeAuthentication,
           preshare: preSharedKey,
           ikeGroup: dhGroup,
           ikeLifeTime: ikeSaSurvivalCycle,
@@ -248,6 +246,9 @@ export const IpsecVpnPage: React.FC = () => {
           payload.localMask = localSubnetMask;
           payload.peerSubnetIp = terminalNetwork;
           payload.peerMask = remoteSubnetMask;
+        } else if (connectionMode === 'transport') {
+          payload.ikeEncrypt = ikeEncryption;
+          payload.ikeDic = ikeAuthentication;
         }
       }
 
@@ -346,21 +347,25 @@ export const IpsecVpnPage: React.FC = () => {
               />
             </FormRow>
 
-            <FormRow label="Encryption algorithm">
-              <StyledSelect
-                value={ikeEncryption}
-                onChange={(e) => setIkeEncryption(e.target.value)}
-                options={encryptionOptions}
-              />
-            </FormRow>
+            {connectionMode === 'transport' && (
+              <>
+                <FormRow label="Encryption algorithm">
+                  <StyledSelect
+                    value={ikeEncryption}
+                    onChange={(e) => setIkeEncryption(e.target.value)}
+                    options={encryptionOptions}
+                  />
+                </FormRow>
 
-            <FormRow label="Authentication Algorithm">
-              <StyledSelect
-                value={ikeAuthentication}
-                onChange={(e) => setIkeAuthentication(e.target.value)}
-                options={authenticationOptions}
-              />
-            </FormRow>
+                <FormRow label="Authentication Algorithm">
+                  <StyledSelect
+                    value={ikeAuthentication}
+                    onChange={(e) => setIkeAuthentication(e.target.value)}
+                    options={authenticationOptions}
+                  />
+                </FormRow>
+              </>
+            )}
 
             <FormRow label="Pre-shared key">
               <StyledInput value={preSharedKey} onChange={(e) => setPreSharedKey(e.target.value)} />
