@@ -100,7 +100,7 @@ export const IpsecVpnPage: React.FC = () => {
   useEffect(() => {
     const fetchIpsecData = async () => {
       try {
-        const data = await apiRequest(281, 'GET');
+        const data = await apiRequest(281, 'GET', { subcmd: 0 });
         if (data && data.success) {
           setIpsecSwitch(data.ipsecSwitch === '1');
           setRuleName(data.ruleName || '');
@@ -215,6 +215,7 @@ export const IpsecVpnPage: React.FC = () => {
     try {
       let payload: any = {
         ipsecSwitch: ipsecSwitch ? '1' : '0',
+        subcmd: 0
       };
 
       if (ipsecSwitch) {
