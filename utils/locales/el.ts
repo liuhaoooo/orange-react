@@ -190,7 +190,7 @@ export const el = {
     basicConfig: "Basic Configuration",
     topologyDiagram: "Network Topology Diagram",
     vpn: "VPN",
-    greSettings: "GRE Settings",
+    greSettings: "GRE",
     ipsecVpn: "IPsec VPN",
     ipsecStatus: "IPsec Status",
     multipleIpPassthrough: "Multiple IP Passthrough",

@@ -29,6 +29,7 @@ import { MultipleDhcpPage } from './settings/MultipleDhcpPage';
 import { SystemUpgradePage } from './settings/SystemUpgradePage';
 import { RoutingPage } from './settings/RoutingPage';
 import { VpnPage } from './settings/VpnPage';
+import { GreSettingsPage } from './settings/GreSettingsPage';
 import { MeshBasicConfigPage } from './settings/MeshBasicConfigPage';
 import { TopologyDiagramPage } from './settings/TopologyDiagramPage';
 import { UrlFilterPage } from './settings/UrlFilterPage';
@@ -442,6 +443,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <TopologyDiagramPage />;
           case 'vpn_main':
               return <VpnPage />;
+          case 'gre_settings':
+              return <GreSettingsPage />;
           case 'url_filter':
               return <UrlFilterPage />;
           case 'mac_filtering':
