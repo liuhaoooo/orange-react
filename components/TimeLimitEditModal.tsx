@@ -10,6 +10,8 @@ interface TimeLimitEditModalProps {
   onSave: (rules: TimeLimitRule[]) => void;
   initialData: TimeLimitRule | null;
   prefilledMacs?: string[];
+  existingRules: TimeLimitRule[];
+  editingIndex: number | null;
 }
 
 const DAYS_OF_WEEK = [
@@ -27,7 +29,9 @@ export const TimeLimitEditModal: React.FC<TimeLimitEditModalProps> = ({
   onClose,
   onSave,
   initialData,
-  prefilledMacs = []
+  prefilledMacs = [],
+  existingRules,
+  editingIndex
 }) => {
   const [macAddress, setMacAddress] = useState('');
   const [startTime, setStartTime] = useState('00:00');
@@ -74,6 +78,17 @@ export const TimeLimitEditModal: React.FC<TimeLimitEditModalProps> = ({
       const invalidMacs = macs.filter(m => !validateMac(m));
       if (invalidMacs.length > 0) {
         newErrors.macAddress = 'Invalid MAC Address format';
+      } else {
+        // Check for duplicate MACs
+        const existingMacs = new Set(
+          existingRules
+            .filter((_, idx) => idx !== editingIndex)
+            .flatMap(r => r.mac.split(',').map(m => m.trim()))
+        );
+        const duplicateMacs = macs.filter(m => existingMacs.has(m));
+        if (duplicateMacs.length > 0) {
+          newErrors.macAddress = `MAC Address already exists: ${duplicateMacs.join(', ')}`;
+        }
       }
     }
 

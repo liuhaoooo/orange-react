@@ -10,6 +10,8 @@ interface UrlLimitEditModalProps {
   onSave: (rules: UrlLimitRule[]) => void;
   initialData: UrlLimitRule | null;
   prefilledMacs?: string[];
+  existingRules: UrlLimitRule[];
+  editingIndex: number | null;
 }
 
 export const UrlLimitEditModal: React.FC<UrlLimitEditModalProps> = ({
@@ -17,7 +19,9 @@ export const UrlLimitEditModal: React.FC<UrlLimitEditModalProps> = ({
   onClose,
   onSave,
   initialData,
-  prefilledMacs = []
+  prefilledMacs = [],
+  existingRules,
+  editingIndex
 }) => {
   const [macAddress, setMacAddress] = useState('');
   const [url, setUrl] = useState('');
@@ -58,6 +62,30 @@ export const UrlLimitEditModal: React.FC<UrlLimitEditModalProps> = ({
 
     if (!url.trim()) {
       newErrors.url = 'URL is required';
+    }
+
+    if (Object.keys(newErrors).length === 0) {
+      const macs = macAddress.split(',').map(m => m.trim());
+      const urls = url.split(',').map(u => u.trim());
+      
+      // Check for duplicate MAC + URL combinations
+      const existingCombinations = new Set(
+        existingRules
+          .filter((_, idx) => idx !== editingIndex)
+          .flatMap(r => {
+            const rMacs = r.mac.split(',').map(m => m.trim());
+            const rUrls = r.url.split(',').map(u => u.trim());
+            return rMacs.flatMap(m => rUrls.map(u => `${m}|${u}`));
+          })
+      );
+
+      const duplicateCombinations = macs.flatMap(m => 
+        urls.filter(u => existingCombinations.has(`${m}|${u}`)).map(u => `${m} - ${u}`)
+      );
+
+      if (duplicateCombinations.length > 0) {
+        newErrors.url = `Rule already exists for: ${duplicateCombinations.join(', ')}`;
+      }
     }
 
     if (Object.keys(newErrors).length > 0) {

@@ -303,6 +303,8 @@ export const UrlLimitPage: React.FC = () => {
         onSave={handleModalSave}
         initialData={editingIndex !== null ? rules[editingIndex] : null}
         prefilledMacs={prefilledMacs}
+        existingRules={rules}
+        editingIndex={editingIndex}
       />
     </div>
   );

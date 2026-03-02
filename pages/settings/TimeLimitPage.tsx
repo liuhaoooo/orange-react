@@ -328,6 +328,8 @@ export const TimeLimitPage: React.FC = () => {
         onSave={handleModalSave}
         initialData={editingIndex !== null ? rules[editingIndex] : null}
         prefilledMacs={prefilledMacs}
+        existingRules={rules}
+        editingIndex={editingIndex}
       />
     </div>
   );
