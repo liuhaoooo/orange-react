@@ -30,6 +30,7 @@ import { SystemUpgradePage } from './settings/SystemUpgradePage';
 import { RoutingPage } from './settings/RoutingPage';
 import { VpnPage } from './settings/VpnPage';
 import { FotaUpgradePage } from './settings/FotaUpgradePage';
+import { SystemSettingsPage } from './settings/SystemSettingsPage';
 import { GreSettingsPage } from './settings/GreSettingsPage';
 import { IpsecVpnPage } from './settings/IpsecVpnPage';
 import { IpsecStatusPage } from './settings/IpsecStatusPage';
@@ -445,6 +446,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <MacFiltering24Page />; // This now exports MacFilteringPage
           case 'dhcp_settings':
               return <DhcpSettingsPage />;
+          case 'system_settings_main':
+              return <SystemSettingsPage />;
           case 'ip_reservation':
               return <IpAddressReservationPage />;
           case 'multiple_dhcp':
