@@ -65,12 +65,12 @@ export const SystemSettingsPage: React.FC = () => {
 
   const handleReboot = () => {
     showConfirm(
-      t('confirmReboot') || 'Rebooting the device will temporarily disconnect your network. Are you sure you want to continue?',
+      'Rebooting the device will temporarily disconnect your network. Are you sure you want to continue?',
       async () => {
         setIsRebooting(true);
         try {
           await apiRequest(6, 'POST', { cmd: 6, rebootType: 2 });
-          showAlert(t('rebooting') || 'Device is rebooting...', 'success');
+          showAlert('Device is rebooting. It will lose connection with the web page for a period of time.', 'success', 'Rebooting');
           // Intentionally not setting isRebooting to false on success, as the device is restarting
         } catch (error) {
           console.error("Failed to reboot", error);
@@ -83,14 +83,14 @@ export const SystemSettingsPage: React.FC = () => {
 
   const handleReset = () => {
     showConfirm(
-      t('confirmReset') || 'Resetting to factory defaults will erase all your custom settings and restore the device to its original state. This action cannot be undone. Are you sure you want to continue?',
+      'Resetting to factory defaults will erase all your custom settings and restore the device to its original state. This action cannot be undone. Are you sure you want to continue?',
       async () => {
         setIsResetting(true);
         try {
           const res = await apiRequest(112, 'POST', { cmd: 112 });
           if (res && res.success) {
             await apiRequest(6, 'POST', { cmd: 6, rebootType: 4 });
-            showAlert(t('resetting') || 'Device is resetting...', 'success');
+            showAlert('Device is resetting. It will lose connection with the web page for a period of time.', 'success', 'Resetting');
             // Intentionally not setting isResetting to false on success, as the device is restarting
           } else {
             showAlert(t('errorResetting') || 'Failed to reset', 'error');
@@ -109,7 +109,7 @@ export const SystemSettingsPage: React.FC = () => {
     const newValue = telnet === '1' ? '0' : '1';
     const action = newValue === '1' ? 'enable' : 'disable';
     showConfirm(
-      t('confirmTelnetChange') || `Are you sure you want to ${action} Telnet? ${newValue === '1' ? 'Enabling Telnet may pose a security risk.' : ''}`,
+      `Are you sure you want to ${action} Telnet? ${newValue === '1' ? 'Enabling Telnet may pose a security risk.' : ''}`,
       async () => {
         try {
           const payload = {
@@ -136,7 +136,7 @@ export const SystemSettingsPage: React.FC = () => {
     const newValue = adbSwitch === '1' ? '0' : '1';
     const action = newValue === '1' ? 'enable' : 'disable';
     showConfirm(
-      t('confirmAdbChange') || `Are you sure you want to ${action} ADB? ${newValue === '1' ? 'Enabling ADB may pose a security risk.' : ''}`,
+      `Are you sure you want to ${action} ADB? ${newValue === '1' ? 'Enabling ADB may pose a security risk.' : ''}`,
       async () => {
         try {
           const payload = {
