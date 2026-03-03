@@ -29,6 +29,7 @@ import { MultipleDhcpPage } from './settings/MultipleDhcpPage';
 import { SystemUpgradePage } from './settings/SystemUpgradePage';
 import { RoutingPage } from './settings/RoutingPage';
 import { VpnPage } from './settings/VpnPage';
+import { FotaUpgradePage } from './settings/FotaUpgradePage';
 import { GreSettingsPage } from './settings/GreSettingsPage';
 import { IpsecVpnPage } from './settings/IpsecVpnPage';
 import { IpsecStatusPage } from './settings/IpsecStatusPage';
@@ -452,6 +453,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <RoutingPage />;
           case 'system_upgrade':
               return <SystemUpgradePage />;
+          case 'fota_upgrade':
+              return <FotaUpgradePage />;
           case 'basic_config':
               return <MeshBasicConfigPage />;
           case 'topology_diagram':
