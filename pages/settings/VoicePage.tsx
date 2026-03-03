@@ -24,7 +24,6 @@ export const VoicePage: React.FC = () => {
 
   // VoIP states
   const [voipOnOff, setVoipOnOff] = useState('0');
-  const [voipRegisterStatus, setVoipRegisterStatus] = useState('Unknown error!');
   const [regServerAddress, setRegServerAddress] = useState('');
   const [regServerPort, setRegServerPort] = useState('5060');
   const [sipDomain, setSipDomain] = useState('');
@@ -57,7 +56,6 @@ export const VoicePage: React.FC = () => {
           setImsPdpType(data.pdpType || 'IPV4V6');
           
           setVoipOnOff(data.voipSw || '0');
-          setVoipRegisterStatus(data.voipRegStatus || '');
           setRegServerAddress(data.regAddress || '');
           setRegServerPort(data.regPort || '5060');
           setSipDomain(data.regDomain || '');
@@ -104,6 +102,62 @@ export const VoicePage: React.FC = () => {
     { name: 'IPV6', value: 'IPV6' },
     { name: 'IPV4&V6', value: 'IPV4V6' }
   ];
+
+  const getVoipRegStatusText = (code: string) => {
+    const statusMap: { [key: string]: string } = {
+      "0": "Unregistered",
+      "1": "Registering",
+      "2": "Registration Failed",
+      "3": "Registered",
+      "400": "Registration Failed: Bad Request (400)",
+      "401": "Registration failed: not authorized, the request requires user authentication (401)",
+      "403": "Registration Failed: Forbidden (403)",
+      "404": "Registration Failed: NotFound (404)",
+      "406": "Registration Failed: Unacceptable (406)",
+      "407": "Registration failed: proxy authentication is not required (407)",
+      "408": "Registration failed: The request timed out and the user could not be found in time (408)",
+      "409": "Registration failed: conflict, user is already registered (409)",
+      "410": "Registration failed: disappeared, the user used to exist, but is no longer available here (410)",
+      "411": "Registration failed: The server requires a valid content length (411)",
+      "413": "Registration failed: the request entity is too large (413)",
+      "414": "Registration failed: request URI is too long (414)",
+      "415": "Registration failed: unsupported media type (415)",
+      "417": "Registration failed: Unknown resource priority (417)",
+      "480": "Registration Failed: Temporarily Unavailable (480)",
+      "481": "Registration failed: call/transaction does not exist (481)",
+      "486": "Registration failed: device is busy (486)",
+      "487": "Registration failed: the request has been terminated (487)",
+      "488": "Registration failed: not accepted here (488)",
+      "50": "Failed to initialize PCM",
+      "500": "Registration failed: server internal error (500)",
+      "501": "Registration Failed: Not Implemented (501)",
+      "502": "Registration Failed: Gateway Error (502)",
+      "503": "Registration Failed: Service Unavailable (503)",
+      "504": "Registration failed: server timed out (504)",
+      "505": "Registration failed: version not supported (505)",
+      "51": "SIM Card Not Detected",
+      "513": "Registration failed: The message is too large (513)",
+      "52": "Failed to set server parameters",
+      "53": "Failed to set account parameters",
+      "54": "Failed to initialize sound card",
+      "55": "Failed to set the ring type",
+      "56": "DNS Resolution Failed",
+      "57": "Factory Mode",
+      "58": "Data Link Disconnected"
+    };
+    return statusMap[code] || "Unknown error";
+  };
+
+  const getVoipAuthStatusText = (code: string) => {
+    const statusMap: { [key: string]: string } = {
+      "0": "Unauthorized",
+      "1": "Authorized",
+      "2": "Unauthorized Device",
+      "3": "Authorization Failed: No Version File",
+      "4": "Authorization failed: SIP program not found"
+    };
+    return statusMap[code] || "Unknown error";
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -223,7 +277,11 @@ export const VoicePage: React.FC = () => {
           {voipOnOff === '1' && (
             <>
               <FormRow label="VoIP Register Status">
-                <div className="text-sm font-medium text-gray-900">{voipRegisterStatus}</div>
+                <div className="text-sm font-medium text-gray-900">{getVoipRegStatusText(globalData.statusInfo?.voipRegStatus || '')}</div>
+              </FormRow>
+
+              <FormRow label="Authorization Status">
+                <div className="text-sm font-medium text-gray-900">{getVoipAuthStatusText(globalData.statusInfo?.voipAuthStatus || '')}</div>
               </FormRow>
 
               <FormRow label="Reg Server Address">
