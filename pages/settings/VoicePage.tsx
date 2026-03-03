@@ -35,6 +35,9 @@ export const VoicePage: React.FC = () => {
   const [alternateSipServerEnable, setAlternateSipServerEnable] = useState('0');
   const [alternateRegServerAddress, setAlternateRegServerAddress] = useState('');
   const [alternateRegServerPort, setAlternateRegServerPort] = useState('');
+  const [alternateSipDomain, setAlternateSipDomain] = useState('');
+  const [alternateSipDomainPort, setAlternateSipDomainPort] = useState('');
+  const [alternateSipProxyServerAddress, setAlternateSipProxyServerAddress] = useState('');
   const [alternateSipProxyServerPort, setAlternateSipProxyServerPort] = useState('');
   const [authName, setAuthName] = useState('');
   const [phoneName, setPhoneName] = useState('');
@@ -65,6 +68,9 @@ export const VoicePage: React.FC = () => {
           setAlternateSipServerEnable(data.altServerSw || '0');
           setAlternateRegServerAddress(data.altRegAddress || '');
           setAlternateRegServerPort(data.altRegPort || '');
+          setAlternateSipDomain(data.altRegDomain || '');
+          setAlternateSipDomainPort(data.altDomainPort || '');
+          setAlternateSipProxyServerAddress(data.altProxyAddress || '');
           setAlternateSipProxyServerPort(data.altProxyPort || '');
           setAuthName(data.authName || '');
           setPhoneName(data.phoneName || '');
@@ -124,13 +130,13 @@ export const VoicePage: React.FC = () => {
           proxySw: sipProxyEnable,
           proxyAddress: sipProxyAddress,
           proxyPort: sipProxyPort,
-          altProxyAddress: originalData.altProxyAddress || '',
+          altProxyAddress: alternateSipProxyServerAddress,
           altProxyPort: alternateSipProxyServerPort,
           altServerSw: alternateSipServerEnable,
           altRegAddress: alternateRegServerAddress,
           altRegPort: alternateRegServerPort,
-          altRegDomain: originalData.altRegDomain || '',
-          altDomainPort: originalData.altDomainPort || '',
+          altRegDomain: alternateSipDomain,
+          altDomainPort: alternateSipDomainPort,
           volteSw: volteOnOff,
         };
       } else {
@@ -252,44 +258,73 @@ export const VoicePage: React.FC = () => {
                 <SquareSwitch isOn={sipProxyEnable === '1'} onChange={() => setSipProxyEnable(sipProxyEnable === '1' ? '0' : '1')} />
               </FormRow>
 
-              <FormRow label="SIP Proxy Address">
-                <StyledInput 
-                  value={sipProxyAddress} 
-                  onChange={(e) => setSipProxyAddress(e.target.value)} 
-                />
-              </FormRow>
+              {sipProxyEnable === '1' && (
+                <>
+                  <FormRow label="SIP Proxy Address">
+                    <StyledInput 
+                      value={sipProxyAddress} 
+                      onChange={(e) => setSipProxyAddress(e.target.value)} 
+                    />
+                  </FormRow>
 
-              <FormRow label="SIP Proxy Port">
-                <StyledInput 
-                  value={sipProxyPort} 
-                  onChange={(e) => setSipProxyPort(e.target.value)} 
-                />
-              </FormRow>
+                  <FormRow label="SIP Proxy Port">
+                    <StyledInput 
+                      value={sipProxyPort} 
+                      onChange={(e) => setSipProxyPort(e.target.value)} 
+                    />
+                  </FormRow>
+                </>
+              )}
 
               <FormRow label="Alternate Sip Server Enable">
                 <SquareSwitch isOn={alternateSipServerEnable === '1'} onChange={() => setAlternateSipServerEnable(alternateSipServerEnable === '1' ? '0' : '1')} />
               </FormRow>
 
-              <FormRow label="Alternate Reg Server Address">
-                <StyledInput 
-                  value={alternateRegServerAddress} 
-                  onChange={(e) => setAlternateRegServerAddress(e.target.value)} 
-                />
-              </FormRow>
+              {alternateSipServerEnable === '1' && (
+                <>
+                  <FormRow label="Alternate Reg Server Address">
+                    <StyledInput 
+                      value={alternateRegServerAddress} 
+                      onChange={(e) => setAlternateRegServerAddress(e.target.value)} 
+                    />
+                  </FormRow>
 
-              <FormRow label="Alternate Reg Server Port">
-                <StyledInput 
-                  value={alternateRegServerPort} 
-                  onChange={(e) => setAlternateRegServerPort(e.target.value)} 
-                />
-              </FormRow>
+                  <FormRow label="Alternate Reg Server Port">
+                    <StyledInput 
+                      value={alternateRegServerPort} 
+                      onChange={(e) => setAlternateRegServerPort(e.target.value)} 
+                    />
+                  </FormRow>
 
-              <FormRow label="Alternate SIP Proxy Server Port">
-                <StyledInput 
-                  value={alternateSipProxyServerPort} 
-                  onChange={(e) => setAlternateSipProxyServerPort(e.target.value)} 
-                />
-              </FormRow>
+                  <FormRow label="Alternate SIP Domain">
+                    <StyledInput 
+                      value={alternateSipDomain} 
+                      onChange={(e) => setAlternateSipDomain(e.target.value)} 
+                    />
+                  </FormRow>
+
+                  <FormRow label="Alternate SIP Domain Port">
+                    <StyledInput 
+                      value={alternateSipDomainPort} 
+                      onChange={(e) => setAlternateSipDomainPort(e.target.value)} 
+                    />
+                  </FormRow>
+
+                  <FormRow label="Alternate SIP Proxy Server Address">
+                    <StyledInput 
+                      value={alternateSipProxyServerAddress} 
+                      onChange={(e) => setAlternateSipProxyServerAddress(e.target.value)} 
+                    />
+                  </FormRow>
+
+                  <FormRow label="Alternate SIP Proxy Server Port">
+                    <StyledInput 
+                      value={alternateSipProxyServerPort} 
+                      onChange={(e) => setAlternateSipProxyServerPort(e.target.value)} 
+                    />
+                  </FormRow>
+                </>
+              )}
 
               <FormRow label="Auth Name">
                 <StyledInput 
