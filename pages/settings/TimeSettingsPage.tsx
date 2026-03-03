@@ -139,7 +139,7 @@ export const TimeSettingsPage: React.FC = () => {
 
   const formatClientTime = (date: Date) => {
       const pad = (n: number) => n.toString().padStart(2, '0');
-      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
   };
 
   const getDatetimeString = (date: Date) => {
@@ -187,10 +187,10 @@ export const TimeSettingsPage: React.FC = () => {
           return;
       }
       
-      // Validate YYYY-MM-DD HH:mm format
-      const timeRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/;
+      // Validate YYYY-MM-DDTHH:mm format (from datetime-local)
+      const timeRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
       if (!timeRegex.test(clientTime)) {
-          showAlert('Invalid time format. Please use YYYY-MM-DD HH:mm', 'error');
+          showAlert('Invalid time format. Please use the date picker.', 'error');
           return;
       }
       
@@ -198,7 +198,7 @@ export const TimeSettingsPage: React.FC = () => {
       try {
           const payload = {
               cmd: 321,
-              clientTime: clientTime,
+              clientTime: clientTime.replace('T', ' '),
               method: 'POST'
           };
           const res = await apiRequest(321, 'POST', payload);
@@ -291,10 +291,9 @@ export const TimeSettingsPage: React.FC = () => {
         <div className="pt-6">
             <FormRow label="Client Time">
                 <StyledInput
-                    type="text"
+                    type="datetime-local"
                     value={clientTime}
                     onChange={(e) => setClientTime(e.target.value)}
-                    placeholder="YYYY-MM-DD HH:mm"
                 />
             </FormRow>
 
