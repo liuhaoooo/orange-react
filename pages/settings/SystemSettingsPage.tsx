@@ -1,16 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { SquareSwitch, PrimaryButton } from '../../components/UIComponents';
+import { ConfirmModal } from '../../components/ConfirmModal';
 import { useLanguage } from '../../utils/i18nContext';
 import { useAlert } from '../../utils/AlertContext';
 import { apiRequest } from '../../utils/services/core';
 
 export const SystemSettingsPage: React.FC = () => {
   const { t } = useLanguage();
-  const { showAlert, showConfirm } = useAlert();
+  const { showAlert } = useAlert();
   const [loading, setLoading] = useState(true);
 
   const [telnet, setTelnet] = useState('0');
   const [adbSwitch, setAdbSwitch] = useState('0');
+
+  const [confirmModalState, setConfirmModalState] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {}
+  });
+
+  const showConfirm = (message: string, onConfirm: () => void, title?: string) => {
+    setConfirmModalState({
+      isOpen: true,
+      title: title || t('confirm') || 'Confirm',
+      message,
+      onConfirm: () => {
+        setConfirmModalState(prev => ({ ...prev, isOpen: false }));
+        onConfirm();
+      }
+    });
+  };
 
   useEffect(() => {
     const fetchSystemSettings = async () => {
@@ -164,6 +189,14 @@ export const SystemSettingsPage: React.FC = () => {
           <SquareSwitch isOn={adbSwitch === '1'} onChange={handleAdbChange} />
         </div>
       </div>
+
+      <ConfirmModal 
+        isOpen={confirmModalState.isOpen}
+        onClose={() => setConfirmModalState(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmModalState.onConfirm}
+        title={confirmModalState.title}
+        message={confirmModalState.message}
+      />
     </div>
   );
 };
