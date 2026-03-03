@@ -32,6 +32,7 @@ import { VpnPage } from './settings/VpnPage';
 import { FotaUpgradePage } from './settings/FotaUpgradePage';
 import { SystemSettingsPage } from './settings/SystemSettingsPage';
 import { ChangePasswordPage } from './settings/ChangePasswordPage';
+import { ChangeUsernamePage } from './settings/ChangeUsernamePage';
 import { GreSettingsPage } from './settings/GreSettingsPage';
 import { IpsecVpnPage } from './settings/IpsecVpnPage';
 import { IpsecStatusPage } from './settings/IpsecStatusPage';
@@ -451,6 +452,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <SystemSettingsPage />;
           case 'change_password':
               return <ChangePasswordPage />;
+          case 'change_username':
+              return <ChangeUsernamePage />;
           case 'ip_reservation':
               return <IpAddressReservationPage />;
           case 'multiple_dhcp':
