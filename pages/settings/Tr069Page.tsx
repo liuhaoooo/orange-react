@@ -3,11 +3,13 @@ import { Save } from 'lucide-react';
 import { FormRow, SquareSwitch, StyledInput, PrimaryButton, PasswordInput } from '../../components/UIComponents';
 import { useLanguage } from '../../utils/i18nContext';
 import { useAlert } from '../../utils/AlertContext';
+import { useGlobalState } from '../../utils/GlobalStateContext';
 import { apiRequest } from '../../utils/services/core';
 
 export const Tr069Page: React.FC = () => {
   const { t } = useLanguage();
   const { showAlert } = useAlert();
+  const { globalData } = useGlobalState();
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -22,8 +24,10 @@ export const Tr069Page: React.FC = () => {
   const [cpeAuthEnabled, setCpeAuthEnabled] = useState('0');
   const [linkUserName, setLinkUserName] = useState('');
   const [linkPasswd, setLinkPasswd] = useState('');
-  const [status, setStatus] = useState('');
-  const [authType, setAuthType] = useState('');
+
+  const statusInfo = globalData.statusInfo || {};
+  const status = statusInfo.tr069_connect_status || '';
+  const authType = statusInfo.tr069_auth_type || '';
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -43,8 +47,6 @@ export const Tr069Page: React.FC = () => {
           setCpeAuthEnabled(data.cpeAuthEnabled || '0');
           setLinkUserName(data.linkUserName || '');
           setLinkPasswd(data.linkPasswd || '');
-          setStatus(data.tr069_connect_status || '');
-          setAuthType(data.tr069_auth_type || '');
         }
       } catch (error) {
         console.error("Failed to fetch TR069 settings", error);
