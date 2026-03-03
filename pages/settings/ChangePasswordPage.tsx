@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '../../utils/i18nContext';
 import { useGlobalState } from '../../utils/GlobalStateContext';
 import { apiRequest } from '../../utils/api';
-import { PrimaryButton } from '../../components/UIComponents';
-import { Eye, EyeOff } from 'lucide-react';
+import { PrimaryButton, FormRow, PasswordInput, StyledSelect } from '../../components/UIComponents';
 import { useAlert } from '../../utils/AlertContext';
 
 const b64EncodeUtf8 = (str: string) => {
@@ -23,10 +22,6 @@ export const ChangePasswordPage: React.FC = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [resetUserRole, setResetUserRole] = useState('2'); // Default to Administrator User for level 1
-
-  const [showOldPassword, setShowOldPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   const [isLoading, setIsLoading] = useState(false);
   const [passError, setPassError] = useState('');
@@ -108,74 +103,39 @@ export const ChangePasswordPage: React.FC = () => {
   };
 
   return (
-    <div className="w-full animate-fade-in py-6">
-      <div className="max-w-3xl space-y-8">
+    <div className="w-full max-w-4xl animate-fade-in py-2">
+      <div className="space-y-0">
         
         {accountLevel === '1' && (
-            <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-8">
-                <label className="text-sm font-bold text-gray-900 md:w-1/3">
-                    <span className="text-red-500 mr-1">*</span>Reset User Password
-                </label>
-                <div className="md:w-2/3">
-                    <select
-                        value={resetUserRole}
-                        onChange={(e) => setResetUserRole(e.target.value)}
-                        className="w-full border border-gray-300 rounded-[2px] px-3 py-2 text-sm focus:outline-none focus:border-orange focus:ring-1 focus:ring-orange/30 bg-white"
-                    >
-                        <option value="2">Administrator User</option>
-                        <option value="3">Normal User</option>
-                    </select>
-                </div>
-            </div>
+            <FormRow label="Reset User Password" required>
+                <StyledSelect
+                    value={resetUserRole}
+                    onChange={(e) => setResetUserRole(e.target.value)}
+                    options={[
+                        { value: '2', label: 'Administrator User' },
+                        { value: '3', label: 'Normal User' }
+                    ]}
+                />
+            </FormRow>
         )}
 
         {accountLevel === '3' && (
-            <div className="flex flex-col md:flex-row md:items-start gap-2 md:gap-8">
-                <label className="text-sm font-bold text-gray-900 md:w-1/3 pt-2">
-                    <span className="text-red-500 mr-1">*</span>Old Password
-                </label>
-                <div className="md:w-2/3">
-                    <div className="relative">
-                        <input
-                            type={showOldPassword ? "text" : "password"}
-                            value={oldPassword}
-                            onChange={(e) => setOldPassword(e.target.value)}
-                            className={`w-full border ${oldPassError ? 'border-red-500' : 'border-gray-300'} rounded-[2px] px-3 py-2 text-sm focus:outline-none focus:border-orange focus:ring-1 focus:ring-orange/30 pr-10`}
-                        />
-                        <button 
-                            type="button"
-                            onClick={() => setShowOldPassword(!showOldPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                        >
-                            {showOldPassword ? <Eye size={16} /> : <EyeOff size={16} />}
-                        </button>
-                    </div>
-                    {oldPassError && <p className="text-red-500 text-xs mt-1">{oldPassError}</p>}
-                </div>
-            </div>
+            <FormRow label="Old Password" required error={oldPassError}>
+                <PasswordInput
+                    value={oldPassword}
+                    onChange={(e) => setOldPassword(e.target.value)}
+                    hasError={!!oldPassError}
+                />
+            </FormRow>
         )}
 
-        <div className="flex flex-col md:flex-row md:items-start gap-2 md:gap-8">
-            <label className="text-sm font-bold text-gray-900 md:w-1/3 pt-2">
-                <span className="text-red-500 mr-1">*</span>New Password
-            </label>
-            <div className="md:w-2/3">
-                <div className="relative">
-                    <input
-                        type={showNewPassword ? "text" : "password"}
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        className={`w-full border ${passError ? 'border-red-500' : 'border-gray-300'} rounded-[2px] px-3 py-2 text-sm focus:outline-none focus:border-orange focus:ring-1 focus:ring-orange/30 pr-10`}
-                    />
-                    <button 
-                        type="button"
-                        onClick={() => setShowNewPassword(!showNewPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                        {showNewPassword ? <Eye size={16} /> : <EyeOff size={16} />}
-                    </button>
-                </div>
-                {passError && <p className="text-red-500 text-xs mt-1">{passError}</p>}
+        <FormRow label="New Password" required error={passError} alignTop>
+            <div className="w-full">
+                <PasswordInput
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    hasError={!!passError}
+                />
                 
                 {/* Strength Indicator */}
                 <div className="flex h-1.5 mt-2 gap-1">
@@ -189,34 +149,18 @@ export const ChangePasswordPage: React.FC = () => {
                     <span className={strength === 3 ? 'text-green-500' : ''}>Strong</span>
                 </div>
             </div>
-        </div>
+        </FormRow>
 
-        <div className="flex flex-col md:flex-row md:items-start gap-2 md:gap-8">
-            <label className="text-sm font-bold text-gray-900 md:w-1/3 pt-2">
-                <span className="text-red-500 mr-1">*</span>Confirm Password
-            </label>
-            <div className="md:w-2/3">
-                <div className="relative">
-                    <input
-                        type={showConfirmPassword ? "text" : "password"}
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        className={`w-full border ${confirmError ? 'border-red-500' : 'border-gray-300'} rounded-[2px] px-3 py-2 text-sm focus:outline-none focus:border-orange focus:ring-1 focus:ring-orange/30 pr-10`}
-                    />
-                    <button 
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                        {showConfirmPassword ? <Eye size={16} /> : <EyeOff size={16} />}
-                    </button>
-                </div>
-                {confirmError && <p className="text-red-500 text-xs mt-1">{confirmError}</p>}
-            </div>
-        </div>
+        <FormRow label="Confirm Password" required error={confirmError}>
+            <PasswordInput
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                hasError={!!confirmError}
+            />
+        </FormRow>
 
         <div className="flex justify-end pt-6">
-          <PrimaryButton onClick={handleSubmit} loading={isLoading} disabled={isLoading}>
+          <PrimaryButton onClick={handleSubmit} loading={isLoading} disabled={isLoading} className="w-32">
             {t('save') || 'Save'}
           </PrimaryButton>
         </div>

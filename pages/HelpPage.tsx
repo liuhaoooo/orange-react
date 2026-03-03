@@ -3,8 +3,9 @@ import React, { useState } from 'react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { FileText } from 'lucide-react';
-import ledInfoOdu from '../assets/ledInfo_ODU.png';
-import ledInfoIdu from '../assets/ledInfo_IDU.png';
+
+const ledInfoOdu = "https://picsum.photos/seed/odu/400/300";
+const ledInfoIdu = "https://picsum.photos/seed/idu/400/300";
 
 type HelpContentGenerator = string | ((lang: string) => string);
 
