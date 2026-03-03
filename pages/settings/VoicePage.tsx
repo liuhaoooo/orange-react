@@ -4,13 +4,17 @@ import { useLanguage } from '../../utils/i18nContext';
 import { useAlert } from '../../utils/AlertContext';
 import { useGlobalState } from '../../utils/GlobalStateContext';
 
+import { apiRequest } from '../../utils/services/core';
+
 export const VoicePage: React.FC = () => {
   const { t } = useLanguage();
   const { showAlert } = useAlert();
   const { globalData } = useGlobalState();
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const [voiceBasicSettings, setVoiceBasicSettings] = useState('0');
+  const [originalData, setOriginalData] = useState<any>({});
   
   // VOLTE states
   const [volteOnOff, setVolteOnOff] = useState('0');
@@ -37,6 +41,45 @@ export const VoicePage: React.FC = () => {
   const [regAccount, setRegAccount] = useState('');
   const [regPassword, setRegPassword] = useState('');
 
+  useEffect(() => {
+    const fetchVoiceData = async () => {
+      try {
+        const data = await apiRequest(295, 'GET');
+        if (data && data.success) {
+          setOriginalData(data);
+          setVoiceBasicSettings(data.voiceType || '0');
+          setVolteOnOff(data.volteSw || '0');
+          setVolteRegister(data.volteRegStatus || '');
+          setIms(data.ims || '');
+          setImsPdpType(data.pdpType || 'IPV4V6');
+          
+          setVoipOnOff(data.voipSw || '0');
+          setVoipRegisterStatus(data.voipRegStatus || '');
+          setRegServerAddress(data.regAddress || '');
+          setRegServerPort(data.regPort || '5060');
+          setSipDomain(data.regDomain || '');
+          setSipDomainPort(data.domainPort || '5060');
+          setSipProxyEnable(data.proxySw || '0');
+          setSipProxyAddress(data.proxyAddress || '');
+          setSipProxyPort(data.proxyPort || '5060');
+          setAlternateSipServerEnable(data.altServerSw || '0');
+          setAlternateRegServerAddress(data.altRegAddress || '');
+          setAlternateRegServerPort(data.altRegPort || '');
+          setAlternateSipProxyServerPort(data.altProxyPort || '');
+          setAuthName(data.authName || '');
+          setPhoneName(data.phoneName || '');
+          setRegAccount(data.regAccount || '');
+          setRegPassword(data.regPassword || '');
+        }
+      } catch (error) {
+        console.error("Failed to fetch Voice settings", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchVoiceData();
+  }, []);
+
   const plmn = globalData.statusInfo?.PLMN || '';
   const isVolteMode = plmn === '60400';
 
@@ -59,9 +102,53 @@ export const VoicePage: React.FC = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      // Mock save action
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      showAlert(t('settingsSaved') || 'Settings saved successfully', 'success');
+      let payload: any = {
+        cmd: 295,
+        voiceType: voiceBasicSettings,
+        voiceAutoSw: originalData.voiceAutoSw || '0',
+      };
+
+      if (voiceBasicSettings === '1') {
+        // VoIP
+        payload = {
+          ...payload,
+          voipSw: voipOnOff,
+          authName,
+          phoneName,
+          regAccount,
+          regPassword,
+          regAddress: regServerAddress,
+          regPort: regServerPort,
+          regDomain: sipDomain,
+          domainPort: sipDomainPort,
+          proxySw: sipProxyEnable,
+          proxyAddress: sipProxyAddress,
+          proxyPort: sipProxyPort,
+          altProxyAddress: originalData.altProxyAddress || '',
+          altProxyPort: alternateSipProxyServerPort,
+          altServerSw: alternateSipServerEnable,
+          altRegAddress: alternateRegServerAddress,
+          altRegPort: alternateRegServerPort,
+          altRegDomain: originalData.altRegDomain || '',
+          altDomainPort: originalData.altDomainPort || '',
+          volteSw: volteOnOff,
+        };
+      } else {
+        // CSFB or VOLTE
+        payload = {
+          ...payload,
+          volteSw: volteOnOff,
+          pdpType: isVolteMode ? imsPdpType : 'IPV4V6',
+          ims,
+        };
+      }
+
+      const data = await apiRequest(295, 'POST', payload);
+      if (data && data.success) {
+        showAlert(t('settingsSaved') || 'Settings saved successfully', 'success');
+      } else {
+        showAlert(t('errorSaving') || 'Failed to save settings', 'error');
+      }
     } catch (error) {
       console.error("Failed to save Voice settings", error);
       showAlert(t('errorSaving') || 'Failed to save settings', 'error');
@@ -69,6 +156,16 @@ export const VoicePage: React.FC = () => {
       setSaving(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="w-full max-w-4xl animate-fade-in py-2">
+        <div className="bg-white border border-gray-200 rounded-[6px] p-8 text-center text-gray-500">
+          Loading...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-4xl animate-fade-in py-2">
