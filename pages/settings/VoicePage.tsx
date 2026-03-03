@@ -1,14 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FormRow, SquareSwitch, StyledInput, PrimaryButton, PasswordInput, StyledSelect } from '../../components/UIComponents';
 import { useLanguage } from '../../utils/i18nContext';
 import { useAlert } from '../../utils/AlertContext';
+import { useGlobalState } from '../../utils/GlobalStateContext';
 
 export const VoicePage: React.FC = () => {
   const { t } = useLanguage();
   const { showAlert } = useAlert();
+  const { globalData } = useGlobalState();
   const [saving, setSaving] = useState(false);
 
-  const [voiceBasicSettings, setVoiceBasicSettings] = useState('VoIP');
+  const [voiceBasicSettings, setVoiceBasicSettings] = useState('0');
+  
+  // VOLTE states
+  const [volteOnOff, setVolteOnOff] = useState('0');
+  const [volteRegister, setVolteRegister] = useState('Registered');
+  const [ims, setIms] = useState('ims');
+  const [imsPdpType, setImsPdpType] = useState('IPV4V6');
+
+  // VoIP states
   const [voipOnOff, setVoipOnOff] = useState('0');
   const [voipRegisterStatus, setVoipRegisterStatus] = useState('Unknown error!');
   const [regServerAddress, setRegServerAddress] = useState('');
@@ -26,6 +36,25 @@ export const VoicePage: React.FC = () => {
   const [phoneName, setPhoneName] = useState('');
   const [regAccount, setRegAccount] = useState('');
   const [regPassword, setRegPassword] = useState('');
+
+  const plmn = globalData.statusInfo?.PLMN || '';
+  const isVolteMode = plmn === '60400';
+
+  const voiceBasicOptions = isVolteMode 
+    ? [
+        { name: 'VOLTE', value: '0' },
+        { name: 'VoIP', value: '1' }
+      ]
+    : [
+        { name: 'CSFB', value: '0' },
+        { name: 'VoIP', value: '1' }
+      ];
+
+  const imsPdpTypeOptions = [
+    { name: 'IPV4', value: 'IP' },
+    { name: 'IPV6', value: 'IPV6' },
+    { name: 'IPV4&V6', value: 'IPV4V6' }
+  ];
 
   const handleSave = async () => {
     setSaving(true);
@@ -47,116 +76,155 @@ export const VoicePage: React.FC = () => {
         <StyledSelect
           value={voiceBasicSettings}
           onChange={(e) => setVoiceBasicSettings(e.target.value)}
-          options={[{ value: 'VoIP', label: 'VoIP' }]}
+          options={voiceBasicOptions}
         />
       </FormRow>
 
-      <FormRow label="VoIP On/Off">
-        <SquareSwitch isOn={voipOnOff === '1'} onChange={() => setVoipOnOff(voipOnOff === '1' ? '0' : '1')} />
-      </FormRow>
+      {voiceBasicSettings === '0' && isVolteMode && (
+        <>
+          <FormRow label="VoLTE On/Off">
+            <SquareSwitch isOn={volteOnOff === '1'} onChange={() => setVolteOnOff(volteOnOff === '1' ? '0' : '1')} />
+          </FormRow>
 
-      <FormRow label="VoIP Register Status">
-        <div className="text-sm font-medium text-gray-900">{voipRegisterStatus}</div>
-      </FormRow>
+          {volteOnOff === '1' && (
+            <>
+              <FormRow label="VoLTE Register">
+                <div className="text-sm font-medium text-gray-900">{volteRegister}</div>
+              </FormRow>
 
-      <FormRow label="Reg Server Address">
-        <StyledInput 
-          value={regServerAddress} 
-          onChange={(e) => setRegServerAddress(e.target.value)} 
-        />
-      </FormRow>
+              <FormRow label="IMS">
+                <StyledInput 
+                  value={ims} 
+                  onChange={(e) => setIms(e.target.value)} 
+                />
+              </FormRow>
 
-      <FormRow label="Reg Server Port">
-        <StyledInput 
-          value={regServerPort} 
-          onChange={(e) => setRegServerPort(e.target.value)} 
-        />
-      </FormRow>
+              <FormRow label="IMS PDP Type">
+                <StyledSelect
+                  value={imsPdpType}
+                  onChange={(e) => setImsPdpType(e.target.value)}
+                  options={imsPdpTypeOptions}
+                />
+              </FormRow>
+            </>
+          )}
+        </>
+      )}
 
-      <FormRow label="SIP Domain">
-        <StyledInput 
-          value={sipDomain} 
-          onChange={(e) => setSipDomain(e.target.value)} 
-        />
-      </FormRow>
+      {voiceBasicSettings === '1' && (
+        <>
+          <FormRow label="VoIP On/Off">
+            <SquareSwitch isOn={voipOnOff === '1'} onChange={() => setVoipOnOff(voipOnOff === '1' ? '0' : '1')} />
+          </FormRow>
 
-      <FormRow label="SIP Domain Port">
-        <StyledInput 
-          value={sipDomainPort} 
-          onChange={(e) => setSipDomainPort(e.target.value)} 
-        />
-      </FormRow>
+          {voipOnOff === '1' && (
+            <>
+              <FormRow label="VoIP Register Status">
+                <div className="text-sm font-medium text-gray-900">{voipRegisterStatus}</div>
+              </FormRow>
 
-      <FormRow label="SIP Proxy Enable">
-        <SquareSwitch isOn={sipProxyEnable === '1'} onChange={() => setSipProxyEnable(sipProxyEnable === '1' ? '0' : '1')} />
-      </FormRow>
+              <FormRow label="Reg Server Address">
+                <StyledInput 
+                  value={regServerAddress} 
+                  onChange={(e) => setRegServerAddress(e.target.value)} 
+                />
+              </FormRow>
 
-      <FormRow label="SIP Proxy Address">
-        <StyledInput 
-          value={sipProxyAddress} 
-          onChange={(e) => setSipProxyAddress(e.target.value)} 
-        />
-      </FormRow>
+              <FormRow label="Reg Server Port">
+                <StyledInput 
+                  value={regServerPort} 
+                  onChange={(e) => setRegServerPort(e.target.value)} 
+                />
+              </FormRow>
 
-      <FormRow label="SIP Proxy Port">
-        <StyledInput 
-          value={sipProxyPort} 
-          onChange={(e) => setSipProxyPort(e.target.value)} 
-        />
-      </FormRow>
+              <FormRow label="SIP Domain">
+                <StyledInput 
+                  value={sipDomain} 
+                  onChange={(e) => setSipDomain(e.target.value)} 
+                />
+              </FormRow>
 
-      <FormRow label="Alternate Sip Server Enable">
-        <SquareSwitch isOn={alternateSipServerEnable === '1'} onChange={() => setAlternateSipServerEnable(alternateSipServerEnable === '1' ? '0' : '1')} />
-      </FormRow>
+              <FormRow label="SIP Domain Port">
+                <StyledInput 
+                  value={sipDomainPort} 
+                  onChange={(e) => setSipDomainPort(e.target.value)} 
+                />
+              </FormRow>
 
-      <FormRow label="Alternate Reg Server Address">
-        <StyledInput 
-          value={alternateRegServerAddress} 
-          onChange={(e) => setAlternateRegServerAddress(e.target.value)} 
-        />
-      </FormRow>
+              <FormRow label="SIP Proxy Enable">
+                <SquareSwitch isOn={sipProxyEnable === '1'} onChange={() => setSipProxyEnable(sipProxyEnable === '1' ? '0' : '1')} />
+              </FormRow>
 
-      <FormRow label="Alternate Reg Server Port">
-        <StyledInput 
-          value={alternateRegServerPort} 
-          onChange={(e) => setAlternateRegServerPort(e.target.value)} 
-        />
-      </FormRow>
+              <FormRow label="SIP Proxy Address">
+                <StyledInput 
+                  value={sipProxyAddress} 
+                  onChange={(e) => setSipProxyAddress(e.target.value)} 
+                />
+              </FormRow>
 
-      <FormRow label="Alternate SIP Proxy Server Port">
-        <StyledInput 
-          value={alternateSipProxyServerPort} 
-          onChange={(e) => setAlternateSipProxyServerPort(e.target.value)} 
-        />
-      </FormRow>
+              <FormRow label="SIP Proxy Port">
+                <StyledInput 
+                  value={sipProxyPort} 
+                  onChange={(e) => setSipProxyPort(e.target.value)} 
+                />
+              </FormRow>
 
-      <FormRow label="Auth Name">
-        <StyledInput 
-          value={authName} 
-          onChange={(e) => setAuthName(e.target.value)} 
-        />
-      </FormRow>
+              <FormRow label="Alternate Sip Server Enable">
+                <SquareSwitch isOn={alternateSipServerEnable === '1'} onChange={() => setAlternateSipServerEnable(alternateSipServerEnable === '1' ? '0' : '1')} />
+              </FormRow>
 
-      <FormRow label="Phone Name">
-        <StyledInput 
-          value={phoneName} 
-          onChange={(e) => setPhoneName(e.target.value)} 
-        />
-      </FormRow>
+              <FormRow label="Alternate Reg Server Address">
+                <StyledInput 
+                  value={alternateRegServerAddress} 
+                  onChange={(e) => setAlternateRegServerAddress(e.target.value)} 
+                />
+              </FormRow>
 
-      <FormRow label="Reg Account">
-        <StyledInput 
-          value={regAccount} 
-          onChange={(e) => setRegAccount(e.target.value)} 
-        />
-      </FormRow>
+              <FormRow label="Alternate Reg Server Port">
+                <StyledInput 
+                  value={alternateRegServerPort} 
+                  onChange={(e) => setAlternateRegServerPort(e.target.value)} 
+                />
+              </FormRow>
 
-      <FormRow label="Reg Password">
-        <PasswordInput 
-          value={regPassword} 
-          onChange={(e) => setRegPassword(e.target.value)} 
-        />
-      </FormRow>
+              <FormRow label="Alternate SIP Proxy Server Port">
+                <StyledInput 
+                  value={alternateSipProxyServerPort} 
+                  onChange={(e) => setAlternateSipProxyServerPort(e.target.value)} 
+                />
+              </FormRow>
+
+              <FormRow label="Auth Name">
+                <StyledInput 
+                  value={authName} 
+                  onChange={(e) => setAuthName(e.target.value)} 
+                />
+              </FormRow>
+
+              <FormRow label="Phone Name">
+                <StyledInput 
+                  value={phoneName} 
+                  onChange={(e) => setPhoneName(e.target.value)} 
+                />
+              </FormRow>
+
+              <FormRow label="Reg Account">
+                <StyledInput 
+                  value={regAccount} 
+                  onChange={(e) => setRegAccount(e.target.value)} 
+                />
+              </FormRow>
+
+              <FormRow label="Reg Password">
+                <PasswordInput 
+                  value={regPassword} 
+                  onChange={(e) => setRegPassword(e.target.value)} 
+                />
+              </FormRow>
+            </>
+          )}
+        </>
+      )}
 
       <div className="flex justify-end pt-8">
         <PrimaryButton
