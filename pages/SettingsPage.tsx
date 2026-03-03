@@ -122,12 +122,12 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
       label: t('device') || 'Device',
       subTabs: [
           { id: 'dhcp_settings', label: t('dhcp') },
+          { id: 'voice', label: t('voice') || 'Voice' },
+          { id: 'ims', label: t('imsSetting') },
           { id: 'ip_reservation', label: t('ipAddressReservation') },
           { id: 'multiple_dhcp', label: t('multipleDhcp') },
           { id: 'vlan', label: t('vlan') },
-          { id: 'routing', label: t('routingConfiguration') },
-          { id: 'ims', label: t('imsSetting') },
-          { id: 'voice', label: t('voice') || 'Voice' }
+          { id: 'routing', label: t('routingConfiguration') }
       ]
     },
     { 

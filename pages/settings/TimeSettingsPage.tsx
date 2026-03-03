@@ -96,6 +96,9 @@ export const TimeSettingsPage: React.FC = () => {
                     // month is 0-indexed in JS Date
                     const dateObj = new Date(year, month - 1, day, hour, minute, second);
                     setSystemTime(dateObj);
+                    
+                    const pad = (n: number) => n.toString().padStart(2, '0');
+                    setClientTime(`${year}-${pad(month)}-${pad(day)}T${pad(hour)}:${pad(minute)}`);
                 }
             }
         }
@@ -301,7 +304,6 @@ export const TimeSettingsPage: React.FC = () => {
                 <PrimaryButton 
                     onClick={handleGetLocalTime} 
                     disabled={isSaving}
-                    className="bg-white text-black border-2 border-black hover:bg-gray-50"
                 >
                     Get Local Time
                 </PrimaryButton>
