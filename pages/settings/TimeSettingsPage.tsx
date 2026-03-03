@@ -187,27 +187,21 @@ export const TimeSettingsPage: React.FC = () => {
           return;
       }
       
+      // Validate YYYY-MM-DD HH:mm format
+      const timeRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/;
+      if (!timeRegex.test(clientTime)) {
+          showAlert('Invalid time format. Please use YYYY-MM-DD HH:mm', 'error');
+          return;
+      }
+      
       setIsSaving(true);
       try {
-          // Parse clientTime "YYYY-MM-DD HH:mm"
-          const [datePart, timePart] = clientTime.split(' ');
-          const [year, month, day] = datePart.split('-');
-          const [hour, minute] = timePart.split(':');
-          
-          const datetimeStr = `${month}${day}${hour}${minute}${year}`;
-
           const payload = {
-              cmd: 11,
-              timeServer: ntp1,
-              timeServer2: ntp2,
-              timeServer3: ntp3,
-              timeServer4: ntp4,
-              ntpSwitch: ntpSwitch,
-              timezone: timezone,
-              datetime: datetimeStr,
+              cmd: 321,
+              clientTime: clientTime,
               method: 'POST'
           };
-          const res = await apiRequest(11, 'POST', payload);
+          const res = await apiRequest(321, 'POST', payload);
           if (res && res.success) {
               showAlert(t('settingsSaved') || 'Settings saved successfully', 'success');
           } else {
