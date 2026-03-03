@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Save, Loader2 } from 'lucide-react';
 import { fetchImsSettings, saveImsSettings } from '../../utils/api';
 import { useAlert } from '../../utils/AlertContext';
+import { useGlobalState } from '../../utils/GlobalStateContext';
 import { SquareSwitch, FormRow, StyledInput, StyledSelect, PrimaryButton } from '../../components/UIComponents';
 
 const PDP_OPTIONS = [
@@ -13,6 +14,7 @@ const PDP_OPTIONS = [
 
 export const ImsSettingsPage: React.FC = () => {
   const { showAlert } = useAlert();
+  const { globalData } = useGlobalState();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -65,20 +67,60 @@ export const ImsSettingsPage: React.FC = () => {
       }
   };
 
-  const getStatusText = (status: string) => {
-      switch(status) {
-          case '0': return "The system is initializing";
-          case '1': return "Initializing VoLTE Settings";
-          case '2': return "Resetting Module";
-          case '3': return "Registering";
-          case '4': return "Registered";
-          case '5': return "Error Configuring Module";
-          case '6': return "SIM Card Not Detected";
-          case '7': return "Factory Mode";
-          case '8': return "Stationed in the Network";
-          case '9': return "Unregistered";
-          default: return "Unknown Mistake";
-      }
+  const getVoipRegStatusText = (code: string) => {
+    const statusMap: { [key: string]: string } = {
+      "0": "Unregistered",
+      "1": "Registering",
+      "2": "Registration Failed",
+      "3": "Registered",
+      "400": "Registration Failed: Bad Request (400)",
+      "401": "Registration failed: not authorized, the request requires user authentication (401)",
+      "403": "Registration Failed: Forbidden (403)",
+      "404": "Registration Failed: NotFound (404)",
+      "406": "Registration Failed: Unacceptable (406)",
+      "407": "Registration failed: proxy authentication is not required (407)",
+      "408": "Registration failed: The request timed out and the user could not be found in time (408)",
+      "409": "Registration failed: conflict, user is already registered (409)",
+      "410": "Registration failed: disappeared, the user used to exist, but is no longer available here (410)",
+      "411": "Registration failed: The server requires a valid content length (411)",
+      "413": "Registration failed: the request entity is too large (413)",
+      "414": "Registration failed: request URI is too long (414)",
+      "415": "Registration failed: unsupported media type (415)",
+      "417": "Registration failed: Unknown resource priority (417)",
+      "480": "Registration Failed: Temporarily Unavailable (480)",
+      "481": "Registration failed: call/transaction does not exist (481)",
+      "486": "Registration failed: device is busy (486)",
+      "487": "Registration failed: the request has been terminated (487)",
+      "488": "Registration failed: not accepted here (488)",
+      "50": "Failed to initialize PCM",
+      "500": "Registration failed: server internal error (500)",
+      "501": "Registration Failed: Not Implemented (501)",
+      "502": "Registration Failed: Gateway Error (502)",
+      "503": "Registration Failed: Service Unavailable (503)",
+      "504": "Registration failed: server timed out (504)",
+      "505": "Registration failed: version not supported (505)",
+      "51": "SIM Card Not Detected",
+      "513": "Registration failed: The message is too large (513)",
+      "52": "Failed to set server parameters",
+      "53": "Failed to set account parameters",
+      "54": "Failed to initialize sound card",
+      "55": "Failed to set the ring type",
+      "56": "DNS Resolution Failed",
+      "57": "Factory Mode",
+      "58": "Data Link Disconnected"
+    };
+    return statusMap[code] || "Unknown error";
+  };
+
+  const getVoipAuthStatusText = (code: string) => {
+    const statusMap: { [key: string]: string } = {
+      "0": "Unauthorized",
+      "1": "Authorized",
+      "2": "Unauthorized Device",
+      "3": "Authorization Failed: No Version File",
+      "4": "Authorization failed: SIP program not found"
+    };
+    return statusMap[code] || "Unknown error";
   };
 
   if (loading) {
@@ -102,7 +144,11 @@ export const ImsSettingsPage: React.FC = () => {
               <>
                 {/* IMS Register Status */}
                 <FormRow label="IMS Register Status">
-                    <span className="text-black text-sm font-medium">{getStatusText(regStatus)}</span>
+                    <span className="text-black text-sm font-medium">{getVoipRegStatusText(globalData.statusInfo?.voipRegStatus || '')}</span>
+                </FormRow>
+
+                <FormRow label="Authorization Status">
+                    <span className="text-black text-sm font-medium">{getVoipAuthStatusText(globalData.statusInfo?.voipAuthStatus || '')}</span>
                 </FormRow>
 
                 {/* IMS Input */}
