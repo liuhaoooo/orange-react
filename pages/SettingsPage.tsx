@@ -36,6 +36,7 @@ import { IpPassthroughPage } from './settings/IpPassthroughPage';
 import { MultipleIpPassthroughPage } from './settings/MultipleIpPassthroughPage';
 import { SipAlgPage } from './settings/SipAlgPage';
 import { Tr069Page } from './settings/Tr069Page';
+import { VoicePage } from './settings/VoicePage';
 import { MeshBasicConfigPage } from './settings/MeshBasicConfigPage';
 import { TopologyDiagramPage } from './settings/TopologyDiagramPage';
 import { UrlFilterPage } from './settings/UrlFilterPage';
@@ -119,7 +120,9 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
           { id: 'ip_reservation', label: t('ipAddressReservation') },
           { id: 'multiple_dhcp', label: t('multipleDhcp') },
           { id: 'vlan', label: t('vlan') },
-          { id: 'routing', label: t('routingConfiguration') }
+          { id: 'routing', label: t('routingConfiguration') },
+          { id: 'ims', label: t('imsSetting') },
+          { id: 'voice', label: t('voice') || 'Voice' }
       ]
     },
     { 
@@ -155,8 +158,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
           { id: 'ip_passthrough_main', label: t('ipPassthrough') },
           { id: 'multiple_ip_passthrough', label: t('multipleIpPassthrough') },
           { id: 'sip_alg', label: t('sipAlg') },
-          { id: 'tr069', label: t('tr069') },
-          { id: 'ims', label: t('imsSetting') }
+          { id: 'tr069', label: t('tr069') }
       ]
     },
     { 
@@ -431,6 +433,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <UsageSettingsPage type="international" />;
           case 'ims':
               return <ImsSettingsPage />;
+          case 'voice':
+              return <VoicePage />;
           // Updated cases for unified Wi-Fi pages
           case 'wifi_advanced':
               return <AdvSettings24Page />; // This now exports WifiAdvancedSettingsPage
