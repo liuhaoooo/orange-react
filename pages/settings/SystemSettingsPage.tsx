@@ -13,6 +13,9 @@ export const SystemSettingsPage: React.FC = () => {
   const [telnet, setTelnet] = useState('0');
   const [adbSwitch, setAdbSwitch] = useState('0');
 
+  const [isRebooting, setIsRebooting] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+
   const [confirmModalState, setConfirmModalState] = useState<{
     isOpen: boolean;
     title: string;
@@ -64,12 +67,15 @@ export const SystemSettingsPage: React.FC = () => {
     showConfirm(
       t('confirmReboot') || 'Rebooting the device will temporarily disconnect your network. Are you sure you want to continue?',
       async () => {
+        setIsRebooting(true);
         try {
           await apiRequest(6, 'POST', { cmd: 6, rebootType: 2 });
           showAlert(t('rebooting') || 'Device is rebooting...', 'success');
+          // Intentionally not setting isRebooting to false on success, as the device is restarting
         } catch (error) {
           console.error("Failed to reboot", error);
           showAlert(t('errorRebooting') || 'Failed to reboot', 'error');
+          setIsRebooting(false);
         }
       }
     );
@@ -79,17 +85,21 @@ export const SystemSettingsPage: React.FC = () => {
     showConfirm(
       t('confirmReset') || 'Resetting to factory defaults will erase all your custom settings and restore the device to its original state. This action cannot be undone. Are you sure you want to continue?',
       async () => {
+        setIsResetting(true);
         try {
           const res = await apiRequest(112, 'POST', { cmd: 112 });
           if (res && res.success) {
             await apiRequest(6, 'POST', { cmd: 6, rebootType: 4 });
             showAlert(t('resetting') || 'Device is resetting...', 'success');
+            // Intentionally not setting isResetting to false on success, as the device is restarting
           } else {
             showAlert(t('errorResetting') || 'Failed to reset', 'error');
+            setIsResetting(false);
           }
         } catch (error) {
           console.error("Failed to reset", error);
           showAlert(t('errorResetting') || 'Failed to reset', 'error');
+          setIsResetting(false);
         }
       }
     );
@@ -163,8 +173,8 @@ export const SystemSettingsPage: React.FC = () => {
       <div className="flex items-center justify-between py-4 border-b border-gray-100">
         <span className="text-sm font-medium text-gray-900 w-1/3">Reboot</span>
         <div className="w-2/3 flex justify-end">
-          <PrimaryButton onClick={handleReboot} className="w-32">
-            Reboot
+          <PrimaryButton onClick={handleReboot} className="w-32" loading={isRebooting}>
+            {isRebooting ? 'Rebooting...' : 'Reboot'}
           </PrimaryButton>
         </div>
       </div>
@@ -172,8 +182,8 @@ export const SystemSettingsPage: React.FC = () => {
       <div className="flex items-center justify-between py-4 border-b border-gray-100">
         <span className="text-sm font-medium text-gray-900 w-1/3">Reset</span>
         <div className="w-2/3 flex justify-end">
-          <PrimaryButton onClick={handleReset} className="w-32">
-            Reset
+          <PrimaryButton onClick={handleReset} className="w-32" loading={isResetting}>
+            {isResetting ? 'Resetting...' : 'Reset'}
           </PrimaryButton>
         </div>
       </div>
