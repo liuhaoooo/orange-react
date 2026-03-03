@@ -62,7 +62,7 @@ export const SystemSettingsPage: React.FC = () => {
 
   const handleReboot = () => {
     showConfirm(
-      t('confirmReboot') || 'Are you sure you want to reboot the device?',
+      t('confirmReboot') || 'Rebooting the device will temporarily disconnect your network. Are you sure you want to continue?',
       async () => {
         try {
           await apiRequest(6, 'POST', { cmd: 6, rebootType: 2 });
@@ -77,7 +77,7 @@ export const SystemSettingsPage: React.FC = () => {
 
   const handleReset = () => {
     showConfirm(
-      t('confirmReset') || 'Are you sure you want to reset the device to factory settings?',
+      t('confirmReset') || 'Resetting to factory defaults will erase all your custom settings and restore the device to its original state. This action cannot be undone. Are you sure you want to continue?',
       async () => {
         try {
           const res = await apiRequest(112, 'POST', { cmd: 112 });
@@ -97,8 +97,9 @@ export const SystemSettingsPage: React.FC = () => {
 
   const handleTelnetChange = () => {
     const newValue = telnet === '1' ? '0' : '1';
+    const action = newValue === '1' ? 'enable' : 'disable';
     showConfirm(
-      t('confirmTelnetChange') || `Are you sure you want to ${newValue === '1' ? 'enable' : 'disable'} Telnet?`,
+      t('confirmTelnetChange') || `Are you sure you want to ${action} Telnet? ${newValue === '1' ? 'Enabling Telnet may pose a security risk.' : ''}`,
       async () => {
         try {
           const payload = {
@@ -123,8 +124,9 @@ export const SystemSettingsPage: React.FC = () => {
 
   const handleAdbChange = () => {
     const newValue = adbSwitch === '1' ? '0' : '1';
+    const action = newValue === '1' ? 'enable' : 'disable';
     showConfirm(
-      t('confirmAdbChange') || `Are you sure you want to ${newValue === '1' ? 'enable' : 'disable'} ADB?`,
+      t('confirmAdbChange') || `Are you sure you want to ${action} ADB? ${newValue === '1' ? 'Enabling ADB may pose a security risk.' : ''}`,
       async () => {
         try {
           const payload = {
