@@ -3,10 +3,9 @@ import React from 'react';
 import { Card, CardHeader } from './UIComponents';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
-import { Link } from '../utils/GlobalStateContext';
+import { Link, useNavigate } from 'react-router-dom';
 import servicesBgSvg from '../assets/services-bg.svg';
 import { getServicesByPlmn, PlmnServiceItem } from '../utils/services/plmnServices';
-import { apiRequest } from '../utils/api';
 import { useAlert } from '../utils/AlertContext';
 
 interface ServicesCardProps {
@@ -24,6 +23,7 @@ export const ServicesCard: React.FC<ServicesCardProps> = ({
 }) => {
   const { t } = useLanguage();
   const { showAlert } = useAlert();
+  const navigate = useNavigate();
   const { isLoggedIn, globalData } = useGlobalState();
   const statusInfo = globalData.statusInfo;
   const connectionSettings = globalData.connectionSettings;
@@ -40,23 +40,7 @@ export const ServicesCard: React.FC<ServicesCardProps> = ({
       return;
     }
 
-    try {
-      const payload = {
-        cmd: 560,
-        subcmd: item.subcmd || "0",
-        ussd_code: item.ussd_code || "",
-        timeout: 30000,
-        method: 'POST'
-      };
-      const res = await apiRequest(560, 'POST', payload);
-      if (res && res.success) {
-        // Handled successfully
-      } else {
-        showAlert('Failed to send request', 'error');
-      }
-    } catch (e) {
-      showAlert('Failed to send request', 'error');
-    }
+    navigate('/services', { state: { executeService: item } });
   };
 
   // State: Not Logged In

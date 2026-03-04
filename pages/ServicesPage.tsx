@@ -1,6 +1,7 @@
 
-import React, { useState } from 'react';
-import { Delete } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Delete, Loader2 } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import servicesBgSvg from '../assets/services-bg.svg';
@@ -17,10 +18,14 @@ interface ServicesPageProps {
 export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenSettings, onShowPin, onShowPuk }) => {
   const { t } = useLanguage();
   const { showAlert } = useAlert();
+  const location = useLocation();
+  const navigate = useNavigate();
   const { isLoggedIn, globalData } = useGlobalState();
   const [screenText, setScreenText] = useState('');
   const [inputText, setInputText] = useState('');
   const [activeMenu, setActiveMenu] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isCancelDisabled, setIsCancelDisabled] = useState(false);
   
   const statusInfo = globalData.statusInfo;
   const connectionSettings = globalData.connectionSettings;
@@ -31,6 +36,90 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenSettings, onSh
 
   const plmn = statusInfo?.PLMN || '';
   const menuItems = getServicesByPlmn(plmn);
+
+  const hex2char = (hex: string) => {
+    let result = '';
+    let n = parseInt(hex, 16);
+    if (n <= 0xffff) {
+      result += String.fromCharCode(n);
+    } else if (n <= 0x10ffff) {
+      n -= 0x10000;
+      result +=
+        String.fromCharCode(0xd800 | (n >> 10)) +
+        String.fromCharCode(0xdc00 | (n & 0x3ff));
+    }
+    return result;
+  };
+
+  const decodeMessage = (str: string) => {
+    if (!str) return '';
+    let specialCharsIgnoreWrap = ['0009', '0000'];
+    let specials = specialCharsIgnoreWrap;
+    return str.replace(/([A-Fa-f0-9]{1,4})/g, (parens) => {
+      if (!specials.includes(parens)) {
+        return hex2char(parens);
+      } else {
+        return '';
+      }
+    });
+  };
+
+  const executeUssd = async (item: PlmnServiceItem | { subcmd?: string; ussd_code?: string }) => {
+    setIsLoading(true);
+    try {
+      const payload = {
+        cmd: 560,
+        subcmd: item.subcmd || "0",
+        ussd_code: item.ussd_code || "",
+        timeout: 30000,
+        method: 'POST'
+      };
+      const res = await apiRequest(560, 'POST', payload);
+      
+      if (res && res.success && res.ret === '0') {
+        setScreenText(decodeMessage(res.message));
+        
+        if (res.ussd_st === '0' || res.ussd_st === '2') {
+          setIsCancelDisabled(true);
+        } else if (res.ussd_st === '1') {
+          setIsCancelDisabled(false);
+        } else {
+          const ussdStMap: Record<string, string> = {
+            "3": "Other local client has responded",
+            "4": "Operation not supported",
+            "5": "Network time out",
+          };
+          setScreenText(ussdStMap[res.ussd_st] || "Unsupported USSD code");
+        }
+      } else {
+        const retMap: Record<string, string> = {
+          "500": "General error!",
+          "501": "The current state does not support the operation.",
+          "502": "AT command returns error!",
+          "506": "Illegal parameter.",
+          "507": "Operation timeout!",
+          "601": "Sending SMS registration error",
+          "602": "Mailbox is full",
+        };
+        setScreenText(retMap[res?.ret] || "Unsupported USSD code");
+      }
+    } catch (e) {
+      setScreenText("General error!");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isLoggedIn && location.state?.executeService) {
+      const service = location.state.executeService;
+      setActiveMenu(service.id);
+      executeUssd(service);
+      
+      // Clear state so it doesn't re-execute on refresh
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [isLoggedIn, location.state, navigate]);
 
   // Authentication check wrapper
   const handleInteraction = (action: () => void) => {
@@ -49,23 +138,8 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenSettings, onSh
         return;
       }
 
-      try {
-        const payload = {
-          cmd: 560,
-          subcmd: item.subcmd || "0",
-          ussd_code: item.ussd_code || "",
-          timeout: 30000,
-          method: 'POST'
-        };
-        const res = await apiRequest(560, 'POST', payload);
-        if (res && res.success) {
-          // Handled successfully
-        } else {
-          showAlert('Failed to send request', 'error');
-        }
-      } catch (e) {
-        showAlert('Failed to send request', 'error');
-      }
+      setScreenText('');
+      executeUssd(item);
     });
   };
 
@@ -83,14 +157,16 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenSettings, onSh
 
   const handleCancel = () => {
       handleInteraction(() => {
+        if (isCancelDisabled) return;
         setInputText('');
+        executeUssd({ subcmd: '2' }); // Assuming subcmd 2 is cancel, or just clear
       });
   };
 
   const handleSend = () => {
       handleInteraction(() => {
         if (!inputText) return;
-        setScreenText(prev => prev + (prev ? '\n' : '') + `> ${inputText}`);
+        executeUssd({ subcmd: '1', ussd_code: inputText });
         setInputText('');
       });
   };
@@ -189,8 +265,14 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenSettings, onSh
             <div className="w-full">
                 
                 {/* Screen Display */}
-                <div className="border border-gray-300 h-48 mb-4 p-2 text-sm font-mono overflow-y-auto bg-white shadow-inner text-black whitespace-pre-wrap">
-                    {screenText}
+                <div className="border border-gray-300 h-48 mb-4 p-2 text-sm font-mono overflow-y-auto bg-white shadow-inner text-black whitespace-pre-wrap relative">
+                    {isLoading ? (
+                        <div className="absolute inset-0 flex items-center justify-center bg-white/80">
+                            <Loader2 className="w-8 h-8 animate-spin text-orange" />
+                        </div>
+                    ) : (
+                        screenText
+                    )}
                 </div>
 
                 {/* Input Controls Row */}
@@ -208,14 +290,24 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenSettings, onSh
 
                     <button 
                         onClick={handleCancel}
-                        className="w-24 bg-black text-white font-bold text-sm hover:bg-gray-800 transition-colors h-10"
+                        disabled={isCancelDisabled || isLoading}
+                        className={`w-24 font-bold text-sm transition-colors h-10 ${
+                            isCancelDisabled || isLoading 
+                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                                : 'bg-black text-white hover:bg-gray-800'
+                        }`}
                     >
                         {t('cancel')}
                     </button>
 
                     <button 
                         onClick={handleSend}
-                        className="w-24 bg-orange hover:bg-orange-dark text-black font-bold text-sm transition-colors h-10"
+                        disabled={isLoading}
+                        className={`w-24 font-bold text-sm transition-colors h-10 ${
+                            isLoading 
+                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                                : 'bg-orange hover:bg-orange-dark text-black'
+                        }`}
                     >
                         {t('send')}
                     </button>
