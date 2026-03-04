@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../../utils/i18nContext';
-import { apiRequest } from '../../utils/api';
+import { apiRequest, API_BASE_URL, getSessionId } from '../../utils/api';
 import { PrimaryButton, FormRow, StyledInput, StyledSelect } from '../../components/UIComponents';
 import { useAlert } from '../../utils/AlertContext';
 
@@ -32,20 +32,14 @@ export const LogSettingsPage: React.FC = () => {
     const fetchLogSettings = async () => {
       try {
         // Fetch log text
-        const logRes = await apiRequest(17, 'GET');
-        // Assuming the response from cmd 17 is just text or has a specific field. 
-        // If it's raw text, apiRequest might try to parse it as JSON. 
-        // We handle both cases here.
-        if (typeof logRes === 'string') {
-            setLogText(logRes);
-        } else if (logRes && logRes.log) {
-            setLogText(logRes.log);
-        } else if (logRes && logRes.message) {
-            setLogText(logRes.message);
-        } else {
-            // Fallback if it's an object but we don't know the key
-            setLogText(JSON.stringify(logRes, null, 2));
-        }
+        const sessionId = getSessionId();
+        const logResponse = await fetch(API_BASE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cmd: 17, method: 'GET', sessionId })
+        });
+        const logTextData = await logResponse.text();
+        setLogText(logTextData);
 
         // Fetch log parameters
         const paramsRes = await apiRequest(322, 'GET');
@@ -74,55 +68,35 @@ export const LogSettingsPage: React.FC = () => {
       }
   }, [logText]);
 
-  const handleExportUserLog = async () => {
-      setIsExportingUserLog(true);
+  const handleExportUserLog = () => {
       try {
-          // Assuming cmd 17 is for user log export based on the UI
-          // If there's a specific endpoint for downloading the file, we would use window.open or a hidden iframe
-          // For now, we just fetch cmd 17 and trigger a download
-          const res = await apiRequest(17, 'GET');
-          let textData = '';
-          if (typeof res === 'string') textData = res;
-          else if (res && res.log) textData = res.log;
-          else textData = JSON.stringify(res, null, 2);
-
-          const blob = new Blob([textData], { type: 'text/plain' });
-          const url = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
-          a.href = url;
-          a.download = 'user_log.txt';
+          a.href = '/web_event_log.tar.gz.encode';
+          a.download = 'web_event_log.tar.gz.encode';
           document.body.appendChild(a);
           a.click();
-          window.URL.revokeObjectURL(url);
           document.body.removeChild(a);
       } catch (error) {
           showAlert('Failed to export User LOG', 'error');
-      } finally {
-          setIsExportingUserLog(false);
       }
   };
 
   const handleExportSystemLog = async () => {
       setIsExportingSystemLog(true);
       try {
-          // Assuming there's a different cmd for system log, e.g., 18 or similar. 
-          // If not specified, we'll just show an alert or use a placeholder cmd.
-          // For this example, let's assume cmd 18 for system log export.
-          const res = await apiRequest(18, 'GET'); // Placeholder cmd
-          let textData = '';
-          if (typeof res === 'string') textData = res;
-          else if (res && res.log) textData = res.log;
-          else textData = JSON.stringify(res, null, 2);
-
-          const blob = new Blob([textData], { type: 'text/plain' });
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'system_log.txt';
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
-          document.body.removeChild(a);
+          const res = await apiRequest(241, 'POST');
+          if (res && res.success && res.message) {
+              const a = document.createElement('a');
+              // Ensure the path starts with a slash
+              const path = res.message.startsWith('/') ? res.message : `/${res.message}`;
+              a.href = path;
+              a.download = res.message.split('/').pop() || 'system_log.tar.gz.encode';
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+          } else {
+              showAlert('Failed to export System LOG', 'error');
+          }
       } catch (error) {
           showAlert('Failed to export System LOG', 'error');
       } finally {
