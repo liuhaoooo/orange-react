@@ -2,8 +2,7 @@
 import React from 'react';
 import { Card, CardHeader } from './UIComponents';
 import { useLanguage } from '../utils/i18nContext';
-import { useGlobalState } from '../utils/GlobalStateContext';
-import { Link, useNavigate } from 'react-router-dom';
+import { useGlobalState, Link, useNavigate } from '../utils/GlobalStateContext';
 import servicesBgSvg from '../assets/services-bg.svg';
 import { getServicesByPlmn, PlmnServiceItem } from '../utils/services/plmnServices';
 import { useAlert } from '../utils/AlertContext';

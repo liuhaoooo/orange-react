@@ -1,9 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Delete, Loader2 } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../utils/i18nContext';
-import { useGlobalState } from '../utils/GlobalStateContext';
+import { useGlobalState, useLocation, useNavigate } from '../utils/GlobalStateContext';
 import servicesBgSvg from '../assets/services-bg.svg';
 import { getServicesByPlmn, PlmnServiceItem } from '../utils/services/plmnServices';
 import { apiRequest } from '../utils/api';
