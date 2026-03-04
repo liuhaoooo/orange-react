@@ -190,7 +190,7 @@ export const PingPage: React.FC = () => {
             />
         </FormRow>
 
-        <div className="flex justify-end space-x-4 mt-8 mb-8">
+        <div className="flex justify-end space-x-4 pt-6 pb-4">
             <button 
                 onClick={handleStart} 
                 disabled={isRunning}
@@ -215,7 +215,7 @@ export const PingPage: React.FC = () => {
             </button>
         </div>
 
-        <div className="mb-4 mt-4 relative">
+        <div className="pb-4 relative">
             <textarea
                 ref={outputRef}
                 value={output}
