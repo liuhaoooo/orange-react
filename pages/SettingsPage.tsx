@@ -39,6 +39,7 @@ import { WebSettingPage } from './settings/WebSettingPage';
 import { ModuleLogSwitchPage } from './settings/ModuleLogSwitchPage';
 import { PingPage } from './settings/PingPage';
 import { TracePage } from './settings/TracePage';
+import { ClatPage } from './settings/ClatPage';
 import { GreSettingsPage } from './settings/GreSettingsPage';
 import { IpsecVpnPage } from './settings/IpsecVpnPage';
 import { IpsecStatusPage } from './settings/IpsecStatusPage';
@@ -167,6 +168,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
           { id: 'ipsec_status', label: t('ipsecStatus') },
           { id: 'ip_passthrough_main', label: t('ipPassthrough') },
           { id: 'multiple_ip_passthrough', label: t('multipleIpPassthrough') },
+          { id: 'clat', label: 'CLAT' },
           { id: 'sip_alg', label: t('sipAlg') },
           { id: 'tr069', label: t('tr069') }
       ]
@@ -499,6 +501,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <IpPassthroughPage />;
           case 'multiple_ip_passthrough':
               return <MultipleIpPassthroughPage />;
+          case 'clat':
+              return <ClatPage />;
           case 'sip_alg':
               return <SipAlgPage />;
           case 'tr069':
