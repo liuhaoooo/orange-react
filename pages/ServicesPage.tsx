@@ -4,6 +4,9 @@ import { Delete } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import servicesBgSvg from '../assets/services-bg.svg';
+import { getServicesByPlmn, PlmnServiceItem } from '../utils/services/plmnServices';
+import { apiRequest } from '../utils/api';
+import { useAlert } from '../utils/AlertContext';
 
 interface ServicesPageProps {
   onOpenSettings: () => void;
@@ -13,6 +16,7 @@ interface ServicesPageProps {
 
 export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenSettings, onShowPin, onShowPuk }) => {
   const { t } = useLanguage();
+  const { showAlert } = useAlert();
   const { isLoggedIn, globalData } = useGlobalState();
   const [screenText, setScreenText] = useState('');
   const [inputText, setInputText] = useState('');
@@ -25,6 +29,9 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenSettings, onSh
   const isPukLocked = connectionSettings?.lock_puk_flag === '1' || statusInfo?.lock_puk_flag === '1';
   const isPinLocked = connectionSettings?.lock_pin_flag === '1' || statusInfo?.lock_pin_flag === '1';
 
+  const plmn = statusInfo?.PLMN || '';
+  const menuItems = getServicesByPlmn(plmn);
+
   // Authentication check wrapper
   const handleInteraction = (action: () => void) => {
     if (!isLoggedIn) {
@@ -32,6 +39,34 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenSettings, onSh
     } else {
       action();
     }
+  };
+
+  const handleItemClick = async (item: PlmnServiceItem) => {
+    handleInteraction(async () => {
+      setActiveMenu(item.id);
+      if (item.url) {
+        window.open(item.url, '_blank');
+        return;
+      }
+
+      try {
+        const payload = {
+          cmd: 560,
+          subcmd: item.subcmd || "0",
+          ussd_code: item.ussd_code || "",
+          timeout: 30000,
+          method: 'POST'
+        };
+        const res = await apiRequest(560, 'POST', payload);
+        if (res && res.success) {
+          // Handled successfully
+        } else {
+          showAlert('Failed to send request', 'error');
+        }
+      } catch (e) {
+        showAlert('Failed to send request', 'error');
+      }
+    });
   };
 
   const handleKeyPress = (key: string) => {
@@ -59,14 +94,6 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenSettings, onSh
         setInputText('');
       });
   };
-
-  const menuItems = [
-    { id: 'recharge', label: t('rechargeByCard') },
-    { id: 'buy_pass', label: t('buyAPass') },
-    { id: 'credit_transfer', label: t('creditTransfer') },
-    { id: 'fidelite', label: t('orangeFidelite') },
-    { id: 'google', label: t('googleSearch') },
-  ];
 
   // Locked State View (Priority over USSD)
   if (isLoggedIn && (isPukLocked || isPinLocked)) {
@@ -137,15 +164,21 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenSettings, onSh
         {/* Left Sidebar Menu */}
         <div className="w-full md:w-64 shrink-0">
              <div className="bg-white border border-gray-200">
-                {menuItems.map((item) => (
-                    <button 
-                        key={item.id}
-                        onClick={() => handleInteraction(() => setActiveMenu(item.id))}
-                        className={`w-full text-start px-4 py-3 font-bold text-sm border-b border-gray-200 last:border-0 hover:bg-gray-50 transition-colors ${activeMenu === item.id ? 'text-orange bg-gray-50' : 'text-black'}`}
-                    >
-                        {item.label}
-                    </button>
-                ))}
+                {menuItems.length === 0 ? (
+                  <div className="p-4 text-center text-gray-500 text-sm">
+                    No services available
+                  </div>
+                ) : (
+                  menuItems.map((item) => (
+                      <button 
+                          key={item.id}
+                          onClick={() => handleItemClick(item)}
+                          className={`w-full text-start px-4 py-3 font-bold text-sm border-b border-gray-200 last:border-0 hover:bg-gray-50 transition-colors ${activeMenu === item.id ? 'text-orange bg-gray-50' : 'text-black'}`}
+                      >
+                          {item.label}
+                      </button>
+                  ))
+                )}
              </div>
         </div>
 

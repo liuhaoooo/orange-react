@@ -5,6 +5,9 @@ import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { Link } from '../utils/GlobalStateContext';
 import servicesBgSvg from '../assets/services-bg.svg';
+import { getServicesByPlmn, PlmnServiceItem } from '../utils/services/plmnServices';
+import { apiRequest } from '../utils/api';
+import { useAlert } from '../utils/AlertContext';
 
 interface ServicesCardProps {
   onOpenLogin?: () => void;
@@ -20,6 +23,7 @@ export const ServicesCard: React.FC<ServicesCardProps> = ({
   className = "" 
 }) => {
   const { t } = useLanguage();
+  const { showAlert } = useAlert();
   const { isLoggedIn, globalData } = useGlobalState();
   const statusInfo = globalData.statusInfo;
   const connectionSettings = globalData.connectionSettings;
@@ -27,13 +31,33 @@ export const ServicesCard: React.FC<ServicesCardProps> = ({
   const isPukLocked = connectionSettings?.lock_puk_flag === '1' || statusInfo?.lock_puk_flag === '1';
   const isPinLocked = connectionSettings?.lock_pin_flag === '1' || statusInfo?.lock_pin_flag === '1';
 
-  const menuItems = [
-    { id: 'recharge', label: t('rechargeByCard') },
-    { id: 'buy_pass', label: t('buyAPass') },
-    { id: 'credit_transfer', label: t('creditTransfer') },
-    { id: 'fidelite', label: t('orangeFidelite') },
-    { id: 'google', label: t('googleSearch') },
-  ];
+  const plmn = statusInfo?.PLMN || '';
+  const menuItems = getServicesByPlmn(plmn);
+
+  const handleItemClick = async (item: PlmnServiceItem) => {
+    if (item.url) {
+      window.open(item.url, '_blank');
+      return;
+    }
+
+    try {
+      const payload = {
+        cmd: 560,
+        subcmd: item.subcmd || "0",
+        ussd_code: item.ussd_code || "",
+        timeout: 30000,
+        method: 'POST'
+      };
+      const res = await apiRequest(560, 'POST', payload);
+      if (res && res.success) {
+        // Handled successfully
+      } else {
+        showAlert('Failed to send request', 'error');
+      }
+    } catch (e) {
+      showAlert('Failed to send request', 'error');
+    }
+  };
 
   // State: Not Logged In
   if (!isLoggedIn) {
@@ -116,14 +140,21 @@ export const ServicesCard: React.FC<ServicesCardProps> = ({
         <div className="flex-1 bg-white flex flex-col w-full relative">
            {/* Service List */}
            <div className="w-full">
-              {menuItems.map((item, index) => (
-                <div 
-                    key={item.id}
-                    className={`w-full py-4 px-5 text-start font-bold text-base border-b border-gray-200 text-black ${index === 0 ? 'bg-gray-100' : 'bg-white'}`}
-                >
-                    {item.label}
+              {menuItems.length === 0 ? (
+                <div className="w-full py-8 px-5 text-center text-gray-500">
+                  No services available
                 </div>
-              ))}
+              ) : (
+                menuItems.map((item, index) => (
+                  <button 
+                      key={item.id}
+                      onClick={() => handleItemClick(item)}
+                      className={`w-full py-4 px-5 text-start font-bold text-base border-b border-gray-200 text-black hover:bg-gray-50 transition-colors ${index === 0 ? 'bg-gray-100' : 'bg-white'}`}
+                  >
+                      {item.label}
+                  </button>
+                ))
+              )}
            </div>
            
            {/* View Services Button */}
