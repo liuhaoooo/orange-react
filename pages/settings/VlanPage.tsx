@@ -120,17 +120,43 @@ export const VlanPage: React.FC = () => {
     if (!rawData) return;
     setIsSaving(true);
     try {
-      const payload = { ...rawData };
-      payload.cmd = 290;
-      payload.method = 'POST';
-      
-      const maskBinaryStr = vlanMask.split('').reverse().join('');
-      const maskHex = parseInt(maskBinaryStr || '0', 2).toString(16);
-      const originalSuffix = rawData.lanMark ? rawData.lanMark.slice(-4) : '0001';
-      payload.lanMark = maskHex + originalSuffix;
+      const payload: any = {
+        cmd: 290,
+        method: 'POST'
+      };
 
-      delete payload.success;
-      delete payload.getfun;
+      let lanMark = (parseInt(rawData.lanMark || '0', 16) & 0x0000ffff).toString(16);
+      if (lanMark === '0') {
+        lanMark = '1';
+      }
+      
+      const vlanMarkStr = vlanMask.split('').reverse().join('');
+      let tmp = parseInt(vlanMarkStr || '0', 2).toString(16);
+      
+      for (let i = lanMark.length; i < 4; i++) {
+        lanMark = '0' + lanMark;
+      }
+      payload.lanMark = parseInt(tmp + lanMark, 16).toString(16);
+
+      for (let i = 0; i < 16; i++) {
+        if (vlanMask[i] === '1') {
+          payload[`vlanId${i}`] = rawData[`vlanId${i}`] || '';
+          payload[`vlanIp${i}`] = rawData[`vlanIp${i}`] || '';
+          payload[`vlanNetMask${i}`] = rawData[`vlanNetMask${i}`] || '';
+          payload[`vlanDhcpServer${i}`] = parseInt(rawData[`vlanDhcpServer${i}`] || '0', 10);
+          payload[`vlanMainDns${i}`] = rawData[`vlanMainDns${i}`] || '';
+          payload[`vlanViceDns${i}`] = rawData[`vlanViceDns${i}`] || '';
+          payload[`vlanIpBegin${i}`] = rawData[`vlanIpBegin${i}`] || '';
+          payload[`vlanIpEnd${i}`] = rawData[`vlanIpEnd${i}`] || '';
+          payload[`vlanExpireTime${i}`] = rawData[`vlanExpireTime${i}`] || '';
+          payload[`ipv6_mode${i}`] = rawData[`ipv6_mode${i}`] || '0';
+          payload[`ipv6_startIp${i}`] = rawData[`ipv6_startIp${i}`] || '';
+          payload[`ipv6_endIp${i}`] = rawData[`ipv6_endIp${i}`] || '';
+          payload[`ipv6_main_dns${i}`] = rawData[`ipv6_main_dns${i}`] || '';
+          payload[`ipv6_vice_dns${i}`] = rawData[`ipv6_vice_dns${i}`] || '';
+          payload[`vlanbindPort${i}`] = parseInt(rawData[`vlanbindPort${i}`] || '0', 10);
+        }
+      }
 
       const res = await apiRequest(290, 'POST', payload);
       if (res && res.success) {
