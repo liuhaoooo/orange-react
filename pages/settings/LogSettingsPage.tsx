@@ -64,7 +64,11 @@ export const LogSettingsPage: React.FC = () => {
   // Auto-scroll to bottom when log text changes
   useEffect(() => {
       if (logTextareaRef.current) {
-          logTextareaRef.current.scrollTop = logTextareaRef.current.scrollHeight;
+          setTimeout(() => {
+              if (logTextareaRef.current) {
+                  logTextareaRef.current.scrollTop = logTextareaRef.current.scrollHeight;
+              }
+          }, 10);
       }
   }, [logText]);
 
