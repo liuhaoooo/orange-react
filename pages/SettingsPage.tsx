@@ -37,6 +37,7 @@ import { TimeSettingsPage } from './settings/TimeSettingsPage';
 import { LogSettingsPage } from './settings/LogSettingsPage';
 import { WebSettingPage } from './settings/WebSettingPage';
 import { ModuleLogSwitchPage } from './settings/ModuleLogSwitchPage';
+import { PingPage } from './settings/PingPage';
 import { GreSettingsPage } from './settings/GreSettingsPage';
 import { IpsecVpnPage } from './settings/IpsecVpnPage';
 import { IpsecStatusPage } from './settings/IpsecStatusPage';
@@ -467,6 +468,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onOpenLogin }) => {
               return <WebSettingPage />;
           case 'module_log_switch':
               return <ModuleLogSwitchPage />;
+          case 'ping':
+              return <PingPage />;
           case 'ip_reservation':
               return <IpAddressReservationPage />;
           case 'multiple_dhcp':
