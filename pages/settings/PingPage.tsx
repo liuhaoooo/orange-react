@@ -85,8 +85,8 @@ export const PingPage: React.FC = () => {
               }
               
               if (textData) {
-                  // Append new data
-                  setOutput(prev => prev + textData);
+                  // Overwrite new data instead of appending
+                  setOutput(textData);
               }
               
               if (textData.includes("ping statistics") || textData.startsWith("connect") || textData.startsWith("ping")) {
@@ -190,14 +190,14 @@ export const PingPage: React.FC = () => {
             />
         </FormRow>
 
-        <div className="flex justify-end space-x-4 mb-4">
+        <div className="flex justify-end space-x-4 mt-6 mb-6">
             <button 
                 onClick={handleStart} 
                 disabled={isRunning}
-                className={`w-24 px-4 py-2 font-bold text-sm transition-colors border-2 border-black ${
+                className={`w-24 px-4 py-2 font-bold text-sm transition-colors border-2 ${
                     isRunning 
                         ? 'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed' 
-                        : 'bg-white text-black hover:bg-gray-50'
+                        : 'border-black bg-white text-black hover:bg-gray-50'
                 }`}
             >
                 Start
@@ -205,23 +205,28 @@ export const PingPage: React.FC = () => {
             <button 
                 onClick={handleStop}
                 disabled={!isRunning}
-                className={`w-24 px-4 py-2 font-bold text-sm transition-colors ${
+                className={`w-24 px-4 py-2 font-bold text-sm transition-colors border-2 ${
                     !isRunning 
-                        ? 'bg-[#d1d5db] text-gray-500 cursor-not-allowed' 
-                        : 'bg-[#d1d5db] hover:bg-gray-400 text-black'
+                        ? 'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed' 
+                        : 'border-black bg-gray-200 hover:bg-gray-300 text-black'
                 }`}
             >
                 Stop
             </button>
         </div>
 
-        <div className="mb-4">
+        <div className="mb-4 relative">
             <textarea
                 ref={outputRef}
                 value={output}
                 readOnly
-                className="w-full h-80 p-3 text-sm font-mono text-gray-700 bg-white border border-gray-300 rounded-[2px] resize-none focus:outline-none"
+                className="w-full h-64 p-3 text-sm font-mono text-gray-700 bg-white border border-gray-300 rounded-[2px] resize-none focus:outline-none"
             />
+            {isRunning && !output && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <span className="text-gray-400 font-mono animate-pulse">Waiting for data...</span>
+                </div>
+            )}
         </div>
 
         <div className="flex justify-end">
