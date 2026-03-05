@@ -257,4 +257,8 @@ export const ar = {
     error_message: "رسالة خطأ",
     common_note: "المعلومات",
     connecting: "جاري الاتصال...",
+    switch_on_main_wifi_network: "السماح بالوصول إلى شبكة الـ Wi-Fi الرئيسية",
+    switch_on_guest_wifi_network: "السماح بالوصول إلى شبكة الـ Wi-Fi الزائر",
+    switch_off_guest_wifi_network_may_disconnect_guest_users: "سيؤدي هذا الإجراء إلى فصل كل مستخدمي الـ Wi-Fi",
+    authorize_access_to_guest_wifi_network: "تفعيل شبكة Wi-Fi للزائرين (كلمة مرور الـ Wi-Fi الافتراضية = %s)",
 };

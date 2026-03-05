@@ -257,4 +257,8 @@ export const el = {
     error_message: "Mensaje de error",
     common_note: "Información",
     connecting: "Conectando…",
+    switch_on_main_wifi_network: "Autorizar el acceso a Wi-Fi principal",
+    switch_on_guest_wifi_network: "Autorizar acceso a la red Wi-Fi invitados",
+    switch_off_guest_wifi_network_may_disconnect_guest_users: "Esta acción desconectara todo los usuarios Wi-Fi",
+    authorize_access_to_guest_wifi_network: "Activar red Wi-Fi de invitados (clave Wi-Fi predefinida = %s)",
 };

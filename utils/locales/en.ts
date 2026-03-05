@@ -247,6 +247,9 @@ export const en = {
     redirect_messages_disabled_text_message: "SMS forwarding is disabled, click to enable it",
     this_connection_may_add_supplementary_fees: "This connection may add supplementary fees.",
     redirect_my_messages_to_handset: "Redirect my messages to handset",
+    switch_on_main_wifi_network: "Grant access to main Wi-Fi network",
+    switch_on_guest_wifi_network: "Grant access to guest Wi-Fi network",
+    switch_off_guest_wifi_network_may_disconnect_guest_users: "This action will disconnect all Wi-Fi users",
     sms_mobile_number: "Mobile Number:",
     sms_forward_automatically: "SMS automatically forwarded",
     back: "Back",
@@ -257,4 +260,5 @@ export const en = {
     error_message: "Error message",
     common_note: "Information",
     connecting: "Connecting...",
+    authorize_access_to_guest_wifi_network: "Activate guest Wi-Fi network (default Wi-Fi key = %s)",
 };

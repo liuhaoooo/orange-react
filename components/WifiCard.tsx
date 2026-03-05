@@ -4,6 +4,7 @@ import { Card, CardHeader, SquareSwitch } from './UIComponents';
 import { User, QrCode } from 'lucide-react';
 import { useLanguage } from '../utils/i18nContext';
 import { QrModal } from './QrModal';
+import { ConfirmModal } from './ConfirmModal';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { Link } from '../utils/GlobalStateContext';
 import { updateWifiConfig, fetchWifiSettings, WifiSettingsResponse } from '../utils/api';
@@ -67,6 +68,10 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
   const [qrData, setQrData] = useState({ ssid: '', password: '', authType: '3' });
   // Use a counter for loading state to handle concurrent requests (e.g. toggling merged network updates both bands)
   const [loadingIds, setLoadingIds] = useState<Record<string, number>>({});
+  const [confirmMessage, setConfirmMessage] = useState('');
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isConfirmLoading, setIsConfirmLoading] = useState(false);
+  const [pendingConfirmAction, setPendingConfirmAction] = useState<null | (() => Promise<void> | void)>(null);
   
   const { t } = useLanguage();
   const { isLoggedIn, globalData, updateGlobalData } = useGlobalState();
@@ -220,24 +225,22 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
   };
 
   const toggleSplitNetwork = (net: MappedNetwork) => {
-    handleInteraction(() => {
-        const parts = net.id.split('_');
-        const prefix = parts[0] as 'main' | 'guest';
-        const band = parts[1] === '5' ? '5g' : '24g';
-        const newState = !net.enabled;
-        performUpdate(prefix, band, newState, net.id);
-    });
+    const parts = net.id.split('_');
+    const prefix = parts[0] as 'main' | 'guest';
+    const band = parts[1] === '5' ? '5g' : '24g';
+    const newState = !net.enabled;
+    openConfirm(prefix, newState, () => performUpdate(prefix, band, newState, net.id));
   };
 
   const toggleMergedNetwork = (net: MappedNetwork) => {
-    handleInteraction(async () => {
-       const isAnyOn = net.enabled24 || net.enabled5;
-       const newState = !isAnyOn;
-       const prefix = net.id.startsWith('guest') ? 'guest' : 'main';
-       await Promise.all([
-           performUpdate(prefix, '24g', newState, net.id),
-           performUpdate(prefix, '5g', newState, net.id)
-       ]);
+    const isAnyOn = net.enabled24 || net.enabled5;
+    const newState = !isAnyOn;
+    const prefix = net.id.startsWith('guest') ? 'guest' : 'main';
+    openConfirm(prefix, newState, async () => {
+      await Promise.all([
+          performUpdate(prefix, '24g', newState, net.id),
+          performUpdate(prefix, '5g', newState, net.id)
+      ]);
     });
   };
 
@@ -279,6 +282,40 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
     isOn
       ? t('wifi_enabled_text_message')
       : t('wifi_disabled_text_message');
+
+  const getConfirmMessage = (prefix: 'main' | 'guest', newState: boolean) => {
+    if (newState) {
+      return prefix === 'main'
+        ? t('switch_on_main_wifi_network')
+        : t('switch_on_guest_wifi_network');
+    }
+    return t('switch_off_guest_wifi_network_may_disconnect_guest_users');
+  };
+
+  const openConfirm = (
+    prefix: 'main' | 'guest',
+    newState: boolean,
+    action: () => Promise<void> | void
+  ) => {
+    handleInteraction(() => {
+      setConfirmMessage(getConfirmMessage(prefix, newState));
+      setPendingConfirmAction(() => action);
+      setIsConfirmOpen(true);
+    });
+  };
+
+  const handleConfirmToggle = async () => {
+    if (!pendingConfirmAction) return;
+    setIsConfirmLoading(true);
+    try {
+      await pendingConfirmAction();
+    } finally {
+      setIsConfirmLoading(false);
+      setIsConfirmOpen(false);
+      setPendingConfirmAction(null);
+      setConfirmMessage('');
+    }
+  };
 
   return (
     <>
@@ -374,6 +411,19 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
         ssid={qrData.ssid}
         password={qrData.password}
         authType={qrData.authType}
+      />
+      <ConfirmModal
+        isOpen={isConfirmOpen}
+        onClose={() => {
+          if (isConfirmLoading) return;
+          setIsConfirmOpen(false);
+          setPendingConfirmAction(null);
+          setConfirmMessage('');
+        }}
+        onConfirm={handleConfirmToggle}
+        isLoading={isConfirmLoading}
+        title={t('confirm')}
+        message={confirmMessage}
       />
     </>
   );

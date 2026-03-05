@@ -381,7 +381,7 @@ export const HelpPage: React.FC = () => {
 
   // Determine User Guide Link
   const userGuideUrl = connectionSettings.userguide_link || "http://customer.cwmpd.com/customer/ORANGE/Flybox_5G_CP06_User_Manual.pdf";
-  const rawFaqPdf = connectionSettings.fqa_pdf || connectionSettings.faq_pdf || '';
+  const rawFaqPdf = connectionSettings.faq_pdf || '';
   const faqPdfUrl = typeof rawFaqPdf === 'string' ? rawFaqPdf.trim() : '';
   const hasFaqPdf = faqPdfUrl !== '' && faqPdfUrl.toLowerCase() !== 'null';
 

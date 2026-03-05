@@ -5,6 +5,7 @@ import { useNavigate } from '../utils/GlobalStateContext';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { SquareSwitch } from '../components/UIComponents';
+import { ConfirmModal } from '../components/ConfirmModal';
 import { QrModal } from '../components/QrModal';
 import { updateWifiConfig, fetchWifiSettings, WifiSettingsResponse } from '../utils/api';
 
@@ -45,6 +46,10 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
   const [qrData, setQrData] = useState({ ssid: '', password: '', authType: '3' });
   // Loading counter
   const [loadingIds, setLoadingIds] = useState<Record<string, number>>({});
+  const [confirmMessage, setConfirmMessage] = useState('');
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isConfirmLoading, setIsConfirmLoading] = useState(false);
+  const [pendingConfirmAction, setPendingConfirmAction] = useState<null | (() => Promise<void> | void)>(null);
 
   const networks: PageWifiNetwork[] = useMemo(() => {
     const list: PageWifiNetwork[] = [];
@@ -190,24 +195,22 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
   };
 
   const toggleSplitNetwork = (net: PageWifiNetwork) => {
-      handleInteraction(() => {
-        const parts = net.id.split('_');
-        const prefix = parts[0] as 'main' | 'guest';
-        const band = parts[1] === '5' ? '5g' : '24g';
-        const newState = !net.enabled;
-        performUpdate(prefix, band, newState, net.id);
-      });
+      const parts = net.id.split('_');
+      const prefix = parts[0] as 'main' | 'guest';
+      const band = parts[1] === '5' ? '5g' : '24g';
+      const newState = !net.enabled;
+      openConfirm(prefix, newState, () => performUpdate(prefix, band, newState, net.id));
   };
 
   const toggleMergedNetwork = (net: PageWifiNetwork) => {
-      handleInteraction(async () => {
-         const isAnyOn = net.enabled24 || net.enabled5;
-         const newState = !isAnyOn;
-         const prefix = net.id.startsWith('guest') ? 'guest' : 'main';
-         await Promise.all([
-             performUpdate(prefix, '24g', newState, net.id),
-             performUpdate(prefix, '5g', newState, net.id)
-         ]);
+      const isAnyOn = net.enabled24 || net.enabled5;
+      const newState = !isAnyOn;
+      const prefix = net.id.startsWith('guest') ? 'guest' : 'main';
+      openConfirm(prefix, newState, async () => {
+        await Promise.all([
+            performUpdate(prefix, '24g', newState, net.id),
+            performUpdate(prefix, '5g', newState, net.id)
+        ]);
       });
   };
 
@@ -246,6 +249,56 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
     isOn
       ? t('wifi_enabled_text_message')
       : t('wifi_disabled_text_message');
+
+  const getGuestPassword = (net: PageWifiNetwork) => {
+    if (!net.id.startsWith('guest')) return '';
+
+    if (net.id.endsWith('_5')) {
+      return settings.guest_password_5g || settings.guest_password_24g || '';
+    }
+
+    return settings.guest_password_24g || settings.guest_password_5g || '';
+  };
+
+  const getGuestWifiDesc = (net: PageWifiNetwork) => {
+    if (!net.id.startsWith('guest')) return '';
+    const password = getGuestPassword(net);
+    return t('authorize_access_to_guest_wifi_network').replace('%s', password);
+  };
+
+  const getConfirmMessage = (prefix: 'main' | 'guest', newState: boolean) => {
+    if (newState) {
+      return prefix === 'main'
+        ? t('switch_on_main_wifi_network')
+        : t('switch_on_guest_wifi_network');
+    }
+    return t('switch_off_guest_wifi_network_may_disconnect_guest_users');
+  };
+
+  const openConfirm = (
+    prefix: 'main' | 'guest',
+    newState: boolean,
+    action: () => Promise<void> | void
+  ) => {
+    handleInteraction(() => {
+      setConfirmMessage(getConfirmMessage(prefix, newState));
+      setPendingConfirmAction(() => action);
+      setIsConfirmOpen(true);
+    });
+  };
+
+  const handleConfirmToggle = async () => {
+    if (!pendingConfirmAction) return;
+    setIsConfirmLoading(true);
+    try {
+      await pendingConfirmAction();
+    } finally {
+      setIsConfirmLoading(false);
+      setIsConfirmOpen(false);
+      setPendingConfirmAction(null);
+      setConfirmMessage('');
+    }
+  };
 
   const FreqCheckbox = ({ label, checked, onChange, disabled }: { label: string, checked: boolean, onChange: () => void, disabled?: boolean }) => (
       <div 
@@ -300,6 +353,12 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
                           >
                               {net.name}
                           </div>
+
+                          {net.id.startsWith('guest') && (
+                            <div className="text-[11px] sm:text-xs text-gray-500 mb-1 leading-snug break-all">
+                              {getGuestWifiDesc(net)}
+                            </div>
+                          )}
                           
                           {net.isMerged ? (
                               <div className="flex items-center flex-wrap">
@@ -352,6 +411,19 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
         ssid={qrData.ssid}
         password={qrData.password}
         authType={qrData.authType}
+      />
+      <ConfirmModal
+        isOpen={isConfirmOpen}
+        onClose={() => {
+          if (isConfirmLoading) return;
+          setIsConfirmOpen(false);
+          setPendingConfirmAction(null);
+          setConfirmMessage('');
+        }}
+        onConfirm={handleConfirmToggle}
+        isLoading={isConfirmLoading}
+        title={t('confirm')}
+        message={confirmMessage}
       />
     </div>
   );
