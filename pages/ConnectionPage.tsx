@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, Link as LinkIcon, Globe, Monitor, Smartphone } from 'lucide-react';
+import { Settings, Link as LinkIcon, Globe } from 'lucide-react';
 import { useNavigate } from '../utils/GlobalStateContext';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
@@ -9,6 +9,7 @@ import timeElapsedSvg from '../assets/time_elapsed.svg';
 import dataUsageSvg from '../assets/data_usage.svg';
 import connectedSvg from '../assets/connected.svg';
 import batterySvg from '../assets/battery.svg';
+import devicesIconSvg from '../assets/devices-icon.svg';
 
 interface ConnectionPageProps {
   onOpenSettings: () => void;
@@ -333,9 +334,8 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
              <div>
                <h2 className="font-bold text-xl mb-4 text-black">{t('devices')}</h2>
                <div className="flex items-start mb-6">
-                  <div className="flex items-end me-5 text-black shrink-0 relative">
-                      <Monitor size={56} strokeWidth={1.2} />
-                      <Smartphone size={36} strokeWidth={1.2} className="absolute -right-2 -bottom-0.5 fill-white bg-white border-2 border-white rounded-md" />
+                  <div className="me-5 shrink-0">
+                      <img src={devicesIconSvg} alt={t('devices')} className="w-[84px] h-auto object-contain" />
                   </div>
                   <p className="text-sm text-gray-700 leading-tight pt-1">
                     {t('manageAccessDesc')}
