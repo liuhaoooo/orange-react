@@ -24,7 +24,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenSettings, onSh
   const [inputText, setInputText] = useState('');
   const [activeMenu, setActiveMenu] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isCancelDisabled, setIsCancelDisabled] = useState(false);
+  const [isCancelDisabled, setIsCancelDisabled] = useState(true);
   
   const statusInfo = globalData.statusInfo;
   const connectionSettings = globalData.connectionSettings;
@@ -63,7 +63,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenSettings, onSh
     });
   };
 
-  const executeUssd = async (item: PlmnServiceItem | { subcmd?: string; ussd_code?: string }) => {
+  const executeUssd = async (item: PlmnServiceItem | { subcmd?: string; ussd_code?: string }, isCancel = false) => {
     setIsLoading(true);
     try {
       const payload = {
@@ -76,19 +76,24 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenSettings, onSh
       const res = await apiRequest(560, 'POST', payload);
       
       if (res && res.success && res.ret === '0') {
-        setScreenText(decodeMessage(res.message));
-        
-        if (res.ussd_st === '0' || res.ussd_st === '2') {
+        if (isCancel) {
+          setScreenText("Cancel successful");
           setIsCancelDisabled(true);
-        } else if (res.ussd_st === '1') {
-          setIsCancelDisabled(false);
         } else {
-          const ussdStMap: Record<string, string> = {
-            "3": "Other local client has responded",
-            "4": "Operation not supported",
-            "5": "Network time out",
-          };
-          setScreenText(ussdStMap[res.ussd_st] || "Unsupported USSD code");
+          setScreenText(decodeMessage(res.message));
+          
+          if (res.ussd_st === '0' || res.ussd_st === '2') {
+            setIsCancelDisabled(true);
+          } else if (res.ussd_st === '1') {
+            setIsCancelDisabled(false);
+          } else {
+            const ussdStMap: Record<string, string> = {
+              "3": "Other local client has responded",
+              "4": "Operation not supported",
+              "5": "Network time out",
+            };
+            setScreenText(ussdStMap[res.ussd_st] || "Unsupported USSD code");
+          }
         }
       } else {
         const retMap: Record<string, string> = {
@@ -158,7 +163,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenSettings, onSh
       handleInteraction(() => {
         if (isCancelDisabled) return;
         setInputText('');
-        executeUssd({ subcmd: '2' }); // Assuming subcmd 2 is cancel, or just clear
+        executeUssd({ subcmd: '1' }, true);
       });
   };
 
