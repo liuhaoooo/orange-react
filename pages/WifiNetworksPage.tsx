@@ -242,6 +242,11 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
       });
   };
 
+  const getWifiSwitchTitle = (isOn: boolean) =>
+    isOn
+      ? t('wifi_enabled_text_message')
+      : t('wifi_disabled_text_message');
+
   const FreqCheckbox = ({ label, checked, onChange, disabled }: { label: string, checked: boolean, onChange: () => void, disabled?: boolean }) => (
       <div 
         className={`flex items-center me-2 sm:me-4 ${!disabled ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}
@@ -260,6 +265,7 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
          <h1 className="text-3xl font-bold text-black">{t('wifiNetworks')}</h1>
          <button 
            onClick={handleSettingsClick}
+           title={t('wifi_settings_explanatory_text_message')}
            className="bg-orange hover:bg-orange-dark text-black px-4 py-2 font-bold text-sm flex items-center transition-colors border border-orange whitespace-nowrap"
          >
             <Settings size={16} className="me-2" />
@@ -328,9 +334,10 @@ export const WifiNetworksPage: React.FC<WifiNetworksPageProps> = ({ onOpenSettin
                            )}
                            <div className="scale-90 sm:scale-100">
                                <SquareSwitch 
-                                isOn={net.isMerged ? (!!net.enabled24 || !!net.enabled5) : !!net.enabled} 
+                                isOn={net.isMerged ? (!!net.enabled24 || !!net.enabled5) : !!net.enabled}
                                 onChange={() => net.isMerged ? toggleMergedNetwork(net) : toggleSplitNetwork(net)}
-                                isLoading={isLoading} 
+                                isLoading={isLoading}
+                                title={getWifiSwitchTitle(net.isMerged ? (!!net.enabled24 || !!net.enabled5) : !!net.enabled)}
                                />
                            </div>
                       </div>

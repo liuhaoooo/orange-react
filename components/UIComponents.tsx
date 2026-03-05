@@ -16,12 +16,13 @@ interface SquareSwitchProps {
   onChange?: () => void;
   isLoading?: boolean;
   disabled?: boolean;
+  title?: string;
 }
 
-export const SquareSwitch: React.FC<SquareSwitchProps> = ({ isOn, onChange, isLoading, disabled = false }) => {
+export const SquareSwitch: React.FC<SquareSwitchProps> = ({ isOn, onChange, isLoading, disabled = false, title }) => {
   if (isLoading) {
     return (
-      <div className="flex border border-gray-300 w-16 h-8 items-center justify-center bg-gray-50 select-none">
+      <div title={title} className="flex border border-gray-300 w-16 h-8 items-center justify-center bg-gray-50 select-none">
         <Loader2 className="animate-spin text-orange" size={18} />
       </div>
     );
@@ -29,6 +30,7 @@ export const SquareSwitch: React.FC<SquareSwitchProps> = ({ isOn, onChange, isLo
 
   return (
     <div 
+      title={title}
       className={`flex border w-16 h-8 select-none transition-colors ${isOn ? 'border-orange' : 'border-black'} ${disabled ? 'opacity-40 cursor-not-allowed grayscale' : 'cursor-pointer'}`}
       onClick={!disabled ? onChange : undefined}
     >

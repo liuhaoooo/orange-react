@@ -275,6 +275,11 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
     });
   };
 
+  const getWifiSwitchTitle = (isOn: boolean) =>
+    isOn
+      ? t('wifi_enabled_text_message')
+      : t('wifi_disabled_text_message');
+
   return (
     <>
       <Card className="h-full flex flex-col">
@@ -343,7 +348,8 @@ export const WifiCard: React.FC<WifiCardProps> = ({ onManageDevices, onOpenLogin
                         // Visual State: ON if either band is enabled
                         isOn={net.isMerged ? (!!net.enabled24 || !!net.enabled5) : !!net.enabled} 
                         onChange={() => net.isMerged ? toggleMergedNetwork(net) : toggleSplitNetwork(net)}
-                        isLoading={isLoading} 
+                        isLoading={isLoading}
+                        title={getWifiSwitchTitle(net.isMerged ? (!!net.enabled24 || !!net.enabled5) : !!net.enabled)}
                     />
                   </div>
                 </div>

@@ -21,11 +21,12 @@ const StatBox: React.FC<{
   icon: React.ReactNode; 
   label: string; 
   value: string; 
-  topText?: string 
-}> = ({ icon, label, value, topText }) => (
+  topText?: string;
+  iconTitle?: string;
+}> = ({ icon, label, value, topText, iconTitle }) => (
   <div className="bg-white border border-gray-200 p-6 flex flex-col items-center justify-center text-center h-[200px] shadow-sm">
     {/* Fixed height container (h-[60px]) to match large icon size and ensure alignment across grid */}
-    <div className="text-orange mb-4 h-[60px] w-full flex flex-col items-center justify-center">
+    <div title={iconTitle} className="text-orange mb-4 h-[60px] w-full flex flex-col items-center justify-center">
         {topText && <div className="text-orange font-bold text-sm leading-none">{topText}</div>}
         {icon}
     </div>
@@ -223,6 +224,14 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
     return `${statusInfo.battery_level} %`;
   };
 
+  const connectedSwitchTitle = isConnected
+    ? t('switch_connected_text_message')
+    : t('switch_disconnected_text_message');
+
+  const roamingSwitchTitle = isRoaming
+    ? t('switch_disconnect_roaming_text_message')
+    : t('switch_connect_roaming_text_message');
+
   return (
     <div className="w-full">
       {/* Header Row */}
@@ -230,6 +239,7 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
          <h1 className="text-3xl font-bold text-black">{t('connection')}</h1>
          <button 
            onClick={handleSettingsClick}
+           title={t('connection_settings_explanatory_text_message')}
            className="border border-black bg-white hover:bg-gray-50 text-black px-4 py-2 font-bold text-sm flex items-center transition-colors"
          >
             <Settings size={16} className="me-2" />
@@ -243,26 +253,31 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
             icon={<img src={timeElapsedSvg} alt="Time Elapsed" className="w-[60px] h-[60px]" />} 
             label={t('timeElapsed')} 
             value={statusInfo ? formatTime(statusInfo.time_elapsed) : "00:00:00"} 
+            iconTitle={t('chrono_explanatory_text_message')}
           />
           <StatBox 
             icon={<img src={dataUsageSvg} alt="Data Usage" className="w-[60px] h-[60px]" />} 
             label={t('dataUsage')} 
             value={formatDataUsage()} 
+            iconTitle={t('volume_explanatory_text_message')}
           />
           <StatBox 
             icon={<SignalStrengthIcon level={signalLevel} className="h-full w-16" barWidth="w-2" />} 
             label={t('network')} 
             value={statusInfo?.network_type_str || t('noNetwork')} 
+            iconTitle={t('network_explanatory_text_message')}
           />
           <StatBox 
             icon={<img src={batterySvg} alt="Battery" className="w-[60px] h-[60px]" />} 
             label={t('battery')} 
             value={getBatteryValue()} 
+            iconTitle={t('battery_explanatory_text_message')}
           />
           <StatBox 
             icon={<img src={connectedSvg} alt="Connected" className="w-[60px] h-[60px]" />} 
             label={t('connected')} 
             value={getConnectedCount()} 
+            iconTitle={t('people_explanatory_text_message')}
           />
       </div>
 
@@ -288,6 +303,7 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
                     isOn={isConnected} 
                     onChange={handleConnectionToggle} 
                     isLoading={isConnLoading}
+                    title={connectedSwitchTitle}
                 />
             </div>
 
@@ -307,6 +323,7 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
                     isOn={isRoaming} 
                     onChange={handleRoamingToggle} 
                     isLoading={isRoamLoading}
+                    title={roamingSwitchTitle}
                 />
             </div>
         </Card>
@@ -328,6 +345,7 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
              
              <button 
                 onClick={handleManageDevicesClick}
+                title={t('management_button_description')}
                 className="bg-orange hover:bg-orange-dark text-black font-bold py-3 px-6 text-sm transition-colors w-full rounded-none"
             >
                 {t('manageDevices')}

@@ -39,11 +39,11 @@ export const AlertModal: React.FC<AlertModalProps> = ({
   const getTitle = () => {
       if (title) return title;
       switch(type) {
-          case 'warning': return 'Warning';
-          case 'error': return 'Error';
-          case 'success': return 'Success';
-          case 'loading': return 'Processing';
-          default: return 'Information';
+          case 'warning': return t('common_alert');
+          case 'error': return t('error_message');
+          case 'success': return t('common_success');
+          case 'loading': return t('connecting');
+          default: return t('common_note');
       }
   };
 

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X, AlertTriangle, Check, Loader2 } from 'lucide-react';
 import { redirectSms } from '../utils/api';
+import { useLanguage } from '../utils/i18nContext';
 
 interface RedirectWarningModalProps {
   isOpen: boolean;
@@ -11,6 +12,8 @@ interface RedirectWarningModalProps {
 }
 
 export const RedirectWarningModal: React.FC<RedirectWarningModalProps> = ({ isOpen, onClose, onConfirm }) => {
+  const { t } = useLanguage();
+
   if (!isOpen) return null;
 
   return createPortal(
@@ -19,7 +22,7 @@ export const RedirectWarningModal: React.FC<RedirectWarningModalProps> = ({ isOp
         <div className="flex justify-between items-center p-5 pb-4">
           <h2 className="text-xl font-bold text-black flex items-center">
              <AlertTriangle className="text-yellow-500 fill-yellow-500 text-white w-6 h-6 me-2" />
-             Warning
+             {t('common_alert')}
           </h2>
           <button onClick={onClose} className="text-black hover:text-gray-600 transition-colors">
             <X size={24} strokeWidth={4} />
@@ -27,14 +30,14 @@ export const RedirectWarningModal: React.FC<RedirectWarningModalProps> = ({ isOp
         </div>
         <div className="px-8 pb-8 pt-2">
           <p className="mb-8 text-base text-black">
-            This connection may add supplementary fees.
+            {t('this_connection_may_add_supplementary_fees')}
           </p>
           <div className="flex justify-end">
              <button 
                onClick={onConfirm}
                className="px-8 py-2 bg-orange hover:bg-orange-dark text-black font-bold text-sm h-10 min-w-[100px] flex items-center justify-center transition-colors"
              >
-               Ok
+               {t('ok')}
              </button>
           </div>
         </div>
@@ -50,6 +53,7 @@ interface RedirectConfigModalProps {
 }
 
 export const RedirectConfigModal: React.FC<RedirectConfigModalProps> = ({ isOpen, onClose }) => {
+  const { t } = useLanguage();
   const [phone, setPhone] = useState('');
   const [enabled, setEnabled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -100,7 +104,7 @@ export const RedirectConfigModal: React.FC<RedirectConfigModalProps> = ({ isOpen
 
   const handleSave = async () => {
       if (!isValidPhoneNumber(phone)) {
-          setErrorMsg('Invalid number. For international calls, enter numbers in the +12345 format; for domestic calls, enter numbers in the 12345 format. A number can contain a maximum of 20 characters, of which the plus sign (+) does not count towards the character limit. Use semicolons to separate numbers, and no spaces are allowed in a number.');
+          setErrorMsg(t('sms_hint_mobile_number_format'));
           return;
       }
 
@@ -112,16 +116,16 @@ export const RedirectConfigModal: React.FC<RedirectConfigModalProps> = ({ isOpen
           const res = await redirectSms(enabled, phone);
           
           if (res.success && res.message === "") {
-              setSuccessMsg('Success');
+              setSuccessMsg(t('common_success'));
               setTimeout(() => {
                   onClose();
               }, 1000);
           } else {
-              setErrorMsg(res.message || 'Operation failed');
+              setErrorMsg(res.message || t('common_failed'));
           }
       } catch (e) {
           console.error(e);
-          setErrorMsg('An error occurred');
+          setErrorMsg(t('error_message'));
       } finally {
           setIsLoading(false);
       }
@@ -133,14 +137,14 @@ export const RedirectConfigModal: React.FC<RedirectConfigModalProps> = ({ isOpen
     <div className="fixed inset-0 bg-black/70 z-[9999] flex items-center justify-center p-4">
       <div className="bg-white w-full max-w-lg shadow-2xl relative animate-fade-in text-black border border-gray-300">
         <div className="flex justify-between items-center p-5 pb-4">
-          <h2 className="text-xl font-bold text-black">Redirect my messages to handset</h2>
+          <h2 className="text-xl font-bold text-black">{t('redirect_my_messages_to_handset')}</h2>
           <button onClick={onClose} disabled={isLoading || !!successMsg} className="text-black hover:text-gray-600 transition-colors">
             <X size={24} strokeWidth={4} />
           </button>
         </div>
         <div className="px-8 pb-8">
             <div className="mb-6">
-                <label className="block font-bold text-sm mb-2 text-black">Mobile Number:</label>
+                <label className="block font-bold text-sm mb-2 text-black">{t('sms_mobile_number')}</label>
                 <input 
                     type="text" 
                     value={phone}
@@ -164,7 +168,7 @@ export const RedirectConfigModal: React.FC<RedirectConfigModalProps> = ({ isOpen
                 <div className={`w-6 h-6 border flex items-center justify-center me-3 transition-colors ${(isLoading || !!successMsg) ? 'opacity-50' : ''} ${enabled ? 'bg-orange border-orange' : 'bg-white border-gray-400'}`}>
                     {enabled && <Check className="text-white w-5 h-5" strokeWidth={3} />}
                 </div>
-                <span className="text-sm text-black">SMS automatically forwarded</span>
+                <span className="text-sm text-black">{t('sms_forward_automatically')}</span>
             </div>
 
             <div className="flex justify-end space-x-3 rtl:space-x-reverse">
@@ -173,14 +177,14 @@ export const RedirectConfigModal: React.FC<RedirectConfigModalProps> = ({ isOpen
                     disabled={isLoading || !!successMsg}
                     className="px-6 py-2 border border-black bg-white text-black font-bold text-sm hover:bg-gray-50 transition-colors h-10 min-w-[100px]"
                 >
-                    Back
+                    {t('back')}
                 </button>
                 <button 
                     onClick={handleSave}
                     disabled={isLoading || !!successMsg}
                     className="px-6 py-2 bg-orange hover:bg-orange-dark text-black font-bold text-sm h-10 min-w-[100px] flex items-center justify-center transition-colors"
                 >
-                    {isLoading ? <Loader2 className="animate-spin w-4 h-4" /> : 'Save'}
+                    {isLoading ? <Loader2 className="animate-spin w-4 h-4" /> : t('save')}
                 </button>
             </div>
         </div>

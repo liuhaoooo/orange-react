@@ -5,12 +5,26 @@ import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { Link } from '../utils/GlobalStateContext';
 
-const DonutChart = ({ value, label, unit, percentage }: { value: number, label: string, unit: string, percentage: number }) => {
+const DonutChart = ({
+  value,
+  label,
+  unit,
+  percentage,
+  title
+}: {
+  value: number;
+  label: string;
+  unit: string;
+  percentage: number;
+  title: string;
+}) => {
   return (
     <div className="flex flex-col items-center">
       <span className="text-sm sm:text-base font-bold mb-2 sm:mb-4 text-black text-center">{label}</span>
       {/* Responsive size: w-32 (128px) on mobile, w-40 (160px) on sm+ screens */}
-      <div className="relative w-32 h-32 sm:w-40 sm:h-40 rounded-full flex items-center justify-center bg-gray-100"
+      <div
+           title={title}
+           className="relative w-32 h-32 sm:w-40 sm:h-40 rounded-full flex items-center justify-center bg-gray-100"
            style={{
              backgroundImage: `conic-gradient(#f16e00 ${percentage}%, #f2f2f2 ${percentage}% 100%)`
            }}
@@ -82,13 +96,15 @@ export const UsageCard: React.FC = () => {
             value={natFormatted.val} 
             percentage={natPercentage > 100 ? 100 : natPercentage} 
             label={t('national')} 
-            unit={natFormatted.unit} 
+            unit={natFormatted.unit}
+            title={t('progress_bar_explanatory_text_message')}
           />
           <DonutChart 
             value={intFormatted.val} 
             percentage={intPercentage > 100 ? 100 : intPercentage} 
             label={t('international')} 
-            unit={intFormatted.unit} 
+            unit={intFormatted.unit}
+            title={t('progress_bar_explanatory_text_message')}
           />
         </div>
 

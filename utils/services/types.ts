@@ -196,6 +196,8 @@ export interface ConnectionSettingsResponse {
     // Fields for Help Page
     device_module?: string;
     version?: string;
+    fqa_pdf?: string;
+    faq_pdf?: string;
     [key: string]: any;
 }
 

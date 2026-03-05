@@ -125,7 +125,7 @@ export const ServicesCard: React.FC<ServicesCardProps> = ({
            <div className="w-full">
               {menuItems.length === 0 ? (
                 <div className="w-full py-8 px-5 text-center text-gray-500">
-                  No services available
+                  {t('no_services_are_found')}
                 </div>
               ) : (
                 menuItems.map((item, index) => (

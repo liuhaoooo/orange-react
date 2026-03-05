@@ -20,11 +20,12 @@ const StatItem: React.FC<{
   icon: React.ReactNode; 
   label: string; 
   value: string; 
-  topText?: string 
-}> = ({ icon, label, value, topText }) => (
+  topText?: string;
+  iconTitle?: string;
+}> = ({ icon, label, value, topText, iconTitle }) => (
   <div className="flex flex-col items-center justify-start text-center h-full min-w-[60px] sm:min-w-[70px] flex-1">
     {/* Fixed height container, adjusted for mobile responsiveness */}
-    <div className="text-orange mb-1.5 sm:mb-3 h-10 sm:h-12 w-full flex flex-col items-center justify-center">
+    <div title={iconTitle} className="text-orange mb-1.5 sm:mb-3 h-10 sm:h-12 w-full flex flex-col items-center justify-center">
         {topText && <div className="text-orange font-bold text-[10px] sm:text-sm leading-none">{topText}</div>}
         {/* Scale icons down on small screens to match text scaling */}
         <div className="transform scale-[0.75] sm:scale-100 origin-center flex items-center justify-center">
@@ -237,6 +238,14 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
     return `${statusInfo.battery_level} %`;
   };
 
+  const connectedSwitchTitle = isConnected
+    ? t('switch_connected_text_message')
+    : t('switch_disconnected_text_message');
+
+  const roamingSwitchTitle = isRoaming
+    ? t('switch_disconnect_roaming_text_message')
+    : t('switch_connect_roaming_text_message');
+
   return (
     <Card className="h-full">
       <CardHeader title={t('connection')} />
@@ -247,26 +256,31 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
             icon={<img src={timeElapsedSvg} alt="Time Elapsed" className="w-11 h-11 sm:w-14 sm:h-14" />} 
             label={t('timeElapsed')} 
             value={statusInfo ? formatTime(statusInfo.time_elapsed) : "00:00:00"} 
+            iconTitle={t('chrono_explanatory_text_message')}
           />
           <StatItem 
             icon={<img src={dataUsageSvg} alt="Data Usage" className="w-11 h-11 sm:w-14 sm:h-14" />} 
             label={t('dataUsage')} 
             value={formatDataUsage()} 
+            iconTitle={t('volume_explanatory_text_message')}
           />
           <StatItem 
             icon={<SignalStrengthIcon level={signalLevel} className="h-8 w-12 sm:h-10 sm:w-14" />} 
             label={t('network')} 
             value={statusInfo?.network_type_str || t('noNetwork')} 
+            iconTitle={t('network_explanatory_text_message')}
           />
           <StatItem 
             icon={<img src={batterySvg} alt="Battery" className="w-11 h-11 sm:w-14 sm:h-14" />} 
             label={t('battery')} 
             value={getBatteryValue()} 
+            iconTitle={t('battery_explanatory_text_message')}
           />
           <StatItem 
             icon={<img src={connectedSvg} alt="Connected" className="w-11 h-11 sm:w-14 sm:h-14" />} 
             label={t('connected')} 
             value={getConnectedCount()} 
+            iconTitle={t('people_explanatory_text_message')}
           />
       </div>
 
@@ -288,6 +302,7 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
                 onChange={handleConnectionToggle} 
                 isLoading={isConnLoading}
                 disabled={isSwitchDisabled}
+                title={connectedSwitchTitle}
             />
           </div>
         </div>
@@ -304,6 +319,7 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
                 onChange={handleRoamingToggle}
                 isLoading={isRoamLoading} 
                 disabled={isSwitchDisabled}
+                title={roamingSwitchTitle}
             />
           </div>
         </div>

@@ -9,6 +9,53 @@ import ledInfoIdu from '../assets/ledInfo_IDU.png';
 
 type HelpContentGenerator = string | ((lang: string) => string);
 
+interface FaqItem {
+  question: string;
+  paragraphs: string[];
+  bullets?: string[];
+}
+
+const FALLBACK_FAQ_ITEMS: FaqItem[] = [
+  {
+    question: '1. Why do I need to log with an admin login/password and for which actions ?',
+    paragraphs: [
+      'Admin login/password provides extra security to access to ZLT advanced features.',
+      'Specific information as "client area" and specific functions like settings, redirecting messages, file sharing and Wi-Fi network activation will be exclusively available to the administrator thanks to these credentials.'
+    ]
+  },
+  {
+    question: '2. How can I see Wi-Fi information ?',
+    paragraphs: ['You can find your Wi-Fi information on the back of your ZLT.']
+  },
+  {
+    question: '3. How can I share my Wi-Fi Connection ?',
+    paragraphs: ['You can share your Wi-Fi information with trusted people so they can connect to the ZLT anytime it is switched on.']
+  },
+  {
+    question: "4. What actions are available for other users connected to ZLT's Wi-Fi networks ?",
+    paragraphs: [
+      'All users connected to the ZLT will have access to the Web UI. Advanced features like redirect messages, settings, Wi-Fi network management, ... are protected with specific login and password.'
+    ]
+  },
+  {
+    question: '5. How can I modify device default settings, Wi-Fi information, consumption thresholds and connection mode... ?',
+    paragraphs: [
+      'You should be connected with admin login/password to modify default settings. Then you have two options:'
+    ],
+    bullets: [
+      'Select settings on menu bar',
+      'Click on settings icon at each module top right corner'
+    ]
+  },
+  {
+    question: '6. Why ZLT receives messages and what is message transfer function ?',
+    paragraphs: [
+      'ZLT can receive SMS messages to its SIM card phone number. This messages can come from anyone knowing the number but will mainly come from your operator to provide you with information and alert messages (like consumption tracking and bill shock).',
+      'You can transfer your messages received in your ZLT to your handset with "redirect my messages to handset" function. You have to fill in your cellular number so your messages will be automatically transferred to your mobile phone.'
+    ]
+  }
+];
+
 const PLMN_HELP_CONTENT: Record<string, HelpContentGenerator> = {
     "65202": `
               <p>Customer service:</p>
@@ -312,6 +359,7 @@ export const HelpPage: React.FC = () => {
   const connectionSettings = globalData.connectionSettings || {};
   
   const [activeTab, setActiveTab] = useState<'info' | 'faq' | 'led'>('info');
+  const [collapsedFaqItems, setCollapsedFaqItems] = useState<Record<number, boolean>>({});
 
   const getNetworkStatusText = () => {
     if (statusInfo.network_status === "1") return t('connected');
@@ -333,6 +381,16 @@ export const HelpPage: React.FC = () => {
 
   // Determine User Guide Link
   const userGuideUrl = connectionSettings.userguide_link || "http://customer.cwmpd.com/customer/ORANGE/Flybox_5G_CP06_User_Manual.pdf";
+  const rawFaqPdf = connectionSettings.fqa_pdf || connectionSettings.faq_pdf || '';
+  const faqPdfUrl = typeof rawFaqPdf === 'string' ? rawFaqPdf.trim() : '';
+  const hasFaqPdf = faqPdfUrl !== '' && faqPdfUrl.toLowerCase() !== 'null';
+
+  const toggleFaqItem = (index: number) => {
+    setCollapsedFaqItems(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
 
   return (
     <div className="w-full">
@@ -437,26 +495,56 @@ export const HelpPage: React.FC = () => {
         )}
         
         {activeTab === 'faq' && (
-          <div className="bg-gray-200 border border-gray-300 h-[600px] flex flex-col items-center justify-center relative overflow-hidden">
-             {/* Simulating a PDF Viewer container */}
-             <div className="bg-white p-10 shadow-lg max-w-2xl w-full h-[90%] overflow-y-auto">
-                <h1 className="text-3xl font-bold text-orange mb-2">Airbox 4G</h1>
-                <h2 className="text-xl font-bold text-gray-700 mb-6">(U10E)</h2>
-                <h2 className="text-2xl font-bold text-gray-500 mb-10">Quick Start Guide</h2>
-                
-                <div className="flex justify-center mb-10">
-                   <div className="w-64 h-40 bg-black rounded-3xl flex items-center justify-center relative border-4 border-gray-800">
-                        {/* Device Graphic Mockup */}
-                        <div className="text-gray-600 text-xs">Device Image</div>
-                   </div>
-                </div>
-                
-                <div className="flex justify-between items-end mt-20">
-                    <div className="w-8 h-8 bg-orange text-white rounded-full flex items-center justify-center font-bold">1</div>
-                    <div className="bg-orange text-white px-2 py-1 font-bold text-xs">orange</div>
-                </div>
-             </div>
-          </div>
+          <>
+            {hasFaqPdf ? (
+              <div className="bg-white border border-gray-300 h-[700px] overflow-hidden">
+                <iframe
+                  src={faqPdfUrl}
+                  title="FAQ PDF"
+                  className="w-full h-full"
+                />
+              </div>
+            ) : (
+              <div className="bg-gray-200 border border-gray-300 p-4 md:p-6 space-y-5 md:space-y-6">
+                {FALLBACK_FAQ_ITEMS.map((item, index) => {
+                  const isCollapsed = Boolean(collapsedFaqItems[index]);
+
+                  return (
+                    <div key={item.question} className="text-gray-700">
+                      <button
+                        type="button"
+                        onClick={() => toggleFaqItem(index)}
+                        aria-expanded={!isCollapsed}
+                        aria-label={`${isCollapsed ? 'Expand' : 'Collapse'} FAQ item ${index + 1}`}
+                        className="w-full flex items-start justify-between gap-3 text-left"
+                      >
+                        <h3 className="text-sm md:text-base font-semibold leading-snug">{item.question}</h3>
+                        <span className="shrink-0 text-gray-500 text-lg leading-none px-1">
+                          {isCollapsed ? '+' : '-'}
+                        </span>
+                      </button>
+
+                      {!isCollapsed && (
+                        <div className="mt-2 md:mt-2.5 space-y-1.5 md:space-y-2 text-xs md:text-sm text-gray-600 leading-relaxed">
+                          {item.paragraphs.map((paragraph, paragraphIndex) => (
+                            <p key={`${index}-paragraph-${paragraphIndex}`}>{paragraph}</p>
+                          ))}
+
+                          {item.bullets && item.bullets.length > 0 && (
+                            <div className="space-y-1">
+                              {item.bullets.map((bullet, bulletIndex) => (
+                                <p key={`${index}-bullet-${bulletIndex}`}>- {bullet}</p>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
 
         {activeTab === 'led' && (

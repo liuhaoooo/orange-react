@@ -73,7 +73,7 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
       if (s.sim_status !== '1') return { ready: false, reason: t('noSimAvailable') };
       if (s.lock_puk_flag === '1') return { ready: false, reason: t('pukCodeRequired') };
       if (s.lock_pin_flag === '1') return { ready: false, reason: t('pinCodeRequired') };
-      if (s.sms_sw !== '1') return { ready: false, reason: "SMS function is disabled." };
+      if (s.sms_sw !== '1') return { ready: false, reason: t('redirect_messages_disabled_text_message') };
 
       return { ready: true };
   };
@@ -82,7 +82,7 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
     if (isLoggedIn) {
         const check = checkSmsReady();
         if (!check.ready) {
-            showAlert(check.reason || '', 'warning', 'Warning');
+            showAlert(check.reason || '', 'warning', t('common_alert'));
             return;
         }
         action();
@@ -431,6 +431,7 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
           <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
               <button 
                   onClick={handleSettingsClick}
+                  title={t('message_settings_explanatory_text_message')}
                   className="bg-white border border-black px-4 py-2 font-bold text-sm text-black flex items-center justify-center md:justify-start hover:bg-gray-50 transition-colors w-full md:w-auto whitespace-nowrap"
               >
                   <Settings size={16} className="me-2" />
@@ -438,6 +439,7 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
               </button>
               <button 
                   onClick={() => handleSmsAction(openRedirectFlow)}
+                  title={t('redirect_messages_explanatory_text_message')}
                   className="bg-black border border-black px-4 py-2 font-bold text-sm text-white flex items-center justify-center md:justify-start hover:bg-gray-900 transition-colors w-full md:w-auto whitespace-nowrap"
               >
                   <CornerUpRight size={16} className="me-2" />
@@ -448,6 +450,7 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
                       setNewMessageReceiver('');
                       setIsNewMessageModalOpen(true);
                   })}
+                  title={t('new_message_explanatory_text_message')}
                   className="bg-orange border border-orange px-4 py-2 font-bold text-sm text-black flex items-center justify-center md:justify-start hover:bg-orange-dark transition-colors w-full md:w-auto whitespace-nowrap"
               >
                   <Plus size={16} className="me-2" />
@@ -512,7 +515,7 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
                           <button 
                               onClick={promptDeleteBulk}
                               className="text-black hover:text-red-600 transition-colors"
-                              title="Delete Selected"
+                              title={t('delete_item')}
                           >
                               <Trash2 size={18} />
                           </button>
@@ -544,7 +547,7 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
                                           <button 
                                               onClick={(e) => promptDeleteThread(thread.sender, e)}
                                               className="invisible group-hover/item:visible text-gray-400 hover:text-red-600 transition-colors"
-                                              title="Delete Thread"
+                                              title={t('delete_item')}
                                           >
                                               <Trash2 size={14} />
                                           </button>
@@ -609,7 +612,7 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
                                           <button 
                                               onClick={() => promptDeleteSingle(msg.id)}
                                               className="opacity-0 group-hover/msg:opacity-100 transition-opacity p-2 text-gray-300 hover:text-red-500"
-                                              title="Delete Message"
+                                              title={t('delete_item')}
                                           >
                                               <Trash2 size={14} />
                                           </button>
@@ -624,7 +627,7 @@ export const MessagesPage: React.FC<MessagesPageProps> = ({ onOpenSettings }) =>
                                           <button 
                                               onClick={() => promptDeleteSingle(msg.id)}
                                               className="opacity-0 group-hover/msg:opacity-100 transition-opacity p-2 text-gray-300 hover:text-red-500"
-                                              title="Delete Message"
+                                              title={t('delete_item')}
                                           >
                                               <Trash2 size={14} />
                                           </button>

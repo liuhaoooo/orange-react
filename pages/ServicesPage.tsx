@@ -246,7 +246,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenSettings, onSh
              <div className="bg-white border border-gray-200">
                 {menuItems.length === 0 ? (
                   <div className="p-4 text-center text-gray-500 text-sm">
-                    No services available
+                    {t('no_services_are_found')}
                   </div>
                 ) : (
                   menuItems.map((item) => (

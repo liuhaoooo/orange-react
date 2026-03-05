@@ -44,13 +44,29 @@ const CLIENT_AREA_LINKS: Record<string, string> = {
     "60501": 'https://monoffre.orange.tn',
 };
 
-const UsageDonut = ({ label, value, unit, total, color }: { label: string, value: number, unit: string, total: number, color: string }) => {
+const UsageDonut = ({
+  label,
+  value,
+  unit,
+  total,
+  color,
+  title
+}: {
+  label: string;
+  value: number;
+  unit: string;
+  total: number;
+  color: string;
+  title: string;
+}) => {
   const percentage = total > 0 ? (value / total) * 100 : 0;
   
   return (
     <div className="flex flex-col items-center">
       <div className="text-black font-bold mb-4">{label}</div>
-      <div className="relative w-56 h-56 rounded-full flex items-center justify-center bg-gray-100"
+      <div
+           title={title}
+           className="relative w-56 h-56 rounded-full flex items-center justify-center bg-gray-100"
            style={{
              background: `conic-gradient(${color} ${percentage}%, #f3f4f6 ${percentage}% 100%)`
            }}
@@ -103,6 +119,7 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
 
   // Get device name from settings or default to Flybox
   const deviceName = globalData.connectionSettings?.board_type || 'Flybox';
+  const usageInfoText = t('your_client_area_informations_come_from').replace('{{product_name}}', deviceName);
 
   const handleAuthAction = (action: () => void) => {
     if (isLoggedIn) {
@@ -190,11 +207,12 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
       <div className="flex justify-between items-start mb-6">
         <div>
             <h1 className="text-3xl font-bold text-black mb-1">{t('usage')}</h1>
-            <p className="text-gray-400 text-sm">Info coming from {deviceName}</p>
+            <p className="text-gray-400 text-sm">{usageInfoText}</p>
         </div>
         <div className="flex space-x-3">
              <button 
                 onClick={handleSettingsClick}
+                title={t('usage_settings_text_message')}
                 className="bg-white border border-black px-4 py-2 font-bold text-sm text-black flex items-center hover:bg-gray-50 transition-colors"
              >
                 <Settings size={16} className="me-2" />
@@ -202,6 +220,7 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
              </button>
              <button 
                 onClick={handleResetClick}
+                title={t('usage_reset_explanatory_text_message')}
                 className="bg-orange border border-orange px-4 py-2 font-bold text-sm text-black flex items-center hover:bg-orange-dark transition-colors"
              >
                 <RotateCcw size={16} className="me-2 transform -scale-x-100" />
@@ -225,14 +244,16 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
                         value={natFormatted.val} 
                         unit={natFormatted.unit} 
                         total={natTotalConverted} 
-                        color="#f16e00" 
+                        color="#f16e00"
+                        title={t('progress_bar_explanatory_text_message')}
                     />
                     <UsageDonut 
                         label={t('international')} 
                         value={intFormatted.val} 
                         unit={intFormatted.unit} 
                         total={intTotalConverted} 
-                        color="#f16e00" 
+                        color="#f16e00"
+                        title={t('progress_bar_explanatory_text_message')}
                     />
                 </div>
             </div>
@@ -246,28 +267,28 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
                     <div>
                         <h3 className="font-bold text-black mb-4">{t('national')}</h3>
                         <div className="flex items-center text-sm text-gray-600 mb-2">
-                            <span className="w-24">{t('uploads')}</span>
+                            <span title={t('national_uploaded_explanatory_text_message')} className="w-24">{t('uploads')}</span>
                             <ArrowUp size={16} className="me-2 text-black" />
-                            <span className="font-bold text-black">{natUpload.val.toFixed(2)} {natUpload.unit}</span>
+                            <span title={t('national_uploaded_explanatory_text_message')} className="font-bold text-black">{natUpload.val.toFixed(2)} {natUpload.unit}</span>
                         </div>
                         <div className="flex items-center text-sm text-gray-600">
-                            <span className="w-24">{t('downloads')}</span>
+                            <span title={t('national_downloaded_explanatory_text_message')} className="w-24">{t('downloads')}</span>
                             <ArrowDown size={16} className="me-2 text-black" />
-                            <span className="font-bold text-black">{natDownload.val.toFixed(2)} {natDownload.unit}</span>
+                            <span title={t('national_downloaded_explanatory_text_message')} className="font-bold text-black">{natDownload.val.toFixed(2)} {natDownload.unit}</span>
                         </div>
                     </div>
                     
                     <div className="md:border-s md:border-gray-200 md:ps-8">
                         <h3 className="font-bold text-black mb-4">{t('international')}</h3>
                         <div className="flex items-center text-sm text-gray-600 mb-2">
-                            <span className="w-24">{t('uploads')}</span>
+                            <span title={t('national_uploaded_explanatory_text_message')} className="w-24">{t('uploads')}</span>
                             <ArrowUp size={16} className="me-2 text-black" />
-                            <span className="font-bold text-black">{intUpload.val.toFixed(2)} {intUpload.unit}</span>
+                            <span title={t('national_uploaded_explanatory_text_message')} className="font-bold text-black">{intUpload.val.toFixed(2)} {intUpload.unit}</span>
                         </div>
                         <div className="flex items-center text-sm text-gray-600">
-                            <span className="w-24">{t('downloads')}</span>
+                            <span title={t('national_downloaded_explanatory_text_message')} className="w-24">{t('downloads')}</span>
                             <ArrowDown size={16} className="me-2 text-black" />
-                            <span className="font-bold text-black">{intDownload.val.toFixed(2)} {intDownload.unit}</span>
+                            <span title={t('national_downloaded_explanatory_text_message')} className="font-bold text-black">{intDownload.val.toFixed(2)} {intDownload.unit}</span>
                         </div>
                     </div>
                 </div>
@@ -298,6 +319,7 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
 
                     <button 
                         onClick={handleConnect}
+                        title={t('your_client_area_explanatory_text_message')}
                         className="bg-orange hover:bg-orange-dark text-black font-bold py-2 px-8 text-sm transition-colors w-full rounded-none"
                     >
                         {t('connect')}
