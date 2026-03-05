@@ -4,6 +4,7 @@ import { useNavigate } from '../utils/GlobalStateContext';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
 import { SquareSwitch, Card, SignalStrengthIcon } from '../components/UIComponents';
+import { RoamingNoticeModal } from '../components/RoamingNoticeModal';
 import { setDialMode, setRoamingEnable, fetchConnectionSettings } from '../utils/api';
 import timeElapsedSvg from '../assets/time_elapsed.svg';
 import dataUsageSvg from '../assets/data_usage.svg';
@@ -46,6 +47,7 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
 
   const [isConnLoading, setIsConnLoading] = useState(false);
   const [isRoamLoading, setIsRoamLoading] = useState(false);
+  const [isRoamingNoticeOpen, setIsRoamingNoticeOpen] = useState(false);
 
   // Determine switch state from CMD 1020 data
   const isConnected = connectionSettings?.dialMode === '1';
@@ -106,6 +108,9 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
     try {
         const res = await setRoamingEnable(newVal);
         if (res.success) {
+            if (newVal === '1') {
+                setIsRoamingNoticeOpen(true);
+            }
             // Optimistic Update
             if (connectionSettings) {
                 updateGlobalData('connectionSettings', { ...connectionSettings, roamingEnable: newVal });
@@ -233,7 +238,15 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
     ? t('switch_disconnect_roaming_text_message')
     : t('switch_connect_roaming_text_message');
 
+  const handleOpenRoamingSettings = () => {
+    setIsRoamingNoticeOpen(false);
+    navigate('/settings', {
+      state: { sectionId: 'network', subTabId: 'apn_settings' }
+    });
+  };
+
   return (
+    <>
     <div className="w-full">
       {/* Header Row */}
       <div className="flex justify-between items-center mb-6">
@@ -354,5 +367,11 @@ export const ConnectionPage: React.FC<ConnectionPageProps> = ({ onOpenSettings, 
 
       </div>
     </div>
+    <RoamingNoticeModal
+      isOpen={isRoamingNoticeOpen}
+      onClose={() => setIsRoamingNoticeOpen(false)}
+      onOpenSettings={handleOpenRoamingSettings}
+    />
+    </>
   );
 };

@@ -261,4 +261,6 @@ export const cn = {
     switch_on_guest_wifi_network: "授权访问访客 Wi-Fi 网络",
     switch_off_guest_wifi_network_may_disconnect_guest_users: "此操作将断开所有 Wi-Fi 用户的连接",
     authorize_access_to_guest_wifi_network: "激活访客 Wi-Fi 网络（默认 Wi-Fi 密码 = %s）",
+    youre_now_roaming_on_a_foreigner_network: "您现在正在国外网络上漫游。",
+    wa_settings: "设置",
 };

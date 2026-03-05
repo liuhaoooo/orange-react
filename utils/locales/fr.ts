@@ -261,4 +261,6 @@ export const fr = {
     switch_on_guest_wifi_network: "Autorisez l'accès au réseau Wi-Fi invités",
     switch_off_guest_wifi_network_may_disconnect_guest_users: "Cette action va déconnecter tous les utilisateurs Wi-Fi",
     authorize_access_to_guest_wifi_network: "Activer le réseau Wi-Fi invités (clé Wi-Fi par défaut = %s)",
+    youre_now_roaming_on_a_foreigner_network: "Vous êtes maintenant connecté sur un réseau étranger.",
+    wa_settings: "Paramètres",
 };

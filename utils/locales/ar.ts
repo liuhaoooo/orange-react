@@ -261,4 +261,6 @@ export const ar = {
     switch_on_guest_wifi_network: "السماح بالوصول إلى شبكة الـ Wi-Fi الزائر",
     switch_off_guest_wifi_network_may_disconnect_guest_users: "سيؤدي هذا الإجراء إلى فصل كل مستخدمي الـ Wi-Fi",
     authorize_access_to_guest_wifi_network: "تفعيل شبكة Wi-Fi للزائرين (كلمة مرور الـ Wi-Fi الافتراضية = %s)",
+    youre_now_roaming_on_a_foreigner_network: "أنت الأن على نظام التجوال على شبكة أجنبية.",
+    wa_settings: "الاٍعدادات",
 };

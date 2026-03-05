@@ -261,4 +261,6 @@ export const en = {
     common_note: "Information",
     connecting: "Connecting...",
     authorize_access_to_guest_wifi_network: "Activate guest Wi-Fi network (default Wi-Fi key = %s)",
+    youre_now_roaming_on_a_foreigner_network: "You’re now roaming on a foreign network.",
+    wa_settings: "Settings",
 };

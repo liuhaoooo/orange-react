@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Card, CardHeader, SquareSwitch, SignalStrengthIcon } from './UIComponents';
 import { useLanguage } from '../utils/i18nContext';
 import { useGlobalState } from '../utils/GlobalStateContext';
-import { Link } from '../utils/GlobalStateContext';
+import { Link, useNavigate } from '../utils/GlobalStateContext';
+import { RoamingNoticeModal } from './RoamingNoticeModal';
 import { setDialMode, setRoamingEnable, fetchConnectionSettings } from '../utils/api';
 import timeElapsedSvg from '../assets/time_elapsed.svg';
 import dataUsageSvg from '../assets/data_usage.svg';
@@ -40,12 +41,14 @@ const StatItem: React.FC<{
 
 export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, onManageDevices, onShowPin, onShowPuk }) => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const { isLoggedIn, globalData, updateGlobalData } = useGlobalState();
   const statusInfo = globalData.statusInfo;
   const connectionSettings = globalData.connectionSettings;
 
   const [isConnLoading, setIsConnLoading] = useState(false);
   const [isRoamLoading, setIsRoamLoading] = useState(false);
+  const [isRoamingNoticeOpen, setIsRoamingNoticeOpen] = useState(false);
 
   // Determine switch state from CMD 1020 data
   // '1' = ON, '0' = OFF. Default to false if data not loaded.
@@ -132,6 +135,9 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
         const res = await setRoamingEnable(newVal);
         
         if (res.success) {
+            if (newVal === '1') {
+                setIsRoamingNoticeOpen(true);
+            }
             // Optimistically update
             if (connectionSettings) {
                 updateGlobalData('connectionSettings', { ...connectionSettings, roamingEnable: newVal });
@@ -246,7 +252,15 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
     ? t('switch_disconnect_roaming_text_message')
     : t('switch_connect_roaming_text_message');
 
+  const handleOpenRoamingSettings = () => {
+    setIsRoamingNoticeOpen(false);
+    navigate('/settings', {
+      state: { sectionId: 'network', subTabId: 'apn_settings' }
+    });
+  };
+
   return (
+    <>
     <Card className="h-full">
       <CardHeader title={t('connection')} />
       
@@ -336,5 +350,11 @@ export const ConnectionCard: React.FC<ConnectionCardProps> = ({ onOpenSettings, 
 
       </div>
     </Card>
+    <RoamingNoticeModal
+      isOpen={isRoamingNoticeOpen}
+      onClose={() => setIsRoamingNoticeOpen(false)}
+      onOpenSettings={handleOpenRoamingSettings}
+    />
+    </>
   );
 };

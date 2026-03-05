@@ -261,4 +261,6 @@ export const el = {
     switch_on_guest_wifi_network: "Autorizar acceso a la red Wi-Fi invitados",
     switch_off_guest_wifi_network_may_disconnect_guest_users: "Esta acción desconectara todo los usuarios Wi-Fi",
     authorize_access_to_guest_wifi_network: "Activar red Wi-Fi de invitados (clave Wi-Fi predefinida = %s)",
+    youre_now_roaming_on_a_foreigner_network: "Estás conectado en una red extranjera",
+    wa_settings: "Preferencias",
 };
