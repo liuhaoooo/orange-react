@@ -170,7 +170,7 @@ export const ServicesPage: React.FC<ServicesPageProps> = ({ onOpenSettings, onSh
   const handleSend = () => {
       handleInteraction(() => {
         if (!inputText) return;
-        executeUssd({ subcmd: '1', ussd_code: inputText });
+        executeUssd({ subcmd: '0', ussd_code: inputText });
         setInputText('');
       });
   };
