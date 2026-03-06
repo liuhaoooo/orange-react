@@ -48,19 +48,17 @@ const UsageDonut = ({
   label,
   value,
   unit,
-  total,
+  percentage,
   color,
   title
 }: {
   label: string;
   value: number;
   unit: string;
-  total: number;
+  percentage: number;
   color: string;
   title: string;
 }) => {
-  const percentage = total > 0 ? (value / total) * 100 : 0;
-  
   return (
     <div className="flex flex-col items-center">
       <div className="text-black font-bold mb-4">{label}</div>
@@ -173,21 +171,17 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
   // National: dl_mon_flow + ul_mon_flow
   const natUsedMb = (parseFloat(info?.dl_mon_flow || '0') + parseFloat(info?.ul_mon_flow || '0'));
   const natTotalMb = getLimitInMb(info?.nation_limit_size, flowLimitUnit);
-  const natFormatted = formatTraffic(natUsedMb.toString());
-  
-  let natTotalConverted = natTotalMb;
-  if (natFormatted.unit === 'GB') natTotalConverted = natTotalMb / 1024;
-  else if (natFormatted.unit === 'KB') natTotalConverted = natTotalMb * 1024;
+  const natRemainingMb = Math.max(0, natTotalMb - natUsedMb);
+  const natFormatted = formatTraffic(natRemainingMb.toString());
+  const natPercentage = natTotalMb > 0 ? (natUsedMb / natTotalMb) * 100 : 0;
 
 
   // International: roam_dl_mon_flow + roam_ul_mon_flow
   const intUsedMb = (parseFloat(info?.roam_dl_mon_flow || '0') + parseFloat(info?.roam_ul_mon_flow || '0'));
   const intTotalMb = getLimitInMb(info?.internation_limit_size, flowLimitUnit);
-  const intFormatted = formatTraffic(intUsedMb.toString());
-  
-  let intTotalConverted = intTotalMb;
-  if (intFormatted.unit === 'GB') intTotalConverted = intTotalMb / 1024;
-  else if (intFormatted.unit === 'KB') intTotalConverted = intTotalMb * 1024;
+  const intRemainingMb = Math.max(0, intTotalMb - intUsedMb);
+  const intFormatted = formatTraffic(intRemainingMb.toString());
+  const intPercentage = intTotalMb > 0 ? (intUsedMb / intTotalMb) * 100 : 0;
 
   // --- Calculations for Session Details ---
 
@@ -243,7 +237,7 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
                         label={t('national')} 
                         value={natFormatted.val} 
                         unit={natFormatted.unit} 
-                        total={natTotalConverted} 
+                        percentage={natPercentage > 100 ? 100 : natPercentage}
                         color="#f16e00"
                         title={t('progress_bar_explanatory_text_message')}
                     />
@@ -251,7 +245,7 @@ export const UsagePage: React.FC<UsagePageProps> = ({ onOpenSettings }) => {
                         label={t('international')} 
                         value={intFormatted.val} 
                         unit={intFormatted.unit} 
-                        total={intTotalConverted} 
+                        percentage={intPercentage > 100 ? 100 : intPercentage}
                         color="#f16e00"
                         title={t('progress_bar_explanatory_text_message')}
                     />

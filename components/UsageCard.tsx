@@ -74,15 +74,15 @@ export const UsageCard: React.FC = () => {
   // 1. National Data
   const natUsedMb = (parseFloat(info?.dl_mon_flow || '0') + parseFloat(info?.ul_mon_flow || '0'));
   const natTotalMb = getLimitInMb(info?.nation_limit_size, flowLimitUnit);
-  
-  const natFormatted = formatTraffic(natUsedMb.toString());
+  const natRemainingMb = Math.max(0, natTotalMb - natUsedMb);
+  const natFormatted = formatTraffic(natRemainingMb.toString());
   const natPercentage = natTotalMb > 0 ? (natUsedMb / natTotalMb) * 100 : 0;
 
   // 2. International Data
   const intUsedMb = (parseFloat(info?.roam_dl_mon_flow || '0') + parseFloat(info?.roam_ul_mon_flow || '0'));
   const intTotalMb = getLimitInMb(info?.internation_limit_size, flowLimitUnit);
-
-  const intFormatted = formatTraffic(intUsedMb.toString());
+  const intRemainingMb = Math.max(0, intTotalMb - intUsedMb);
+  const intFormatted = formatTraffic(intRemainingMb.toString());
   const intPercentage = intTotalMb > 0 ? (intUsedMb / intTotalMb) * 100 : 0;
 
   return (
